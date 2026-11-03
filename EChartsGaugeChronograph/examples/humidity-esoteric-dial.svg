@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <radialGradient id="humidity-aura" cx="48%" cy="46%" r="55%">
+      <stop offset="0%" stop-color="#5b9ca3" stop-opacity="0.17"/>
+      <stop offset="62%" stop-color="#526786" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#29354c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="humidity-water" x1="15%" y1="10%" x2="85%" y2="90%">
+      <stop offset="0%" stop-color="#a4c8c3"/>
+      <stop offset="52%" stop-color="#5b9ca3"/>
+      <stop offset="100%" stop-color="#716b91"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="300" cy="300" r="286" fill="url(#humidity-aura)"/>
+  <g fill="none" stroke-linecap="round">
+    <circle cx="300" cy="300" r="274" stroke="url(#humidity-water)" stroke-width="3" opacity="0.4"/>
+    <circle cx="300" cy="300" r="252" stroke="#82b8b3" stroke-width="1.5" stroke-dasharray="3 12" opacity="0.38"/>
+    <circle cx="300" cy="300" r="222" stroke="#716b91" stroke-width="1.5" stroke-dasharray="17 10 2 10" opacity="0.25"/>
+  </g>
+
+  <!-- Central water sigil: open and translucent to preserve label readability. -->
+  <path d="M300 144 C270 198 222 247 222 321 A78 78 0 0 0 378 321 C378 247 330 198 300 144 Z"
+        fill="none" stroke="url(#humidity-water)" stroke-width="5" opacity="0.3"/>
+  <path d="M266 330 A42 42 0 0 0 340 344" fill="none" stroke="#a4c8c3" stroke-width="5"
+        stroke-linecap="round" opacity="0.24"/>
+
+  <!-- Moon phases hint at tides and moisture cycles. -->
+  <g transform="translate(300 125)" fill="#a4c8c3" opacity="0.35">
+    <circle cx="-112" cy="0" r="13" opacity="0.24"/>
+    <path d="M-56 -14 A14 14 0 1 0 -56 14 A9 14 0 1 1 -56 -14 Z"/>
+    <circle cx="0" cy="0" r="14"/>
+    <path d="M56 -14 A14 14 0 1 1 56 14 A9 14 0 1 0 56 -14 Z"/>
+    <circle cx="112" cy="0" r="13" opacity="0.24"/>
+  </g>
+
+  <!-- Layered waves form a quiet ornamental lower half. -->
+  <g fill="none" stroke-linecap="round" opacity="0.26">
+    <path d="M116 400 C164 365 210 435 258 400 S352 365 400 400 S478 434 506 408"
+          stroke="#82b8b3" stroke-width="4"/>
+    <path d="M132 431 C174 401 216 461 258 431 S342 401 384 431 S456 458 482 436"
+          stroke="#716b91" stroke-width="3"/>
+    <path d="M160 462 C194 438 228 486 262 462 S330 438 364 462 S424 482 450 466"
+          stroke="#a4c8c3" stroke-width="2"/>
+  </g>
+
+  <g fill="url(#humidity-water)" opacity="0.34">
+    <path d="M300 47 L309 60 L300 75 L291 60 Z"/>
+    <path d="M553 300 L540 309 L525 300 L540 291 Z"/>
+    <path d="M300 553 L291 540 L300 525 L309 540 Z"/>
+    <path d="M47 300 L60 291 L75 300 L60 309 Z"/>
+  </g>
+  <circle cx="300" cy="300" r="49" fill="none" stroke="#82b8b3" stroke-width="1.5" opacity="0.16"/>
+</svg>

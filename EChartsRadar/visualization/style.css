@@ -1,0 +1,45 @@
+html, body {
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--symc-text);
+    background: var(--symc-background);
+}
+
+* { box-sizing: border-box; }
+
+.echarts-radar-root,
+.echarts-radar-chart {
+    position: relative;
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: 0;
+    min-block-size: 0;
+    overflow: hidden;
+}
+
+.echarts-radar-error,
+.echarts-radar-empty,
+.echarts-refresh-warning {
+    position: absolute;
+    inset-inline: 0.75rem;
+    z-index: 2;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.35rem;
+    background: color-mix(in srgb, var(--symc-surface) 88%, transparent);
+    color: var(--symc-muted);
+    text-align: center;
+}
+
+.echarts-radar-error,
+.echarts-radar-empty {
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+}
+
+.echarts-refresh-warning { inset-block-end: 0.65rem; color: var(--symc-text); }
+[hidden] { display: none !important; }
+
+

@@ -1,0 +1,586 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "SelectVariable",
+            "name": "SourceVariableID",
+            "caption": "Numeric archive variable",
+            "validVariableTypes": [
+                1,
+                2
+            ]
+        },
+        {
+            "type": "CheckBox",
+            "name": "UseComparisonPanels",
+            "caption": "Use comparison views"
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Comparison views",
+            "rowCount": 4,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "name": "VariableID",
+                    "caption": "Archive variable",
+                    "add": 0,
+                    "save": true,
+                    "width": "220px",
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "name": "Label",
+                    "caption": "View name (optional)",
+                    "add": "",
+                    "save": true,
+                    "width": "220px",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "name": "PeriodOffset",
+                    "caption": "Earlier periods",
+                    "add": 0,
+                    "save": true,
+                    "width": "220px",
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 120
+                    }
+                },
+                {
+                    "name": "UseOwnPeriod",
+                    "caption": "Use own fixed period",
+                    "add": false,
+                    "save": true,
+                    "width": "220px",
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
+                    "name": "AbsoluteStart",
+                    "caption": "From (inclusive)",
+                    "add": "{}",
+                    "save": true,
+                    "visible": false
+                },
+                {
+                    "name": "AbsoluteEnd",
+                    "caption": "Until (exclusive)",
+                    "add": "{}",
+                    "save": true,
+                    "visible": false
+                }
+            ],
+            "form": [
+                {
+                    "type": "SelectVariable",
+                    "validVariableTypes": [
+                        1,
+                        2
+                    ],
+                    "name": "VariableID",
+                    "caption": "Archive variable"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Label",
+                    "caption": "View name (optional)"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "minimum": 0,
+                    "maximum": 120,
+                    "name": "PeriodOffset",
+                    "caption": "Earlier periods"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "UseOwnPeriod",
+                    "caption": "Use own fixed period"
+                },
+                {
+                    "type": "SelectDateTime",
+                    "name": "AbsoluteStart",
+                    "caption": "From (inclusive)"
+                },
+                {
+                    "type": "SelectDateTime",
+                    "name": "AbsoluteEnd",
+                    "caption": "Until (exclusive)"
+                }
+            ]
+        },
+        {
+            "type": "CheckBox",
+            "name": "SharedColorScale",
+            "caption": "Shared color scale"
+        },
+        {
+            "type": "Label",
+            "caption": "One to four views share the metric and seven archive queries. Earlier periods shift the base period; own fixed periods replace it. Shared colors require identical units."
+        },
+        {
+            "type": "Select",
+            "name": "Metric",
+            "caption": "Metric",
+            "options": [
+                {
+                    "caption": "Average of hourly means",
+                    "value": "average"
+                },
+                {
+                    "caption": "Minimum of hourly minima",
+                    "value": "minimum"
+                },
+                {
+                    "caption": "Maximum of hourly maxima",
+                    "value": "maximum"
+                },
+                {
+                    "caption": "Sum of hourly consumption",
+                    "value": "consumption"
+                }
+            ]
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "Select",
+                    "name": "Range",
+                    "caption": "Time range",
+                    "onChange": "ECHM_UpdateTimeRangeForm($id, $Range);",
+                    "options": [
+                        {
+                            "caption": "1 week",
+                            "value": "1w"
+                        },
+                        {
+                            "caption": "1 month",
+                            "value": "1m"
+                        },
+                        {
+                            "caption": "3 months",
+                            "value": "3m"
+                        },
+                        {
+                            "caption": "6 months",
+                            "value": "6m"
+                        },
+                        {
+                            "caption": "12 months",
+                            "value": "12m"
+                        },
+                        {
+                            "caption": "Since January 1",
+                            "value": "ytd"
+                        },
+                        {
+                            "caption": "Custom",
+                            "value": "custom"
+                        },
+                        {
+                            "caption": "Fixed historical period",
+                            "value": "absolute"
+                        }
+                    ]
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "UseVariablePresentation",
+                    "caption": "Variable presentation"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Unit",
+                    "caption": "Unit"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "Decimals",
+                    "caption": "Decimals",
+                    "minimum": 0,
+                    "maximum": 6
+                }
+            ]
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "NumberSpinner",
+                    "name": "CustomRangeValue",
+                    "caption": "Range value",
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "visible": false,
+                    "width": "140px"
+                },
+                {
+                    "type": "Select",
+                    "name": "CustomRangeUnit",
+                    "caption": "Range unit",
+                    "visible": false,
+                    "width": "140px",
+                    "options": [
+                        {
+                            "caption": "Minutes",
+                            "value": "minute"
+                        },
+                        {
+                            "caption": "Hours",
+                            "value": "hour"
+                        },
+                        {
+                            "caption": "Days",
+                            "value": "day"
+                        },
+                        {
+                            "caption": "Weeks",
+                            "value": "week"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "SelectDateTime",
+            "name": "AbsoluteStart",
+            "caption": "From (inclusive)",
+            "visible": false
+        },
+        {
+            "type": "SelectDateTime",
+            "name": "AbsoluteEnd",
+            "caption": "Until (exclusive)",
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "name": "AbsoluteRangeHint",
+            "caption": "Start is included, end is excluded. Only fully contained completed hours are evaluated. The end must not be in the future.",
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "name": "AbsoluteTimeZone",
+            "caption": "Symcon time zone: %s",
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "caption": "Custom and fixed periods support at most 366 days of elapsed time. Navigation shifts by the selected duration, not calendar months. Partial hours remain excluded."
+        },
+        {
+            "type": "Label",
+            "caption": "Completed hours are grouped by local weekday and hour. Average, minimum and maximum require a standard archive; consumption requires a counter archive. Longer periods combine hourly means, minima, maxima or consumption totals according to the selected metric. Missing hours stay empty."
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate heatmap"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "ColorScalePreset",
+                            "caption": "Color scale preset",
+                            "options": [
+                                {
+                                    "caption": "Custom (2–5 colors)",
+                                    "value": "custom"
+                                },
+                                {
+                                    "caption": "Tempera-12 (Schiewe 2023)",
+                                    "value": "tempera12"
+                                },
+                                {
+                                    "caption": "Tempera-6 (Schiewe 2023)",
+                                    "value": "tempera6"
+                                },
+                                {
+                                    "caption": "NOAA (April 2023 sample)",
+                                    "value": "noaa2023"
+                                },
+                                {
+                                    "caption": "SAWS (April 2023 sample)",
+                                    "value": "saws2023"
+                                },
+                                {
+                                    "caption": "DWD (April 2023 sample)",
+                                    "value": "dwd2023"
+                                },
+                                {
+                                    "caption": "tagesschau (April 2023 sample)",
+                                    "value": "ts2023"
+                                },
+                                {
+                                    "caption": "FAZ (April 2023 sample)",
+                                    "value": "faz2023"
+                                },
+                                {
+                                    "caption": "USA Today (April 2023 sample)",
+                                    "value": "usa2023"
+                                },
+                                {
+                                    "caption": "China Daily (April 2023 sample)",
+                                    "value": "china2023"
+                                },
+                                {
+                                    "caption": "ABC.net (April 2023 sample)",
+                                    "value": "abc2023"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "Presets use fixed Celsius classes, not the observed archive range. NOAA covers -50 to +50 °C; other historical bounds are approximated from Schiewe (2023). Tempera uses an application-defined -20 to +40 °C range. Custom blends 2–5 evenly spaced colors over the observed range."
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "LowColor",
+                            "caption": "Low value color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "CustomMiddleColor1",
+                            "caption": "Intermediate color 1",
+                            "allowTransparent": true,
+                            "transparentCaption": "Not used"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "CustomMiddleColor2",
+                            "caption": "Intermediate color 2",
+                            "allowTransparent": true,
+                            "transparentCaption": "Not used"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "CustomMiddleColor3",
+                            "caption": "Intermediate color 3",
+                            "allowTransparent": true,
+                            "transparentCaption": "Not used"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "HighColor",
+                            "caption": "High value color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowColorScale",
+                            "caption": "Show color scale"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowValues",
+                            "caption": "Show cell values"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisFontSizePercent",
+                            "caption": "Axis label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ValueFontSizePercent",
+                            "caption": "Value label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "TitleColor",
+                            "caption": "Title color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "AxisColor",
+                            "caption": "Axis color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "ValueColor",
+                            "caption": "Value label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic contrast"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "GridColor",
+                            "caption": "Grid color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "Button",
+            "caption": "Read current Heatmap data",
+            "onClick": "echo ECHM_GetHeatmapData($id);"
+        }
+    ],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Heatmap is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Configure a numeric archive variable"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Heatmap configuration is invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "EChartsGateway archive request failed"
+        }
+    ]
+}

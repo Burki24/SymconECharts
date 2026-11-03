@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="{{HTML_LANGUAGE}}" class="{{HTML_CLASSES}}" style="font-size: {{ROOT_FONT_SIZE}};">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="{{VIEWPORT_CONTENT}}">
+    <title>{{DOCUMENT_TITLE}}</title>
+    <style>
+{{VISUALIZATION_THEME}}
+{{MODULE_STYLE}}
+{{IPSVIEW_STYLE}}
+    </style>
+    {{INTERACTION_SCRIPT}}
+</head>
+<body>
+    <main id="echarts-heatmap-root" class="echarts-heatmap-root">
+        <nav id="echarts-heatmap-period" class="echarts-heatmap-period" aria-label="Time range">
+            <button id="echarts-heatmap-previous" type="button" aria-label="Previous period">&#x2039;</button>
+            <span id="echarts-heatmap-period-label" class="echarts-heatmap-period-label"></span>
+            <button id="echarts-heatmap-next" type="button" aria-label="Next period">&#x203a;</button>
+            <button id="echarts-heatmap-today" type="button">Today</button>
+        </nav>
+        <div id="echarts-heatmap-chart" class="echarts-heatmap-chart" role="img"></div>
+        <div id="echarts-heatmap-comparisons" class="echarts-heatmap-comparisons" tabindex="0" hidden>
+            <h2 id="echarts-heatmap-comparison-title" class="echarts-heatmap-comparison-title"></h2>
+            <div id="echarts-heatmap-comparison-list"></div>
+        </div>
+        <div id="echarts-heatmap-class-legend" class="echarts-heatmap-class-legend" role="img" hidden>
+            <span id="echarts-heatmap-class-min"></span>
+            <span id="echarts-heatmap-class-segments" class="echarts-heatmap-class-segments"></span>
+            <span id="echarts-heatmap-class-max"></span>
+        </div>
+        <div id="echarts-heatmap-warning" class="echarts-heatmap-warning" role="status" hidden></div>
+        <div id="echarts-heatmap-empty" class="echarts-heatmap-empty" role="status" hidden></div>
+        <div id="echarts-heatmap-error" class="echarts-heatmap-error" role="alert" hidden></div>
+    </main>
+    <script>{{ECHARTS_SCRIPT}}</script>
+    <script>{{ECHARTS_THEME_SCRIPT}}</script>
+    <script>{{ECHARTS_DESIGN_SCRIPT}}</script>
+    <script>window.SYMC_VISUALIZATION = {{BOOTSTRAP_JSON}};</script>
+    <script>{{MODULE_SCRIPT}}</script>
+    <script>{{IPSVIEW_TRANSPORT_SCRIPT}}</script>
+</body>
+</html>

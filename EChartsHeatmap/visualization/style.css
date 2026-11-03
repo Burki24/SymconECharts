@@ -1,0 +1,115 @@
+html, body {
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--symc-text);
+    background: var(--symc-background);
+}
+* { box-sizing: border-box; }
+.echarts-heatmap-root, .echarts-heatmap-chart {
+    position: relative;
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: 0;
+    min-block-size: 12rem;
+    overflow: hidden;
+}
+.echarts-heatmap-period {
+    position: absolute;
+    z-index: 3;
+    inset-inline: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    block-size: 1.6rem;
+    color: var(--symc-text);
+    font-size: clamp(10px, 2.5vw, 12px);
+    white-space: nowrap;
+}
+.echarts-heatmap-period button {
+    flex: 0 0 auto;
+    min-inline-size: 1.5rem;
+    block-size: 1.45rem;
+    padding: 0 0.3rem;
+    border: 1px solid var(--symc-border);
+    border-radius: 0.25rem;
+    color: inherit;
+    font: inherit;
+    background: var(--symc-surface);
+    cursor: pointer;
+}
+.echarts-heatmap-period button:disabled { opacity: 0.4; cursor: default; }
+#echarts-heatmap-period-label { flex: 0 1 auto; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
+.echarts-heatmap-warning, .echarts-heatmap-empty, .echarts-heatmap-error {
+    position: absolute;
+    inset-inline: 0.75rem;
+    z-index: 2;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.35rem;
+    background: color-mix(in srgb, var(--symc-surface) 88%, transparent);
+    color: var(--symc-text);
+    text-align: center;
+}
+.echarts-heatmap-class-legend {
+    position: absolute;
+    z-index: 1;
+    inset-inline: 0;
+    inset-block-end: 0.55rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    inline-size: min(100%, 460px);
+    margin-inline: auto;
+    padding-inline: 0.3rem;
+    font-size: clamp(10px, 1.2vw, 12px);
+    white-space: nowrap;
+    pointer-events: none;
+}
+.echarts-heatmap-class-segments {
+    display: flex;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    max-inline-size: 320px;
+    block-size: 0.75rem;
+    overflow: hidden;
+    border-radius: 0.15rem;
+}
+.echarts-heatmap-class-segments > span {
+    flex: 1 1 0;
+    min-inline-size: 0;
+}
+.echarts-heatmap-warning { inset-block-end: 0.65rem; }
+.echarts-heatmap-empty, .echarts-heatmap-error {
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+    color: var(--symc-muted);
+}
+.echarts-heatmap-comparisons {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    min-block-size: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+.echarts-heatmap-comparison-title {
+    margin: 0.35rem 0.5rem;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+.echarts-heatmap-panel {
+    position: relative;
+    margin-block-end: 0.75rem;
+}
+.echarts-heatmap-panel-caption, .echarts-heatmap-panel-empty {
+    margin: 0.3rem 0.5rem;
+    text-align: center;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+}
+.echarts-heatmap-panel-surface { inline-size: 100%; }
+[hidden] { display: none !important; }

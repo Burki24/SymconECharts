@@ -1,0 +1,16 @@
+{
+    "id": "{2B2C26A3-6F92-48D0-ADE1-5F03D7282EF8}",
+    "name": "EChartsTree",
+    "type": 3,
+    "vendor": "",
+    "aliases": [],
+    "parentRequirements": [
+        "{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{E4749B72-912B-E3E3-1C57-D19019FFDD84}"
+    ],
+    "prefix": "ECTR",
+    "url": "https://github.com/Burki24/SymconECharts"
+}

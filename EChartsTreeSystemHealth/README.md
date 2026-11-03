@@ -1,0 +1,187 @@
+# EChartsTreeSystemHealth
+
+`EChartsTreeSystemHealth` (`ECTH`) zeigt einen ausgewählten Teil des
+IP-Symcon-Objektbaums mit ausdrücklich konfigurierten Zustandsregeln als
+interaktiven Apache-ECharts-Baum in einer nativen Kachel oder einem optionalen
+IPSView-HTML-Widget. Für eine reine Hierarchie ohne Zustandsbewertung steht
+[`EChartsTree`](../EChartsTree/README.md) (`ECTR`) bereit. Benötigt werden
+IP-Symcon 9.0/9.1 und ein verbundenes, aktives `EChartsGateway`. Ein Archiv ist
+nicht erforderlich.
+
+Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+[Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartstreesystemhealth).
+
+## Einrichtung und Quellen
+
+Wählen Sie als Wurzel eine Kategorie oder Instanz. Für den gesamten Objektbaum
+aktivieren Sie stattdessen „Symcon-Wurzel verwenden“; das Objekt-Auswahlfeld
+wird dann deaktiviert. Eine dort zuvor gewählte Kategorie oder Instanz bleibt
+gespeichert und wird beim Ausschalten der Option wieder verwendet. Ohne diese
+Option und ohne ausgewähltes Objekt bleibt die Instanz unkonfiguriert.
+Unter der aktiven Wurzel werden Kategorien, Instanzen und Variablen in der
+Symcon-Reihenfolge aufgenommen; Skripte, Links,
+Medien und andere Objekttypen bleiben außen vor. Ausgeblendete Objekte und
+deren Zweige erscheinen standardmäßig nicht. „Ausgeblendete Objekte
+einbeziehen“ hebt diesen Filter auf. Maximale Tiefe und Knotenzahl begrenzen
+die Darstellung auf 1–12 Nachkommensebenen beziehungsweise 10–3000 Knoten.
+Die gewählte Wurzel zählt als Ebene null; die bisherigen Standardwerte von
+drei Nachkommensebenen und 80 Knoten bleiben unverändert.
+Wenn die Knotengrenze weitere passende Objekte abschneidet, zeigt das
+Diagramm eine Meldung. Beide Ausgabewege verwenden dieselbe Wurzel und
+dieselben Grenzen.
+
+Mit „Variablenname enthält“ lässt sich der Baum auf Variablen mit einem
+bestimmten Namensbestandteil einschränken, beispielsweise „Batterie“. Die
+Suche unterscheidet nicht zwischen Groß- und Kleinschreibung. Sichtbar bleiben
+die Treffer sowie ihre übergeordneten Kategorien und Instanzen; andere
+Variablen und leere Zweige entfallen. Bei keinem Treffer bleibt nur die
+gewählte Wurzel sichtbar. Ein leeres Feld verzichtet auf den Namensfilter.
+Der Filter respektiert Tiefe und ausgeblendete Objekte. Die
+Knotengrenze gilt für das gefilterte Ergebnis, nicht für die zuerst
+durchsuchten Objekte. Für sehr große Hierarchien ist der Suchdurchlauf auf
+30 000 Objekte begrenzt; wird er überschritten, wählen Sie eine engere Wurzel
+oder geringere Tiefe.
+
+Mit „Nur Variablen mit Zustandsregel anzeigen“ blendet der Health-Tree
+Variablen ohne konfigurierte Regel und danach leere Zweige aus. Kategorien und
+Instanzen auf dem Weg zu einer Regelvariable bleiben erhalten. Der Schalter ist
+standardmäßig aus; bisherige Instanzen zeigen weiterhin den vollständigen
+Teilbaum. Bei aktivem Schalter und leerer Regelliste bleibt nur die Wurzel
+sichtbar. Der Namensfilter gilt zusätzlich, und die Knotengrenze wird erst auf
+den gefilterten Baum angewendet. Die Einstellung gilt gleichermaßen für
+Kachel und IPSView.
+
+Jeder Knoten trägt seinen aktuellen Symcon-Namen. Bei Variablen zeigt der
+Tooltip zusätzlich den formatierten aktuellen Wert; dieser kann optional auch
+an der Beschriftung stehen. Gleiche Variablennamen werden nicht
+zusammengeführt. Änderungen an Namen, Struktur und Werten werden spätestens
+mit der nächsten Aktualisierung nach 60 Sekunden sichtbar. Die Abfrage liest
+Objekte und Werte ausschließlich; sie verändert die ausgewählte Hierarchie
+nicht.
+
+## Anlagenzustand
+
+Im aufklappbaren Bereich **Anlagenzustand** können Sie einzelne Bool- oder
+Zahl-Variablen als Zustandsquellen auswählen. Jede Zeile legt fest, ob hohe
+oder niedrige Rohwerte schlechter sind, und ab welchem Wert eine Warnung
+beziehungsweise ein kritischer Zustand gilt. Bei „Höher ist schlechter“
+muss die kritische Schwelle mindestens so hoch wie die Warnschwelle sein;
+bei „Niedriger ist schlechter“ höchstens so hoch. Gleiche Schwellen
+kennzeichnen einen Alarm direkt als kritisch, etwa eine Bool-Variable mit
+`1/1` für `true` oder `0/0` für `false`.
+Über **Zustandsvariablen suchen und hinzufügen** lassen sich mehrere Integer-
+und Float-Variablen auf einmal vorbereiten: Namensbestandteil, Typ,
+Alarmrichtung und Schwellen eingeben, **Suchen** wählen, Treffer einzeln
+ab- oder anwählen und **Auswahl hinzufügen** bestätigen. Gesucht wird nur
+unter der gewählten Wurzel unter Berücksichtigung von Namensfilter,
+Sichtbarkeit, Tiefe und Knotengrenze. Der Schalter „Nur Variablen mit
+Zustandsregel anzeigen“ schränkt diese Suche nicht ein, damit weitere Regeln
+hinzugefügt werden können. Bereits vorhandene Regeln werden
+nicht doppelt hinzugefügt. Die neuen Regeln erscheinen zur individuellen
+Nachbearbeitung in der normalen Liste; erst **Änderungen übernehmen**
+speichert sie. Wenn die Knotengrenze erreicht wird, kann die Suche weitere
+Variablen auslassen; erhöhen Sie dann die Grenze oder schränken Sie die
+Wurzel ein. Bool-Variablen werden weiterhin einzeln eingetragen.
+Im Bearbeitungsdialog begrenzt die gewählte Alarmrichtung die zulässige
+Kritisch-Schwelle; eine vertauschte Reihenfolge lässt sich dort nicht
+bestätigen. Doppelt gewählte Variablen und bereits gespeicherte fehlerhafte
+Regeln werden im Formular mit Regelnummer, Sensorname und Variablen-ID angezeigt und die
+betroffenen Zeilen farblich markiert. Korrigieren Sie die markierten Zeilen;
+ungültige Regeln werden weiterhin nicht als gültige Instanzkonfiguration
+übernommen.
+
+Nur ausgewählte Zustandsvariablen erhalten Grün (OK), Orange (Warnung) oder
+Rot (kritisch). Kategorien und Instanzen übernehmen den höchsten Zustand
+ihrer **sichtbaren** Nachkommen. Andere Variablen bleiben in ihrer normalen
+Typfarbe; sie werden nicht automatisch als Alarm interpretiert. Der Tooltip
+nennt den ermittelten Zustand. Kachel und IPSView verwenden dieselben
+Zustandsregeln, können ihre drei Farben aber separat gestalten. Ohne Regeln
+bleibt die Darstellung bei den normalen Typfarben.
+
+Eine Zustandsvariable muss im angezeigten Teilbaum und innerhalb der gewählten
+Tiefe und Knotengrenze liegen. Ausgeblendete, abgeschnittene und tiefere
+Zweige fließen nicht in den angezeigten Zustand ein. Bei Kürzung erscheint
+weiterhin die vorhandene Meldung; der Wurzelzustand ist dann **kein**
+Gesamtzustand der vollständigen Anlage. Der Baum liest nur und schaltet keine
+Geräte.
+Bei konfigurierten Zustandsregeln nennt die Ansicht ausdrücklich diesen
+Teilbaumbezug. Liegen Regeln wegen Tiefe, Sichtbarkeit, Filter, Wurzel oder
+Knotengrenze außerhalb der dargestellten Hierarchie, erscheint ein zusätzlicher
+Hinweis. Ihre Werte werden nicht für den angezeigten Zustand nachgelesen.
+
+Der Kacheldesigner bietet orthogonale oder radiale Anordnung. Für orthogonale
+Bäume sind vier Richtungen verfügbar, für die Verbindungslinien Kurven oder
+Polylinien. Anfangs geöffnete Ebenen, Verschieben/Zoomen, Knotengröße,
+Beschriftung, Farben, Theme und Animation lassen sich einstellen. Knoten
+können in der Laufzeitansicht per Klick auf- und zugeklappt werden.
+Der unabhängige IPSView-Designer besitzt dieselben Optionen; standardmäßig
+übernimmt er das Kacheldesign. Beide Designer zeigen eine unmittelbar auf
+Formularänderungen reagierende schematische Vorschau. Ohne gültige Wurzel
+verwendet diese ausdrücklich eine Beispielstruktur.
+Die Anfangstiefe kann unabhängig bis zwölf Ebenen eingestellt werden; null
+zeigt zunächst nur die Wurzel. Die Vorschau berücksichtigt echte
+Eltern-/Kindbeziehungen und bis zu 80 Knoten sowie die Anfangstiefe.
+Geschlossene Gruppen sind markiert. Lange Beschriftungen werden in Vorschau
+und Laufzeitansicht begrenzt; der Tooltip zeigt den vollständigen Knotennamen.
+Geöffnete Zweige und die verschobene beziehungsweise gezoomte Ansicht bleiben
+bei regelmäßigen Aktualisierungen und Größenänderungen erhalten. Ein Wechsel
+von Wurzel, Layout oder Anfangstiefe beginnt die entsprechende Ansicht neu.
+
+Für IPSView aktivieren Sie die optionale WebContent-Ausgabe und platzieren die
+erzeugte Variable in einem HTML-Widget. Das WebContent-Dokument wird bei
+Datenaktualisierungen nicht neu geladen. Der Baum und das Design werden im
+bestehenden Diagramm aktualisiert.
+
+## Konfigurationsreferenz und Skriptzugriff
+
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartstreesystemhealth) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
+
+### Ausgabevariable
+
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewTreeSystemHealth` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
+
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
+
+### Öffentliche PHP-Funktionen
+
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
+
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECTH_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECTH_GetTreeData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
+| `ECTH_GetTreeDiagnostic(int $InstanzID): string` | JSON-Momentaufnahme der Konfigurationsprüfung und letzten Fehlermeldung; kein Nachweis einer erfolgreichen Datenabfrage. |
+| `ECTH_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+| `ECTH_RefreshTree(int $InstanzID): void` | Aktualisiert die Diagrammausgaben aus den konfigurierten Quellen. Kein Erfolgswert und keine Änderung von Quellen/Archiven. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
+
+```php
+$instanceID = 12000;
+$model = json_decode(ECTH_GetTreeData($instanceID), true, 512, JSON_THROW_ON_ERROR);
+```
+
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
+
+## Lizenz
+
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

@@ -1,0 +1,668 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "CheckBox",
+            "name": "NormalizeValues",
+            "caption": "Normalize numeric sources using their Min/Max"
+        },
+        {
+            "type": "Label",
+            "caption": "Normalization maps each source range to 0–100 and clips only the bar geometry. Original values and units remain available. Stacked bars add the normalized values; they are not percentage shares."
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Category sources",
+            "rowCount": 8,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "caption": "Variable",
+                    "name": "VariableID",
+                    "width": "360px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "caption": "Category",
+                    "name": "Category",
+                    "width": "180px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Data series (optional)",
+                    "name": "Series",
+                    "width": "160px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Variable presentation",
+                    "name": "UseVariablePresentation",
+                    "width": "150px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
+                    "caption": "Unit",
+                    "name": "Unit",
+                    "width": "90px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Decimals",
+                    "name": "Decimals",
+                    "width": "90px",
+                    "add": 1,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 6
+                    }
+                },
+                {
+                    "caption": "Min (normalization)",
+                    "name": "Minimum",
+                    "width": "150px",
+                    "add": 0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 6
+                    }
+                },
+                {
+                    "caption": "Max (normalization)",
+                    "name": "Maximum",
+                    "width": "150px",
+                    "add": 100,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 6
+                    }
+                },
+                {
+                    "caption": "Color",
+                    "name": "Color",
+                    "width": "110px",
+                    "add": -1,
+                    "edit": {
+                        "type": "SelectColor",
+                        "allowTransparent": true,
+                        "transparentCaption": "Automatic (theme)"
+                    }
+                }
+            ],
+            "form": [
+                {
+                    "type": "SelectVariable",
+                    "name": "VariableID",
+                    "caption": "Variable",
+                    "validVariableTypes": [
+                        1,
+                        2
+                    ]
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Category",
+                    "caption": "Category"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Series",
+                    "caption": "Data series (optional)"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "UseVariablePresentation",
+                    "caption": "Variable presentation"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Unit",
+                    "caption": "Unit"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "Decimals",
+                    "caption": "Decimals",
+                    "minimum": 0,
+                    "maximum": 6
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "Minimum",
+                    "caption": "Min (normalization)",
+                    "digits": 6
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "Maximum",
+                    "caption": "Max (normalization)",
+                    "digits": 6
+                },
+                {
+                    "type": "SelectColor",
+                    "name": "Color",
+                    "caption": "Color",
+                    "allowTransparent": true,
+                    "transparentCaption": "Automatic (theme)"
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Category labels the category axis. Data series names the legend entry in grouped and stacked bars. An empty category uses the variable name in Simple mode and the shared group in Grouped or Stacked mode. An empty data series uses the variable name. If category and series labels collide, the variable ID distinguishes the sources automatically; object paths are not used as source IDs."
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate bars"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "BarMode",
+                            "caption": "Bar mode",
+                            "width": "165px",
+                            "options": [
+                                {
+                                    "caption": "Simple",
+                                    "value": "simple"
+                                },
+                                {
+                                    "caption": "Grouped",
+                                    "value": "grouped"
+                                },
+                                {
+                                    "caption": "Stacked",
+                                    "value": "stacked"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "Orientation",
+                            "caption": "Orientation",
+                            "width": "165px",
+                            "options": [
+                                {
+                                    "caption": "Vertical",
+                                    "value": "vertical"
+                                },
+                                {
+                                    "caption": "Horizontal",
+                                    "value": "horizontal"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "SortOrder",
+                            "caption": "Order",
+                            "width": "165px",
+                            "options": [
+                                {
+                                    "caption": "Configured order",
+                                    "value": "configured"
+                                },
+                                {
+                                    "caption": "Value ascending",
+                                    "value": "ascending"
+                                },
+                                {
+                                    "caption": "Value descending",
+                                    "value": "descending"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "width": "165px",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowValues",
+                            "caption": "Show values"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowGrid",
+                            "caption": "Show grid"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "RoundedBars",
+                            "caption": "Rounded bars"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BarWidthPercent",
+                            "caption": "Bar width",
+                            "minimum": 20,
+                            "maximum": 100,
+                            "suffix": "%",
+                            "width": "170px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "BarFillMode",
+                            "caption": "Bar fill",
+                            "onChange": "ECBC_UpdateBarDesignForm($id, false, $BarFillMode);",
+                            "options": [
+                                {
+                                    "caption": "Solid color",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "SVG pattern",
+                                    "value": "svg"
+                                },
+                                {
+                                    "caption": "Gradient along the value axis",
+                                    "value": "gradient"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "SelectFile",
+                            "name": "BarSVG",
+                            "caption": "Bar SVG pattern",
+                            "extensions": ".svg",
+                            "visible": false
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BarSVGSizePercent",
+                            "caption": "SVG pattern size",
+                            "minimum": 25,
+                            "maximum": 400,
+                            "suffix": "%",
+                            "visible": false
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "IPSView design",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "Label",
+                    "caption": "Configure optional IPSView HTML output."
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "IPSViewAdaptToBackground",
+                            "caption": "Adapt to IPSView background"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "IPSViewBackgroundColor",
+                            "caption": "Background color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)",
+                            "width": "180px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "IPSViewBackgroundOpacityPercent",
+                            "caption": "Background opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%",
+                            "width": "180px"
+                        }
+                    ]
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "IPSViewUseTileDesign",
+                    "caption": "Use Tile design"
+                },
+                {
+                    "type": "Button",
+                    "caption": "Copy Tile design to IPSView and edit independently",
+                    "onClick": "ECBC_CopyTileDesignToIPSView($id); return \"MESSAGE:Tile design copied to IPSView.\";"
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Independent IPSView designer",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "CheckBox",
+                                    "name": "IPSViewAnimationEnabled",
+                                    "caption": "Animate bars"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewAnimationDuration",
+                                    "caption": "Initial animation",
+                                    "minimum": 0,
+                                    "maximum": 3000,
+                                    "suffix": "ms"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewAnimationDurationUpdate",
+                                    "caption": "Update animation",
+                                    "minimum": 0,
+                                    "maximum": 3000,
+                                    "suffix": "ms"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "IPSViewBarMode",
+                                    "caption": "Bar mode",
+                                    "width": "165px",
+                                    "options": [
+                                        {
+                                            "caption": "Simple",
+                                            "value": "simple"
+                                        },
+                                        {
+                                            "caption": "Grouped",
+                                            "value": "grouped"
+                                        },
+                                        {
+                                            "caption": "Stacked",
+                                            "value": "stacked"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "IPSViewOrientation",
+                                    "caption": "Orientation",
+                                    "width": "165px",
+                                    "options": [
+                                        {
+                                            "caption": "Vertical",
+                                            "value": "vertical"
+                                        },
+                                        {
+                                            "caption": "Horizontal",
+                                            "value": "horizontal"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "IPSViewSortOrder",
+                                    "caption": "Order",
+                                    "width": "165px",
+                                    "options": [
+                                        {
+                                            "caption": "Configured order",
+                                            "value": "configured"
+                                        },
+                                        {
+                                            "caption": "Value ascending",
+                                            "value": "ascending"
+                                        },
+                                        {
+                                            "caption": "Value descending",
+                                            "value": "descending"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "IPSViewEChartsTheme",
+                                    "caption": "ECharts theme",
+                                    "width": "165px",
+                                    "options": [
+                                        {
+                                            "caption": "Automatic (Symcon design)",
+                                            "value": "auto"
+                                        },
+                                        {
+                                            "caption": "Dark",
+                                            "value": "dark"
+                                        },
+                                        {
+                                            "caption": "Vintage",
+                                            "value": "vintage"
+                                        },
+                                        {
+                                            "caption": "Macarons",
+                                            "value": "macarons"
+                                        },
+                                        {
+                                            "caption": "Infographic",
+                                            "value": "infographic"
+                                        },
+                                        {
+                                            "caption": "Shine",
+                                            "value": "shine"
+                                        },
+                                        {
+                                            "caption": "Roma",
+                                            "value": "roma"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "CheckBox",
+                                    "name": "IPSViewShowValues",
+                                    "caption": "Show values"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "IPSViewShowGrid",
+                                    "caption": "Show grid"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "IPSViewRoundedBars",
+                                    "caption": "Rounded bars"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewBarWidthPercent",
+                                    "caption": "Bar width",
+                                    "minimum": 20,
+                                    "maximum": 100,
+                                    "suffix": "%",
+                                    "width": "170px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "IPSViewBarFillMode",
+                                    "caption": "Bar fill",
+                                    "onChange": "ECBC_UpdateBarDesignForm($id, true, $IPSViewBarFillMode);",
+                                    "options": [
+                                        {
+                                            "caption": "Solid color",
+                                            "value": "solid"
+                                        },
+                                        {
+                                            "caption": "SVG pattern",
+                                            "value": "svg"
+                                        },
+                                        {
+                                            "caption": "Gradient along the value axis",
+                                            "value": "gradient"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "SelectFile",
+                                    "name": "IPSViewBarSVG",
+                                    "caption": "Bar SVG pattern",
+                                    "extensions": ".svg",
+                                    "visible": false
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewBarSVGSizePercent",
+                                    "caption": "SVG pattern size",
+                                    "minimum": 25,
+                                    "maximum": 400,
+                                    "suffix": "%",
+                                    "visible": false
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "Button",
+            "caption": "Read current Category Bar data",
+            "onClick": "echo ECBC_GetBarData($id);"
+        }
+    ],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Category Bar is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Configure valid Category Bar sources"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Category Bar design is invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "EChartsGateway request failed"
+        }
+    ]
+}

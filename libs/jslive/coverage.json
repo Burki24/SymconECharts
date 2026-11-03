@@ -1,0 +1,2104 @@
+{
+    "common": {},
+    "cartesian-history": {
+        "Axes": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "Axes: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "CreateIPSView": {
+            "status": "exact",
+            "rule": "new-native-output-1",
+            "effect": "CreateIPSView enables a new target-owned HTML output. The original output ID and its contents remain unchanged."
+        },
+        "CreateOutput": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "CreateOutput: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "Datasets": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "Datasets: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "EnableViewport": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "EnableViewport: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "IFrameHeight": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "IFrameHeight: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "ShowDefault": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "ShowDefault: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "TemplateScriptID": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "TemplateScriptID: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "ViewLevel": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "ViewLevel: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "animation_duration": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "animation_duration: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "animation_easing": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "animation_easing: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "axes_beginAtZero": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_beginAtZero: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_color": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_color: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_colorAlpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_colorAlpha: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_drawBorder": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_drawBorder: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_drawOnChartArea": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_drawOnChartArea: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_drawTicks": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_drawTicks: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_labelText": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_labelText: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_labelfontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_labelfontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_lineWidth": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_lineWidth: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_showLabel": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_showLabel: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_swap": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_swap: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_tickfontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_tickfontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "data_highResSteps": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "data_highResSteps: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "data_loadAsync": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "data_loadAsync: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "data_precision": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "data_precision: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "data_pullModeRefreshTime": {
+            "status": "approximate",
+            "rule": "source-engine-option-without-native-effect-1",
+            "effect": "data_pullModeRefreshTime: retained in the frozen settings for provenance; this engine-specific option has no active native effect. Compare the corresponding target detail before accepting."
+        },
+        "data_pullModeinMinute": {
+            "status": "approximate",
+            "rule": "source-engine-option-without-native-effect-1",
+            "effect": "data_pullModeinMinute: retained in the frozen settings for provenance; this engine-specific option has no active native effect. Compare the corresponding target detail before accepting."
+        },
+        "datalabels_align": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_align: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "datalabels_anchoring": {
+            "status": "approximate",
+            "rule": "native-label-geometry-1",
+            "effect": "datalabels_anchoring: native ECharts positions labels by the imported alignment within its own series geometry. Chart.js anchor projection is not reproduced exactly."
+        },
+        "datalabels_borderRadius": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_borderRadius: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "datalabels_borderWidth": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_borderWidth: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "datalabels_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "datalabels_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "datalabels_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "datalabels_offset": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_offset: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "legend_align": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_align: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_boxWidth": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_boxWidth: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_position": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_position: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "overrideHeight": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "overrideHeight: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "overrideWidth": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "overrideWidth: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "point_hoverRadius": {
+            "status": "approximate",
+            "rule": "source-engine-option-without-native-effect-1",
+            "effect": "point_hoverRadius: retained in the frozen settings for provenance; this engine-specific option has no active native effect. Compare the corresponding target detail before accepting."
+        },
+        "point_radius": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "point_radius: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "points_Style": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "points_Style: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_position": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_position: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_text": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_text: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_backgroundColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_backgroundColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_cornerRadius": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_cornerRadius: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_enabled": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_enabled: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_mode": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_mode: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_position": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_position: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "xaxes_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "xaxes_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "xaxes_overrideDynamic": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "xaxes_overrideDynamic: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "xaxes_override_list": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "xaxes_override_list: maximum tick counts and minimum intervals are mapped. Moment.js format strings and calendar tick stepping are replaced by native timezone-aware labels and intervals."
+        }
+    },
+    "pie": {
+        "CreateIPSView": {
+            "status": "exact",
+            "rule": "new-native-output-1",
+            "effect": "CreateIPSView enables a new target-owned HTML output. The original output ID and its contents remain unchanged."
+        },
+        "CreateOutput": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "CreateOutput: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "Datasets": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "Datasets: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "EnableViewport": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "EnableViewport: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "IFrameHeight": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "IFrameHeight: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "Ratio": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "Ratio: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "ShowDefault": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "ShowDefault: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "TemplateScriptID": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "TemplateScriptID: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "ViewLevel": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "ViewLevel: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "animation_duration": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "animation_duration: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "animation_easing": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "animation_easing: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "data_precision": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "data_precision: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "datalabels_align": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_align: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "datalabels_anchoring": {
+            "status": "approximate",
+            "rule": "native-label-geometry-1",
+            "effect": "datalabels_anchoring: native ECharts positions labels by the imported alignment within its own series geometry. Chart.js anchor projection is not reproduced exactly."
+        },
+        "datalabels_borderRadius": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_borderRadius: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "datalabels_borderWidth": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_borderWidth: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "datalabels_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "datalabels_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "datalabels_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_align": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_align: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_boxWidth": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_boxWidth: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_position": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_position: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "overrideHeight": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "overrideHeight: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "overrideWidth": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "overrideWidth: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "rotation_length": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "rotation_length: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "rotation_start": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "rotation_start: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_position": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_position: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_text": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_text: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_backgroundColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_backgroundColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_cornerRadius": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_cornerRadius: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_enabled": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_enabled: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_mode": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_mode: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_position": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_position: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "type": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "type: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        }
+    },
+    "gauge": {
+        "AutoConvertHighlight": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "AutoConvertHighlight: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "AutoConvertValue": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "AutoConvertValue: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "CreateIPSView": {
+            "status": "exact",
+            "rule": "new-native-output-1",
+            "effect": "CreateIPSView enables a new target-owned HTML output. The original output ID and its contents remain unchanged."
+        },
+        "CreateOutput": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "CreateOutput: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "EnableViewport": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "EnableViewport: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "Highlights": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "Highlights: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "IFrameHeight": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "IFrameHeight: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "ShowDefault": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "ShowDefault: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "TemplateScriptID": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "TemplateScriptID: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "Ticks": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "Ticks: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "Variable": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "Variable: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "ViewLevel": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "ViewLevel: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "animation_duration": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "animation_duration: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "animation_rule": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "animation_rule: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "animation_target": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "animation_target: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "linear_needleSide": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "linear_needleSide: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "linear_numberSide": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "linear_numberSide: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "linear_tickSide": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "linear_tickSide: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "max": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "max: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "min": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "min: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "needle_CircleOuter": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_CircleOuter: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "needle_CircleSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_CircleSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "needle_Type": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_Type: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "needle_colorNeedle": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_colorNeedle: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "needle_colorNeedleCircleInner": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_colorNeedleCircleInner: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "needle_colorNeedleCircleInnerEnd": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_colorNeedleCircleInnerEnd: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "needle_colorNeedleCircleInnerEnd_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_colorNeedleCircleInnerEnd_Alpha: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "needle_colorNeedleCircleInner_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_colorNeedleCircleInner_Alpha: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "needle_colorNeedleCircleOuter": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_colorNeedleCircleOuter: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "needle_colorNeedleCircleOuterEnd": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_colorNeedleCircleOuterEnd: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "needle_colorNeedleCircleOuterEnd_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_colorNeedleCircleOuterEnd_Alpha: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "needle_colorNeedleCircleOuter_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_colorNeedleCircleOuter_Alpha: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "needle_colorNeedleEnd": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_colorNeedleEnd: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "needle_colorNeedleEnd_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_colorNeedleEnd_Alpha: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "needle_colorNeedle_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_colorNeedle_Alpha: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "needle_colorShadowDown": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_colorShadowDown: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "needle_colorShadowDown_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_colorShadowDown_Alpha: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "needle_colorShadowUp": {
+            "status": "approximate",
+            "rule": "source-engine-option-without-native-effect-1",
+            "effect": "needle_colorShadowUp: retained in the frozen settings for provenance; this engine-specific option has no active native effect. Compare the corresponding target detail before accepting."
+        },
+        "needle_colorShadowUp_Alpha": {
+            "status": "approximate",
+            "rule": "source-engine-option-without-native-effect-1",
+            "effect": "needle_colorShadowUp_Alpha: retained in the frozen settings for provenance; this engine-specific option has no active native effect. Compare the corresponding target detail before accepting."
+        },
+        "needle_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "needle_end": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_end: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "needle_start": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_start: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "needle_width": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "needle_width: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "overrideHeight": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "overrideHeight: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "overrideWidth": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "overrideWidth: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "plate_colorPlate": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "plate_colorPlate: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "plate_colorPlateEnd": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "plate_colorPlateEnd: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "plate_colorPlateEnd_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "plate_colorPlateEnd_Alpha: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "plate_colorPlate_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "plate_colorPlate_Alpha: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "plate_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "plate_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "plate_unit": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "plate_unit: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "plate_unit_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "plate_unit_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "plate_unit_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "plate_unit_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "plate_unit_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "plate_unit_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "precision": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "precision: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "progressbar_barShadow": {
+            "status": "approximate",
+            "rule": "source-engine-option-without-native-effect-1",
+            "effect": "progressbar_barShadow: retained in the frozen settings for provenance; this engine-specific option has no active native effect. Compare the corresponding target detail before accepting."
+        },
+        "progressbar_barStartPosition": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "progressbar_barStartPosition: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "progressbar_barWidth": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "progressbar_barWidth: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "progressbar_colorBar": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "progressbar_colorBar: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "progressbar_colorBarProgress": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "progressbar_colorBarProgress: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "progressbar_colorBarProgress_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "progressbar_colorBarProgress_Alpha: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "progressbar_colorBar_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "progressbar_colorBar_Alpha: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "progressbar_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "progressbar_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "radial_startAngle": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "radial_startAngle: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "radial_ticksAngle": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "radial_ticksAngle: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "template": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "template: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "ticks_colorMajorTick": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "ticks_colorMajorTick: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "ticks_colorMinorTicks": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "ticks_colorMinorTicks: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "ticks_colorNumbers": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "ticks_colorNumbers: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "ticks_exactTicks": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "ticks_exactTicks: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "ticks_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "ticks_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "ticks_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "ticks_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "ticks_highlightsWidth": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "ticks_highlightsWidth: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "ticks_minorTicks": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "ticks_minorTicks: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "ticks_strokeTicks": {
+            "status": "approximate",
+            "rule": "source-engine-option-without-native-effect-1",
+            "effect": "ticks_strokeTicks: retained in the frozen settings for provenance; this engine-specific option has no active native effect. Compare the corresponding target detail before accepting."
+        },
+        "title_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_text": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_text: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "valuebox_colorValueBoxBackground": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "valuebox_colorValueBoxBackground: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "valuebox_colorValueBoxBackground_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "valuebox_colorValueBoxBackground_Alpha: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "valuebox_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "valuebox_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "valuebox_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "valuebox_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "valuebox_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "valuebox_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "valuebox_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "valuebox_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "valuebox_separator": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "valuebox_separator: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        }
+    },
+    "radar-history": {
+        "CreateIPSView": {
+            "status": "exact",
+            "rule": "new-native-output-1",
+            "effect": "CreateIPSView enables a new target-owned HTML output. The original output ID and its contents remain unchanged."
+        },
+        "CreateOutput": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "CreateOutput: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "Datasets": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "Datasets: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "EnableViewport": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "EnableViewport: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "IFrameHeight": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "IFrameHeight: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "Ratio": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "Ratio: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "ShowDefault": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "ShowDefault: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "TemplateScriptID": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "TemplateScriptID: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "ViewLevel": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "ViewLevel: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "animation_duration": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "animation_duration: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "animation_easing": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "animation_easing: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "axes_angleLines_color": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_angleLines_color: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_angleLines_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_angleLines_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_angleLines_lineWidth": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_angleLines_lineWidth: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_gridLines_color": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_gridLines_color: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_gridLines_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_gridLines_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_gridLines_drawTicks": {
+            "status": "approximate",
+            "rule": "source-engine-option-without-native-effect-1",
+            "effect": "axes_gridLines_drawTicks: retained in the frozen settings for provenance; this engine-specific option has no active native effect. Compare the corresponding target detail before accepting."
+        },
+        "axes_gridLines_lineWidth": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_gridLines_lineWidth: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_pointLabels_color": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_pointLabels_color: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_pointLabels_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_pointLabels_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_pointLabels_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_pointLabels_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_pointLabels_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_pointLabels_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "axes_ticks_backdropColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_ticks_backdropColor: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "axes_ticks_backdropColor_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_ticks_backdropColor_Alpha: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "axes_ticks_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_ticks_fontColor: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "axes_ticks_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_ticks_fontFamily: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "axes_ticks_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "axes_ticks_fontSize: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "customScale": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "customScale: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "customScale_mode": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "customScale_mode: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "data_loadAsync": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "data_loadAsync: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "data_maxValue": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "data_maxValue: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "data_minValue": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "data_minValue: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "data_precision": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "data_precision: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "data_sections": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "data_sections: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "datalabels_align": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_align: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "datalabels_anchoring": {
+            "status": "approximate",
+            "rule": "native-label-geometry-1",
+            "effect": "datalabels_anchoring: native ECharts positions labels by the imported alignment within its own series geometry. Chart.js anchor projection is not reproduced exactly."
+        },
+        "datalabels_borderRadius": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_borderRadius: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "datalabels_borderWidth": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_borderWidth: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "datalabels_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "datalabels_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_fontFamily: used by the native family adapter with the original typed value. Native font metrics, shape fitting and animation can differ; compare both HTML outputs."
+        },
+        "datalabels_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "datalabels_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_align": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_align: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_boxWidth": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_boxWidth: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "legend_position": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "legend_position: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "overrideHeight": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "overrideHeight: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "overrideWidth": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "overrideWidth: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "point_hoverRadius": {
+            "status": "approximate",
+            "rule": "source-engine-option-without-native-effect-1",
+            "effect": "point_hoverRadius: retained in the frozen settings for provenance; this engine-specific option has no active native effect. Compare the corresponding target detail before accepting."
+        },
+        "point_radius": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "point_radius: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "points_Style": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "points_Style: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_display": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_display: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_position": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_position: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "title_text": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "title_text: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_backgroundColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_backgroundColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_cornerRadius": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_cornerRadius: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_enabled": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_enabled: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_mode": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_mode: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "tooltips_position": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "tooltips_position: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        }
+    },
+    "progress": {
+        "CreateIPSView": {
+            "status": "exact",
+            "rule": "new-native-output-1",
+            "effect": "CreateIPSView enables a new target-owned HTML output. The original output ID and its contents remain unchanged."
+        },
+        "CreateOutput": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "CreateOutput: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "EnableViewport": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "EnableViewport: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "IFrameHeight": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "IFrameHeight: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "ShowDefault": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "ShowDefault: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "TemplateScriptID": {
+            "status": "not-applicable",
+            "rule": "native-output-context-1",
+            "effect": "TemplateScriptID: the source web wrapper/template setting is not executed. Target tile and IPSView use their native HTML SDK container."
+        },
+        "Type": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "Type: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "Variable": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "Variable: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "ViewLevel": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "ViewLevel: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "data_animationDuration": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "data_animationDuration: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "data_animationTransitionIn": {
+            "status": "approximate",
+            "rule": "source-engine-option-without-native-effect-1",
+            "effect": "data_animationTransitionIn: retained in the frozen settings for provenance; this engine-specific option has no active native effect. Compare the corresponding target detail before accepting."
+        },
+        "data_max": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "data_max: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "data_min": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "data_min: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "data_precision": {
+            "status": "exact",
+            "rule": "frozen-calculation-or-native-format-1",
+            "effect": "data_precision: original calculation input or verified native formatting retained without changing the source variable."
+        },
+        "data_precisionCustom": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "data_precisionCustom: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "fill_backgroundColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "fill_backgroundColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "fill_backgroundColor_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "fill_backgroundColor_Alpha: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "fill_backgroundExtrude": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "fill_backgroundExtrude: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "fill_backgroundFile": {
+            "status": "approximate",
+            "rule": "native-progress-validated-paint-1",
+            "effect": "fill_backgroundFile: embedded SVG paints and explicit hexadecimal colors or bounded loading-bar gradients use the validated local paint adapter. The original typed settings remain frozen. Fill overrides take precedence over the fill file; SVG shapes retain their own paints. Unsupported or external resources stay blocked. Cyclic gradient motion is reported separately."
+        },
+        "fill_backgroundFileType": {
+            "status": "approximate",
+            "rule": "native-progress-validated-paint-1",
+            "effect": "fill_backgroundFileType: embedded SVG paints and explicit hexadecimal colors or bounded loading-bar gradients use the validated local paint adapter. The original typed settings remain frozen. Fill overrides take precedence over the fill file; SVG shapes retain their own paints. Unsupported or external resources stay blocked. Cyclic gradient motion is reported separately."
+        },
+        "fill_color": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "fill_color: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "fill_color_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "fill_color_Alpha: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "fill_dir": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "fill_dir: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "overrideHeight": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "overrideHeight: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "overrideWidth": {
+            "status": "approximate",
+            "rule": "native-container-placement-1",
+            "effect": "overrideWidth: source wrapper/form visibility and fixed dimensions are replaced by the native responsive tile/IPSView container. Existing visibility and output objects remain unchanged; place the new target deliberately."
+        },
+        "override_fill": {
+            "status": "approximate",
+            "rule": "native-progress-validated-paint-1",
+            "effect": "override_fill: embedded SVG paints and explicit hexadecimal colors or bounded loading-bar gradients use the validated local paint adapter. The original typed settings remain frozen. Fill overrides take precedence over the fill file; SVG shapes retain their own paints. Unsupported or external resources stay blocked. Cyclic gradient motion is reported separately."
+        },
+        "override_stroke": {
+            "status": "approximate",
+            "rule": "native-progress-validated-paint-1",
+            "effect": "override_stroke: embedded SVG paints and explicit hexadecimal colors or bounded loading-bar gradients use the validated local paint adapter. The original typed settings remain frozen. Fill overrides take precedence over the fill file; SVG shapes retain their own paints. Unsupported or external resources stay blocked. Cyclic gradient motion is reported separately."
+        },
+        "shape_path": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "shape_path: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "shape_preset": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "shape_preset: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "shape_svg": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "shape_svg: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "stroke_Dash1": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "stroke_Dash1: an explicit custom stroke path uses the native dash pattern in normal direction. Reverse progress reserves lineDash for end-first clipping and does not combine it with the source dash pattern. Preset shapes retain their own native stroke."
+        },
+        "stroke_Dash2": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "stroke_Dash2: an explicit custom stroke path uses the native dash pattern in normal direction. Reverse progress reserves lineDash for end-first clipping and does not combine it with the source dash pattern. Preset shapes retain their own native stroke."
+        },
+        "stroke_color": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "stroke_color: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "stroke_color_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "stroke_color_Alpha: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "stroke_dir": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "stroke_dir: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "stroke_lincap": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "stroke_lincap: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "stroke_trailColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "stroke_trailColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "stroke_trailColor_Alpha": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "stroke_trailColor_Alpha: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "stroke_trailWidth": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "stroke_trailWidth: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "stroke_width": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "stroke_width: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "style_fontColor": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "style_fontColor: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "style_fontDisplay": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "style_fontDisplay: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "style_fontFamily": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "style_fontFamily: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "style_fontPosition": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "style_fontPosition: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        },
+        "style_fontSize": {
+            "status": "approximate",
+            "rule": "native-family-geometry-1",
+            "effect": "style_fontSize: imported value is used by the family adapter. ECharts font metrics, geometry, labels and animations can differ from the source engine."
+        }
+    },
+    "nested": {
+        "cartesian-history": {
+            "Axes/AxesStackGroup": {
+                "status": "approximate",
+                "rule": "independent-native-axis-layout-1",
+                "effect": "Axes/AxesStackGroup: same-side Chart.js axis-stack grouping/weight/offset is not reproduced; native independent axes share the plot and use pixel offsets. Compare stacked-axis layouts before accepting."
+            },
+            "Axes/AxesStackOffset": {
+                "status": "approximate",
+                "rule": "independent-native-axis-layout-1",
+                "effect": "Axes/AxesStackOffset: same-side Chart.js axis-stack grouping/weight/offset is not reproduced; native independent axes share the plot and use pixel offsets. Compare stacked-axis layouts before accepting."
+            },
+            "Axes/AxesStackWeight": {
+                "status": "approximate",
+                "rule": "independent-native-axis-layout-1",
+                "effect": "Axes/AxesStackWeight: same-side Chart.js axis-stack grouping/weight/offset is not reproduced; native independent axes share the plot and use pixel offsets. Compare stacked-axis layouts before accepting."
+            },
+            "Axes/Bool": {
+                "status": "approximate",
+                "rule": "typed-native-boolean-axis-1",
+                "effect": "Axes/Bool: native Boolean axes use the frozen state captions. The profile-less source fallback to a linear axis is not reproduced; previously invisible Boolean points can become visible."
+            },
+            "Axes/BoolFalse": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Axes/BoolFalse: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Axes/BoolTrue": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Axes/BoolTrue: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Axes/DynScale": {
+                "status": "approximate",
+                "rule": "profile-backed-axis-bounds-1",
+                "effect": "Axes/DynScale: as in the pinned source, numeric bounds/steps are applied only to profile-backed axes; other axes remain automatic. Native automatic tick choices may differ."
+            },
+            "Axes/Ident": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Axes/Ident: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Axes/Max": {
+                "status": "not-applicable",
+                "rule": "obsolete-source-axis-field-1",
+                "effect": "Axes/Max: obsolete string fields are not used by the pinned JSLive numeric axis path; current profile-backed overrides remain in their separate fields."
+            },
+            "Axes/Maximum": {
+                "status": "approximate",
+                "rule": "profile-backed-axis-bounds-1",
+                "effect": "Axes/Maximum: as in the pinned source, numeric bounds/steps are applied only to profile-backed axes; other axes remain automatic. Native automatic tick choices may differ."
+            },
+            "Axes/Min": {
+                "status": "not-applicable",
+                "rule": "obsolete-source-axis-field-1",
+                "effect": "Axes/Min: obsolete string fields are not used by the pinned JSLive numeric axis path; current profile-backed overrides remain in their separate fields."
+            },
+            "Axes/Minimum": {
+                "status": "approximate",
+                "rule": "profile-backed-axis-bounds-1",
+                "effect": "Axes/Minimum: as in the pinned source, numeric bounds/steps are applied only to profile-backed axes; other axes remain automatic. Native automatic tick choices may differ."
+            },
+            "Axes/OverrideBoolText": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Axes/OverrideBoolText: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Axes/OverrideMinMax": {
+                "status": "approximate",
+                "rule": "profile-backed-axis-bounds-1",
+                "effect": "Axes/OverrideMinMax: as in the pinned source, numeric bounds/steps are applied only to profile-backed axes; other axes remain automatic. Native automatic tick choices may differ."
+            },
+            "Axes/OverrideStepSize": {
+                "status": "approximate",
+                "rule": "profile-backed-axis-bounds-1",
+                "effect": "Axes/OverrideStepSize: as in the pinned source, numeric bounds/steps are applied only to profile-backed axes; other axes remain automatic. Native automatic tick choices may differ."
+            },
+            "Axes/Profile": {
+                "status": "not-applicable",
+                "rule": "profile-name-eliminated-1",
+                "effect": "Axes/Profile: legacy profile name is replaced by its independently normalized native parameters; the target does not look up this profile by name."
+            },
+            "Axes/Side": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Axes/Side: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Axes/Steps": {
+                "status": "not-applicable",
+                "rule": "obsolete-source-axis-field-1",
+                "effect": "Axes/Steps: obsolete string fields are not used by the pinned JSLive numeric axis path; current profile-backed overrides remain in their separate fields."
+            },
+            "Axes/Title": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Axes/Title: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Axes/beginAtZero": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Axes/beginAtZero: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Axes": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Axes: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/BackgroundColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/BackgroundColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/BackgroundColor_Alpha": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/BackgroundColor_Alpha: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/BorderColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/BorderColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/BorderColor_Alpha": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/BorderColor_Alpha: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/BorderWidth": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/BorderWidth: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Dash": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Dash: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Dash/Length": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Dash/Length: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Dash/Order": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Dash/Order: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/HighRes": {
+                "status": "exact",
+                "rule": "legacy-binding-or-query-1",
+                "effect": "Datasets/HighRes: verified source binding or versioned historical query/reducer retained. Explicit foreign mappings retain the origin key and bind to the reviewed target ID."
+            },
+            "Datasets/MonotoneInterpolationMode": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/MonotoneInterpolationMode: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Offset": {
+                "status": "exact",
+                "rule": "legacy-binding-or-query-1",
+                "effect": "Datasets/Offset: verified source binding or versioned historical query/reducer retained. Explicit foreign mappings retain the origin key and bind to the reviewed target ID."
+            },
+            "Datasets/PointRadius": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/PointRadius: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/PointStyle": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/PointStyle: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/StackGroup": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/StackGroup: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Tension": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Tension: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Title": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Title: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Type": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Type: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Variable": {
+                "status": "exact",
+                "rule": "legacy-binding-or-query-1",
+                "effect": "Datasets/Variable: verified source binding or versioned historical query/reducer retained. Explicit foreign mappings retain the origin key and bind to the reviewed target ID."
+            },
+            "Datasets/datalabels_BackgroundColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_BackgroundColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_BackgroundColor_Alpha": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_BackgroundColor_Alpha: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_BorderColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_BorderColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_BorderColor_Alpha": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_BorderColor_Alpha: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_FontColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_FontColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_enable": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_enable: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_showPrefix": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_showPrefix: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_showSuffix": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_showSuffix: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "xaxes_override_list/ID": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "xaxes_override_list/ID: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "xaxes_override_list/Name": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "xaxes_override_list/Name: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "xaxes_override_list/maxTicksLimit": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "xaxes_override_list/maxTicksLimit: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "xaxes_override_list/stepSize": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "xaxes_override_list/stepSize: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            }
+        },
+        "pie": {
+            "Datasets/Order": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Order: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Profile": {
+                "status": "not-applicable",
+                "rule": "profile-name-eliminated-1",
+                "effect": "Datasets/Profile: legacy profile name is replaced by its independently normalized native parameters; the target does not look up this profile by name."
+            },
+            "Datasets/Title": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Title: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Variables": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Variables: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Variables/BackgroundColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Variables/BackgroundColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Variables/BackgroundColor_Alpha": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Variables/BackgroundColor_Alpha: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Variables/BorderColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Variables/BorderColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Variables/BorderColor_Alpha": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Variables/BorderColor_Alpha: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Variables/BorderWidth": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Variables/BorderWidth: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Variables/Label": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Variables/Label: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Variables/Order": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Variables/Order: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Variables/Variable": {
+                "status": "exact",
+                "rule": "legacy-binding-or-query-1",
+                "effect": "Datasets/Variables/Variable: verified source binding or versioned historical query/reducer retained. Explicit foreign mappings retain the origin key and bind to the reviewed target ID."
+            },
+            "Datasets/cutout": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/cutout: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_BackgroundColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_BackgroundColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_BackgroundColor_Alpha": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_BackgroundColor_Alpha: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_BorderColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_BorderColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_BorderColor_Alpha": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_BorderColor_Alpha: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_FontColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_FontColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_anchoring": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_anchoring: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_enable": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_enable: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_showPrefix": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_showPrefix: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_showSuffix": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_showSuffix: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            }
+        },
+        "gauge": {
+            "Highlights/From": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Highlights/From: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Highlights/HighlightColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Highlights/HighlightColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Highlights/HighlightColor_Alpha": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Highlights/HighlightColor_Alpha: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Highlights/To": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Highlights/To: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Ticks/Value": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Ticks/Value: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            }
+        },
+        "radar-history": {
+            "Datasets/BackgroundColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/BackgroundColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/BackgroundColor_Alpha": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/BackgroundColor_Alpha: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/BorderColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/BorderColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/BorderColor_Alpha": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/BorderColor_Alpha: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/BorderWidth": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/BorderWidth: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Dash": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Dash: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Mode": {
+                "status": "exact",
+                "rule": "legacy-binding-or-query-1",
+                "effect": "Datasets/Mode: verified source binding or versioned historical query/reducer retained. Explicit foreign mappings retain the origin key and bind to the reviewed target ID."
+            },
+            "Datasets/Offset": {
+                "status": "exact",
+                "rule": "legacy-binding-or-query-1",
+                "effect": "Datasets/Offset: verified source binding or versioned historical query/reducer retained. Explicit foreign mappings retain the origin key and bind to the reviewed target ID."
+            },
+            "Datasets/Order": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Order: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/PointRadius": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/PointRadius: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/PointStyle": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/PointStyle: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Reference": {
+                "status": "exact",
+                "rule": "legacy-binding-or-query-1",
+                "effect": "Datasets/Reference: verified source binding or versioned historical query/reducer retained. Explicit foreign mappings retain the origin key and bind to the reviewed target ID."
+            },
+            "Datasets/Title": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Title: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Variable": {
+                "status": "exact",
+                "rule": "legacy-binding-or-query-1",
+                "effect": "Datasets/Variable: verified source binding or versioned historical query/reducer retained. Explicit foreign mappings retain the origin key and bind to the reviewed target ID."
+            },
+            "Datasets/datalabels_BackgroundColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_BackgroundColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_BackgroundColor_Alpha": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_BackgroundColor_Alpha: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_BorderColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_BorderColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_BorderColor_Alpha": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_BorderColor_Alpha: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_FontColor": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_FontColor: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_enable": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_enable: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_showPrefix": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_showPrefix: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/datalabels_showSuffix": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/datalabels_showSuffix: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "customScale/Alias": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "customScale/Alias: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "customScale/Order": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "customScale/Order: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "customScale/Value": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "customScale/Value: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            }
+        },
+        "progress": {}
+    }
+}

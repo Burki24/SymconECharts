@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <title>Gauge Chronograph browser fixture</title>
+    <style>
+        html, body { margin: 0; background: #fff; color: #111; }
+        body { --symc-background: #fff; --symc-text: #111; --symc-muted: #666;
+            --symc-border: #aaa; --symc-surface: #ddd; --symc-accent: #55cbb5; }
+        #echarts-gauge-chart { width: 1280px; height: 720px; }
+        #echarts-gauge-error { color: #111; }
+    </style>
+</head>
+<body>
+    <div id="echarts-gauge-chart"></div>
+    <div id="echarts-gauge-error" hidden></div>
+    <script>
+        const plateSvg = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj48Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9IjEwMCIgZmlsbD0iIzEyMzQ1NiIvPjxwYXRoIGQ9Ik0wIDEwMEgyMDBNMTAwIDBWMjAwIiBzdHJva2U9IiNmZmZmMDAiIHN0cm9rZS13aWR0aD0iMjAiLz48L3N2Zz4=';
+        const style = {
+            plateMode: 'custom', plateColor: '#000000', plateBorderColor: '#ffffff',
+            plateSizePercent: 100, plateBorderWidthPercent: 100,
+            plateBackgroundEnabled: true, plateBackgroundImage: plateSvg,
+            plateBackgroundAspectRatio: 1, plateBackgroundFit: 'cover',
+            plateBackgroundSizePercent: 100, plateBackgroundOffsetXPercent: 0,
+            plateBackgroundOffsetYPercent: 0, plateBackgroundOpacityPercent: 100,
+            plateBackgroundRotation: 0
+        };
+        window.SYMC_VISUALIZATION = {
+            mode: 'ipsview',
+            options: { echartsThemes: { auto: {
+                background: '#fff', text: '#111', muted: '#666',
+                border: '#aaa', track: '#ddd', accent: '#55cbb5'
+            } } },
+            state: { status: 'ready', chart: {
+                theme: 'auto',
+                gauge: { title: '', preset: 'chronograph', style },
+                items: [
+                    { id: 'variable-1', value: 18.5, style, gauge: {
+                        label: 'Temperatur', minimum: -40, maximum: 60, unit: '°C', decimals: 1
+                    } },
+                    { id: 'variable-2', value: 64, style, gauge: {
+                        label: 'Feuchte', minimum: 1, maximum: 99, unit: '%', decimals: 0
+                    } },
+                    { id: 'variable-3', value: 101.6, style, gauge: {
+                        label: 'Luftdruck', minimum: 30, maximum: 110, unit: 'kPa', decimals: 1
+                    } }
+                ]
+            } }
+        };
+    </script>
+    <script src="../../libs/echarts/6.1.0/echarts.gauge.min.js"></script>
+    <script src="../../EChartsGaugeChronograph/visualization/app.js"></script>
+</body>
+</html>

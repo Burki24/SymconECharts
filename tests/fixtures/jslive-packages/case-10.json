@@ -1,0 +1,1968 @@
+{
+    "format": "de.burki24.jslive-echarts",
+    "formatVersion": "1.0",
+    "exportId": "11111111-1111-4111-8111-000000000010",
+    "createdAt": "2026-10-31T12:00:00Z",
+    "producer": {
+        "libraryId": "{1189E095-5FC2-22A5-12DF-2B177A36DB8C}",
+        "libraryVersion": "0.111",
+        "build": 5073965,
+        "exporterVersion": "1.0.0",
+        "symconVersion": "9.1",
+        "phpVersion": "8.5.8"
+    },
+    "sourceInstallation": {
+        "id": "22222222-2222-4222-8222-222222222222"
+    },
+    "charts": [
+        {
+            "chartKey": "instance:12010",
+            "origin": {
+                "instanceId": 12010,
+                "moduleId": "{9419245E-CE2E-F949-AAB6-714E2045632F}",
+                "moduleName": "SymconJSLiveDoughnutPie",
+                "instanceName": "Synthetic text 44",
+                "family": "pie",
+                "templateVariant": "doughnut"
+            },
+            "original": {
+                "configuration": {
+                    "CreateIPSView": true,
+                    "CreateOutput": true,
+                    "Datasets": "[{\"Order\":0,\"Title\":\"Synthetic text 45\",\"Profile\":\"\",\"Variables\":[{\"Order\":0,\"Label\":\"Synthetic text 36\",\"Variable\":13025,\"BackgroundColor\":561586,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3},{\"Order\":1,\"Label\":\"Synthetic text 17\",\"Variable\":13018,\"BackgroundColor\":16347926,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3},{\"Order\":2,\"Label\":\"Synthetic text 18\",\"Variable\":13019,\"BackgroundColor\":9133302,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3},{\"Order\":3,\"Label\":\"Synthetic text 3\",\"Variable\":13001,\"BackgroundColor\":1483594,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3}],\"datalabels_enable\":true,\"datalabels_anchoring\":\"\",\"datalabels_BackgroundColor\":-1,\"datalabels_BackgroundColor_Alpha\":0.5,\"datalabels_BorderColor\":-1,\"datalabels_BorderColor_Alpha\":1,\"datalabels_FontColor\":16777215,\"datalabels_showPrefix\":false,\"datalabels_showSuffix\":false,\"cutout\":35},{\"Order\":2,\"Title\":\"Synthetic text 46\",\"Profile\":\"\",\"Variables\":[{\"Order\":0,\"Label\":\"Synthetic text 36\",\"Variable\":13025,\"BackgroundColor\":9133302,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3},{\"Order\":1,\"Label\":\"Synthetic text 17\",\"Variable\":13018,\"BackgroundColor\":1483594,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3},{\"Order\":2,\"Label\":\"Synthetic text 18\",\"Variable\":13019,\"BackgroundColor\":14427686,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3},{\"Order\":3,\"Label\":\"Synthetic text 3\",\"Variable\":13001,\"BackgroundColor\":14251782,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3}],\"datalabels_enable\":true,\"datalabels_anchoring\":\"\",\"datalabels_BackgroundColor\":-1,\"datalabels_BackgroundColor_Alpha\":0.5,\"datalabels_BorderColor\":-1,\"datalabels_BorderColor_Alpha\":1,\"datalabels_FontColor\":16777215,\"datalabels_showPrefix\":false,\"datalabels_showSuffix\":false,\"cutout\":35}]",
+                    "EnableViewport": true,
+                    "IFrameHeight": 0,
+                    "Ratio": 0,
+                    "ShowDefault": true,
+                    "TemplateScriptID": 0,
+                    "ViewLevel": 2,
+                    "animation_duration": 500,
+                    "animation_easing": "easeOutBounce",
+                    "data_precision": 2,
+                    "datalabels_align": "center",
+                    "datalabels_anchoring": "center",
+                    "datalabels_borderRadius": 2,
+                    "datalabels_borderWidth": 1,
+                    "datalabels_fontColor": 0,
+                    "datalabels_fontFamily": "",
+                    "datalabels_fontSize": 11,
+                    "legend_align": "center",
+                    "legend_boxWidth": 40,
+                    "legend_display": true,
+                    "legend_fontColor": 0,
+                    "legend_fontFamily": "",
+                    "legend_fontSize": 12,
+                    "legend_position": "bottom",
+                    "overrideHeight": 0,
+                    "overrideWidth": 0,
+                    "rotation_length": 180,
+                    "rotation_start": -90,
+                    "title_display": true,
+                    "title_fontColor": 0,
+                    "title_fontFamily": "Comfortaa",
+                    "title_fontSize": 18,
+                    "title_position": "top",
+                    "title_text": "Synthetic text 47",
+                    "tooltips_backgroundColor": 0,
+                    "tooltips_cornerRadius": 5,
+                    "tooltips_enabled": true,
+                    "tooltips_fontColor": 65535,
+                    "tooltips_fontFamily": "",
+                    "tooltips_fontSize": 12,
+                    "tooltips_mode": "index",
+                    "tooltips_position": "average",
+                    "type": "doughnut"
+                },
+                "globalConfiguration": {
+                    "CreateIPSView": true,
+                    "DataMode": 1,
+                    "EnableViewport": true,
+                    "RefreshTime": 3,
+                    "viewport_content": "width=device-width, initial-scale=1, maximum-scale=1.0, minimum-scale=1, user-scalable=no"
+                },
+                "runtimeState": {},
+                "excluded": [
+                    {
+                        "pointer": "/LastUploadedConfig",
+                        "reason": "Operational state, not chart configuration."
+                    },
+                    {
+                        "pointer": "/Debug",
+                        "reason": "Operational state, not chart configuration."
+                    },
+                    {
+                        "pointer": "/EnableCache",
+                        "reason": "Operational state, not chart configuration."
+                    }
+                ]
+            },
+            "sources": [
+                {
+                    "sourceKey": "variable:13025",
+                    "variableId": 13025,
+                    "variableType": 2,
+                    "label": "Synthetic text 26",
+                    "presentation": {
+                        "original": {
+                            "presentation": {
+                                "COLOR": -1,
+                                "CONTENT_COLOR": -1,
+                                "DECIMAL_SEPARATOR": "Client",
+                                "DIGITS": 2,
+                                "DISPLAY_TYPE": 0,
+                                "ICON": "",
+                                "INTERVALS": "[]",
+                                "INTERVALS_ACTIVE": false,
+                                "MAX": 100,
+                                "MIN": 0,
+                                "PERCENTAGE": false,
+                                "PREFIX": "",
+                                "PRESENTATION": "{3319437D-7CDE-699D-750A-3C6A3841FA75}",
+                                "PREVIEW_STYLE": 1,
+                                "SHOW_PREVIEW": true,
+                                "SUFFIX": "",
+                                "THOUSANDS_SEPARATOR": "",
+                                "USAGE_TYPE": 0
+                            },
+                            "profiles": {},
+                            "variable": {
+                                "VariableAction": 0,
+                                "VariableCustomAction": 0,
+                                "VariableCustomPresentation": [],
+                                "VariableCustomProfile": "",
+                                "VariablePresentation": [],
+                                "VariableProfile": "",
+                                "VariableType": 2
+                            },
+                            "templates": {},
+                            "objectIcon": ""
+                        },
+                        "effective": {
+                            "kind": "value",
+                            "prefix": "",
+                            "suffix": "",
+                            "digits": 2,
+                            "minimum": 0,
+                            "maximum": 100,
+                            "stepSize": null,
+                            "icon": "",
+                            "color": -1,
+                            "contentColor": -1,
+                            "displayType": 0,
+                            "previewStyle": 1,
+                            "showPreview": true,
+                            "percentage": false,
+                            "usageType": 0,
+                            "decimalSeparator": "Client",
+                            "thousandsSeparator": "",
+                            "options": [],
+                            "intervals": [],
+                            "extra": {
+                                "INTERVALS_ACTIVE": false
+                            }
+                        },
+                        "native": {
+                            "presentationId": "{3319437D-7CDE-699D-750A-3C6A3841FA75}",
+                            "parameters": {
+                                "COLOR": -1,
+                                "CONTENT_COLOR": -1,
+                                "DECIMAL_SEPARATOR": "Client",
+                                "DIGITS": 2,
+                                "DISPLAY_TYPE": 0,
+                                "ICON": "",
+                                "INTERVALS": [],
+                                "INTERVALS_ACTIVE": false,
+                                "MAX": 100,
+                                "MIN": 0,
+                                "PERCENTAGE": false,
+                                "PREFIX": "",
+                                "PREVIEW_STYLE": 1,
+                                "SHOW_PREVIEW": true,
+                                "SUFFIX": "",
+                                "THOUSANDS_SEPARATOR": "",
+                                "USAGE_TYPE": 0
+                            }
+                        },
+                        "conversion": {
+                            "status": "exact",
+                            "ruleVersion": "1.0",
+                            "fieldCoverage": [
+                                {
+                                    "source": "/original/presentation/COLOR",
+                                    "target": "/native/parameters/COLOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/CONTENT_COLOR",
+                                    "target": "/native/parameters/CONTENT_COLOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DECIMAL_SEPARATOR",
+                                    "target": "/native/parameters/DECIMAL_SEPARATOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DIGITS",
+                                    "target": "/native/parameters/DIGITS",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DISPLAY_TYPE",
+                                    "target": "/native/parameters/DISPLAY_TYPE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/ICON",
+                                    "target": "/native/parameters/ICON",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/INTERVALS",
+                                    "target": "/native/parameters/INTERVALS",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/INTERVALS_ACTIVE",
+                                    "target": "/native/parameters/INTERVALS_ACTIVE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/MAX",
+                                    "target": "/native/parameters/MAX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/MIN",
+                                    "target": "/native/parameters/MIN",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PERCENTAGE",
+                                    "target": "/native/parameters/PERCENTAGE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PREFIX",
+                                    "target": "/native/parameters/PREFIX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PREVIEW_STYLE",
+                                    "target": "/native/parameters/PREVIEW_STYLE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/SHOW_PREVIEW",
+                                    "target": "/native/parameters/SHOW_PREVIEW",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/SUFFIX",
+                                    "target": "/native/parameters/SUFFIX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/THOUSANDS_SEPARATOR",
+                                    "target": "/native/parameters/THOUSANDS_SEPARATOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/USAGE_TYPE",
+                                    "target": "/native/parameters/USAGE_TYPE",
+                                    "status": "exact"
+                                }
+                            ],
+                            "issues": []
+                        }
+                    },
+                    "archive": {
+                        "archiveId": 2,
+                        "logging": true,
+                        "aggregationType": 0,
+                        "counterSettings": null,
+                        "availability": "metadata-only"
+                    }
+                },
+                {
+                    "sourceKey": "variable:13018",
+                    "variableId": 13018,
+                    "variableType": 2,
+                    "label": "Synthetic text 17",
+                    "presentation": {
+                        "original": {
+                            "presentation": {
+                                "COLOR": -1,
+                                "CONTENT_COLOR": -1,
+                                "DECIMAL_SEPARATOR": "Client",
+                                "DIGITS": 2,
+                                "DISPLAY_TYPE": 0,
+                                "ICON": "",
+                                "INTERVALS": "[]",
+                                "INTERVALS_ACTIVE": false,
+                                "MAX": 100,
+                                "MIN": 0,
+                                "PERCENTAGE": false,
+                                "PREFIX": "",
+                                "PRESENTATION": "{3319437D-7CDE-699D-750A-3C6A3841FA75}",
+                                "PREVIEW_STYLE": 1,
+                                "SHOW_PREVIEW": true,
+                                "SUFFIX": "",
+                                "THOUSANDS_SEPARATOR": "",
+                                "USAGE_TYPE": 0
+                            },
+                            "profiles": {},
+                            "variable": {
+                                "VariableAction": 0,
+                                "VariableCustomAction": 0,
+                                "VariableCustomPresentation": [],
+                                "VariableCustomProfile": "",
+                                "VariablePresentation": [],
+                                "VariableProfile": "",
+                                "VariableType": 2
+                            },
+                            "templates": {},
+                            "objectIcon": ""
+                        },
+                        "effective": {
+                            "kind": "value",
+                            "prefix": "",
+                            "suffix": "",
+                            "digits": 2,
+                            "minimum": 0,
+                            "maximum": 100,
+                            "stepSize": null,
+                            "icon": "",
+                            "color": -1,
+                            "contentColor": -1,
+                            "displayType": 0,
+                            "previewStyle": 1,
+                            "showPreview": true,
+                            "percentage": false,
+                            "usageType": 0,
+                            "decimalSeparator": "Client",
+                            "thousandsSeparator": "",
+                            "options": [],
+                            "intervals": [],
+                            "extra": {
+                                "INTERVALS_ACTIVE": false
+                            }
+                        },
+                        "native": {
+                            "presentationId": "{3319437D-7CDE-699D-750A-3C6A3841FA75}",
+                            "parameters": {
+                                "COLOR": -1,
+                                "CONTENT_COLOR": -1,
+                                "DECIMAL_SEPARATOR": "Client",
+                                "DIGITS": 2,
+                                "DISPLAY_TYPE": 0,
+                                "ICON": "",
+                                "INTERVALS": [],
+                                "INTERVALS_ACTIVE": false,
+                                "MAX": 100,
+                                "MIN": 0,
+                                "PERCENTAGE": false,
+                                "PREFIX": "",
+                                "PREVIEW_STYLE": 1,
+                                "SHOW_PREVIEW": true,
+                                "SUFFIX": "",
+                                "THOUSANDS_SEPARATOR": "",
+                                "USAGE_TYPE": 0
+                            }
+                        },
+                        "conversion": {
+                            "status": "exact",
+                            "ruleVersion": "1.0",
+                            "fieldCoverage": [
+                                {
+                                    "source": "/original/presentation/COLOR",
+                                    "target": "/native/parameters/COLOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/CONTENT_COLOR",
+                                    "target": "/native/parameters/CONTENT_COLOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DECIMAL_SEPARATOR",
+                                    "target": "/native/parameters/DECIMAL_SEPARATOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DIGITS",
+                                    "target": "/native/parameters/DIGITS",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DISPLAY_TYPE",
+                                    "target": "/native/parameters/DISPLAY_TYPE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/ICON",
+                                    "target": "/native/parameters/ICON",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/INTERVALS",
+                                    "target": "/native/parameters/INTERVALS",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/INTERVALS_ACTIVE",
+                                    "target": "/native/parameters/INTERVALS_ACTIVE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/MAX",
+                                    "target": "/native/parameters/MAX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/MIN",
+                                    "target": "/native/parameters/MIN",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PERCENTAGE",
+                                    "target": "/native/parameters/PERCENTAGE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PREFIX",
+                                    "target": "/native/parameters/PREFIX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PREVIEW_STYLE",
+                                    "target": "/native/parameters/PREVIEW_STYLE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/SHOW_PREVIEW",
+                                    "target": "/native/parameters/SHOW_PREVIEW",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/SUFFIX",
+                                    "target": "/native/parameters/SUFFIX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/THOUSANDS_SEPARATOR",
+                                    "target": "/native/parameters/THOUSANDS_SEPARATOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/USAGE_TYPE",
+                                    "target": "/native/parameters/USAGE_TYPE",
+                                    "status": "exact"
+                                }
+                            ],
+                            "issues": []
+                        }
+                    },
+                    "archive": {
+                        "archiveId": 2,
+                        "logging": true,
+                        "aggregationType": 0,
+                        "counterSettings": null,
+                        "availability": "metadata-only"
+                    }
+                },
+                {
+                    "sourceKey": "variable:13019",
+                    "variableId": 13019,
+                    "variableType": 2,
+                    "label": "Synthetic text 18",
+                    "presentation": {
+                        "original": {
+                            "presentation": {
+                                "COLOR": -1,
+                                "CONTENT_COLOR": -1,
+                                "DECIMAL_SEPARATOR": "Client",
+                                "DIGITS": 2,
+                                "DISPLAY_TYPE": 0,
+                                "ICON": "",
+                                "INTERVALS": "[]",
+                                "INTERVALS_ACTIVE": false,
+                                "MAX": 100,
+                                "MIN": 0,
+                                "PERCENTAGE": false,
+                                "PREFIX": "",
+                                "PRESENTATION": "{3319437D-7CDE-699D-750A-3C6A3841FA75}",
+                                "PREVIEW_STYLE": 1,
+                                "SHOW_PREVIEW": true,
+                                "SUFFIX": "",
+                                "THOUSANDS_SEPARATOR": "",
+                                "USAGE_TYPE": 0
+                            },
+                            "profiles": {},
+                            "variable": {
+                                "VariableAction": 0,
+                                "VariableCustomAction": 0,
+                                "VariableCustomPresentation": [],
+                                "VariableCustomProfile": "",
+                                "VariablePresentation": [],
+                                "VariableProfile": "",
+                                "VariableType": 2
+                            },
+                            "templates": {},
+                            "objectIcon": ""
+                        },
+                        "effective": {
+                            "kind": "value",
+                            "prefix": "",
+                            "suffix": "",
+                            "digits": 2,
+                            "minimum": 0,
+                            "maximum": 100,
+                            "stepSize": null,
+                            "icon": "",
+                            "color": -1,
+                            "contentColor": -1,
+                            "displayType": 0,
+                            "previewStyle": 1,
+                            "showPreview": true,
+                            "percentage": false,
+                            "usageType": 0,
+                            "decimalSeparator": "Client",
+                            "thousandsSeparator": "",
+                            "options": [],
+                            "intervals": [],
+                            "extra": {
+                                "INTERVALS_ACTIVE": false
+                            }
+                        },
+                        "native": {
+                            "presentationId": "{3319437D-7CDE-699D-750A-3C6A3841FA75}",
+                            "parameters": {
+                                "COLOR": -1,
+                                "CONTENT_COLOR": -1,
+                                "DECIMAL_SEPARATOR": "Client",
+                                "DIGITS": 2,
+                                "DISPLAY_TYPE": 0,
+                                "ICON": "",
+                                "INTERVALS": [],
+                                "INTERVALS_ACTIVE": false,
+                                "MAX": 100,
+                                "MIN": 0,
+                                "PERCENTAGE": false,
+                                "PREFIX": "",
+                                "PREVIEW_STYLE": 1,
+                                "SHOW_PREVIEW": true,
+                                "SUFFIX": "",
+                                "THOUSANDS_SEPARATOR": "",
+                                "USAGE_TYPE": 0
+                            }
+                        },
+                        "conversion": {
+                            "status": "exact",
+                            "ruleVersion": "1.0",
+                            "fieldCoverage": [
+                                {
+                                    "source": "/original/presentation/COLOR",
+                                    "target": "/native/parameters/COLOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/CONTENT_COLOR",
+                                    "target": "/native/parameters/CONTENT_COLOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DECIMAL_SEPARATOR",
+                                    "target": "/native/parameters/DECIMAL_SEPARATOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DIGITS",
+                                    "target": "/native/parameters/DIGITS",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DISPLAY_TYPE",
+                                    "target": "/native/parameters/DISPLAY_TYPE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/ICON",
+                                    "target": "/native/parameters/ICON",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/INTERVALS",
+                                    "target": "/native/parameters/INTERVALS",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/INTERVALS_ACTIVE",
+                                    "target": "/native/parameters/INTERVALS_ACTIVE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/MAX",
+                                    "target": "/native/parameters/MAX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/MIN",
+                                    "target": "/native/parameters/MIN",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PERCENTAGE",
+                                    "target": "/native/parameters/PERCENTAGE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PREFIX",
+                                    "target": "/native/parameters/PREFIX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PREVIEW_STYLE",
+                                    "target": "/native/parameters/PREVIEW_STYLE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/SHOW_PREVIEW",
+                                    "target": "/native/parameters/SHOW_PREVIEW",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/SUFFIX",
+                                    "target": "/native/parameters/SUFFIX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/THOUSANDS_SEPARATOR",
+                                    "target": "/native/parameters/THOUSANDS_SEPARATOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/USAGE_TYPE",
+                                    "target": "/native/parameters/USAGE_TYPE",
+                                    "status": "exact"
+                                }
+                            ],
+                            "issues": []
+                        }
+                    },
+                    "archive": {
+                        "archiveId": 2,
+                        "logging": true,
+                        "aggregationType": 0,
+                        "counterSettings": null,
+                        "availability": "metadata-only"
+                    }
+                },
+                {
+                    "sourceKey": "variable:13001",
+                    "variableId": 13001,
+                    "variableType": 2,
+                    "label": "Synthetic text 6",
+                    "presentation": {
+                        "original": {
+                            "presentation": {
+                                "COLOR": -1,
+                                "CONTENT_COLOR": -1,
+                                "DECIMAL_SEPARATOR": "Client",
+                                "DIGITS": 2,
+                                "DISPLAY_TYPE": 0,
+                                "ICON": "",
+                                "INTERVALS": "[]",
+                                "INTERVALS_ACTIVE": false,
+                                "MAX": 100,
+                                "MIN": 0,
+                                "PERCENTAGE": false,
+                                "PREFIX": "",
+                                "PRESENTATION": "{3319437D-7CDE-699D-750A-3C6A3841FA75}",
+                                "PREVIEW_STYLE": 1,
+                                "SHOW_PREVIEW": true,
+                                "SUFFIX": "",
+                                "THOUSANDS_SEPARATOR": "",
+                                "USAGE_TYPE": 0
+                            },
+                            "profiles": {},
+                            "variable": {
+                                "VariableAction": 0,
+                                "VariableCustomAction": 0,
+                                "VariableCustomPresentation": [],
+                                "VariableCustomProfile": "",
+                                "VariablePresentation": [],
+                                "VariableProfile": "",
+                                "VariableType": 2
+                            },
+                            "templates": {},
+                            "objectIcon": ""
+                        },
+                        "effective": {
+                            "kind": "value",
+                            "prefix": "",
+                            "suffix": "",
+                            "digits": 2,
+                            "minimum": 0,
+                            "maximum": 100,
+                            "stepSize": null,
+                            "icon": "",
+                            "color": -1,
+                            "contentColor": -1,
+                            "displayType": 0,
+                            "previewStyle": 1,
+                            "showPreview": true,
+                            "percentage": false,
+                            "usageType": 0,
+                            "decimalSeparator": "Client",
+                            "thousandsSeparator": "",
+                            "options": [],
+                            "intervals": [],
+                            "extra": {
+                                "INTERVALS_ACTIVE": false
+                            }
+                        },
+                        "native": {
+                            "presentationId": "{3319437D-7CDE-699D-750A-3C6A3841FA75}",
+                            "parameters": {
+                                "COLOR": -1,
+                                "CONTENT_COLOR": -1,
+                                "DECIMAL_SEPARATOR": "Client",
+                                "DIGITS": 2,
+                                "DISPLAY_TYPE": 0,
+                                "ICON": "",
+                                "INTERVALS": [],
+                                "INTERVALS_ACTIVE": false,
+                                "MAX": 100,
+                                "MIN": 0,
+                                "PERCENTAGE": false,
+                                "PREFIX": "",
+                                "PREVIEW_STYLE": 1,
+                                "SHOW_PREVIEW": true,
+                                "SUFFIX": "",
+                                "THOUSANDS_SEPARATOR": "",
+                                "USAGE_TYPE": 0
+                            }
+                        },
+                        "conversion": {
+                            "status": "exact",
+                            "ruleVersion": "1.0",
+                            "fieldCoverage": [
+                                {
+                                    "source": "/original/presentation/COLOR",
+                                    "target": "/native/parameters/COLOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/CONTENT_COLOR",
+                                    "target": "/native/parameters/CONTENT_COLOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DECIMAL_SEPARATOR",
+                                    "target": "/native/parameters/DECIMAL_SEPARATOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DIGITS",
+                                    "target": "/native/parameters/DIGITS",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DISPLAY_TYPE",
+                                    "target": "/native/parameters/DISPLAY_TYPE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/ICON",
+                                    "target": "/native/parameters/ICON",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/INTERVALS",
+                                    "target": "/native/parameters/INTERVALS",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/INTERVALS_ACTIVE",
+                                    "target": "/native/parameters/INTERVALS_ACTIVE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/MAX",
+                                    "target": "/native/parameters/MAX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/MIN",
+                                    "target": "/native/parameters/MIN",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PERCENTAGE",
+                                    "target": "/native/parameters/PERCENTAGE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PREFIX",
+                                    "target": "/native/parameters/PREFIX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PREVIEW_STYLE",
+                                    "target": "/native/parameters/PREVIEW_STYLE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/SHOW_PREVIEW",
+                                    "target": "/native/parameters/SHOW_PREVIEW",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/SUFFIX",
+                                    "target": "/native/parameters/SUFFIX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/THOUSANDS_SEPARATOR",
+                                    "target": "/native/parameters/THOUSANDS_SEPARATOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/USAGE_TYPE",
+                                    "target": "/native/parameters/USAGE_TYPE",
+                                    "status": "exact"
+                                }
+                            ],
+                            "issues": []
+                        }
+                    },
+                    "archive": {
+                        "archiveId": 2,
+                        "logging": true,
+                        "aggregationType": 0,
+                        "counterSettings": null,
+                        "availability": "metadata-only"
+                    }
+                }
+            ],
+            "bindings": [
+                {
+                    "bindingKey": "instance:12010#/Datasets/0/Variables/0",
+                    "sourceKey": "variable:13025",
+                    "role": "slice",
+                    "enabled": true,
+                    "settings": {
+                        "Order": 0,
+                        "Label": "Synthetic text 36",
+                        "Variable": 13025,
+                        "BackgroundColor": 561586,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 0,
+                        "ringSettings": {
+                            "Order": 0,
+                            "Title": "Synthetic text 45",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "appearance": {
+                        "Order": 0,
+                        "Label": "Synthetic text 36",
+                        "Variable": 13025,
+                        "BackgroundColor": 561586,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 0,
+                        "ringSettings": {
+                            "Order": 0,
+                            "Title": "Synthetic text 45",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "originalPointer": "/Datasets/0/Variables/0"
+                },
+                {
+                    "bindingKey": "instance:12010#/Datasets/0/Variables/1",
+                    "sourceKey": "variable:13018",
+                    "role": "slice",
+                    "enabled": true,
+                    "settings": {
+                        "Order": 1,
+                        "Label": "Synthetic text 17",
+                        "Variable": 13018,
+                        "BackgroundColor": 16347926,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 0,
+                        "ringSettings": {
+                            "Order": 0,
+                            "Title": "Synthetic text 45",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "appearance": {
+                        "Order": 1,
+                        "Label": "Synthetic text 17",
+                        "Variable": 13018,
+                        "BackgroundColor": 16347926,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 0,
+                        "ringSettings": {
+                            "Order": 0,
+                            "Title": "Synthetic text 45",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "originalPointer": "/Datasets/0/Variables/1"
+                },
+                {
+                    "bindingKey": "instance:12010#/Datasets/0/Variables/2",
+                    "sourceKey": "variable:13019",
+                    "role": "slice",
+                    "enabled": true,
+                    "settings": {
+                        "Order": 2,
+                        "Label": "Synthetic text 18",
+                        "Variable": 13019,
+                        "BackgroundColor": 9133302,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 0,
+                        "ringSettings": {
+                            "Order": 0,
+                            "Title": "Synthetic text 45",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "appearance": {
+                        "Order": 2,
+                        "Label": "Synthetic text 18",
+                        "Variable": 13019,
+                        "BackgroundColor": 9133302,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 0,
+                        "ringSettings": {
+                            "Order": 0,
+                            "Title": "Synthetic text 45",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "originalPointer": "/Datasets/0/Variables/2"
+                },
+                {
+                    "bindingKey": "instance:12010#/Datasets/0/Variables/3",
+                    "sourceKey": "variable:13001",
+                    "role": "slice",
+                    "enabled": true,
+                    "settings": {
+                        "Order": 3,
+                        "Label": "Synthetic text 3",
+                        "Variable": 13001,
+                        "BackgroundColor": 1483594,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 0,
+                        "ringSettings": {
+                            "Order": 0,
+                            "Title": "Synthetic text 45",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "appearance": {
+                        "Order": 3,
+                        "Label": "Synthetic text 3",
+                        "Variable": 13001,
+                        "BackgroundColor": 1483594,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 0,
+                        "ringSettings": {
+                            "Order": 0,
+                            "Title": "Synthetic text 45",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "originalPointer": "/Datasets/0/Variables/3"
+                },
+                {
+                    "bindingKey": "instance:12010#/Datasets/1/Variables/0",
+                    "sourceKey": "variable:13025",
+                    "role": "slice",
+                    "enabled": true,
+                    "settings": {
+                        "Order": 0,
+                        "Label": "Synthetic text 36",
+                        "Variable": 13025,
+                        "BackgroundColor": 9133302,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 1,
+                        "ringSettings": {
+                            "Order": 2,
+                            "Title": "Synthetic text 46",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "appearance": {
+                        "Order": 0,
+                        "Label": "Synthetic text 36",
+                        "Variable": 13025,
+                        "BackgroundColor": 9133302,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 1,
+                        "ringSettings": {
+                            "Order": 2,
+                            "Title": "Synthetic text 46",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "originalPointer": "/Datasets/1/Variables/0"
+                },
+                {
+                    "bindingKey": "instance:12010#/Datasets/1/Variables/1",
+                    "sourceKey": "variable:13018",
+                    "role": "slice",
+                    "enabled": true,
+                    "settings": {
+                        "Order": 1,
+                        "Label": "Synthetic text 17",
+                        "Variable": 13018,
+                        "BackgroundColor": 1483594,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 1,
+                        "ringSettings": {
+                            "Order": 2,
+                            "Title": "Synthetic text 46",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "appearance": {
+                        "Order": 1,
+                        "Label": "Synthetic text 17",
+                        "Variable": 13018,
+                        "BackgroundColor": 1483594,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 1,
+                        "ringSettings": {
+                            "Order": 2,
+                            "Title": "Synthetic text 46",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "originalPointer": "/Datasets/1/Variables/1"
+                },
+                {
+                    "bindingKey": "instance:12010#/Datasets/1/Variables/2",
+                    "sourceKey": "variable:13019",
+                    "role": "slice",
+                    "enabled": true,
+                    "settings": {
+                        "Order": 2,
+                        "Label": "Synthetic text 18",
+                        "Variable": 13019,
+                        "BackgroundColor": 14427686,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 1,
+                        "ringSettings": {
+                            "Order": 2,
+                            "Title": "Synthetic text 46",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "appearance": {
+                        "Order": 2,
+                        "Label": "Synthetic text 18",
+                        "Variable": 13019,
+                        "BackgroundColor": 14427686,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 1,
+                        "ringSettings": {
+                            "Order": 2,
+                            "Title": "Synthetic text 46",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "originalPointer": "/Datasets/1/Variables/2"
+                },
+                {
+                    "bindingKey": "instance:12010#/Datasets/1/Variables/3",
+                    "sourceKey": "variable:13001",
+                    "role": "slice",
+                    "enabled": true,
+                    "settings": {
+                        "Order": 3,
+                        "Label": "Synthetic text 3",
+                        "Variable": 13001,
+                        "BackgroundColor": 14251782,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 1,
+                        "ringSettings": {
+                            "Order": 2,
+                            "Title": "Synthetic text 46",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "appearance": {
+                        "Order": 3,
+                        "Label": "Synthetic text 3",
+                        "Variable": 13001,
+                        "BackgroundColor": 14251782,
+                        "BackgroundColor_Alpha": 0.8,
+                        "BorderColor": 16777215,
+                        "BorderColor_Alpha": 1,
+                        "BorderWidth": 3,
+                        "ring": 1,
+                        "ringSettings": {
+                            "Order": 2,
+                            "Title": "Synthetic text 46",
+                            "Profile": "",
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "Profile": ""
+                    },
+                    "originalPointer": "/Datasets/1/Variables/3"
+                }
+            ],
+            "axes": [],
+            "time": null,
+            "appearance": {
+                "settings": {
+                    "CreateIPSView": true,
+                    "CreateOutput": true,
+                    "Datasets": "[{\"Order\":0,\"Title\":\"Synthetic text 45\",\"Profile\":\"\",\"Variables\":[{\"Order\":0,\"Label\":\"Synthetic text 36\",\"Variable\":13025,\"BackgroundColor\":561586,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3},{\"Order\":1,\"Label\":\"Synthetic text 17\",\"Variable\":13018,\"BackgroundColor\":16347926,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3},{\"Order\":2,\"Label\":\"Synthetic text 18\",\"Variable\":13019,\"BackgroundColor\":9133302,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3},{\"Order\":3,\"Label\":\"Synthetic text 3\",\"Variable\":13001,\"BackgroundColor\":1483594,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3}],\"datalabels_enable\":true,\"datalabels_anchoring\":\"\",\"datalabels_BackgroundColor\":-1,\"datalabels_BackgroundColor_Alpha\":0.5,\"datalabels_BorderColor\":-1,\"datalabels_BorderColor_Alpha\":1,\"datalabels_FontColor\":16777215,\"datalabels_showPrefix\":false,\"datalabels_showSuffix\":false,\"cutout\":35},{\"Order\":2,\"Title\":\"Synthetic text 46\",\"Profile\":\"\",\"Variables\":[{\"Order\":0,\"Label\":\"Synthetic text 36\",\"Variable\":13025,\"BackgroundColor\":9133302,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3},{\"Order\":1,\"Label\":\"Synthetic text 17\",\"Variable\":13018,\"BackgroundColor\":1483594,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3},{\"Order\":2,\"Label\":\"Synthetic text 18\",\"Variable\":13019,\"BackgroundColor\":14427686,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3},{\"Order\":3,\"Label\":\"Synthetic text 3\",\"Variable\":13001,\"BackgroundColor\":14251782,\"BackgroundColor_Alpha\":0.8,\"BorderColor\":16777215,\"BorderColor_Alpha\":1,\"BorderWidth\":3}],\"datalabels_enable\":true,\"datalabels_anchoring\":\"\",\"datalabels_BackgroundColor\":-1,\"datalabels_BackgroundColor_Alpha\":0.5,\"datalabels_BorderColor\":-1,\"datalabels_BorderColor_Alpha\":1,\"datalabels_FontColor\":16777215,\"datalabels_showPrefix\":false,\"datalabels_showSuffix\":false,\"cutout\":35}]",
+                    "EnableViewport": true,
+                    "IFrameHeight": 0,
+                    "Ratio": 0,
+                    "ShowDefault": true,
+                    "TemplateScriptID": 0,
+                    "ViewLevel": 2,
+                    "animation_duration": 500,
+                    "animation_easing": "easeOutBounce",
+                    "data_precision": 2,
+                    "datalabels_align": "center",
+                    "datalabels_anchoring": "center",
+                    "datalabels_borderRadius": 2,
+                    "datalabels_borderWidth": 1,
+                    "datalabels_fontColor": 0,
+                    "datalabels_fontFamily": "",
+                    "datalabels_fontSize": 11,
+                    "legend_align": "center",
+                    "legend_boxWidth": 40,
+                    "legend_display": true,
+                    "legend_fontColor": 0,
+                    "legend_fontFamily": "",
+                    "legend_fontSize": 12,
+                    "legend_position": "bottom",
+                    "overrideHeight": 0,
+                    "overrideWidth": 0,
+                    "rotation_length": 180,
+                    "rotation_start": -90,
+                    "title_display": true,
+                    "title_fontColor": 0,
+                    "title_fontFamily": "Comfortaa",
+                    "title_fontSize": 18,
+                    "title_position": "top",
+                    "title_text": "Synthetic text 47",
+                    "tooltips_backgroundColor": 0,
+                    "tooltips_cornerRadius": 5,
+                    "tooltips_enabled": true,
+                    "tooltips_fontColor": 65535,
+                    "tooltips_fontFamily": "",
+                    "tooltips_fontSize": 12,
+                    "tooltips_mode": "index",
+                    "tooltips_position": "average",
+                    "type": "doughnut"
+                },
+                "global": {
+                    "CreateIPSView": true,
+                    "DataMode": 1,
+                    "EnableViewport": true,
+                    "RefreshTime": 3,
+                    "viewport_content": "width=device-width, initial-scale=1, maximum-scale=1.0, minimum-scale=1, user-scalable=no"
+                },
+                "rings": [
+                    {
+                        "settings": {
+                            "Order": 0,
+                            "Title": "Synthetic text 45",
+                            "Profile": "",
+                            "Variables": [
+                                {
+                                    "Order": 0,
+                                    "Label": "Synthetic text 36",
+                                    "Variable": 13025,
+                                    "BackgroundColor": 561586,
+                                    "BackgroundColor_Alpha": 0.8,
+                                    "BorderColor": 16777215,
+                                    "BorderColor_Alpha": 1,
+                                    "BorderWidth": 3
+                                },
+                                {
+                                    "Order": 1,
+                                    "Label": "Synthetic text 17",
+                                    "Variable": 13018,
+                                    "BackgroundColor": 16347926,
+                                    "BackgroundColor_Alpha": 0.8,
+                                    "BorderColor": 16777215,
+                                    "BorderColor_Alpha": 1,
+                                    "BorderWidth": 3
+                                },
+                                {
+                                    "Order": 2,
+                                    "Label": "Synthetic text 18",
+                                    "Variable": 13019,
+                                    "BackgroundColor": 9133302,
+                                    "BackgroundColor_Alpha": 0.8,
+                                    "BorderColor": 16777215,
+                                    "BorderColor_Alpha": 1,
+                                    "BorderWidth": 3
+                                },
+                                {
+                                    "Order": 3,
+                                    "Label": "Synthetic text 3",
+                                    "Variable": 13001,
+                                    "BackgroundColor": 1483594,
+                                    "BackgroundColor_Alpha": 0.8,
+                                    "BorderColor": 16777215,
+                                    "BorderColor_Alpha": 1,
+                                    "BorderWidth": 3
+                                }
+                            ],
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "presentation": null
+                    },
+                    {
+                        "settings": {
+                            "Order": 2,
+                            "Title": "Synthetic text 46",
+                            "Profile": "",
+                            "Variables": [
+                                {
+                                    "Order": 0,
+                                    "Label": "Synthetic text 36",
+                                    "Variable": 13025,
+                                    "BackgroundColor": 9133302,
+                                    "BackgroundColor_Alpha": 0.8,
+                                    "BorderColor": 16777215,
+                                    "BorderColor_Alpha": 1,
+                                    "BorderWidth": 3
+                                },
+                                {
+                                    "Order": 1,
+                                    "Label": "Synthetic text 17",
+                                    "Variable": 13018,
+                                    "BackgroundColor": 1483594,
+                                    "BackgroundColor_Alpha": 0.8,
+                                    "BorderColor": 16777215,
+                                    "BorderColor_Alpha": 1,
+                                    "BorderWidth": 3
+                                },
+                                {
+                                    "Order": 2,
+                                    "Label": "Synthetic text 18",
+                                    "Variable": 13019,
+                                    "BackgroundColor": 14427686,
+                                    "BackgroundColor_Alpha": 0.8,
+                                    "BorderColor": 16777215,
+                                    "BorderColor_Alpha": 1,
+                                    "BorderWidth": 3
+                                },
+                                {
+                                    "Order": 3,
+                                    "Label": "Synthetic text 3",
+                                    "Variable": 13001,
+                                    "BackgroundColor": 14251782,
+                                    "BackgroundColor_Alpha": 0.8,
+                                    "BorderColor": 16777215,
+                                    "BorderColor_Alpha": 1,
+                                    "BorderWidth": 3
+                                }
+                            ],
+                            "datalabels_enable": true,
+                            "datalabels_anchoring": "",
+                            "datalabels_BackgroundColor": -1,
+                            "datalabels_BackgroundColor_Alpha": 0.5,
+                            "datalabels_BorderColor": -1,
+                            "datalabels_BorderColor_Alpha": 1,
+                            "datalabels_FontColor": 16777215,
+                            "datalabels_showPrefix": false,
+                            "datalabels_showSuffix": false,
+                            "cutout": 35
+                        },
+                        "presentation": null
+                    }
+                ],
+                "contexts": [
+                    "tile",
+                    "ipsview"
+                ],
+                "resolved": {
+                    "GetConfigurationData": {
+                        "CreateIPSView": true,
+                        "CreateOutput": true,
+                        "Debug": false,
+                        "EnableCache": true,
+                        "EnableViewport": true,
+                        "IFrameHeight": 0,
+                        "LastUploadedConfig": "",
+                        "Ratio": 0,
+                        "ShowDefault": true,
+                        "TemplateScriptID": 0,
+                        "ViewLevel": 2,
+                        "animation_duration": 500,
+                        "animation_easing": "easeOutBounce",
+                        "data_precision": 2,
+                        "datalabels_align": "center",
+                        "datalabels_anchoring": "center",
+                        "datalabels_borderRadius": 2,
+                        "datalabels_borderWidth": 1,
+                        "datalabels_fontColor": "rgb(0, 0, 0)",
+                        "datalabels_fontFamily": "",
+                        "datalabels_fontSize": 11,
+                        "legend_align": "center",
+                        "legend_boxWidth": 40,
+                        "legend_display": true,
+                        "legend_fontColor": "rgb(0, 0, 0)",
+                        "legend_fontFamily": "",
+                        "legend_fontSize": 12,
+                        "legend_position": "bottom",
+                        "overrideHeight": 0,
+                        "overrideWidth": 0,
+                        "rotation_length": 180,
+                        "rotation_start": -90,
+                        "title_display": true,
+                        "title_fontColor": "rgb(0, 0, 0)",
+                        "title_fontFamily": "Comfortaa",
+                        "title_fontSize": 18,
+                        "title_position": "top",
+                        "title_text": "Synthetic text 47",
+                        "tooltips_backgroundColor": "rgb(0, 0, 0)",
+                        "tooltips_cornerRadius": 5,
+                        "tooltips_enabled": true,
+                        "tooltips_fontColor": "rgb(0, 255, 255)",
+                        "tooltips_fontFamily": "",
+                        "tooltips_fontSize": 12,
+                        "tooltips_mode": "index",
+                        "tooltips_position": "average",
+                        "type": "doughnut",
+                        "InstanceID": 12010
+                    },
+                    "GenerateTitleData": {
+                        "text": "Doughnut – Zwei Halbkreis-Ringe",
+                        "position": "top",
+                        "font": {
+                            "size": 18,
+                            "family": "Comfortaa"
+                        },
+                        "display": true,
+                        "color": "rgb(0, 0, 0)"
+                    },
+                    "GenerateLegendData": {
+                        "display": true,
+                        "position": "bottom",
+                        "align": "center",
+                        "labels": {
+                            "color": "rgb(0, 0, 0)",
+                            "font": {
+                                "size": 12,
+                                "family": ""
+                            },
+                            "boxWidth": 40
+                        }
+                    },
+                    "GenerateTooltipData": {
+                        "enabled": true,
+                        "position": "average",
+                        "mode": "index",
+                        "titleFontSize": 12,
+                        "bodyFontSize": 12,
+                        "footerFontSize": 12,
+                        "titleFontFamily": "",
+                        "bodyFontFamily": "",
+                        "footerFontFamily": "",
+                        "cornerRadius": 5,
+                        "titleFontColor": "rgb(0, 255, 255)",
+                        "bodyFontColor": "rgb(0, 255, 255)",
+                        "footerFontColor": "rgb(0, 255, 255)",
+                        "backgroundColor": "rgb(0, 0, 0)"
+                    }
+                }
+            },
+            "assetRefs": [
+                "sha256:2852f86cc7193b1066a1a4766fc0b32cf197c7ce0d6a4e7f987812195bf84cde",
+                "sha256:dc212655cf823967c04467a9c22ff16fb55f2a2f24bacc9ea4867739bc2876cf"
+            ],
+            "coverage": [
+                {
+                    "pointer": "/CreateIPSView",
+                    "status": "exact",
+                    "target": "/original/configuration/CreateIPSView",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/CreateOutput",
+                    "status": "exact",
+                    "target": "/original/configuration/CreateOutput",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/Datasets",
+                    "status": "exact",
+                    "target": "/original/configuration/Datasets",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/EnableViewport",
+                    "status": "exact",
+                    "target": "/original/configuration/EnableViewport",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/IFrameHeight",
+                    "status": "exact",
+                    "target": "/original/configuration/IFrameHeight",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/Ratio",
+                    "status": "exact",
+                    "target": "/original/configuration/Ratio",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ShowDefault",
+                    "status": "exact",
+                    "target": "/original/configuration/ShowDefault",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/TemplateScriptID",
+                    "status": "exact",
+                    "target": "/original/configuration/TemplateScriptID",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ViewLevel",
+                    "status": "exact",
+                    "target": "/original/configuration/ViewLevel",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/animation_duration",
+                    "status": "exact",
+                    "target": "/original/configuration/animation_duration",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/animation_easing",
+                    "status": "exact",
+                    "target": "/original/configuration/animation_easing",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/data_precision",
+                    "status": "exact",
+                    "target": "/original/configuration/data_precision",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/datalabels_align",
+                    "status": "exact",
+                    "target": "/original/configuration/datalabels_align",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/datalabels_anchoring",
+                    "status": "exact",
+                    "target": "/original/configuration/datalabels_anchoring",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/datalabels_borderRadius",
+                    "status": "exact",
+                    "target": "/original/configuration/datalabels_borderRadius",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/datalabels_borderWidth",
+                    "status": "exact",
+                    "target": "/original/configuration/datalabels_borderWidth",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/datalabels_fontColor",
+                    "status": "exact",
+                    "target": "/original/configuration/datalabels_fontColor",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/datalabels_fontFamily",
+                    "status": "exact",
+                    "target": "/original/configuration/datalabels_fontFamily",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/datalabels_fontSize",
+                    "status": "exact",
+                    "target": "/original/configuration/datalabels_fontSize",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/legend_align",
+                    "status": "exact",
+                    "target": "/original/configuration/legend_align",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/legend_boxWidth",
+                    "status": "exact",
+                    "target": "/original/configuration/legend_boxWidth",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/legend_display",
+                    "status": "exact",
+                    "target": "/original/configuration/legend_display",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/legend_fontColor",
+                    "status": "exact",
+                    "target": "/original/configuration/legend_fontColor",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/legend_fontFamily",
+                    "status": "exact",
+                    "target": "/original/configuration/legend_fontFamily",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/legend_fontSize",
+                    "status": "exact",
+                    "target": "/original/configuration/legend_fontSize",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/legend_position",
+                    "status": "exact",
+                    "target": "/original/configuration/legend_position",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/overrideHeight",
+                    "status": "exact",
+                    "target": "/original/configuration/overrideHeight",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/overrideWidth",
+                    "status": "exact",
+                    "target": "/original/configuration/overrideWidth",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/rotation_length",
+                    "status": "exact",
+                    "target": "/original/configuration/rotation_length",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/rotation_start",
+                    "status": "exact",
+                    "target": "/original/configuration/rotation_start",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/title_display",
+                    "status": "exact",
+                    "target": "/original/configuration/title_display",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/title_fontColor",
+                    "status": "exact",
+                    "target": "/original/configuration/title_fontColor",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/title_fontFamily",
+                    "status": "exact",
+                    "target": "/original/configuration/title_fontFamily",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/title_fontSize",
+                    "status": "exact",
+                    "target": "/original/configuration/title_fontSize",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/title_position",
+                    "status": "exact",
+                    "target": "/original/configuration/title_position",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/title_text",
+                    "status": "exact",
+                    "target": "/original/configuration/title_text",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/tooltips_backgroundColor",
+                    "status": "exact",
+                    "target": "/original/configuration/tooltips_backgroundColor",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/tooltips_cornerRadius",
+                    "status": "exact",
+                    "target": "/original/configuration/tooltips_cornerRadius",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/tooltips_enabled",
+                    "status": "exact",
+                    "target": "/original/configuration/tooltips_enabled",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/tooltips_fontColor",
+                    "status": "exact",
+                    "target": "/original/configuration/tooltips_fontColor",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/tooltips_fontFamily",
+                    "status": "exact",
+                    "target": "/original/configuration/tooltips_fontFamily",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/tooltips_fontSize",
+                    "status": "exact",
+                    "target": "/original/configuration/tooltips_fontSize",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/tooltips_mode",
+                    "status": "exact",
+                    "target": "/original/configuration/tooltips_mode",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/tooltips_position",
+                    "status": "exact",
+                    "target": "/original/configuration/tooltips_position",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/type",
+                    "status": "exact",
+                    "target": "/original/configuration/type",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                }
+            ],
+            "reference": null
+        }
+    ],
+    "assets": [
+        {
+            "assetId": "sha256:2852f86cc7193b1066a1a4766fc0b32cf197c7ce0d6a4e7f987812195bf84cde",
+            "kind": "font",
+            "mediaType": "font/woff2",
+            "byteLength": 18072,
+            "sha256": "2852f86cc7193b1066a1a4766fc0b32cf197c7ce0d6a4e7f987812195bf84cde",
+            "contentBase64": "@fixture-font:2852f86cc7193b1066a1a4766fc0b32cf197c7ce0d6a4e7f987812195bf84cde",
+            "origin": {
+                "font": "Comfortaa",
+                "resource": "/hook/JSLive/js/fonts/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4WjMDrMfIA.woff2",
+                "license": "not-inferred"
+            }
+        },
+        {
+            "assetId": "sha256:dc212655cf823967c04467a9c22ff16fb55f2a2f24bacc9ea4867739bc2876cf",
+            "kind": "inert-standard-template",
+            "mediaType": "text/plain",
+            "byteLength": 11595,
+            "sha256": "dc212655cf823967c04467a9c22ff16fb55f2a2f24bacc9ea4867739bc2876cf",
+            "contentBase64": "@fixture-template:dc212655cf823967c04467a9c22ff16fb55f2a2f24bacc9ea4867739bc2876cf",
+            "origin": {
+                "template": "Doughnut-PIE",
+                "license": "GPL-3.0",
+                "resource": "templates/Doughnut-PIE.html"
+            }
+        }
+    ],
+    "issues": [],
+    "extensions": {}
+}

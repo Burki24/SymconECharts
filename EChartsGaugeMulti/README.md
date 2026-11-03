@@ -1,18 +1,92 @@
 # EChartsGaugeMulti
 
 Gerätemodul der SymconECharts-Library für einen zusammengesetzten Gauge-Chart
-mit mehreren Werten oder Zeigern. Eine Gauge-Multi-Instanz soll die native
-Symcon-Kacheldarstellung und ein separat platzierbares HTML-Widget in IPSView
-bereitstellen können. Datenquellen und Diagrammkonfiguration werden dabei nur
-einmal gepflegt.
+mit mehreren Werten oder Zeigern. Eine Gauge-Multi-Instanz bietet die native
+Symcon-Kacheldarstellung und ein optionales HTML-Widget in IPSView.
+Datenquellen und Diagrammkonfiguration werden dabei nur einmal gepflegt.
 
-**Entwicklungsstand:** Technische Mehrquellenbasis. Eine geordnete Liste aus
-2 bis 16 numerischen Quellvariablen ist konfigurierbar, wird als Referenzen
+Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+[Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsgaugemulti).
+
+## Beschriftungsoptionen
+
+Skalenbeschriftungen lassen sich um -100 bis +100 px relativ zur Vorlage verschieben. Titel und Werte können separat horizontal und vertikal um -100 bis +100 % versetzt werden; null bewahrt die bisherige Vorlagengeometrie.
+
+Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
+IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen.
+
+## Vorübergehende Ladefehler
+
+Können Werte kurzzeitig nicht geladen werden, bleibt die letzte gültige Grafik
+in Kachel und IPSView sichtbar. Bei wiederholtem Fehler erscheint ein Hinweis;
+das Modul versucht nach 60 Sekunden erneut zu laden. Ohne zuvor geladene Daten
+oder bei ungültiger Konfiguration erscheint weiterhin eine Fehlermeldung.
+
+Kachel- und unabhängiger IPSView-Designer ordnen Diagrammtitel, Feinabstimmung,
+Zeiger und Nabe, Skala und Farben sowie Zifferblatt in einklappbaren Bereichen.
+In **Diagrammtitel** lassen sich Größe (50–150 %) und Farbe des äußeren Titels
+einstellen. **Automatisch (Theme)** erhält die bisherige Titelfarbe. Die
+Beschriftungen der einzelnen Instrumente werden weiterhin separat gestaltet.
+Bei **Kacheldesign verwenden** übernimmt IPSView auch diese Titelwerte.
+
+## Animation
+
+Für Start und Aktualisierung lassen sich außerdem die **Bewegungskurve** und
+eine feste **Verzögerung** (0–3000 ms) getrennt wählen. Ohne Änderung gilt
+jeweils cubicInOut ohne Verzögerung. Die Verzögerung betrifft das ganze Diagramm,
+nicht jeden Datenpunkt einzeln.
+
+Im Kachel- und unabhängigen IPSView-Designer steuern **Animation**, **Startanimation** und **Aktualisierungsanimation** die ECharts-Übergänge. Beide Zeiten sind von 0 bis 3000 ms einstellbar; 0 ms unterdrückt den jeweiligen Übergang. Die Systemeinstellung für reduzierte Bewegung schaltet Animationen immer ab. Bei **Kacheldesign verwenden** übernimmt IPSView die Kachelwerte.
+
+Multi-Title-, zwei Ring- und Wetterstations-Vorlage mit optionaler
+IPSView-WebContent-Ausgabe. Eine geordnete Liste aus
+2 bis 32 numerischen Quellvariablen ist konfigurierbar, wird als Referenzen
 registriert und über EChartsGateway gelesen. Das Modul erzeugt daraus ein
-versioniertes Multi-Datenmodell. Diagramme, Kacheln und
-IPSView-HTML-Ausgabevariablen sind noch nicht implementiert.
+versioniertes Multi-Datenmodell und rendert jede Quelle mit eigener Skala,
+Einheit und Wertanzeige in einem responsiven Instrumentenraster. Beide
+Ausgaben verwenden dieselben Quellen und denselben Renderer; IPSView kann
+das Kacheldesign erben oder ein eigenes Design verwenden.
 
-### Inhaltsverzeichnis
+## Quellenauswahl und Seiten
+
+**Quellenauswahl aktivieren** ist zunächst ausgeschaltet. Aktiviert bietet
+**Quellen** eine einzeln schaltbare Liste sowie **Alle** und **Umkehren**.
+**Anfangs sichtbar** bestimmt den Startzustand einer Quelle; ohne Angabe ist
+sie sichtbar. Bei ausgeschalteter Auswahl wird dieses Feld ignoriert.
+
+Listen über 16 Quellen erhalten auch ohne Auswahl eine Seitennavigation.
+Bei aktiver Auswahl passt sich die Anzahl der Instrumente je Seite ebenfalls
+an Platz, Vorlage und Schriftgröße an. Vorherige/nächste Seite und eine
+Bereichsanzeige erschließen alle ausgewählten Quellen. Bestehende Listen bis
+16 Quellen behalten bei ausgeschalteter Auswahl ihre bisherige Darstellung.
+
+Jede Quelle behält ihren eigenen Wertebereich, ihre Einheit und Genauigkeit.
+Auswahl und Seiten bilden weder eine gemeinsame Skala noch eine Normalisierung.
+Alle konfigurierten Quellen werden weiter gelesen, validiert und aktualisiert,
+einschließlich ausgeblendeter und anderer Seiten. Originalwerte außerhalb des
+Bereichs bleiben in Wertanzeige und Tooltip erhalten; nur die Geometrie wird
+begrenzt. Die Quellenreihenfolge bestimmt die Position innerhalb jeder Seite.
+Bei der Wetterstation ist die erste Quelle der jeweiligen Seite das Hauptinstrument.
+
+Auswahl, Seitenanker und automatische Quellenfarben bleiben in der geöffneten
+Auswahl-/Seitenansicht an die Quellenidentität gebunden. Beim Aktualisieren,
+Umbenennen, Umsortieren, Größen- oder Themewechsel bleiben vorhandene Quellen
+erhalten; die erste sichtbare Quelle bleibt erhalten, soweit die neue
+Fenstergröße es zulässt. Ein Reload beginnt mit der gespeicherten Anfangsauswahl.
+Eine einzelne ausgewählte Quelle ist als Ansicht zulässig; die Konfiguration
+benötigt weiterhin mindestens zwei Quellen. Eine leere Auswahl zeigt einen Hinweis.
+
+Sehr umfangreiche Beschriftungen oder Designimporte können die zulässige
+Ausgabegröße überschreiten. Dann erscheint ein ausdrücklicher Fehler statt
+einer unvollständigen Darstellung; Beschriftungen oder Importe verkleinern.
+Der IPSView-Designer kann den Dokumenthintergrund transparent schalten und
+eine automatische Theme-Farbe oder eigene Hintergrundfarbe mit einstellbarer
+Deckkraft über den tatsächlichen IPSView-Hintergrund legen.
+
+## Inhaltsverzeichnis
 
 1. [Funktionsumfang](#1-funktionsumfang)
 2. [Voraussetzungen](#2-voraussetzungen)
@@ -20,135 +94,229 @@ IPSView-HTML-Ausgabevariablen sind noch nicht implementiert.
 4. [Einrichten der Instanzen in Symcon](#4-einrichten-der-instanzen-in-symcon)
 5. [Statusvariablen und Profile](#5-statusvariablen-und-profile)
 6. [Visualisierung](#6-visualisierung)
-7. [PHP-Befehlsreferenz](#7-php-befehlsreferenz)
+7. [Konfigurationsreferenz und Skriptzugriff](#konfigurationsreferenz-und-skriptzugriff)
 
-### 1. Funktionsumfang
+## 1. Funktionsumfang
 
-**Vorhanden:** Eigene Moduldefinition als Gerät (`type: 3`) auf Basis von
-`IPSModuleStrict`, eigene GUID und eigenes Präfix sowie eine wiederverwendbare
-Verbindung zu EChartsGateway. Jede konfigurierte Quelle besitzt eine eindeutige
+Das Modul besitzt eine wiederverwendbare Verbindung zu EChartsGateway. Jede
+konfigurierte Quelle besitzt eine eindeutige
 numerische Variable, Beschriftung, Minimum, Maximum, Einheit und 0 bis 6
 Nachkommastellen. `GetGaugeData()` liest alle aktuellen Werte über das
 versionierte Gateway-Protokoll und liefert sie in der konfigurierten Reihenfolge.
+Die Variablen-ID bleibt dabei die technische Identität jedes Instruments.
+Gleichlautende Beschriftungen bleiben unverändert sichtbar; die Variablen-IDs
+unterscheiden die Instrumente ausschließlich intern.
 
-**Geplant:** Vorlagen wie Multi Title, Ring und Car, sichtbare Live-Darstellung
-sowie die Ausgabe als native Symcon-Kachel und optionales IPSView-Widget.
+Multi Title, Ringraster, konzentrische Ringe und Wetterstation stehen als native
+Symcon-Kachel und optionales IPSView-Widget mit offiziellen ECharts-Themes,
+Live-Aktualisierung und erster Feinabstimmung.
 
 Eine Instanz bildet genau einen zusammengesetzten Gauge-Chart ab. Gauges mit
 genau einer numerischen Quellvariable gehören zu
 [EChartsGaugeSingle](../EChartsGaugeSingle).
 
-### 2. Voraussetzungen
+## 2. Voraussetzungen
 
-Das Entwicklungsziel und die deklarierte Mindestversion sind
-**Symcon 9.0 / PHP 8.5**. Eine Kompatibilität zu älteren Symcon-Versionen wird
-nicht versprochen. Die Modulverträge werden lokal mit Test-Doppeln geprüft;
-ein Laufzeitnachweis in einer realen Symcon-Installation steht noch aus.
+Erforderlich sind **Symcon 9.0 oder 9.1 und PHP 8.5**. Eine Kompatibilität zu
+älteren Symcon-Versionen wird nicht versprochen.
 
 Erforderlich ist eine Verbindung zu einer aktiven
 [EChartsGateway-Instanz](../EChartsGateway) sowie mindestens zwei vorhandene
 Integer- oder Float-Variablen als Datenquellen.
 
-### 3. Software-Installation
+Optional kann jeder Listeneintrag Wertebereich, Einheit und Nachkommastellen
+aus der nativen Variablendarstellung übernehmen. Kompatible Legacy-Profile
+werden ebenfalls ausgewertet. Fehlen einzelne gültige Darstellungsangaben,
+bleiben die manuellen Werte der betreffenden Zeile als Rückfall erhalten.
+
+## 3. Software-Installation
 
 Das Gauge-Modul wird gemeinsam mit EChartsGateway über die Library
 **SymconECharts** eingebunden. Es gibt kein separat zu installierendes
 Gerätepaket.
 
-Für Entwicklungsarbeiten im Module Control das Repository hinzufügen und
-`dev` auswählen:
+Im **Symcon-Modulstore** nach **SymconECharts** suchen und die Library
+installieren. Sie enthält das Gateway und alle Diagrammmodule.
 
-```text
-https://github.com/Burki24/SymconECharts
-```
+## 4. Einrichten der Instanzen in Symcon
 
-Die Beschreibung gilt für das Entwicklungsgerüst, nicht für eine bereits
-funktionsfähige oder produktiv freigegebene Visualisierung. Eine Veröffentlichung
-im Module Store wird nicht vorausgesetzt.
-
-### 4. Einrichten der Instanzen in Symcon
-
-**Zielmodell:** Eine EChartsGaugeMulti-Instanz je unabhängig konfigurierbarem
+Eine EChartsGaugeMulti-Instanz wird je unabhängig konfigurierbarem
 zusammengesetztem Gauge-Chart. Mehrere Gauge-Instanzen sollen ein gemeinsames
 Gateway verwenden können. Für die parallele Anzeige desselben Charts als
 Kachel und in IPSView ist keine zweite Gauge-Instanz vorgesehen.
 
-**Aktueller Stand:** Über die kompatiblen Parent-Verbindungen kann eine
+Bei der ersten ECharts-Diagramminstanz wird ein EChartsGateway neu angelegt.
+Bei allen weiteren Gauge- oder anderen ECharts-Diagramminstanzen wird dieses
+vorhandene Gateway ausgewählt. Symcon bietet aufgrund des Verbindungstyps
+zusätzlich weiterhin eine Neuanlage an; sie ist für den regulären Betrieb nicht
+notwendig.
+
+Über die kompatiblen Parent-Verbindungen kann eine
 vorhandene EChartsGateway-Instanz ausgewählt und von mehreren Gauges verwendet
 werden. Ohne aktive Verbindung bleibt die Gauge-Instanz in einem eindeutigen
 Fehlerstatus.
 
 **Konfigurationsseite:** Neben dem gemeinsamen Titel wird eine geordnete Liste
-aus 2 bis 16 Quellen gepflegt. Jede Variable darf nur einmal vorkommen. Pro
+aus 2 bis 32 Quellen gepflegt. Jede Variable darf nur einmal vorkommen. Pro
 Quelle werden Beschriftung, Minimum, Maximum, Einheit und 0 bis 6
-Nachkommastellen festgelegt. Eine leere Beschriftung verwendet automatisch den
-Namen der Symcon-Variable. Die Reihenfolge bestimmt später die Zuordnung zu den
-Positionen der gewählten Multi-Vorlage.
+Nachkommastellen festgelegt. Mit **Variablendarstellung verwenden** können
+Wertebereich, Einheit und Nachkommastellen stattdessen aus der Quellvariable
+übernommen werden. Eine leere Beschriftung verwendet automatisch den Namen der
+Symcon-Variable. Die Reihenfolge bestimmt später die Zuordnung zu den Positionen
+der gewählten Multi-Vorlage.
 
 Das in Version 1.8 kurzzeitig enthaltene Einzelquellen-Gerüst wird nicht
 automatisch übernommen: Eine einzelne Quelle erfüllt den Multi-Vertrag nicht.
-Bereits angelegte Entwicklungsinstanzen müssen ihre Quellenliste neu
+Bereits angelegte Instanzen dieses unveröffentlichten Zwischenstands müssen ihre Quellenliste neu
 konfigurieren.
 
-### 5. Statusvariablen und Profile
+## 5. Statusvariablen und Profile
 
-#### Statusvariablen
+### Statusvariablen
 
-Aktuell werden keine eigenen Variablen angelegt. Für IPSView ist künftig
-je aktivierter Widget-Ausgabe eine eigene Stringvariable mit HTML-Inhalt
-vorgesehen. Die native Kachel soll diese Variable nicht benötigen.
+Standardmäßig werden keine eigenen Variablen angelegt. Bei aktivierter
+IPSView-Ausgabe entsteht eine Stringvariable mit WebContent-Darstellung und
+vollständigem HTML-Inhalt. Die native Kachel benötigt diese Variable nicht.
+Wertänderungen werden anschließend über das gemeinsame Gateway an das
+bestehende Diagramm übertragen; die Stringvariable bleibt dabei unverändert.
 
 Quellvariablen werden als Referenzen registriert und bei Änderungen der Liste
 deterministisch ergänzt oder entfernt. Messwertkopien unter dem Gauge-Modul
-werden nicht angelegt. Beim späteren Abschalten der IPSView-Ausgabe sollen
-bestehende HTML-Variablen erhalten bleiben; ein Löschen soll ausdrücklich
-bestätigt werden müssen.
+werden nicht angelegt. Beim Abschalten der IPSView-Ausgabe bleibt eine
+bestehende HTML-Variable erhalten. Sie wird nur über die ausdrücklich
+bestätigte Löschfunktion des gemeinsamen Helpers entfernt.
 
-#### Profile
+### Profile
 
-Aktuell werden noch keine Profile oder eigenen Variablendarstellungen angelegt.
-Die künftige Ausgabe soll auf den gemeinsamen Variablen- und
-Darstellungs-Helpern aufbauen.
+Das Modul legt keine Profile oder eigenen Variablendarstellungen an.
 
-### 6. Visualisierung
+## 6. Visualisierung
 
-**Beide Ausgabewege gehören zum Projektziel und sind noch nicht implementiert.**
+**Vier Multi-Vorlagen und die optionale IPSView-Ausgabe sind implementiert.**
 
-#### Native Symcon-Kachel
+### Native Symcon-Kachel
 
-Vorgesehen ist eine eigene Darstellung der Chart-Instanz über das Symcon-HTML-SDK.
-Sie soll ohne aktivierte IPSView-Ausgabe funktionieren. Datenaktualisierungen
-und Interaktionen erhalten eine native Anbindung, getrennt vom IPSView-Datenkanal.
+Die Chart-Instanz wird über das Symcon-HTML-SDK dargestellt und benötigt keine
+IPSView-Ausgabe. Jede Quelle besitzt eine eigene ECharts-Gauge-Serie mit
+eigenem Wertebereich. **Multi Title** zeigt Zifferblätter, **Ringraster**
+einzelne Fortschrittsringe und **konzentrische Ringe** ein gemeinsames
+Ringinstrument mit einer beschrifteten Werteliste. **Wetterstation** zeigt ein
+analoges Instrumentenpanel: Die erste Quelle wird als großes Hauptinstrument
+dargestellt, die übrigen als kleinere Zifferblätter. Das ist keine feste
+Zuordnung zu Druck, Temperatur oder Feuchte; die Reihenfolge der Quellenliste
+bestimmt die Platzierung. Alle Instrumente behalten ihren individuellen
+Wertebereich und ihre Einheit. Tacho und Chronograph sind wegen ihrer quellbezogenen Einzelgestaltung eigenständige Module; siehe `EChartsGaugeTacho` und `EChartsGaugeChronograph`. Kachel und eigenständiges IPSView-Design können die Vorlage
+unabhängig wählen. Für gut lesbare Nebenskalen ist eine große Kachel sinnvoll.
+Raster-Vorlagen wählen
+abhängig von Quellenanzahl, Breite und Höhe eine passende Spalten- und
+Zeilenaufteilung. Multi Title und Ringraster füllen ihre Zellen in Kachel und
+IPSView stärker aus, ohne die Instrumente zu strecken. Änderungen einer
+Quellvariable werden über `VM_UPDATE` direkt an die Kachel übertragen.
+Das Multi-Raster lässt in der nativen Kachel Platz für die von Symcon
+eingeblendete Kopfzeile. Wird der Objekttitel unter Symcon 9.1 ausgeblendet,
+nutzt es den frei werdenden Platz automatisch. Unter Symcon 9.0 bleibt der
+Abstand wie bisher erhalten; IPSView nutzt die gesamte Widgetfläche.
 
-#### IPSView
+Der eingeklappte Kacheldesigner bietet die vier Vorlagen, das automatische
+Symcon-Design und sechs gebündelte offizielle ECharts-Themes. Eine gemeinsame
+Designschicht gestaltet alle Instrumente einer Ausgabe: Zeigerform, Zeigerlänge
+und -stärke, Nabenform und -größe, Haupt- und Nebenunterteilungen sowie die
+Farbrollen für Zeiger, Fortschritt, Ring, Skala, Wert, Titel und Nabe. Für jedes
+Zifferblatt kann außerdem die Vorlagenplatte beibehalten, ausgeblendet oder
+durch eine gemeinsam gestaltete runde Platte ersetzt werden. Zeiger können
+alternativ als bereinigte SVG-Pfade importiert und mit einem SVG-eigenen oder
+prozentual gesetzten Ankerpunkt ausgerichtet werden. Eine benutzerdefinierte
+Platte kann zusätzlich ein bereinigtes, zugeschnittenes SVG-Motiv mit
+einstellbarer Anpassung, Größe, Deckkraft, Drehung und Position erhalten. Die
+Import- und Sicherheitsregeln sind mit Gauge Single über den zentralen
+ECharts-Gauge-Design-Helper identisch. Ringstärke,
+Schriftgrößen und geometrische Feinabstimmungen sind zwischen 50 und 150 Prozent
+einstellbar. Die Standardwerte `preset` und `theme` erhalten die bisherige
+Darstellung vollständig. Die SVG-Vorschau übernimmt die aktuell bearbeiteten
+Designwerte und bestätigte Änderungen der Quellenliste sofort, auch beim
+Hinzufügen, Entfernen und Umsortieren, ohne die Konfiguration zu speichern. Bei
+einer unvollständigen Quellenliste zeigt sie einen Hinweis statt alter Werte.
+Die Vorschau zeigt höchstens vier anfangs sichtbare Quellen mit ihren eigenen
+Skalen und Originalwerten. Sie berücksichtigt die Anfangsauswahl vor dem
+Ausschnitt, sodass auch eine erst spät konfigurierte Quelle erscheint.
+Sind weitere Quellen konfiguriert, nennt sie die angezeigte und die gesamte
+Quellenzahl. Eine leere Auswahl wird nicht durch Beispieldaten ersetzt.
+Kachel und IPSView erschließen alle bis zu 32 Quellen über Auswahl und Seiten.
+Bei vielen konzentrischen Ringen oder Wetterstations-Instrumenten ist
+für lesbare Beschriftungen eine ausreichend große Kachel beziehungsweise ein
+großes IPSView-Widget erforderlich.
+Die gemeinsamen Einstellungen einschließlich der SVG-Assets gelten für alle
+Quellen der jeweiligen Ausgabe. Ein individuelles Design je Quelle bieten die
+eigenständigen Module Gauge Tacho und Gauge Chronograph.
 
-Vorgesehen ist ein kleines, eigenständig platzierbares HTML-Widget pro Chart,
-keine gemeinsame Dashboard-Seite. Die Größe und Platzierung werden in IPSView
-festgelegt; das Diagramm soll sich an die verfügbare Fläche anpassen.
+### IPSView
 
-#### Gemeinsame Darstellung
+Im Abschnitt **IPSView-Design** wird die WebContent-Ausgabe aktiviert. Die
+erzeugte Variable wird in IPSView als HTML-Widget platziert; Größe und Position
+bestimmt IPSView. Standardmäßig erbt sie das Kacheldesign. Für eine abweichende
+Gestaltung zuerst **Kacheldesign verwenden** ausschalten. Solange es aktiv ist,
+stehen die eigenen Designfelder und der Knopf **Kacheldesign nach IPSView
+kopieren und unabhängig bearbeiten** direkt im Abschnitt **IPSView-Design**,
+sind aber deaktiviert.
+Nach dem Ausschalten werden die Eingaben und der Knopf sofort aktiv; dieser
+kopiert das gespeicherte Kacheldesign einmalig. Bisherige unabhängige
+IPSView-Designwerte werden dabei überschrieben. Anschließend kann der
+IPSView-Designer separat bearbeitet werden. Beide Ausgaben behalten dieselben
+Quellen, Wertebereiche, Einheiten und Live-Daten.
+Änderungen am Kacheldesigner vor dem Kopieren speichern.
 
-ECharts-Konfiguration, Datenaufbereitung und Zeichenlogik sollen gemeinsam
-verwendet werden. Ausgabespezifische Anpassungen wie Hintergrund, Transparenz
+### Gemeinsame Darstellung
+
+ECharts-Konfiguration, Datenaufbereitung und Zeichenlogik werden gemeinsam
+verwendet. Ausgabespezifische Anpassungen wie Hintergrund, Transparenz
 und Schriftgrößen dürfen getrennt eingestellt werden, ohne die andere
 Visualisierung unbeabsichtigt zu verändern.
 
-### 7. PHP-Befehlsreferenz
+## Konfigurationsreferenz und Skriptzugriff
 
-Das festgelegte Funktionspräfix lautet `ECGM`.
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartsgaugemulti) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
+
+### Ausgabevariable
+
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewGauge` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
+
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
+
+### Öffentliche PHP-Funktionen
+
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
+
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECGM_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECGM_GetGaugeData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
+| `ECGM_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
 
 ```php
-$json = ECGM_GetGaugeData($InstanceID);
+$instanceID = 12000;
+$model = json_decode(ECGM_GetGaugeData($instanceID), true, 512, JSON_THROW_ON_ERROR);
 ```
 
-`ECGM_GetGaugeData()` validiert Konfiguration und aktive Gateway-Verbindung
-und liefert das aktuelle Gauge-Datenmodell als JSON. Das Modell enthält
-`schemaVersion: 1`, `family: gauge`, `variant: multi`, den gemeinsamen Titel
-und eine geordnete `items`-Liste. Jeder Eintrag enthält eine aus der
-Variablen-ID abgeleitete stabile ID, Quellvariable, Zeitstempel,
-Gauge-Konfiguration und numerischen Wert. Es ist die technische Grenze für die
-späteren Ausgabeadapter und noch kein gerendertes ECharts-Diagramm.
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
 
-Weitere Projektgrundsätze: [Entwicklung](../docs/ENTWICKLUNG.md).  
-Lizenz der eigenen Beiträge: [PolyForm Noncommercial License 1.0.0](../LICENSE).
+## Lizenz
 
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

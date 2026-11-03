@@ -1,0 +1,148 @@
+{
+    "contract": "de.burki24.jslive-echarts",
+    "contractVersion": "1.0",
+    "purpose": "Synthetic presentation examples, not an import package or a tested converter output",
+    "examples": [
+        {
+            "case": "temperature-with-prefix-and-whitespace",
+            "variableType": 2,
+            "profileSnapshot": {
+                "ProfileName": "Example.Temperature",
+                "ProfileType": 2,
+                "IsReadOnly": false,
+                "MinValue": -20.0,
+                "MaxValue": 60.0,
+                "StepSize": 0.1,
+                "Digits": 1,
+                "Prefix": "ca. ",
+                "Suffix": " °C",
+                "Icon": "",
+                "Associations": []
+            },
+            "native": {
+                "presentationId": "{3319437D-7CDE-699D-750A-3C6A3841FA75}",
+                "parameters": {
+                    "PREFIX": "ca. ",
+                    "SUFFIX": " °C",
+                    "DIGITS": 1,
+                    "MIN": -20.0,
+                    "MAX": 60.0,
+                    "ICON": "",
+                    "PERCENTAGE": false,
+                    "USAGE_TYPE": 0,
+                    "INTERVALS_ACTIVE": false,
+                    "INTERVALS": []
+                }
+            },
+            "chartMetadata": {
+                "minimum": -20.0,
+                "maximum": 60.0,
+                "stepSize": 0.1
+            },
+            "assertions": {
+                "inputValue": 21.5,
+                "rawValueAfterImport": 21.5,
+                "expectedTextWithDecimalSeparatorDot": "ca. 21.5 °C",
+                "sourceMutationAllowed": false
+            }
+        },
+        {
+            "case": "boolean-states-with-colors",
+            "variableType": 0,
+            "profileSnapshot": {
+                "ProfileName": "Example.Contact",
+                "ProfileType": 0,
+                "IsReadOnly": false,
+                "MinValue": 0.0,
+                "MaxValue": 1.0,
+                "StepSize": 0.0,
+                "Digits": 0,
+                "Prefix": "",
+                "Suffix": "",
+                "Icon": "",
+                "Associations": [
+                    {
+                        "Value": 0.0,
+                        "Name": "Geschlossen",
+                        "Icon": "",
+                        "Color": 32768
+                    },
+                    {
+                        "Value": 1.0,
+                        "Name": "Offen",
+                        "Icon": "",
+                        "Color": 16711680
+                    }
+                ]
+            },
+            "native": {
+                "presentationId": "{3319437D-7CDE-699D-750A-3C6A3841FA75}",
+                "parameters": {
+                    "ICON": "",
+                    "OPTIONS": [
+                        {
+                            "Value": false,
+                            "Caption": "Geschlossen",
+                            "IconActive": false,
+                            "IconValue": "",
+                            "ColorActive": true,
+                            "ColorValue": 32768
+                        },
+                        {
+                            "Value": true,
+                            "Caption": "Offen",
+                            "IconActive": false,
+                            "IconValue": "",
+                            "ColorActive": true,
+                            "ColorValue": 16711680
+                        }
+                    ]
+                }
+            },
+            "assertions": {
+                "inputValue": false,
+                "rawValueAfterImport": false,
+                "expectedText": "Geschlossen",
+                "sourceMutationAllowed": false,
+                "newActionAllowed": false
+            }
+        },
+        {
+            "case": "lqi-percent-suffix-without-active-scaling-in-jslive",
+            "variableType": 1,
+            "effectiveJSLiveFormatting": {
+                "prefix": "",
+                "suffix": " %",
+                "digits": 0,
+                "minimum": 0,
+                "maximum": 255,
+                "stepSize": 1,
+                "percentage": false
+            },
+            "native": {
+                "presentationId": "{3319437D-7CDE-699D-750A-3C6A3841FA75}",
+                "parameters": {
+                    "PREFIX": "",
+                    "SUFFIX": " %",
+                    "DIGITS": 0,
+                    "MIN": 0,
+                    "MAX": 255,
+                    "PERCENTAGE": false,
+                    "USAGE_TYPE": 0
+                }
+            },
+            "chartMetadata": {
+                "minimum": 0,
+                "maximum": 255,
+                "stepSize": 1,
+                "normalizeValues": false
+            },
+            "assertions": {
+                "inputValue": 128,
+                "rawValueAfterImport": 128,
+                "expectedText": "128 %",
+                "sourceMutationAllowed": false
+            }
+        }
+    ]
+}

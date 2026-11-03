@@ -1,0 +1,873 @@
+{
+    "format": "de.burki24.jslive-echarts",
+    "formatVersion": "1.0",
+    "exportId": "11111111-1111-4111-8111-000000000040",
+    "createdAt": "2026-10-31T12:00:00Z",
+    "producer": {
+        "libraryId": "{1189E095-5FC2-22A5-12DF-2B177A36DB8C}",
+        "libraryVersion": "0.111",
+        "build": 5073965,
+        "exporterVersion": "1.0.0",
+        "symconVersion": "9.1",
+        "phpVersion": "8.5.8"
+    },
+    "sourceInstallation": {
+        "id": "22222222-2222-4222-8222-222222222222"
+    },
+    "charts": [
+        {
+            "chartKey": "instance:12040",
+            "origin": {
+                "instanceId": 12040,
+                "moduleId": "{934051F5-EE82-953D-5241-A29D74CBC251}",
+                "moduleName": "SymconJSLiveProgressbar",
+                "instanceName": "Synthetic text 86",
+                "family": "progress",
+                "templateVariant": "line"
+            },
+            "original": {
+                "configuration": {
+                    "CreateIPSView": true,
+                    "CreateOutput": true,
+                    "EnableViewport": true,
+                    "IFrameHeight": 0,
+                    "ShowDefault": true,
+                    "TemplateScriptID": 0,
+                    "Type": "fill",
+                    "Variable": 13025,
+                    "ViewLevel": 2,
+                    "data_animationDuration": 0.5,
+                    "data_animationTransitionIn": 0.5,
+                    "data_max": 100.0,
+                    "data_min": 0.0,
+                    "data_precision": 1.0,
+                    "data_precisionCustom": 0.0,
+                    "fill_backgroundColor": 14870768,
+                    "fill_backgroundColor_Alpha": 1.0,
+                    "fill_backgroundExtrude": 1,
+                    "fill_backgroundFile": "",
+                    "fill_backgroundFileType": "image/jpeg",
+                    "fill_color": 1096065,
+                    "fill_color_Alpha": 1.0,
+                    "fill_dir": "ltr",
+                    "overrideHeight": 0,
+                    "overrideWidth": 0,
+                    "override_fill": "",
+                    "override_stroke": "",
+                    "shape_path": "",
+                    "shape_preset": "line",
+                    "shape_svg": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgNjAiPjxyZWN0IHg9IjQiIHk9IjEwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjQwIiByeD0iNiIvPjxyZWN0IHg9IjEwNCIgeT0iMjIiIHdpZHRoPSIxMiIgaGVpZ2h0PSIxNiIgcng9IjIiLz48L3N2Zz4=",
+                    "stroke_Dash1": 0,
+                    "stroke_Dash2": 0,
+                    "stroke_color": 0,
+                    "stroke_color_Alpha": 1.0,
+                    "stroke_dir": "normal",
+                    "stroke_lincap": "",
+                    "stroke_trailColor": 0,
+                    "stroke_trailColor_Alpha": 1.0,
+                    "stroke_trailWidth": 5,
+                    "stroke_width": 5,
+                    "style_fontColor": 0,
+                    "style_fontDisplay": true,
+                    "style_fontFamily": "",
+                    "style_fontPosition": "bottom",
+                    "style_fontSize": 18
+                },
+                "globalConfiguration": {
+                    "CreateIPSView": true,
+                    "DataMode": 1,
+                    "EnableViewport": true,
+                    "RefreshTime": 3,
+                    "viewport_content": "width=device-width, initial-scale=1, maximum-scale=1.0, minimum-scale=1, user-scalable=no"
+                },
+                "runtimeState": {},
+                "excluded": [
+                    {
+                        "pointer": "/LastUploadedConfig",
+                        "reason": "Operational state, not chart configuration."
+                    },
+                    {
+                        "pointer": "/Debug",
+                        "reason": "Operational state, not chart configuration."
+                    },
+                    {
+                        "pointer": "/EnableCache",
+                        "reason": "Operational state, not chart configuration."
+                    }
+                ]
+            },
+            "sources": [
+                {
+                    "sourceKey": "variable:13025",
+                    "variableId": 13025,
+                    "variableType": 2,
+                    "label": "Synthetic text 26",
+                    "presentation": {
+                        "original": {
+                            "presentation": {
+                                "COLOR": -1,
+                                "CONTENT_COLOR": -1,
+                                "DECIMAL_SEPARATOR": "Client",
+                                "DIGITS": 2,
+                                "DISPLAY_TYPE": 0,
+                                "ICON": "",
+                                "INTERVALS": "[]",
+                                "INTERVALS_ACTIVE": false,
+                                "MAX": 100,
+                                "MIN": 0,
+                                "PERCENTAGE": false,
+                                "PREFIX": "",
+                                "PRESENTATION": "{3319437D-7CDE-699D-750A-3C6A3841FA75}",
+                                "PREVIEW_STYLE": 1,
+                                "SHOW_PREVIEW": true,
+                                "SUFFIX": "",
+                                "THOUSANDS_SEPARATOR": "",
+                                "USAGE_TYPE": 0
+                            },
+                            "profiles": {},
+                            "variable": {
+                                "VariableAction": 0,
+                                "VariableCustomAction": 0,
+                                "VariableCustomPresentation": [],
+                                "VariableCustomProfile": "",
+                                "VariablePresentation": [],
+                                "VariableProfile": "",
+                                "VariableType": 2
+                            },
+                            "templates": {},
+                            "objectIcon": ""
+                        },
+                        "effective": {
+                            "kind": "value",
+                            "prefix": "",
+                            "suffix": "",
+                            "digits": 2,
+                            "minimum": 0,
+                            "maximum": 100,
+                            "stepSize": null,
+                            "icon": "",
+                            "color": -1,
+                            "contentColor": -1,
+                            "displayType": 0,
+                            "previewStyle": 1,
+                            "showPreview": true,
+                            "percentage": false,
+                            "usageType": 0,
+                            "decimalSeparator": "Client",
+                            "thousandsSeparator": "",
+                            "options": [],
+                            "intervals": [],
+                            "extra": {
+                                "INTERVALS_ACTIVE": false
+                            }
+                        },
+                        "native": {
+                            "presentationId": "{3319437D-7CDE-699D-750A-3C6A3841FA75}",
+                            "parameters": {
+                                "COLOR": -1,
+                                "CONTENT_COLOR": -1,
+                                "DECIMAL_SEPARATOR": "Client",
+                                "DIGITS": 2,
+                                "DISPLAY_TYPE": 0,
+                                "ICON": "",
+                                "INTERVALS": [],
+                                "INTERVALS_ACTIVE": false,
+                                "MAX": 100,
+                                "MIN": 0,
+                                "PERCENTAGE": false,
+                                "PREFIX": "",
+                                "PREVIEW_STYLE": 1,
+                                "SHOW_PREVIEW": true,
+                                "SUFFIX": "",
+                                "THOUSANDS_SEPARATOR": "",
+                                "USAGE_TYPE": 0
+                            }
+                        },
+                        "conversion": {
+                            "status": "exact",
+                            "ruleVersion": "1.0",
+                            "fieldCoverage": [
+                                {
+                                    "source": "/original/presentation/COLOR",
+                                    "target": "/native/parameters/COLOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/CONTENT_COLOR",
+                                    "target": "/native/parameters/CONTENT_COLOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DECIMAL_SEPARATOR",
+                                    "target": "/native/parameters/DECIMAL_SEPARATOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DIGITS",
+                                    "target": "/native/parameters/DIGITS",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/DISPLAY_TYPE",
+                                    "target": "/native/parameters/DISPLAY_TYPE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/ICON",
+                                    "target": "/native/parameters/ICON",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/INTERVALS",
+                                    "target": "/native/parameters/INTERVALS",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/INTERVALS_ACTIVE",
+                                    "target": "/native/parameters/INTERVALS_ACTIVE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/MAX",
+                                    "target": "/native/parameters/MAX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/MIN",
+                                    "target": "/native/parameters/MIN",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PERCENTAGE",
+                                    "target": "/native/parameters/PERCENTAGE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PREFIX",
+                                    "target": "/native/parameters/PREFIX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/PREVIEW_STYLE",
+                                    "target": "/native/parameters/PREVIEW_STYLE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/SHOW_PREVIEW",
+                                    "target": "/native/parameters/SHOW_PREVIEW",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/SUFFIX",
+                                    "target": "/native/parameters/SUFFIX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/THOUSANDS_SEPARATOR",
+                                    "target": "/native/parameters/THOUSANDS_SEPARATOR",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/presentation/USAGE_TYPE",
+                                    "target": "/native/parameters/USAGE_TYPE",
+                                    "status": "exact"
+                                }
+                            ],
+                            "issues": []
+                        }
+                    },
+                    "archive": {
+                        "archiveId": 2,
+                        "logging": true,
+                        "aggregationType": 0,
+                        "counterSettings": null,
+                        "availability": "metadata-only"
+                    }
+                }
+            ],
+            "bindings": [
+                {
+                    "bindingKey": "instance:12040#/Variable",
+                    "sourceKey": "variable:13025",
+                    "role": "value",
+                    "enabled": true,
+                    "settings": {
+                        "CreateIPSView": true,
+                        "CreateOutput": true,
+                        "EnableViewport": true,
+                        "IFrameHeight": 0,
+                        "ShowDefault": true,
+                        "TemplateScriptID": 0,
+                        "Type": "fill",
+                        "Variable": 13025,
+                        "ViewLevel": 2,
+                        "data_animationDuration": 0.5,
+                        "data_animationTransitionIn": 0.5,
+                        "data_max": 100.0,
+                        "data_min": 0.0,
+                        "data_precision": 1.0,
+                        "data_precisionCustom": 0.0,
+                        "fill_backgroundColor": 14870768,
+                        "fill_backgroundColor_Alpha": 1.0,
+                        "fill_backgroundExtrude": 1,
+                        "fill_backgroundFile": "",
+                        "fill_backgroundFileType": "image/jpeg",
+                        "fill_color": 1096065,
+                        "fill_color_Alpha": 1.0,
+                        "fill_dir": "ltr",
+                        "overrideHeight": 0,
+                        "overrideWidth": 0,
+                        "override_fill": "",
+                        "override_stroke": "",
+                        "shape_path": "",
+                        "shape_preset": "line",
+                        "shape_svg": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgNjAiPjxyZWN0IHg9IjQiIHk9IjEwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjQwIiByeD0iNiIvPjxyZWN0IHg9IjEwNCIgeT0iMjIiIHdpZHRoPSIxMiIgaGVpZ2h0PSIxNiIgcng9IjIiLz48L3N2Zz4=",
+                        "stroke_Dash1": 0,
+                        "stroke_Dash2": 0,
+                        "stroke_color": 0,
+                        "stroke_color_Alpha": 1.0,
+                        "stroke_dir": "normal",
+                        "stroke_lincap": "",
+                        "stroke_trailColor": 0,
+                        "stroke_trailColor_Alpha": 1.0,
+                        "stroke_trailWidth": 5,
+                        "stroke_width": 5,
+                        "style_fontColor": 0,
+                        "style_fontDisplay": true,
+                        "style_fontFamily": "",
+                        "style_fontPosition": "bottom",
+                        "style_fontSize": 18
+                    },
+                    "appearance": {
+                        "CreateIPSView": true,
+                        "CreateOutput": true,
+                        "EnableViewport": true,
+                        "IFrameHeight": 0,
+                        "ShowDefault": true,
+                        "TemplateScriptID": 0,
+                        "Type": "fill",
+                        "Variable": 13025,
+                        "ViewLevel": 2,
+                        "data_animationDuration": 0.5,
+                        "data_animationTransitionIn": 0.5,
+                        "data_max": 100.0,
+                        "data_min": 0.0,
+                        "data_precision": 1.0,
+                        "data_precisionCustom": 0.0,
+                        "fill_backgroundColor": 14870768,
+                        "fill_backgroundColor_Alpha": 1.0,
+                        "fill_backgroundExtrude": 1,
+                        "fill_backgroundFile": "",
+                        "fill_backgroundFileType": "image/jpeg",
+                        "fill_color": 1096065,
+                        "fill_color_Alpha": 1.0,
+                        "fill_dir": "ltr",
+                        "overrideHeight": 0,
+                        "overrideWidth": 0,
+                        "override_fill": "",
+                        "override_stroke": "",
+                        "shape_path": "",
+                        "shape_preset": "line",
+                        "shape_svg": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgNjAiPjxyZWN0IHg9IjQiIHk9IjEwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjQwIiByeD0iNiIvPjxyZWN0IHg9IjEwNCIgeT0iMjIiIHdpZHRoPSIxMiIgaGVpZ2h0PSIxNiIgcng9IjIiLz48L3N2Zz4=",
+                        "stroke_Dash1": 0,
+                        "stroke_Dash2": 0,
+                        "stroke_color": 0,
+                        "stroke_color_Alpha": 1.0,
+                        "stroke_dir": "normal",
+                        "stroke_lincap": "",
+                        "stroke_trailColor": 0,
+                        "stroke_trailColor_Alpha": 1.0,
+                        "stroke_trailWidth": 5,
+                        "stroke_width": 5,
+                        "style_fontColor": 0,
+                        "style_fontDisplay": true,
+                        "style_fontFamily": "",
+                        "style_fontPosition": "bottom",
+                        "style_fontSize": 18
+                    },
+                    "originalPointer": "/Variable"
+                }
+            ],
+            "axes": [],
+            "time": null,
+            "appearance": {
+                "settings": {
+                    "CreateIPSView": true,
+                    "CreateOutput": true,
+                    "EnableViewport": true,
+                    "IFrameHeight": 0,
+                    "ShowDefault": true,
+                    "TemplateScriptID": 0,
+                    "Type": "fill",
+                    "Variable": 13025,
+                    "ViewLevel": 2,
+                    "data_animationDuration": 0.5,
+                    "data_animationTransitionIn": 0.5,
+                    "data_max": 100.0,
+                    "data_min": 0.0,
+                    "data_precision": 1.0,
+                    "data_precisionCustom": 0.0,
+                    "fill_backgroundColor": 14870768,
+                    "fill_backgroundColor_Alpha": 1.0,
+                    "fill_backgroundExtrude": 1,
+                    "fill_backgroundFile": "",
+                    "fill_backgroundFileType": "image/jpeg",
+                    "fill_color": 1096065,
+                    "fill_color_Alpha": 1.0,
+                    "fill_dir": "ltr",
+                    "overrideHeight": 0,
+                    "overrideWidth": 0,
+                    "override_fill": "",
+                    "override_stroke": "",
+                    "shape_path": "",
+                    "shape_preset": "line",
+                    "shape_svg": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgNjAiPjxyZWN0IHg9IjQiIHk9IjEwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjQwIiByeD0iNiIvPjxyZWN0IHg9IjEwNCIgeT0iMjIiIHdpZHRoPSIxMiIgaGVpZ2h0PSIxNiIgcng9IjIiLz48L3N2Zz4=",
+                    "stroke_Dash1": 0,
+                    "stroke_Dash2": 0,
+                    "stroke_color": 0,
+                    "stroke_color_Alpha": 1.0,
+                    "stroke_dir": "normal",
+                    "stroke_lincap": "",
+                    "stroke_trailColor": 0,
+                    "stroke_trailColor_Alpha": 1.0,
+                    "stroke_trailWidth": 5,
+                    "stroke_width": 5,
+                    "style_fontColor": 0,
+                    "style_fontDisplay": true,
+                    "style_fontFamily": "",
+                    "style_fontPosition": "bottom",
+                    "style_fontSize": 18
+                },
+                "global": {
+                    "CreateIPSView": true,
+                    "DataMode": 1,
+                    "EnableViewport": true,
+                    "RefreshTime": 3,
+                    "viewport_content": "width=device-width, initial-scale=1, maximum-scale=1.0, minimum-scale=1, user-scalable=no"
+                },
+                "rings": [],
+                "contexts": [
+                    "tile",
+                    "ipsview"
+                ],
+                "resolved": {
+                    "GetConfigurationData": {
+                        "CreateIPSView": true,
+                        "CreateOutput": true,
+                        "Debug": false,
+                        "EnableCache": true,
+                        "EnableViewport": true,
+                        "IFrameHeight": 0,
+                        "LastUploadedConfig": "",
+                        "ShowDefault": true,
+                        "TemplateScriptID": 0,
+                        "Type": "fill",
+                        "Variable": 13025,
+                        "ViewLevel": 2,
+                        "data_animationDuration": 0.5,
+                        "data_animationTransitionIn": 0.5,
+                        "data_max": 100.0,
+                        "data_min": 0.0,
+                        "data_precision": 1.0,
+                        "data_precisionCustom": 0.0,
+                        "fill_backgroundColor": "rgba(226,232,240,1.00)",
+                        "fill_backgroundColor_Alpha": 1.0,
+                        "fill_backgroundExtrude": 1,
+                        "fill_backgroundFile": false,
+                        "fill_backgroundFileType": "image/jpeg",
+                        "fill_color": "rgba(16,185,129,1.00)",
+                        "fill_color_Alpha": 1.0,
+                        "fill_dir": "ltr",
+                        "overrideHeight": 0,
+                        "overrideWidth": 0,
+                        "override_fill": "",
+                        "override_stroke": "",
+                        "shape_path": "",
+                        "shape_preset": "line",
+                        "shape_svg": true,
+                        "stroke_Dash1": 0,
+                        "stroke_Dash2": 0,
+                        "stroke_color": "rgba(0,0,0,1.00)",
+                        "stroke_color_Alpha": 1.0,
+                        "stroke_dir": "normal",
+                        "stroke_lincap": "",
+                        "stroke_trailColor": "rgba(0,0,0,1.00)",
+                        "stroke_trailColor_Alpha": 1.0,
+                        "stroke_trailWidth": 5,
+                        "stroke_width": 5,
+                        "style_fontColor": "rgb(0,0,0)",
+                        "style_fontDisplay": true,
+                        "style_fontFamily": "",
+                        "style_fontPosition": "bottom",
+                        "style_fontSize": 18,
+                        "InstanceID": 12040,
+                        "fill_color_rgb": {
+                            "R": 16.0,
+                            "G": 185.0,
+                            "B": 129.0
+                        },
+                        "stroke_color_rgb": {
+                            "R": 0.0,
+                            "G": 0.0,
+                            "B": 0.0
+                        },
+                        "suffix": "",
+                        "prefix": "",
+                        "reverse": false
+                    }
+                }
+            },
+            "assetRefs": [
+                "sha256:258dc58b619641e3a8719adfeaaa9beee386dbf702b0f845369dafba476f4f29",
+                "sha256:603f8987c1754137a838bd5b56ec948acdf7e4931ed7307b25950e8cfbf0fd27"
+            ],
+            "coverage": [
+                {
+                    "pointer": "/CreateIPSView",
+                    "status": "exact",
+                    "target": "/original/configuration/CreateIPSView",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/CreateOutput",
+                    "status": "exact",
+                    "target": "/original/configuration/CreateOutput",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/EnableViewport",
+                    "status": "exact",
+                    "target": "/original/configuration/EnableViewport",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/IFrameHeight",
+                    "status": "exact",
+                    "target": "/original/configuration/IFrameHeight",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ShowDefault",
+                    "status": "exact",
+                    "target": "/original/configuration/ShowDefault",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/TemplateScriptID",
+                    "status": "exact",
+                    "target": "/original/configuration/TemplateScriptID",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/Type",
+                    "status": "exact",
+                    "target": "/original/configuration/Type",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/Variable",
+                    "status": "exact",
+                    "target": "/original/configuration/Variable",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ViewLevel",
+                    "status": "exact",
+                    "target": "/original/configuration/ViewLevel",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/data_animationDuration",
+                    "status": "exact",
+                    "target": "/original/configuration/data_animationDuration",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/data_animationTransitionIn",
+                    "status": "exact",
+                    "target": "/original/configuration/data_animationTransitionIn",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/data_max",
+                    "status": "exact",
+                    "target": "/original/configuration/data_max",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/data_min",
+                    "status": "exact",
+                    "target": "/original/configuration/data_min",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/data_precision",
+                    "status": "exact",
+                    "target": "/original/configuration/data_precision",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/data_precisionCustom",
+                    "status": "exact",
+                    "target": "/original/configuration/data_precisionCustom",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/fill_backgroundColor",
+                    "status": "exact",
+                    "target": "/original/configuration/fill_backgroundColor",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/fill_backgroundColor_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/fill_backgroundColor_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/fill_backgroundExtrude",
+                    "status": "exact",
+                    "target": "/original/configuration/fill_backgroundExtrude",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/fill_backgroundFile",
+                    "status": "exact",
+                    "target": "/original/configuration/fill_backgroundFile",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/fill_backgroundFileType",
+                    "status": "exact",
+                    "target": "/original/configuration/fill_backgroundFileType",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/fill_color",
+                    "status": "exact",
+                    "target": "/original/configuration/fill_color",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/fill_color_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/fill_color_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/fill_dir",
+                    "status": "exact",
+                    "target": "/original/configuration/fill_dir",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/overrideHeight",
+                    "status": "exact",
+                    "target": "/original/configuration/overrideHeight",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/overrideWidth",
+                    "status": "exact",
+                    "target": "/original/configuration/overrideWidth",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/override_fill",
+                    "status": "exact",
+                    "target": "/original/configuration/override_fill",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/override_stroke",
+                    "status": "exact",
+                    "target": "/original/configuration/override_stroke",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/shape_path",
+                    "status": "exact",
+                    "target": "/original/configuration/shape_path",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/shape_preset",
+                    "status": "exact",
+                    "target": "/original/configuration/shape_preset",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/shape_svg",
+                    "status": "exact",
+                    "target": "/original/configuration/shape_svg",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/stroke_Dash1",
+                    "status": "exact",
+                    "target": "/original/configuration/stroke_Dash1",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/stroke_Dash2",
+                    "status": "exact",
+                    "target": "/original/configuration/stroke_Dash2",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/stroke_color",
+                    "status": "exact",
+                    "target": "/original/configuration/stroke_color",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/stroke_color_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/stroke_color_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/stroke_dir",
+                    "status": "exact",
+                    "target": "/original/configuration/stroke_dir",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/stroke_lincap",
+                    "status": "exact",
+                    "target": "/original/configuration/stroke_lincap",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/stroke_trailColor",
+                    "status": "exact",
+                    "target": "/original/configuration/stroke_trailColor",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/stroke_trailColor_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/stroke_trailColor_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/stroke_trailWidth",
+                    "status": "exact",
+                    "target": "/original/configuration/stroke_trailWidth",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/stroke_width",
+                    "status": "exact",
+                    "target": "/original/configuration/stroke_width",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/style_fontColor",
+                    "status": "exact",
+                    "target": "/original/configuration/style_fontColor",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/style_fontDisplay",
+                    "status": "exact",
+                    "target": "/original/configuration/style_fontDisplay",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/style_fontFamily",
+                    "status": "exact",
+                    "target": "/original/configuration/style_fontFamily",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/style_fontPosition",
+                    "status": "exact",
+                    "target": "/original/configuration/style_fontPosition",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/style_fontSize",
+                    "status": "exact",
+                    "target": "/original/configuration/style_fontSize",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                }
+            ],
+            "reference": null
+        }
+    ],
+    "assets": [
+        {
+            "assetId": "sha256:258dc58b619641e3a8719adfeaaa9beee386dbf702b0f845369dafba476f4f29",
+            "kind": "inert-standard-template",
+            "mediaType": "text/plain",
+            "byteLength": 9816,
+            "sha256": "258dc58b619641e3a8719adfeaaa9beee386dbf702b0f845369dafba476f4f29",
+            "contentBase64": "@fixture-template:258dc58b619641e3a8719adfeaaa9beee386dbf702b0f845369dafba476f4f29",
+            "origin": {
+                "template": "Progressbar",
+                "license": "GPL-3.0",
+                "resource": "templates/Progressbar.html"
+            }
+        },
+        {
+            "assetId": "sha256:603f8987c1754137a838bd5b56ec948acdf7e4931ed7307b25950e8cfbf0fd27",
+            "kind": "shape",
+            "mediaType": "image/svg+xml",
+            "byteLength": 170,
+            "sha256": "603f8987c1754137a838bd5b56ec948acdf7e4931ed7307b25950e8cfbf0fd27",
+            "contentBase64": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgNjAiPjxyZWN0IHg9IjQiIHk9IjEwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjQwIiByeD0iNiIvPjxyZWN0IHg9IjEwNCIgeT0iMjIiIHdpZHRoPSIxMiIgaGVpZ2h0PSIxNiIgcng9IjIiLz48L3N2Zz4=",
+            "origin": {
+                "property": "shape_svg",
+                "license": "not-inferred"
+            }
+        }
+    ],
+    "issues": [],
+    "extensions": {}
+}

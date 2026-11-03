@@ -20,11 +20,37 @@ function requireStrictContract(bool $condition, string $message, array &$errors)
 $gateway = (string) file_get_contents($root . '/EChartsGateway/module.php');
 $gaugeSingle = (string) file_get_contents($root . '/EChartsGaugeSingle/module.php');
 $gaugeMulti = (string) file_get_contents($root . '/EChartsGaugeMulti/module.php');
+$gaugeTacho = (string) file_get_contents($root . '/EChartsGaugeTacho/module.php');
+$gaugeChronograph = (string) file_get_contents($root . '/EChartsGaugeChronograph/module.php');
+$timeSeries = (string) file_get_contents($root . '/EChartsTimeSeries/module.php');
+$barCategory = (string) file_get_contents($root . '/EChartsBarCategory/module.php');
+$barHistory = (string) file_get_contents($root . '/EChartsBarHistory/module.php');
+$barWaterfall = (string) file_get_contents($root . '/EChartsBarWaterfall/module.php');
+$barPolar = (string) file_get_contents($root . '/EChartsBarPolar/module.php');
+$pie = (string) file_get_contents($root . '/EChartsPie/module.php');
+$heatmap = (string) file_get_contents($root . '/EChartsHeatmap/module.php');
+$graph = (string) file_get_contents($root . '/EChartsGraph/module.php');
+$zigbeeGraph = (string) file_get_contents($root . '/EChartsGraphZ2M/module.php');
+$currentSources = (string) file_get_contents($root . '/libs/EChartsCurrentSources.php');
+$configurationFormHelper = (string) file_get_contents($root . '/libs/helper/ConfigurationFormHelper.php');
+$sharedGatewayGuidance = 'One shared EChartsGateway is sufficient for all ECharts chart instances. '
+    . 'When adding further charts, select the existing gateway instead of creating another one.';
 
 foreach ([
-    'EChartsGateway'     => $gateway,
-    'EChartsGaugeSingle' => $gaugeSingle,
-    'EChartsGaugeMulti'  => $gaugeMulti
+    'EChartsGateway'          => $gateway,
+    'EChartsGaugeSingle'      => $gaugeSingle,
+    'EChartsGaugeMulti'       => $gaugeMulti,
+    'EChartsGaugeTacho'       => $gaugeTacho,
+    'EChartsGaugeChronograph' => $gaugeChronograph,
+    'EChartsTimeSeries'       => $timeSeries,
+    'EChartsBarCategory'      => $barCategory,
+    'EChartsBarHistory'       => $barHistory,
+    'EChartsBarWaterfall'     => $barWaterfall,
+    'EChartsBarPolar'         => $barPolar,
+    'EChartsPie'              => $pie,
+    'EChartsHeatmap'          => $heatmap,
+    'EChartsGraph'            => $graph,
+    'EChartsGraphZ2M'         => $zigbeeGraph
 ] as $moduleName => $source) {
     requireStrictContract(
         preg_match('/class\s+' . $moduleName . '\s+extends\s+IPSModuleStrict\b/', $source) === 1,
@@ -40,6 +66,19 @@ foreach ([
     );
 }
 
+requireStrictContract(
+    str_contains($configurationFormHelper, 'protected function SetFormFieldVisibility('),
+    'ConfigurationFormHelper must provide shared nested field visibility.',
+    $errors
+);
+foreach (['EChartsTimeSeries' => $timeSeries, 'EChartsBarHistory' => $barHistory] as $moduleName => $source) {
+    requireStrictContract(
+        !str_contains($source, 'function SetFormFieldVisibility('),
+        $moduleName . ' must use the shared ConfigurationFormHelper visibility method.',
+        $errors
+    );
+}
+
 foreach ([
     'public function Create(): void',
     'public function ApplyChanges(): void',
@@ -49,8 +88,180 @@ foreach ([
 }
 
 foreach ([
-    'EChartsGaugeSingle' => ['source' => $gaugeSingle, 'prefix' => 'ECGS'],
-    'EChartsGaugeMulti'  => ['source' => $gaugeMulti, 'prefix' => 'ECGM']
+    'SetVisualizationType(1)',
+    'public function GetVisualizationTile(): string',
+    'UpdateVisualizationValue(',
+    'JSON_UNESCAPED_UNICODE',
+    'RegisterMessage($variableID, VM_UPDATE)',
+    'ConfigurationFormHelper.php',
+    'IPSViewHTMLPageHelper.php',
+    'ResponsiveVisualizationHelper.php',
+    'SVGPreviewHelper.php',
+    'VisualizationAssetHelper.php',
+    'VisualizationThemeHelper.php',
+    'use ConfigurationFormHelper;',
+    'use IPSViewHTMLPageHelper;',
+    'use ResponsiveVisualizationHelper;',
+    'use VisualizationAssetHelper;',
+    'use VisualizationThemeHelper;'
+] as $visualizationContract) {
+    requireStrictContract(
+        str_contains($gaugeSingle, $visualizationContract),
+        'EChartsGaugeSingle is missing visualization contract: ' . $visualizationContract,
+        $errors
+    );
+}
+
+foreach ([
+    'SetVisualizationType(1)',
+    'public function GetVisualizationTile(): string',
+    'public function GetIPSViewHTML(): string',
+    'public function GetTimeSeriesData(): string',
+    'public function GetTimeSeriesDiagnostic(): string',
+    "RegisterPropertyString('DataMode', 'auto')",
+    "['realtime', 'raw', 'auto'",
+    "RegisterPropertyInteger('PointBudget', 2000)",
+    "RegisterPropertyString('LegendPosition', 'top')",
+    "RegisterPropertyInteger('LineWidthPercent', 100)",
+    "RegisterPropertyBoolean('SmoothLines', false)",
+    "RegisterPropertyBoolean('ShowSymbols', false)",
+    "RegisterPropertyInteger('SymbolSizePercent', 100)",
+    "RegisterPropertyInteger('AreaOpacityPercent', 22)",
+    "RegisterPropertyBoolean('ShowGrid', true)",
+    "RegisterPropertyBoolean('ShowXAxis', true)",
+    "RegisterPropertyBoolean('ShowYAxis', true)",
+    'use Burki24\SymconModuleHelper\SVGPreviewHelper;',
+    'public function UpdateTimeSeriesPreviewFromForm(string $Configuration): void',
+    'public function UpdateTimeSeriesPreviewSourceFromForm(string $Configuration, string $Action): void',
+    'public function CopyTileDesignToIPSView(): void',
+    'EChartsAsset::TimeSeriesJavaScript()',
+    'EChartsTimeSeriesDesign::SourceEditorForm()',
+    'EChartsTimeSeriesDesign::StyleFromSource($source)',
+    'EChartsVariablePresentation::Resolve('
+] as $timeSeriesContract) {
+    requireStrictContract(
+        str_contains($timeSeries, $timeSeriesContract),
+        'EChartsTimeSeries is missing contract: ' . $timeSeriesContract,
+        $errors
+    );
+}
+
+foreach ([
+    'SetVisualizationType(1)',
+    'public function GetVisualizationTile(): string',
+    'public function GetIPSViewHTML(): string',
+    'public function GetBarData(): string',
+    'public function GetBarDiagnostic(): string',
+    'public function CopyTileDesignToIPSView(): void',
+    '$this->RegisterDesignProperties();',
+    "RegisterPropertyString(\$prefix . 'BarMode', 'simple')",
+    "RegisterPropertyString(\$prefix . 'Orientation', 'vertical')",
+    "RegisterPropertyString(\$prefix . 'SortOrder', 'configured')",
+    'EChartsAsset::BarCategoryJavaScript()',
+    'EChartsVariablePresentation::Resolve(',
+    'use EChartsCurrentSources;'
+] as $barCategoryContract) {
+    requireStrictContract(
+        str_contains($barCategory, $barCategoryContract),
+        'EChartsBarCategory is missing contract: ' . $barCategoryContract,
+        $errors
+    );
+}
+
+requireStrictContract(
+    str_contains($currentSources, 'RegisterMessage($variableID, VM_UPDATE)')
+        && str_contains($currentSources, 'EChartsDataProtocol::OPERATION_CURRENT_READ'),
+    'Current-value charts must share ID-based updates and Gateway reads.',
+    $errors
+);
+
+foreach ([
+    'SetVisualizationType(1)',
+    'public function GetVisualizationTile(): string',
+    'public function GetIPSViewHTML(): string',
+    'public function GetWaterfallData(): string',
+    'use EChartsCurrentSources;',
+    'EChartsSourceIdentity::LabelsForSources($sources)',
+    'EChartsAsset::CartesianJavaScript()',
+    'EChartsVariablePresentation::Resolve('
+] as $waterfallContract) {
+    requireStrictContract(
+        str_contains($barWaterfall, $waterfallContract),
+        'EChartsBarWaterfall is missing contract: ' . $waterfallContract,
+        $errors
+    );
+}
+
+foreach ([
+    'SetVisualizationType(1)',
+    'public function GetVisualizationTile(): string',
+    'public function GetIPSViewHTML(): string',
+    'public function GetPolarData(): string',
+    'use EChartsCurrentSources;',
+    'EChartsSourceIdentity::LabelsForSources($sources)',
+    'EChartsAsset::PolarJavaScript()',
+    'EChartsVariablePresentation::Resolve('
+] as $polarContract) {
+    requireStrictContract(
+        str_contains($barPolar, $polarContract),
+        'EChartsBarPolar is missing contract: ' . $polarContract,
+        $errors
+    );
+}
+
+foreach ([
+    'SetVisualizationType(1)',
+    'public function GetVisualizationTile(): string',
+    'public function GetIPSViewHTML(): string',
+    'public function GetPieData(): string',
+    'use EChartsCurrentSources;',
+    'EChartsSourceIdentity::LabelsForSources(',
+    'EChartsAsset::PieJavaScript()',
+    'EChartsVariablePresentation::Resolve('
+] as $pieContract) {
+    requireStrictContract(str_contains($pie, $pieContract), 'EChartsPie is missing contract: ' . $pieContract, $errors);
+}
+
+foreach ([
+    'SetVisualizationType(1)',
+    'public function GetVisualizationTile(): string',
+    'public function GetBarHistoryData(): string',
+    'public function GetBarHistoryDiagnostic(): string',
+    "RegisterPropertyString('DataMode', 'auto')",
+    "RegisterPropertyInteger('PointBudget', 1000)",
+    'EChartsArchiveQuery::Resolve(',
+    'EChartsAsset::CartesianJavaScript()',
+    'EChartsVariablePresentation::Resolve('
+] as $barHistoryContract) {
+    requireStrictContract(
+        str_contains($barHistory, $barHistoryContract),
+        'EChartsBarHistory is missing contract: ' . $barHistoryContract,
+        $errors
+    );
+}
+
+foreach ([
+    'SetVisualizationType(1)',
+    'use ConfigurationFormHelper;',
+    'use IPSViewHTMLPageHelper;',
+    'use ResponsiveVisualizationHelper;',
+    'use VisualizationAssetHelper;',
+    'use VisualizationThemeHelper;',
+    'public function GetVisualizationTile(): string',
+    'public function UpdateGaugePreviewFromForm(string $Configuration): void'
+] as $visualizationContract) {
+    requireStrictContract(
+        str_contains($gaugeMulti, $visualizationContract),
+        'EChartsGaugeMulti is missing visualization contract: ' . $visualizationContract,
+        $errors
+    );
+}
+
+foreach ([
+    'EChartsGaugeSingle'      => ['source' => $gaugeSingle, 'prefix' => 'ECGS'],
+    'EChartsGaugeMulti'       => ['source' => $gaugeMulti, 'prefix' => 'ECGM'],
+    'EChartsGaugeTacho'       => ['source' => $gaugeTacho, 'prefix' => 'ECGT'],
+    'EChartsGaugeChronograph' => ['source' => $gaugeChronograph, 'prefix' => 'ECGC']
 ] as $gaugeModuleName => $gaugeContract) {
     $gauge = $gaugeContract['source'];
     foreach ([
@@ -77,11 +288,58 @@ foreach ([
     $propertyContracts = $gaugeModuleName === 'EChartsGaugeSingle'
         ? [
             "RegisterPropertyInteger('SourceVariableID', 0)",
+            "RegisterPropertyBoolean('UseVariablePresentation', false)",
             "RegisterPropertyFloat('Minimum', 0.0)",
             "RegisterPropertyFloat('Maximum', 100.0)",
             "RegisterPropertyString('Title', '')",
+            "RegisterPropertyString('TitlePosition', 'bottom')",
             "RegisterPropertyString('Unit', '')",
-            "RegisterPropertyInteger('Decimals', 1)"
+            "RegisterPropertyInteger('Decimals', 1)",
+            "RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE)",
+            "RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO)",
+            "RegisterPropertyString('PointerShape', 'preset')",
+            "RegisterPropertyString('CustomPointerSVG', '')",
+            "RegisterPropertyString('CustomPointerPivotMode', 'svg')",
+            "RegisterPropertyFloat('CustomPointerPivotXPercent', 50.0)",
+            "RegisterPropertyFloat('CustomPointerPivotYPercent', 100.0)",
+            "RegisterPropertyString('AnchorShape', 'preset')",
+            "RegisterPropertyString('CustomAnchorSVG', '')",
+            "RegisterPropertyString('AnchorColorMode', 'theme')",
+            "RegisterPropertyInteger('AnchorColor', 0x55CBB5)",
+            "RegisterPropertyInteger('AnchorBorderColor', 0xF4F5F7)",
+            "RegisterPropertyString('PlateShape', 'hidden')",
+            "RegisterPropertyString('PlateColorMode', 'theme')",
+            "RegisterPropertyString('PlateFillMode', 'solid')",
+            "RegisterPropertyBoolean('PlateGradientMiddleEnabled', false)",
+            "RegisterPropertyInteger('PlateGradientMiddleColor', 0x45474C)",
+            "RegisterPropertyInteger('PlateGradientEndColor', 0x111317)",
+            "RegisterPropertyString('PlateGradientDirection', 'top-bottom')",
+            "RegisterPropertyInteger('PlateGradientCenterXPercent', 50)",
+            "RegisterPropertyInteger('PlateGradientCenterYPercent', 50)",
+            "RegisterPropertyInteger('PlateGradientRadiusPercent', 75)",
+            "RegisterPropertyBoolean('PlateBackgroundEnabled', false)",
+            "RegisterPropertyString('PlateBackgroundSVG', '')",
+            "RegisterPropertyString('PlateBackgroundFit', 'cover')",
+            "RegisterPropertyInteger('PlateBackgroundSizePercent', 100)",
+            "RegisterPropertyInteger('PlateBackgroundOffsetXPercent', 0)",
+            "RegisterPropertyInteger('PlateBackgroundOffsetYPercent', 0)",
+            "RegisterPropertyInteger('PlateBackgroundOpacityPercent', 100)",
+            "RegisterPropertyFloat('PlateBackgroundRotation', 0.0)",
+            "RegisterPropertyBoolean('PlateTransparent', false)",
+            "RegisterPropertyBoolean('PlateShadow', false)",
+            "RegisterPropertyInteger('PlateColor', 0x25272B)",
+            "RegisterPropertyInteger('PlateBorderColor', 0xA5A9B0)",
+            "RegisterPropertyString('GaugeArcMode', 'preset')",
+            "RegisterPropertyFloat('GaugeStartPosition', 270.0)",
+            "RegisterPropertyFloat('GaugeEndPosition', 90.0)",
+            "RegisterPropertyString('GaugeColorMode', 'theme')",
+            "RegisterPropertyInteger('PointerColor', 0x55CBB5)",
+            "RegisterPropertyInteger('ProgressColor', 0x55CBB5)",
+            "RegisterPropertyInteger('RingColor', 0x45474C)",
+            "RegisterPropertyInteger('ScaleColor', 0xA7A9AE)",
+            "RegisterPropertyInteger('ValueColor', 0xF4F5F7)",
+            "RegisterPropertyInteger('TitleColor', 0xA7A9AE)",
+            'RegisterPropertyInteger($propertyName, self::DESIGN_SCALE_DEFAULT)'
         ]
         : [
             "RegisterPropertyString('Sources', '[]')",
@@ -101,6 +359,26 @@ foreach ([
         512,
         JSON_THROW_ON_ERROR
     );
+    requireStrictContract(
+        in_array(
+            ['type' => 'Label', 'caption' => $sharedGatewayGuidance],
+            $gaugeForm['elements'] ?? [],
+            true
+        ),
+        $gaugeModuleName . ' form must explain that one shared gateway is sufficient.',
+        $errors
+    );
+    $gaugeLocale = json_decode(
+        (string) file_get_contents($root . '/' . $gaugeModuleName . '/locale.json'),
+        true,
+        512,
+        JSON_THROW_ON_ERROR
+    );
+    requireStrictContract(
+        isset($gaugeLocale['translations']['de'][$sharedGatewayGuidance]),
+        $gaugeModuleName . ' must translate the shared gateway guidance.',
+        $errors
+    );
     $formNames = [];
     foreach ($gaugeForm['elements'] ?? [] as $element) {
         if (isset($element['name']) && is_string($element['name'])) {
@@ -109,8 +387,11 @@ foreach ([
     }
     sort($formNames);
     $expectedFormNames = $gaugeModuleName === 'EChartsGaugeSingle'
-        ? ['Decimals', 'Maximum', 'Minimum', 'SourceVariableID', 'Title', 'Unit']
-        : ['Sources', 'Title'];
+        ? [
+            'Decimals', 'Maximum', 'Minimum', 'SourceVariableID', 'Title', 'TitlePosition',
+            'Unit', 'UseVariablePresentation'
+        ]
+        : ($gaugeModuleName === 'EChartsGaugeMulti' ? ['EnableSourceSelection', 'Sources', 'Title'] : ['Sources', 'Title']);
     sort($expectedFormNames);
     requireStrictContract(
         $formNames === $expectedFormNames,
@@ -133,6 +414,229 @@ foreach ([
             'EChartsGaugeSingle source selection must accept only integer and float variables.',
             $errors
         );
+
+        $gaugePresetElement = null;
+        $findGaugePreset = static function (array $items) use (&$findGaugePreset, &$gaugePresetElement): void
+        {
+            foreach ($items as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+                if (($item['name'] ?? null) === 'GaugePreset') {
+                    $gaugePresetElement = $item;
+                    return;
+                }
+                if (is_array($item['items'] ?? null)) {
+                    $findGaugePreset($item['items']);
+                }
+            }
+        };
+        $findGaugePreset($gaugeForm['elements'] ?? []);
+        requireStrictContract(
+            is_array($gaugePresetElement)
+                && ($gaugePresetElement['type'] ?? null) === 'Select'
+                && array_column($gaugePresetElement['options'] ?? [], 'value') === [
+                    'basic',
+                    'simple',
+                    'progress',
+                    'speed'
+                ],
+            'EChartsGaugeSingle tile designer must expose the four stable Gauge presets.',
+            $errors
+        );
+
+        $themeElement = null;
+        $findTheme = static function (array $items) use (&$findTheme, &$themeElement): void
+        {
+            foreach ($items as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+                if (($item['name'] ?? null) === 'EChartsTheme') {
+                    $themeElement = $item;
+                    return;
+                }
+                if (is_array($item['items'] ?? null)) {
+                    $findTheme($item['items']);
+                }
+            }
+        };
+        $findTheme($gaugeForm['elements'] ?? []);
+        requireStrictContract(
+            is_array($themeElement)
+                && ($themeElement['type'] ?? null) === 'Select'
+                && array_column($themeElement['options'] ?? [], 'value') === [
+                    'auto',
+                    'dark',
+                    'vintage',
+                    'macarons',
+                    'infographic',
+                    'shine',
+                    'roma'
+                ],
+            'EChartsGaugeSingle tile designer must expose the supported ECharts themes.',
+            $errors
+        );
+
+        $fineTuningElements = [];
+        $findFineTuningElements = static function (array $items) use (&$findFineTuningElements, &$fineTuningElements): void
+        {
+            foreach ($items as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+                if (is_string($item['name'] ?? null)) {
+                    $fineTuningElements[$item['name']] = $item;
+                }
+                if (is_array($item['items'] ?? null)) {
+                    $findFineTuningElements($item['items']);
+                }
+            }
+        };
+        $findFineTuningElements($gaugeForm['elements'] ?? []);
+        foreach ([
+            'ScaleFontSizePercent',
+            'ValueFontSizePercent',
+            'UnitFontSizePercent',
+            'TitleFontSizePercent',
+            'RingWidthPercent',
+            'PointerWidthPercent',
+            'PointerLengthPercent',
+            'AnchorSizePercent',
+            'AnchorBorderWidthPercent',
+            'PlateSizePercent',
+            'PlateBorderWidthPercent',
+            'MinorTickLengthPercent',
+            'MajorTickLengthPercent',
+            'ProgressWidthPercent',
+            'MinorTickDistancePercent',
+            'MajorTickDistancePercent',
+            'ScaleLabelDistancePercent',
+            'GaugeRadiusPercent',
+            'DetailBorderWidthPercent',
+            'DetailCornerRadiusPercent'
+        ] as $fineTuningName) {
+            $fineTuningElement = $fineTuningElements[$fineTuningName] ?? null;
+            requireStrictContract(
+                is_array($fineTuningElement)
+                    && ($fineTuningElement['type'] ?? null) === 'NumberSpinner'
+                    && ($fineTuningElement['minimum'] ?? null) === 50
+                    && ($fineTuningElement['maximum'] ?? null) === 150
+                    && ($fineTuningElement['suffix'] ?? null) === '%',
+                'EChartsGaugeSingle tile designer fine tuning is invalid for ' . $fineTuningName . '.',
+                $errors
+            );
+            requireStrictContract(
+                str_contains($gauge, "'" . lcfirst($fineTuningName) . "'"),
+                'EChartsGaugeSingle is missing the fine-tuning property contract for ' . $fineTuningName . '.',
+                $errors
+            );
+        }
+
+        foreach ([
+            'PointerShape'                  => ['type' => 'Select', 'values' => ['preset', 'needle', 'line', 'arrow', 'custom']],
+            'CustomPointerSVG'              => ['type' => 'SelectFile'],
+            'CustomPointerPivotMode'        => ['type' => 'Select', 'values' => ['svg', 'custom']],
+            'CustomPointerPivotXPercent'    => ['type' => 'NumberSpinner'],
+            'CustomPointerPivotYPercent'    => ['type' => 'NumberSpinner'],
+            'AnchorShape'                   => ['type' => 'Select', 'values' => ['preset', 'circle', 'ring', 'custom', 'hidden']],
+            'CustomAnchorSVG'               => ['type' => 'SelectFile'],
+            'AnchorColorMode'               => ['type' => 'Select', 'values' => ['theme', 'custom']],
+            'AnchorColor'                   => ['type' => 'SelectColor'],
+            'AnchorBorderColor'             => ['type' => 'SelectColor'],
+            'PlateShape'                    => ['type' => 'Select', 'values' => ['hidden', 'circle', 'arc']],
+            'PlateColorMode'                => ['type' => 'Select', 'values' => ['theme', 'custom']],
+            'PlateFillMode'                 => ['type' => 'Select', 'values' => ['solid', 'linear', 'radial']],
+            'PlateGradientMiddleEnabled'    => ['type' => 'CheckBox'],
+            'PlateGradientMiddleColor'      => ['type' => 'SelectColor'],
+            'PlateGradientEndColor'         => ['type' => 'SelectColor'],
+            'PlateGradientDirection'        => ['type' => 'Select', 'values' => ['top-bottom', 'left-right', 'diagonal-down', 'diagonal-up']],
+            'PlateGradientCenterXPercent'   => ['type' => 'NumberSpinner'],
+            'PlateGradientCenterYPercent'   => ['type' => 'NumberSpinner'],
+            'PlateGradientRadiusPercent'    => ['type' => 'NumberSpinner'],
+            'PlateBackgroundEnabled'        => ['type' => 'CheckBox'],
+            'PlateBackgroundSVG'            => ['type' => 'SelectFile'],
+            'PlateBackgroundFit'            => ['type' => 'Select', 'values' => ['contain', 'cover', 'stretch']],
+            'PlateBackgroundSizePercent'    => ['type' => 'NumberSpinner'],
+            'PlateBackgroundOffsetXPercent' => ['type' => 'NumberSpinner'],
+            'PlateBackgroundOffsetYPercent' => ['type' => 'NumberSpinner'],
+            'PlateBackgroundOpacityPercent' => ['type' => 'NumberSpinner'],
+            'PlateBackgroundRotation'       => ['type' => 'NumberSpinner'],
+            'PlateTransparent'              => ['type' => 'CheckBox'],
+            'PlateShadow'                   => ['type' => 'CheckBox'],
+            'PlateColor'                    => ['type' => 'SelectColor'],
+            'PlateBorderColor'              => ['type' => 'SelectColor'],
+            'GaugeArcMode'                  => ['type' => 'Select', 'values' => ['preset', 'full', 'three-quarter', 'half', 'quarter', 'custom']],
+            'GaugeStartPosition'            => ['type' => 'Select'],
+            'GaugeEndPosition'              => ['type' => 'Select'],
+            'GaugeColorMode'                => ['type' => 'Select', 'values' => ['theme', 'custom']],
+            'PointerColor'                  => ['type' => 'SelectColor'],
+            'ProgressColor'                 => ['type' => 'SelectColor'],
+            'RingColor'                     => ['type' => 'SelectColor'],
+            'ScaleColor'                    => ['type' => 'SelectColor'],
+            'ValueColor'                    => ['type' => 'SelectColor'],
+            'TitleColor'                    => ['type' => 'SelectColor'],
+            'ScaleZonesEnabled'             => ['type' => 'CheckBox'],
+            'ScaleZones'                    => ['type' => 'List'],
+            'MajorSplitCount'               => ['type' => 'NumberSpinner'],
+            'MinorSplitCount'               => ['type' => 'NumberSpinner'],
+            'ScaleLabelRotation'            => ['type' => 'Select', 'values' => ['horizontal', 'tangential', 'radial']],
+            'GaugeDirection'                => ['type' => 'Select', 'values' => ['clockwise', 'counterclockwise']],
+            'GaugeRadiusPercent'            => ['type' => 'NumberSpinner'],
+            'GaugeOffsetXPercent'           => ['type' => 'NumberSpinner'],
+            'GaugeOffsetYPercent'           => ['type' => 'NumberSpinner'],
+            'ValueOffsetXPercent'           => ['type' => 'NumberSpinner'],
+            'ValueOffsetYPercent'           => ['type' => 'NumberSpinner'],
+            'TitleOffsetXPercent'           => ['type' => 'NumberSpinner'],
+            'TitleOffsetYPercent'           => ['type' => 'NumberSpinner'],
+            'UseVariablePresentation'       => ['type' => 'CheckBox'],
+            'TitlePosition'                 => ['type' => 'Select', 'values' => ['top', 'bottom']],
+            'PointerVisibility'             => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'ProgressVisibility'            => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'RingVisibility'                => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'MinorTicksVisibility'          => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'MajorTicksVisibility'          => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'ScaleLabelsVisibility'         => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'ValueVisibility'               => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'UnitVisibility'                => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'TitleVisibility'               => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'DetailBoxVisibility'           => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'DetailColorMode'               => ['type' => 'Select', 'values' => ['theme', 'custom']],
+            'DetailBackgroundColor'         => ['type' => 'SelectColor'],
+            'DetailBorderColor'             => ['type' => 'SelectColor'],
+            'DetailShadow'                  => ['type' => 'CheckBox'],
+            'PointerShadow'                 => ['type' => 'CheckBox'],
+            'ProgressShadow'                => ['type' => 'CheckBox'],
+            'RingShadow'                    => ['type' => 'CheckBox'],
+            'AnchorShadow'                  => ['type' => 'CheckBox']
+        ] as $designerName => $contract) {
+            $designerElement = $fineTuningElements[$designerName] ?? null;
+            $valid = is_array($designerElement) && ($designerElement['type'] ?? null) === $contract['type'];
+            if (isset($contract['values'])) {
+                $valid = $valid && array_column($designerElement['options'] ?? [], 'value') === $contract['values'];
+            }
+            if (in_array($designerName, ['GaugeStartPosition', 'GaugeEndPosition'], true)) {
+                $valid = $valid
+                    && count($designerElement['options'] ?? []) === 16
+                    && (float) array_column($designerElement['options'] ?? [], 'value')[0] === 0.0
+                    && (float) array_column($designerElement['options'] ?? [], 'value')[15] === 337.5;
+            }
+            if (in_array($designerName, ['CustomPointerSVG', 'CustomAnchorSVG', 'PlateBackgroundSVG'], true)) {
+                $valid = $valid && ($designerElement['extensions'] ?? null) === '.svg';
+            }
+            if (in_array($designerName, ['CustomPointerPivotXPercent', 'CustomPointerPivotYPercent'], true)) {
+                $valid = $valid
+                    && ($designerElement['minimum'] ?? null) === 0
+                    && ($designerElement['maximum'] ?? null) === 100
+                    && ($designerElement['digits'] ?? null) === 1
+                    && ($designerElement['suffix'] ?? null) === '%';
+            }
+            requireStrictContract(
+                $valid,
+                'EChartsGaugeSingle tile designer contract is invalid for ' . $designerName . '.',
+                $errors
+            );
+        }
     } else {
         requireStrictContract(
             is_array($sourceElement)
@@ -147,6 +651,96 @@ foreach ([
                 && (($columns['VariableID']['edit']['type'] ?? null) === 'SelectVariable')
                 && (($columns['VariableID']['edit']['validVariableTypes'] ?? null) === [1, 2]),
             'EChartsGaugeMulti source rows must select numeric variables.',
+            $errors
+        );
+        requireStrictContract(
+            isset($columns['UseVariablePresentation'])
+                && (($columns['UseVariablePresentation']['edit']['type'] ?? null) === 'CheckBox')
+                && (($columns['UseVariablePresentation']['add'] ?? null) === false),
+            'EChartsGaugeMulti source rows must optionally inherit their variable presentation.',
+            $errors
+        );
+
+        $multiDesignerElements = [];
+        $findMultiDesignerElements = static function (array $items) use (&$findMultiDesignerElements, &$multiDesignerElements): void
+        {
+            foreach ($items as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+                if (is_string($item['name'] ?? null)) {
+                    $multiDesignerElements[$item['name']] = $item;
+                }
+                if (is_array($item['items'] ?? null)) {
+                    $findMultiDesignerElements($item['items']);
+                }
+            }
+        };
+        $findMultiDesignerElements($gaugeForm['elements'] ?? []);
+        $supportsCustomAnchor = in_array(
+            $gaugeModuleName,
+            ['EChartsGaugeTacho', 'EChartsGaugeChronograph'],
+            true
+        );
+        $designerContracts = [
+            'PointerShape'            => ['type' => 'Select', 'values' => ['preset', 'needle', 'line', 'arrow', 'custom']],
+            'AnchorShape'             => [
+                'type'   => 'Select',
+                'values' => $supportsCustomAnchor
+                    ? ['preset', 'circle', 'ring', 'custom', 'none']
+                    : ['preset', 'circle', 'ring', 'none']
+            ],
+            'GaugeColorMode'          => ['type' => 'Select', 'values' => ['theme', 'custom']],
+            'PlateDesignMode'         => ['type' => 'Select', 'values' => ['preset', 'custom', 'hidden']],
+            'PointerColor'            => ['type' => 'SelectColor'],
+            'PlateColor'              => ['type' => 'SelectColor'],
+            'MajorSplitCount'         => ['type' => 'NumberSpinner'],
+            'MinorSplitCount'         => ['type' => 'NumberSpinner'],
+            'CustomPointerSVG'        => ['type' => 'SelectFile'],
+            'CustomPointerPivotMode'  => ['type' => 'Select', 'values' => ['svg', 'custom']],
+            'PlateBackgroundEnabled'  => ['type' => 'CheckBox'],
+            'PlateBackgroundSVG'      => ['type' => 'SelectFile'],
+            'PlateBackgroundFit'      => ['type' => 'Select', 'values' => ['contain', 'cover', 'stretch']]
+        ];
+        if ($supportsCustomAnchor) {
+            $designerContracts['CustomAnchorSVG'] = ['type' => 'SelectFile'];
+        }
+        foreach ($designerContracts as $designerName => $contract) {
+            $designerElement = $multiDesignerElements[$designerName] ?? null;
+            $valid = is_array($designerElement) && ($designerElement['type'] ?? null) === $contract['type'];
+            if (isset($contract['values'])) {
+                $valid = $valid && array_column($designerElement['options'] ?? [], 'value') === $contract['values'];
+            }
+            requireStrictContract(
+                $valid,
+                $gaugeModuleName . ' shared designer contract is invalid for ' . $designerName . '.',
+                $errors
+            );
+        }
+        foreach ([
+            'RingWidthPercent', 'ScaleFontSizePercent', 'ValueFontSizePercent', 'TitleFontSizePercent',
+            'PointerWidthPercent', 'PointerLengthPercent', 'AnchorSizePercent', 'AnchorBorderWidthPercent',
+            'PlateSizePercent', 'PlateBorderWidthPercent'
+        ] as $fineTuningName) {
+            $fineTuningElement = $multiDesignerElements[$fineTuningName] ?? null;
+            requireStrictContract(
+                is_array($fineTuningElement)
+                    && ($fineTuningElement['type'] ?? null) === 'NumberSpinner'
+                    && ($fineTuningElement['minimum'] ?? null) === 50
+                    && ($fineTuningElement['maximum'] ?? null) === 150
+                    && ($fineTuningElement['suffix'] ?? null) === '%',
+                'EChartsGaugeMulti shared fine tuning is invalid for ' . $fineTuningName . '.',
+                $errors
+            );
+        }
+        requireStrictContract(
+            str_contains($gauge, 'EChartsGaugeDesign::WithPreviewActions(')
+                && preg_match(
+                    '/EChartsGaugeDesign::PreviewFormAction\(\s*\x27'
+                        . preg_quote($gaugeContract['prefix'], '/') . '\x27/',
+                    $gauge
+                ) === 1,
+            $gaugeModuleName . ' designer fields must use the shared SVG preview callback.',
             $errors
         );
     }

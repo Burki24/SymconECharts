@@ -1,0 +1,16 @@
+{
+    "id": "{A1ABAD81-1878-4F35-A6EE-29B1DE1BCF2D}",
+    "name": "EChartsRadarHistory",
+    "type": 3,
+    "vendor": "",
+    "aliases": [],
+    "parentRequirements": [
+        "{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{E4749B72-912B-E3E3-1C57-D19019FFDD84}"
+    ],
+    "prefix": "ECRH",
+    "url": "https://github.com/Burki24/SymconECharts"
+}

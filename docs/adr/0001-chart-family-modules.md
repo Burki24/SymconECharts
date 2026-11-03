@@ -59,7 +59,8 @@ Konfigurationsformulare und öffentliche Verträge bleiben je Chartfamilie
 überschaubar. Neue Familien können unabhängig ergänzt und getestet werden. Im
 Gegenzug benötigt jede Familie ein eigenes Symcon-Modul und muss gemeinsame
 Fähigkeiten über bewusst abgegrenzte, erst bei realer Wiederverwendung
-entstehende Bausteine teilen.
+entstehende Bausteine teilen. Das dafür verbindliche Vorgehen konkretisiert
+[`ADR 0017`](0017-reuse-before-new-chart-development.md).
 
 Die Namen und Präfixe ändern sich noch im unveröffentlichten Gerüst. Für die
 Umbenennung ist deshalb keine Migration ausgelieferter Instanzen erforderlich.

@@ -1,0 +1,215 @@
+# EChartsStateTimeline
+
+Zeigt archivierte Zustände mehrerer Geräte als farbige Zeitabschnitte.
+Jede Variable erhält eine eigene Zeile. Geeignet ist das beispielsweise
+für Fensterkontakte, Pumpenbetrieb oder Betriebsarten eines Geräts.
+Das Modul liest nur; es schaltet keine Geräte und verändert keine Archivdaten.
+
+Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+[Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsstatetimeline).
+
+## Einrichtung
+
+1. Eine Instanz `EChartsStateTimeline` anlegen und mit dem vorhandenen
+   `EChartsGateway` verbinden. Ein gemeinsames Gateway genügt für alle Diagramme.
+2. Unter **Zustandsquellen** ein bis 32 unterschiedliche Boolean- oder
+   Integer-Variablen hinzufügen, die in einem Standardarchiv aufgezeichnet werden.
+   Float-, String- und Zählerarchive sind nicht unterstützt.
+3. Optional pro Quelle eine Beschriftung festlegen. Ohne eigene Beschriftung
+   wird der aktuelle Variablenname verwendet. Gleiche Namen sind zulässig.
+4. Im Bearbeitungsdialog jeder Quelle unter **Zustandszuordnung** die gewünschten
+   Werte mit Namen und Farben anlegen. Bis zu 32 verschiedene Zustände je
+   Quelle sind möglich. Boolean verwendet `0` für falsch und `1` für wahr.
+   Beispielsweise kann ein Kontakt `0 = Geschlossen` und `1 = Offen` verwenden,
+   eine andere Quelle unabhängig davon `0 = Aus` und `1 = Ein`.
+5. Titel und Zeitraum wählen. Standardmäßig werden die letzten sieben Tage
+   angezeigt; alternativ stehen 24 Stunden, 30 Tage oder **Benutzerdefiniert**
+   zur Verfügung. Für eigene Zeiträume sind 1–1000 Minuten, Stunden, Tage oder
+   Wochen wählbar, beispielsweise 90 Minuten oder zwei Wochen.
+
+Nicht zugeordnete Zustände bleiben als Zahlen sichtbar. Automatische Farben
+folgen dem gewählten Theme. Zustandsnamen und -farben werden nicht automatisch
+aus Variablenprofilen übernommen. So ist ihre Bedeutung ausdrücklich festgelegt.
+Aktuelle Variablenwerte ersetzen keine Archivzustände.
+
+## Zustände und Zeitabschnitte
+
+Ein protokollierter Zustand gilt bis zum nächsten protokollierten Wechsel
+beziehungsweise bis zum Ende des angezeigten Fensters. Wiederholte gleiche
+Werte werden zu einem Abschnitt zusammengefasst. Es werden keine Mittelwerte
+gebildet und keine Zwischenzustände interpoliert.
+
+Ein vorhandener Archivwert vor dem Zeitfenster bestimmt dessen Anfangszustand.
+Fehlt ein solcher Wert, bleibt der Abschnitt bis zum ersten Wert ausdrücklich
+**Unbekannt**. Auch eine vollständig leere Quelle bleibt unbekannt statt als
+ausgeschaltet zu erscheinen. Bekannte Teile eines unvollständigen Archivs
+bleiben sichtbar. Ein Punkt genau am Fensterende erzeugt keinen weiteren
+Abschnitt ohne Dauer.
+
+Mehrere Wechsel innerhalb derselben Sekunde können im Archiv denselben
+Sekundenzeitstempel tragen. Hat genau ein Eintrag eine positive ganzzahlige
+Archiv-Dauer und haben alle übrigen Dauer 0, gilt der Eintrag mit positiver Dauer
+für den folgenden Zeitabschnitt. Wechsel mit Dauer 0 erzeugen keinen Abschnitt.
+Die Reihenfolge der gelieferten Einträge entscheidet dabei nicht über den Zustand.
+
+Fehlende oder ungültige Dauerangaben, mehrere Einträge mit positiver Dauer oder
+ausschließlich Dauer 0 lassen unterschiedliche Zustände mehrdeutig bleiben.
+Solche Abfragen werden weiterhin abgewiesen. Gleiche doppelte Zustände bleiben
+zulässig. Das Modul verändert oder bereinigt keine Archiveinträge automatisch.
+
+Die Zeiträume umfassen verstrichene Zeit bis zum aktuellen Abfragezeitpunkt;
+ein Tag entspricht 24 Stunden, eine Woche sieben Tagen, auch bei einer
+Zeitumstellung. Die Beschriftung verwendet die Symcon-Zeitzone.
+Zusätzlich ist **Fester historischer Zeitraum** mit eigenen Von-/Bis-Daten
+in der angezeigten Symcon-Zeitzone wählbar. Der Beginn ist eingeschlossen,
+das Ende ausgeschlossen und darf nicht in der Zukunft liegen. Der Beginn
+muss vor dem Ende liegen. Die Grenzen bleiben bei Aktualisierungen fest.
+
+Anders als bei Stunden-/Tagesdiagrammen werden diese Zustandsfenster nicht
+gerundet: 12.10.2026 08:30:17 bis 09:45:29 zeigt genau diesen Zeitabschnitt.
+Auch ein nur eine Sekunde langes Fenster ist möglich. Ein Vorgänger vor dem
+Beginn initialisiert weiterhin den ersten Zustand; ohne ihn bleibt der Anfang
+unbekannt. Ein Ereignis genau am Beginn hat Vorrang, eines genau am Ende
+erzeugt weiterhin keinen Abschnitt ohne Dauer.
+
+Fehlende oder ungültige Daten sowie nicht existierende und doppeldeutige
+Uhrzeiten beim Zeitwechsel werden abgewiesen. Bitte eindeutige Grenzen wählen.
+Ein Fenster über einen Zeitwechsel ist möglich, auch bei nicht ganzstündigen
+Offsetänderungen; seine Dauer entspricht der tatsächlich verstrichenen Zeit.
+Beide Ausgabewege und Vorschauen verwenden dieselben Grenzen. Bestehende
+Zeiträume, Zustandszuordnungen, Designs und alle Archivbudgets bleiben erhalten.
+
+Aktualisiert wird minütlich. Der Tooltip nennt Quelle, Zustand, Wert, Beginn,
+Ende und Dauer des angezeigten Abschnitts. Am Fensterrand abgeschnittene
+Abschnitte zeigen entsprechend nur die Dauer innerhalb des Fensters.
+
+Ein Zustandsarchiv kann verlorene Zwischenwerte, ausgeschaltete Aufzeichnung
+oder nachträglich gelöschte Messungen nicht zuverlässig als Ausfall erkennen.
+Das Diagramm stellt die aufgezeichneten Zustände dar und ist kein Nachweis
+einer lückenlosen Geräteüberwachung.
+
+Pro Quelle werden höchstens 2000 Rohwerte innerhalb des Fensters gelesen,
+zusammen höchstens 16000 Rohwerte für alle Quellen. Ein vorhandener Vorgänger
+vor dem Fenster wird je Quelle zusätzlich berücksichtigt.
+Sehr viele Wechsel oder umfangreiche Beschriftungen können zusätzlich die
+gemeinsame Ausgabebegrenzung erreichen. Dann erscheint die Aufforderung,
+einen kürzeren Zeitraum zu wählen. Werte werden nicht stillschweigend
+reduziert oder durch eine geschätzte Fortsetzung ersetzt.
+
+## Kachel und IPSView gestalten
+
+Beide Designer bieten Theme, Zoom, Tooltip, Zustandsbeschriftungen, Raster,
+Abschnittshöhe (20–100 %, Standard 65 %), Deckkraft (0–100 %, Standard 90 %)
+und Rahmenbreite (0–5 px, Standard 0). Titel, Achsen und Zustandsnamen besitzen
+eigene Schriftgrößen (50–200 %) und Farben. Die Farbe unbekannter Abschnitte
+ist separat einstellbar. Automatische Textfarben innerhalb der Abschnitte
+berücksichtigen den Hintergrundkontrast. Zu schmale Abschnitte lassen ihren
+Text aus; ihre Werte bleiben im Tooltip erreichbar.
+
+Unter **Abschnitte und Darstellung** können Rahmen durchgezogen, gestrichelt
+oder gepunktet erscheinen. Der Eckenradius reicht von 0 bis 20 px und wird bei
+schmalen Abschnitten automatisch begrenzt. Zustandsnamen lassen sich innerhalb
+des Abschnitts links, mittig oder rechts ausrichten. Die Breite steht weiterhin
+exakt für die Dauer; Rundungen verbreitern kurze Abschnitte nicht.
+
+**Achsen und Raster** bietet getrennte Schalter für Zeit- und Quellenbeschriftung,
+Zeitachsenlinie und Teilstriche. Zeitangaben sind automatisch, als Uhrzeit,
+Datum oder zweizeilig als Datum und Uhrzeit wählbar. Linienart/-breite (0–5 px),
+Beschriftungsabstand (0–30 px) sowie Rasterfarbe, -linienart, -breite und
+-deckkraft sind einstellbar. Automatisch erscheinen bei langen Zeiträumen
+Datumsangaben statt wiederholter Mitternachtszeiten.
+
+Die Schriftart ist zwischen Arial, Verdana, Georgia und nichtproportionaler
+Schrift wählbar. Titel, Achsenbeschriftungen und Zustandsnamen unterstützen
+jeweils Fett- und Kursivschrift. Verwendet werden die auf dem Anzeigegerät
+verfügbaren Schriften; es werden keine externen Schriftdateien geladen.
+
+Unter **Hervorhebung** lässt sich die Reaktion beim Überfahren eines Abschnitts
+abschalten oder auf diesen Abschnitt fokussieren. Beim Fokus bestimmt die
+Restdeckkraft (0–100 %, Standard 20 %) die Darstellung der übrigen Abschnitte.
+Ohne Fokus bleiben sie unverändert. Der Tooltip kann unabhängig davon aktiv
+bleiben. Diese Mausinteraktion ist in der statischen Vorschau nicht darstellbar.
+
+Der Diagrammtitel steht in der Kachel unter dem nativen Kachelnamen und
+Vergrößerungsbutton. IPSView reserviert diesen zusätzlichen Kopfbereich nicht.
+Zoom vergrößert den Zeitbereich innerhalb des Diagramms, ohne die Konfiguration
+zu ändern. Animation einschließlich Dauer und Bewegungskurve ist einstellbar.
+
+Bei mehr als acht Quellen zeigt das Diagramm einen lesbaren Ausschnitt von
+höchstens acht Zeilen. Mit der senkrechten **Zeilennavigation rechts** sind
+alle Quellen erreichbar. Sie ist unabhängig vom Zeitzoom und bleibt auch bei
+ausgeschaltetem Zeitzoom verfügbar. Aktualisierungen und Größenänderungen
+behalten die ausgewählte erste Quelle und den gewählten Zeitzoom bei, soweit
+die Quelle und der Zeitraum weiterhin vorhanden sind. Alle Quellen bleiben
+Teil des Diagramms; auch unbekannte Zeitabschnitte werden nicht weggelassen.
+
+IPSView erbt zunächst das Kacheldesign. Mit deaktivierter Vererbung kann es
+unabhängig gestaltet werden; der Kopierknopf übernimmt das Kacheldesign als
+Ausgangspunkt. Die gemeinsame Quellen- und Zustandszuordnung bleibt gleich.
+Die optional erzeugte Stringvariable `IPSViewStateTimeline` enthält das
+WebContent-Dokument für ein IPSView-HTML-Widget und wird nicht bedient.
+
+Die Vorschauen reagieren auf ungespeicherte Titel-, Quellen-, Zustands- und
+Designänderungen. Sie verwenden gekennzeichnete Beispieldaten, nicht den
+tatsächlichen Archivverlauf. Das Speichern erfolgt erst beim Übernehmen.
+Auch eigene Zeiträume ändern die Zeitachse der Vorschauen bereits vor dem
+Speichern, ohne auf das Archiv zuzugreifen. Die Rohwert- und Ausgabegrenzen
+gelten unabhängig von der gewählten Dauer unverändert; bei sehr vielen
+Zustandswechseln muss der Zeitraum verkürzt werden.
+Bei mehr als acht Quellen kennzeichnet die statische Vorschau ausdrücklich
+die ersten acht von insgesamt bis zu 32 Zeilen. Scrollen und Zeitzoom sind
+nur im eigentlichen Diagramm bedienbar.
+
+## Konfigurationsreferenz und Skriptzugriff
+
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartsstatetimeline) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
+
+### Ausgabevariable
+
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewStateTimeline` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
+
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
+
+### Öffentliche PHP-Funktionen
+
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
+
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECST_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECST_GetStateTimelineData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
+| `ECST_GetStateTimelineDiagnostic(int $InstanzID): string` | JSON-Momentaufnahme der Konfigurationsprüfung und letzten Fehlermeldung; kein Nachweis einer erfolgreichen Datenabfrage. |
+| `ECST_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+| `ECST_RefreshArchive(int $InstanzID): void` | Aktualisiert die Diagrammausgaben aus den konfigurierten Quellen. Kein Erfolgswert und keine Änderung von Quellen/Archiven. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
+
+```php
+$instanceID = 12000;
+$model = json_decode(ECST_GetStateTimelineData($instanceID), true, 512, JSON_THROW_ON_ERROR);
+```
+
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
+
+## Lizenz
+
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

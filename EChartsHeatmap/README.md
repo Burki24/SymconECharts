@@ -1,0 +1,234 @@
+# EChartsHeatmap
+
+`EChartsHeatmap` zeigt eine numerische Archivvariable als 7 × 24-Heatmap:
+lokale Stunden von 0 bis 23 Uhr und je nach Zeitraum konkrete Tage oder
+zusammengefasste Wochentage. Eine
+gemeinsame `EChartsGateway`-Instanz genügt auch für diese Diagrammfamilie.
+
+Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+[Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsheatmap).
+
+## Einrichtung
+
+Die Modulinstanz anlegen und mit dem vorhandenen EChartsGateway verbinden.
+Die unten beschriebenen Quellen und Datenregeln konfigurieren, Titel und
+Design einstellen und die Änderungen übernehmen. Für IPSView bei Bedarf
+die zusätzliche HTML-Ausgabe aktivieren und ihre WebContent-Variable einbinden.
+
+## Voraussetzungen und Daten
+
+Optional lassen sich **Vergleichsansichten verwenden**: ein bis vier benannte
+Ansichten zeigen mehrere Quellen oder dieselbe Quelle in verschiedenen
+Zeiträumen. Die bisherige Einzelquelle bleibt beim Ausschalten erhalten.
+In jeder Zeile wählen Sie die Archivvariable und optional einen Namen.
+**Frühere Zeiträume** verschiebt die Ansicht um die entsprechende Anzahl
+Basiszeiträume: Bei „1 Monat“ zeigt 0 den letzten abgeschlossenen Monat und 1
+den Monat davor. **Eigenen festen Zeitraum verwenden** ersetzt den Basiszeitraum
+durch die Von-/Bis-Grenzen dieser Zeile. Auch dort ist die Verschiebung möglich.
+Alle Ansichten verwenden dieselbe Kennzahl; die Archivierungsart wird nicht geändert.
+
+**Gemeinsame Farbskala** ist standardmäßig eingeschaltet und verwendet die
+kleinsten/größten vorhandenen Zellwerte aller Ansichten. Dazu müssen alle
+Quellen dieselbe Einheit haben. Schalten Sie die gemeinsame Skala aus, um
+beispielsweise Temperatur und Luftfeuchtigkeit mit **getrennten Farbskalen**
+getrennt zu betrachten. Die Beschriftung jeder Ansicht zeigt den Farbbezug;
+gleiche Farben bedeuten bei getrennten Skalen nicht denselben Zahlenwert.
+Temperatur-Farbvorlagen behalten ihre festen Celsius-Grenzen und benötigen
+im Vergleichsmodus °C in jeder Ansicht. Tooltip und Zellen behalten die
+Originalwerte, Einheiten und Nachkommastellen.
+
+Die Pfeile verschieben alle Ansichten gemeinsam um jeweils ihren Zeitraum.
+„Ausgewählter Zeitraum“ stellt die konfigurierte Ausgangskombination wieder
+her. Kleine Kacheln und IPSView-Flächen lassen sich vertikal scrollen, bei
+großer Schrift zusätzlich horizontal. Fehlende Archivstunden bleiben leer;
+eine leere Ansicht erhält einen eigenen Hinweis.
+
+Alle Ansichten teilen weiterhin **höchstens sieben Archivabfragen** mit je
+höchstens 2000 Stundenwerten. Exakt identische Abfragen werden wiederverwendet.
+Vier Monatsansichten passen üblicherweise; mehrere vollständige Jahresansichten
+überschreiten das Budget. Das Modul fordert dann kürzere Zeiträume oder weniger
+Ansichten, statt Teilwerte als vollständige Ergebnisse zu zeigen. Jeder einzelne
+Zeitraum bleibt auf höchstens 366 × 24 Stunden begrenzt. Die Vorschauen zeigen
+synthetische Beispieldaten für die gewählte Ansichtenaufteilung.
+
+Benötigt werden IP-Symcon 9.0/9.1, eine numerische Integer- oder
+Float-Variable mit aktiviertem Archiv und das verbundene EChartsGateway.
+Die Variable wird über ihre ID zugeordnet; ihr Name ist kein technischer
+Schlüssel.
+
+Wählbar sind eine Woche, ein, drei, sechs oder zwölf Monate sowie „Seit
+1. Januar“. Eine Woche zeigt sieben datierte lokale Tage bis heute.
+Monatsansichten verwenden ausschließlich die letzten vollständig
+abgeschlossenen Kalendermonate: Am 13. Oktober zeigt „1 Monat“ den September,
+„3 Monate“ zeigen Juli bis September. „Seit 1. Januar“ reicht im laufenden
+Jahr bis heute. Bei diesen längeren Ansichten zeigt jede Mo–So-Zelle die
+gewählte Kennzahl der vorhandenen Stundenwerte ihres Wochentags und ihrer Stunde
+aus dem gesamten angezeigten Zeitraum – etwa der Montage um 08:00 Uhr.
+Der konkrete Datumsbereich und die Kennzahl stehen über
+dem Diagramm.
+
+Zusätzlich stehen **Benutzerdefiniert** und **Fester historischer Zeitraum**
+zur Wahl. Benutzerdefiniert verwendet eine Dauer von 1–1000 Minuten, Stunden,
+Tagen oder Wochen, insgesamt höchstens **366 × 24 Stunden**. Das Ende folgt
+dem Beginn der laufenden Archivstunde; die Dauer wird als verstrichene Zeit
+gerechnet, nicht als Anzahl lokaler Kalendertage. Beispielsweise sind zwei
+Wochen stets 336 Stunden, auch über eine Zeitumstellung hinweg.
+
+Im festen historischen Modus wählen Sie Datum und Uhrzeit für **Von
+(einschließlich)** und **Bis (ausschließlich)** in der Symcon-Zeitzone. Das Ende
+muss nach dem Beginn und spätestens jetzt liegen; auch hier gilt höchstens
+366 × 24 Stunden. Diese Grenzen bleiben bei Aktualisierung unverändert.
+Nicht existierende oder doppeldeutige Uhrzeiten einer Zeitumstellung sind
+keine gültigen Auswahlgrenzen; wählen Sie eine eindeutig zuordenbare Uhrzeit.
+
+Beide neuen Modi verwenden nur **vollständig enthaltene, abgeschlossene
+Archivstunden**. Bei 08:15 bis 12:45 werden beispielsweise die Stunden von
+09:00 bis 12:00 ausgewertet; die angeschnittenen Randstunden bleiben aus.
+Enthält ein gültiges Fenster keine volle Stunde, bleibt es leer. Die Anzeige
+bleibt bei sieben Wochentagzeilen und 24 Stundenspalten: Mehrere passende
+Archivstunden werden gemäß der gewählten Kennzahl zusammengefasst, nicht
+als zusätzliche datierte Zeilen eingefügt. Zeitraum und Tooltip nennen
+Grenzen mit Uhrzeit, UTC-Offset und Symcon-Zeitzone.
+
+„Kennzahl“ bietet vier ausdrücklich wählbare Datengrundlagen:
+
+- **Durchschnitt der Stundenmittelwerte** (Voreinstellung): arithmetischer
+  Durchschnitt der vorhandenen abgeschlossenen Stundenmittelwerte.
+- **Minimum der Stundenminima**: kleinster tatsächlich archivierter
+  Stunden-Minimalwert der betreffenden Wochentag-/Stundenkombination.
+- **Maximum der Stundenmaxima**: größter entsprechender Stunden-Maximalwert.
+- **Summe der Stundenverbräuche**: Summe der archivierten Stundenverbräuche
+  eines Zählers, beispielsweise in kWh. In längeren Ansichten ist dies der
+  Gesamtverbrauch aller vorhandenen passenden Stunden, kein Durchschnitt.
+
+Durchschnitt, Minimum und Maximum benötigen ein numerisches **Standardarchiv**;
+Verbrauch benötigt ein **Zählerarchiv**. Das Modul ändert keine Archivierung
+oder Aggregationsart und wechselt nicht automatisch zu einer anderen Kennzahl.
+Negative und Nullwerte sind bei Standardkennzahlen zulässig. Ein gemessener
+Nullverbrauch bleibt ebenfalls erhalten; negative Verbräuche werden als
+fehlerhafte Archivdaten abgewiesen. Bestehende Instanzen bleiben bei Durchschnitt.
+
+Mit den Pfeilen wechseln Sie um eine Woche, die gewählte Anzahl vollständiger
+Monate oder ein Jahr zurück beziehungsweise vor. „Seit 1. Januar“ vergleicht
+im Vorjahr denselben Jahresabschnitt; der 29. Februar wird gegebenenfalls auf
+den 28. Februar begrenzt. „Heute“ führt zur aktuellen Ansicht zurück. Der
+Wechsel gilt für die gerade geöffnete
+Kachel beziehungsweise IPSView-Seite und wird nicht als Instanzeinstellung
+gespeichert. Nach dem erneuten Öffnen erscheint wieder der aktuelle Zeitraum.
+Bei benutzerdefinierten und festen Zeiträumen blättern die Pfeile um die
+exakte gewählte Dauer; anschließend werden erneut nur vollständig enthaltene
+Stunden berücksichtigt. Bis zu 120 Rückwärtsschritte sind möglich, niemals
+vor den unterstützten Archivbeginn. „Heute“ führt zur aktuellen freien Dauer
+zurück; **„Ausgewählter Zeitraum“** stellt im festen Modus die konfigurierten
+historischen Grenzen wieder her. Navigation verändert keine gespeicherten
+Datumsfelder, Designs oder Archivierung.
+Das Gateway liefert ausschließlich abgeschlossene stündliche Archivkennzahlen.
+Werte derselben lokalen Wochentag-Stunde-Kombination werden gemäß der gewählten
+Kennzahl zusammengefasst; der Tooltip nennt Kennzahl, Zeitraum und die Anzahl der tatsächlich
+berücksichtigten Stundenintervalle. Eine fehlende Stunde bleibt leer, nicht
+null. Beim Wechsel von Sommer- auf
+Winterzeit gehen beide tatsächlich vorhandenen 02-Uhr-Intervalle in dieselbe
+Zelle ein. Beim umgekehrten Wechsel wird keine 02-Uhr-Zelle erfunden.
+Tooltip und optional sichtbare Zellenwerte verwenden Einheit und
+Nachkommastellen aus der Variablendarstellung oder den manuellen Angaben.
+
+## Design und Ausgabe
+
+Der Kacheldesigner enthält Theme, Farben der Werteskala, sichtbare Farbskala,
+optionale Zellenwerte, Textgrößen und -farben sowie Animation. „Individuell“
+verläuft zwischen Start- und Endfarbe; bis zu drei optionale Zwischenfarben
+ergeben insgesamt zwei bis fünf gleichmäßig verteilte Farbstützpunkte. Ohne
+Zwischenfarben bleibt das bisherige Aussehen erhalten. Die individuelle
+Skala zeigt ihren kleinsten und größten Archivwert mit der gewählten Einheit.
+Neben dieser individuellen Skala stehen Tempera-12 und
+Tempera-6 sowie acht historische Farbreihen aus der Untersuchung von
+[Schiewe (2023)](https://kartdok.staatsbibliothek-berlin.de/servlets/MCRFileNodeServlet/kartdok_derivate_00000704/Schiewe_Farbschemata%20f%C3%BCr%20Temperaturkarten_Was%20liegt%20zwischen%20Blau%20und%20Rot_KN-IP_2023.pdf)
+zur Wahl. Die als NOAA, SAWS, DWD, tagesschau, FAZ, USA Today, China Daily
+und ABC.net bezeichneten Beispiele stammen aus Karten vom April 2023. Ihre
+Farbtöne wurden aus den Abbildungen näherungsweise rekonstruiert: Es sind
+**keine aktuellen, offiziell veröffentlichten Anbieterpaletten**. Die
+Vorlagen verwenden feste Celsius-Klassen statt den beobachteten Wertebereich
+immer neu auf die gesamte Palette zu verteilen. NOAA reicht gemäß Quelle von
+−50 bis +50 °C in 20 Klassen zu je 5 °C. Die Bereiche der anderen historischen
+Beispiele sind näherungsweise aus der Abbildung abgelesen, nicht als exakte
+Anbietergrenzen zu verstehen. Für Tempera nennt die Quelle keine Grenzen;
+hier verwendet das Modul einen eigenen Bereich von −20 bis +40 °C. Werte
+außerhalb einer Vorlage erhalten die erste beziehungsweise letzte Klassenfarbe.
+Die kompakte Legende zeigt alle Farbfelder und die festen Endwerte in °C,
+auch wenn die aktuellen Archivwerte nur einen Ausschnitt belegen. Für diese
+Vorlagen müssen die Daten bereits als °C vorliegen; eine Umrechnung erfolgt
+nicht. Für Verbrauch ist ausschließlich „Individuell“ zulässig; die festen
+Celsius-Klassen wären dafür fachlich falsch. Die eigenen Farben greifen nur bei „Individuell“; bestehende Instanzen
+behalten diese Voreinstellung. Bei aktivierten Zellenwerten wählt
+„Wertbeschriftungsfarbe: Automatischer Kontrast“ für jede Zelle eine helle oder
+dunkle Schrift passend zu ihrer Füllfarbe. Eine manuell gewählte Schriftfarbe
+hat Vorrang.
+Die Formularvorschau verwendet ausdrücklich Beispieldaten und liest beim
+Bearbeiten kein Archiv. Das Diagramm selbst zeigt leere Felder ohne
+Interpolation.
+
+Bestehende Instanzen mit der bisherigen Auswahl `7d` oder `30d` benötigen
+nach dem Modulupdate eine neue Zeitraumwahl im Formular. Die alten Werte
+werden nicht übernommen; bis zur Auswahl meldet die Instanz eine ungültige
+Konfiguration. „1 Monat“ ist nicht gleichbedeutend mit den bisherigen
+gleitenden 30 Tagen. Variablen- und Archivdaten bleiben unverändert.
+
+Die native Symcon-Kachel und ein optionales IPSView-WebContent-Widget verwenden
+denselben Archivwert. Das IPSView-Design kann das Kacheldesign erben oder
+unabhängig eingestellt werden. Bei einem vorübergehenden Ladefehler bleibt
+eine zuletzt gültige Grafik sichtbar und die Archivabfrage wird beim nächsten
+Aktualisierungsintervall wiederholt.
+
+## Konfigurationsreferenz und Skriptzugriff
+
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartsheatmap) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
+
+### Ausgabevariable
+
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewHeatmap` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
+
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
+
+### Öffentliche PHP-Funktionen
+
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
+
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECHM_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECHM_GetHeatmapData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
+| `ECHM_GetHeatmapDiagnostic(int $InstanzID): string` | JSON-Momentaufnahme der Konfigurationsprüfung und letzten Fehlermeldung; kein Nachweis einer erfolgreichen Datenabfrage. |
+| `ECHM_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+| `ECHM_RefreshArchive(int $InstanzID): void` | Aktualisiert die Diagrammausgaben aus den konfigurierten Quellen. Kein Erfolgswert und keine Änderung von Quellen/Archiven. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
+
+```php
+$instanceID = 12000;
+$model = json_decode(ECHM_GetHeatmapData($instanceID), true, 512, JSON_THROW_ON_ERROR);
+```
+
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
+
+## Lizenz
+
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

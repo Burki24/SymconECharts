@@ -1,0 +1,669 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Funnel stages",
+            "rowCount": 6,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "caption": "Variable",
+                    "name": "VariableID",
+                    "width": "320px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "caption": "Label (optional)",
+                    "name": "Label",
+                    "width": "220px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Initially visible",
+                    "name": "InitiallyVisible",
+                    "width": "130px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
+                    "caption": "Stage color (optional)",
+                    "name": "Color",
+                    "width": "160px",
+                    "add": -1,
+                    "edit": {
+                        "type": "SelectColor",
+                        "allowTransparent": true
+                    }
+                }
+            ],
+            "form": [
+                {
+                    "type": "SelectVariable",
+                    "name": "VariableID",
+                    "caption": "Variable",
+                    "validVariableTypes": [
+                        1,
+                        2
+                    ]
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Label",
+                    "caption": "Label (optional)"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "InitiallyVisible",
+                    "caption": "Initially visible"
+                },
+                {
+                    "type": "SelectColor",
+                    "name": "Color",
+                    "caption": "Stage color (optional)",
+                    "allowTransparent": true,
+                    "transparentCaption": "Automatic (theme)"
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Choose 1 to 32 distinct numeric variables with the same unit and non-negative current values. List order is used by default. Widths always use the largest configured value, including hidden stages, not percentages of a total."
+        },
+        {
+            "type": "CheckBox",
+            "name": "EnableSourceSelection",
+            "caption": "Enable source selection"
+        },
+        {
+            "type": "Label",
+            "caption": "Initially visible is used only when source selection is enabled. Large lists use stage navigation; all configured sources continue to be read."
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate Funnel"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "Orientation",
+                            "caption": "Orientation",
+                            "options": [
+                                {
+                                    "caption": "Vertical",
+                                    "value": "vertical"
+                                },
+                                {
+                                    "caption": "Horizontal",
+                                    "value": "horizontal"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowTooltip",
+                            "caption": "Show tooltip"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "SortOrder",
+                            "caption": "Stage order",
+                            "options": [
+                                {
+                                    "caption": "List order",
+                                    "value": "configured"
+                                },
+                                {
+                                    "caption": "Ascending values",
+                                    "value": "ascending"
+                                },
+                                {
+                                    "caption": "Descending values",
+                                    "value": "descending"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "Alignment",
+                            "caption": "Cross-axis alignment",
+                            "options": [
+                                {
+                                    "caption": "Start edge",
+                                    "value": "start"
+                                },
+                                {
+                                    "caption": "Centered",
+                                    "value": "center"
+                                },
+                                {
+                                    "caption": "End edge",
+                                    "value": "end"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "Gap",
+                            "caption": "Stage gap",
+                            "minimum": 0,
+                            "maximum": 30,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "MinSizePercent",
+                            "caption": "Minimum visual size",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%",
+                            "width": "220px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "MaxSizePercent",
+                            "caption": "Maximum visual size",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "suffix": "%",
+                            "width": "220px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowLabels",
+                            "caption": "Show stage labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowValues",
+                            "caption": "Show current values"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "LabelPosition",
+                            "caption": "Label position",
+                            "options": [
+                                {
+                                    "caption": "Inside",
+                                    "value": "inside"
+                                },
+                                {
+                                    "caption": "Outside",
+                                    "value": "outside"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "OutsideLabelSide",
+                            "caption": "Outside label side",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Start edge",
+                                    "value": "start"
+                                },
+                                {
+                                    "caption": "End edge",
+                                    "value": "end"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LabelMaxWidth",
+                            "caption": "Label width (0 = automatic)",
+                            "minimum": 0,
+                            "maximum": 300,
+                            "suffix": "px",
+                            "width": "220px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "HideOverlappingLabels",
+                            "caption": "Hide overlapping labels"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowLabelLines",
+                            "caption": "Show guide lines"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LabelLineLength",
+                            "caption": "Guide line length",
+                            "minimum": 0,
+                            "maximum": 60,
+                            "suffix": "px",
+                            "width": "220px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LabelLineWidth",
+                            "caption": "Guide line width",
+                            "minimum": 0,
+                            "maximum": 5,
+                            "suffix": "px",
+                            "width": "220px"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "LabelLineType",
+                            "caption": "Guide line type",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "caption": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "LabelLineColor",
+                            "caption": "Guide line color",
+                            "width": "225px",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LabelLineOpacityPercent",
+                            "caption": "Guide line opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%",
+                            "width": "220px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LabelFontSizePercent",
+                            "caption": "Label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "FontFamily",
+                            "caption": "Font family",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Arial",
+                                    "value": "Arial, sans-serif"
+                                },
+                                {
+                                    "caption": "Verdana",
+                                    "value": "Verdana, sans-serif"
+                                },
+                                {
+                                    "caption": "Georgia",
+                                    "value": "Georgia, serif"
+                                },
+                                {
+                                    "caption": "Monospace",
+                                    "value": "monospace"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "TitleColor",
+                            "caption": "Title color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "LabelColor",
+                            "caption": "Label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "TitleBold",
+                            "caption": "Bold title"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "LabelBold",
+                            "caption": "Bold labels"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BorderWidth",
+                            "caption": "Border width",
+                            "minimum": 0,
+                            "maximum": 8,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "BorderColor",
+                            "caption": "Border color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "OpacityPercent",
+                            "caption": "Stage opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "BorderType",
+                            "caption": "Border type",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "caption": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ShadowBlur",
+                            "caption": "Shadow blur",
+                            "minimum": 0,
+                            "maximum": 20,
+                            "suffix": "px",
+                            "width": "220px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "ShadowColor",
+                            "caption": "Shadow color",
+                            "width": "225px",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ShadowOffsetX",
+                            "caption": "Shadow offset X",
+                            "minimum": -20,
+                            "maximum": 20,
+                            "suffix": "px",
+                            "width": "220px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ShadowOffsetY",
+                            "caption": "Shadow offset Y",
+                            "minimum": -20,
+                            "maximum": 20,
+                            "suffix": "px",
+                            "width": "220px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "HoverFocus",
+                            "caption": "Highlight on hover",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Highlight hovered stage",
+                                    "value": "self"
+                                },
+                                {
+                                    "caption": "No highlighting",
+                                    "value": "none"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BlurOpacityPercent",
+                            "caption": "Other stages opacity (-1 = automatic)",
+                            "minimum": -1,
+                            "maximum": 100,
+                            "suffix": "%",
+                            "width": "220px"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Funnel is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Funnel variables are invalid"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Funnel settings are invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "Funnel values could not be loaded"
+        },
+        {
+            "code": 205,
+            "icon": "error",
+            "caption": "Funnel requires non-negative values."
+        }
+    ]
+}

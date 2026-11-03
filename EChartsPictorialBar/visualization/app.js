@@ -1,0 +1,387 @@
+(function () {
+    'use strict';
+
+    var bootstrap = window.SYMC_VISUALIZATION || {};
+    var design = window.SYMC_ECHARTS_DESIGN;
+    var rootElement = document.getElementById('echarts-pictorial-bar-root');
+    var chartElement = document.getElementById('echarts-pictorial-bar-chart');
+    var emptyElement = document.getElementById('echarts-pictorial-bar-empty');
+    var errorElement = document.getElementById('echarts-pictorial-bar-error');
+    var warningElement = document.getElementById('echarts-pictorial-bar-warning');
+    var chart = null;
+    var currentState = bootstrap.state || null;
+    var currentTheme = null;
+    var categoryAnchor = null;
+    var categoryStart = 0;
+
+    function currentCategoryWindow() {
+        if (!chart || typeof chart.getOption !== 'function') { return null; }
+        var option = chart.getOption();
+        var zoom = (option.dataZoom || []).find(function (entry) { return entry.id === 'category-scroll'; });
+        if (!zoom) { return null; }
+        var axes = zoom.orient === 'vertical' ? option.yAxis : option.xAxis;
+        var ids = axes && axes[0] && axes[0].data || [];
+        var start = Number(zoom.startValue);
+        if (!Number.isFinite(start)) {
+            start = ids.indexOf(zoom.startValue);
+            if (start < 0) { start = (Number(zoom.start) || 0) * Math.max(0, ids.length - 1) / 100; }
+        }
+        return {start:Math.max(0,Math.ceil(start-1e-8)),ids:ids};
+    }
+    function rememberCategoryWindow() {
+        var window = currentCategoryWindow();
+        if (!window) { return; }
+        categoryStart = window.start;
+        categoryAnchor = window.ids[categoryStart] || null;
+    }
+
+    var tileHeaderInset = (bootstrap.options && bootstrap.options.tileHeaderInset) || 0;
+    var chartBootstrap = tileHeaderInset ? { mode: 'symcon', options: { tileHeaderVisible: false } } : bootstrap;
+    chartElement.style.top = tileHeaderInset + 'px';
+    chartElement.style.height = tileHeaderInset ? 'calc(100% - ' + tileHeaderInset + 'px)' : '100%';
+
+    function translate(text) { return (bootstrap.translations || {})[text] || text; }
+    var retainOnTransientError = design.createTransientFailureRetainer(
+        chartElement, warningElement, translate, 'The PictorialBar values could not be loaded.'
+    );
+    function normalizeTheme(theme) {
+        var palettes = bootstrap.options && bootstrap.options.echartsThemes || {};
+        return Object.prototype.hasOwnProperty.call(palettes, theme) ? theme : 'auto';
+    }
+    function escapeHTML(value) {
+        return String(value).replace(/[&<>"']/g, function (character) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
+        });
+    }
+    function palette(theme) {
+        var palettes = bootstrap.options && bootstrap.options.echartsThemes || {};
+        return palettes[theme] || palettes.auto || {
+            background: '#151619', text: '#F4F5F7', muted: '#969AA2',
+            border: '#A5A9B0', accent: '#55CBB5'
+        };
+    }
+    function resolveColor(variable, fallback) {
+        var probe = document.createElement('span');
+        probe.style.color = 'var(' + variable + ', ' + fallback + ')';
+        probe.style.display = 'none';
+        document.body.appendChild(probe);
+        var resolved = window.getComputedStyle(probe).color;
+        probe.remove();
+        return resolved || fallback;
+    }
+    function colorsFor(theme) {
+        var colors = palette(theme);
+        if (theme !== 'auto') { return colors; }
+        return {
+            background: resolveColor('--symc-background', colors.background),
+            text: resolveColor('--symc-text', colors.text),
+            muted: resolveColor('--symc-text-muted', colors.muted),
+            border: resolveColor('--symc-border', colors.border),
+            accent: resolveColor('--symc-accent', colors.accent),
+            seriesColors: colors.seriesColors
+        };
+    }
+    // Scale a validated path without SVG markup, script evaluation or font loading.
+    // Uniform scaling preserves arcs and the selected icon's aspect ratio.
+    function iconPath(path, scale, tx, ty) {
+        var tokens = path.match(/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/g) || [];
+        var arities = {M:2,L:2,H:1,V:1,C:6,S:4,Q:4,T:2,A:7,Z:0};
+        var result = '', first = true, index = 0;
+        var n = function(v) { return Math.round(v * 10000) / 10000; };
+        while (index < tokens.length) {
+            var command = tokens[index++], upper = command.toUpperCase(), arity = arities[upper];
+            if (arity == null || (first && upper !== 'M')) { throw new Error('Invalid icon path'); }
+            result += command;
+            if (!arity) { continue; }
+            var groups = 0;
+            while (index < tokens.length && !/^[a-zA-Z]$/.test(tokens[index])) {
+                var args = tokens.slice(index, index + arity).map(Number);
+                if (args.length !== arity || args.some(function(v) { return !Number.isFinite(v); })) { throw new Error('Invalid icon path'); }
+                index += arity;
+                var absolute = command === upper;
+                args = args.map(function(v, i) {
+                    if (upper === 'A' && i >= 2 && i <= 4) { return v; }
+                    var offset = upper === 'H' ? tx : upper === 'V' ? ty : (i % 2 ? ty : tx);
+                    if (upper === 'A') { offset = i === 5 ? tx : i === 6 ? ty : 0; }
+                    return n(v * scale + ((absolute || (first && upper === 'M' && groups === 0)) ? offset : 0));
+                });
+                result += args.join(' ') + ' ';
+                groups++;
+                first = false;
+            }
+            if (!groups) { throw new Error('Invalid icon path'); }
+        }
+        return result;
+    }
+    // One bounded compound shape gives all
+    // repeated glyphs the same gradient coordinate system without renderer hooks.
+    function gradientGroupPath(kind, horizontal, major, width, size, crossSize, gap, icon, limit) {
+        var n = function(value) { return Math.round(value * 10000) / 10000; };
+        var w = horizontal ? major : width, h = horizontal ? width : major;
+        var path = 'M0 0L0 0M' + n(w) + ' ' + n(h) + 'L' + n(w) + ' ' + n(h);
+        size = Math.min(size, major);
+        var count = Math.max(1, Math.min(limit, Math.floor((major + 2 * gap) / (size + 2 * gap))));
+        var step = count > 1 ? (major - size) / (count - 1) : 0;
+        for (var i = 0; i < count; i++) {
+            var x = horizontal ? i * step : (width - crossSize) / 2;
+            var y = horizontal ? (width - crossSize) / 2 : major - size - i * step;
+            var sw = horizontal ? size : crossSize, sh = horizontal ? crossSize : size;
+            var x2 = x + sw, y2 = y + sh, cx = x + sw / 2, cy = y + sh / 2;
+            if (kind === 'icon' || kind === 'svg') {
+                var scale = Math.min(sw / icon.symbolWidth, sh / icon.symbolHeight);
+                path += iconPath(icon.symbolPath,scale,x+(sw-icon.symbolWidth*scale)/2-(icon.symbolMinimumX || 0)*scale,
+                    y+(sh-icon.symbolHeight*scale)/2-(icon.symbolMinimumY || 0)*scale);
+            } else if (kind === 'circle') {
+                path += 'M' + n(x2) + ' ' + n(cy) + 'A' + n(sw/2) + ' ' + n(sh/2) + ' 0 1 0 ' + n(x) + ' ' + n(cy)
+                    + 'A' + n(sw/2) + ' ' + n(sh/2) + ' 0 1 0 ' + n(x2) + ' ' + n(cy) + 'Z';
+            } else if (kind === 'diamond' || kind === 'triangle') {
+                path += 'M' + n(cx) + ' ' + n(y) + 'L' + n(x2) + ' ' + n(kind === 'diamond' ? cy : y2)
+                    + (kind === 'diamond' ? 'L' + n(cx) + ' ' + n(y2) : '') + 'L' + n(x) + ' ' + n(kind === 'diamond' ? cy : y2) + 'Z';
+            } else if (kind === 'roundRect') {
+                var r = Math.min(sw, sh) / 4;
+                path += 'M' + n(x+r) + ' ' + n(y) + 'L' + n(x2-r) + ' ' + n(y) + 'Q' + n(x2) + ' ' + n(y) + ' ' + n(x2) + ' ' + n(y+r)
+                    + 'L' + n(x2) + ' ' + n(y2-r) + 'Q' + n(x2) + ' ' + n(y2) + ' ' + n(x2-r) + ' ' + n(y2)
+                    + 'L' + n(x+r) + ' ' + n(y2) + 'Q' + n(x) + ' ' + n(y2) + ' ' + n(x) + ' ' + n(y2-r)
+                    + 'L' + n(x) + ' ' + n(y+r) + 'Q' + n(x) + ' ' + n(y) + ' ' + n(x+r) + ' ' + n(y) + 'Z';
+            } else {
+                path += 'M' + n(x) + ' ' + n(y) + 'L' + n(x2) + ' ' + n(y) + 'L' + n(x2) + ' ' + n(y2) + 'L' + n(x) + ' ' + n(y2) + 'Z';
+            }
+        }
+        return 'path://' + path;
+    }
+    function buildOption(model, theme) {
+        var colors = colorsFor(theme);
+        var bar = model.pictorialBar || {};
+        var style = bar.style || {};
+        var items = (bar.data || []).slice();
+        if (style.sortOrder === 'ascending' || style.sortOrder === 'descending') {
+            items.sort(function (a,b) { return (style.sortOrder === 'ascending' ? a.value-b.value : b.value-a.value) || a.order-b.order; });
+        }
+        var horizontal = style.orientation !== 'vertical';
+        var width = chartElement.clientWidth || 1;
+        var height = chartElement.clientHeight || 1;
+        var axisFont = design.fontSizePercent(style.axisFontSizePercent, width < 430 ? 10 : 12);
+        var valueFont = design.fontSizePercent(style.valueFontSizePercent, width < 430 ? 10 : 12);
+        var titleSize = design.fontSizePercent(style.titleFontSizePercent,18);
+        var title = design.chartTitleLayout(chartBootstrap,bar.title,titleSize);
+        var top = title.contentTop + axisFont + 14;
+        var fontFamily = style.fontFamily || 'Arial, sans-serif';
+        var left = horizontal && style.showLabels !== false ? Math.min(width * 0.32,axisFont * 11 + 14) : Math.min(width * 0.22,axisFont * 5);
+        var right = horizontal && style.showValues !== false ? Math.min(width * 0.28,valueFont * 8 + 14) : 20;
+        var bottom = horizontal ? axisFont * 2 + 22 : (style.showLabels !== false ? axisFont * 3 + 20 : 24);
+        var scroll = items.length > 16;
+        if (scroll) {
+            if (horizontal) { right += 28; } else { bottom += 28; }
+        }
+        if (horizontal && style.showLabels !== false) {
+            var requestedColumn = Number(style.labelColumnWidthPercent) || 0;
+            var canvas = document.createElement('canvas');
+            var context = canvas.getContext && canvas.getContext('2d');
+            if (context) { context.font = axisFont + 'px ' + fontFamily; }
+            var measured = items.reduce(function (maximum, item) {
+                var text = String(item.label || '');
+                return Math.max(maximum, context ? context.measureText(text).width : Array.from(text).length * axisFont * 0.6);
+            }, 0) + 20;
+            // The column scales with the chart, but never consumes the minimum
+            // value area or the reserved value labels/category navigator.
+            var columnLimit = Math.max(1,width - right - Math.min(80,width * 0.25));
+            left = Math.min(columnLimit, requestedColumn > 0 ? width * requestedColumn / 100 : Math.min(width * 0.6,Math.max(40,measured)));
+        }
+        var visibleCount = scroll ? Math.max(1, Math.min(16, Math.floor(
+            (horizontal ? height - top - bottom : width - left - right) / Math.max(horizontal ? 24 : 44, axisFont * 1.8, valueFont * 1.8)
+        ))) : items.length;
+        var anchorIndex = items.findIndex(function (item) { return item.id === categoryAnchor; });
+        var first = Math.min(Math.max(0, items.length - visibleCount), Math.max(0, anchorIndex >= 0 ? anchorIndex : categoryStart));
+        var major = Math.max(1,horizontal ? width-left-right : height-top-bottom);
+        var cross = Math.max(1,(horizontal ? height-top-bottom : width-left-right)/Math.max(1,visibleCount));
+        var maximum = bar.normalized === true ? 100 : style.scaleMaximum > 0 ? style.scaleMaximum : Math.max.apply(null,[1].concat(items.map(function(x){return x.value;})));
+        var barWidth = Math.max(1,Math.min(style.barWidth || 40,cross*0.65));
+        // Complex glyphs use fewer/larger repeats. Keep path construction bounded.
+        var customShape = style.symbol === 'icon' || style.symbol === 'svg';
+        var limit = customShape ? Math.max(1,Math.min(64,Math.floor(262144/((style.symbolPath || '').length*16+256)))) : 128;
+        var size = Math.max(4,style.symbolSize || 12,Math.ceil(major/limit));
+        var crossSize = Math.max(1,Math.min(size,barWidth));
+        var repeated = style.symbolRepeat !== false;
+        var gradient = style.colorMode === 'gradient';
+        var compound = repeated && (gradient || customShape);
+        var minX = style.symbolMinimumX || 0, minY = style.symbolMinimumY || 0;
+        var maxX = minX + style.symbolWidth, maxY = minY + style.symbolHeight;
+        var singleSymbol = customShape ? 'path://M'+minX+' '+minY+'L'+minX+' '+minY+'M'+maxX+' '+maxY+'L'+maxX+' '+maxY+' '+style.symbolPath
+            : style.symbol || 'rect';
+        function rampColor(value) {
+            var minimum = style.colorMinimum == null ? 0 : style.colorMinimum;
+            var maximum = style.colorMaximum == null ? 100 : style.colorMaximum;
+            var ratio = Math.max(0, Math.min(1, (value - minimum) / (maximum - minimum || 1)));
+            var stops = [style.lowColor || '#ee6666', style.middleColor || '#fac858', style.highColor || '#91cc75'];
+            return design.interpolateColorStops(stops, ratio);
+        }
+        function itemColor(item) {
+            if (style.colorMode === 'value') { return rampColor(item.value); }
+            if (!gradient) { return item.color || (colors.seriesColors || [colors.accent])[item.order % (colors.seriesColors || [colors.accent]).length]; }
+            var domain = repeated ? maximum : Math.min(maximum, item.value);
+            if (domain <= 0) { return rampColor(0); }
+            var low = style.colorMinimum == null ? 0 : style.colorMinimum;
+            var high = style.colorMaximum == null ? 100 : style.colorMaximum;
+            var points = [0].concat([low, low + (high-low)/2, high].filter(function(v) { return v > 0 && v < domain; }), [domain]);
+            // Trim the ramp to the visible domain: avoid huge gradient coordinates
+            // for small values, but never renormalize the configured color range.
+            return {type:'linear',x:0,y:horizontal ? 0 : 1,x2:horizontal ? 1 : 0,y2:0,global:false,
+                colorStops:points.map(function(v) { return {offset:v/domain,color:rampColor(v)}; })};
+        }
+        var valuePositions = horizontal ? {outside:'right',inside:'inside',insideStart:'insideLeft',insideEnd:'insideRight'}
+            : {outside:'top',inside:'inside',insideStart:'insideBottom',insideEnd:'insideTop'};
+        function gradientLabelLayout(params) {
+            // LabelLayout uses the filtered inner index; tooltip/formatter use
+            // raw indices. Resolve the current category window via the public
+            // chart API so a native drag does not need a renderer rebuild.
+            var window = scroll ? currentCategoryWindow() : null;
+            var item = items[(window ? window.start : 0) + params.dataIndex];
+            if (!item) { return {hideOverlap:true}; }
+            var length = major * (Math.min(maximum, item.value) / maximum);
+            var distance = style.valueDistance == null ? 5 : style.valueDistance;
+            var position = style.valuePosition || 'outside';
+            var along = position === 'inside' ? length/2 : position === 'insideStart' ? distance
+                : position === 'insideEnd' ? length-distance : length+distance;
+            var center = params.rect ? (horizontal ? params.rect.y + params.rect.height / 2 : params.rect.x + params.rect.width / 2)
+                : (horizontal ? top : left) + (params.dataIndex - first + 0.5) * cross;
+            // The compound path spans the full scale for clipping. Anchor labels
+            // at the measured value, not its full-scale invisible bounds.
+            return {x:horizontal ? left+along : center,y:horizontal ? center : height-bottom-along,
+                align:horizontal ? (position === 'inside' ? 'center' : position === 'insideEnd' ? 'right' : 'left') : 'center',
+                verticalAlign:horizontal || position === 'inside' ? 'middle' : position === 'insideEnd' ? 'top' : 'bottom',
+                hideOverlap:style.hideOverlap !== false};
+        }
+        var labels = Object.create(null);
+        items.forEach(function(x){labels[x.id]=x.label;});
+        function format(item) {
+            return Number(bar.normalized === true ? item.originalValue : item.value).toLocaleString(bootstrap.language || undefined,{maximumFractionDigits:item.decimals == null ? 2 : item.decimals})
+                + (item.unit ? ' '+item.unit : '');
+        }
+        function normalizationText(item) {
+            if (bar.normalized !== true) { return ''; }
+            function number(value) { return Number(value).toLocaleString(bootstrap.language || undefined,{maximumFractionDigits:2}); }
+            return translate('Normalized')+': '+number(item.value)+' / 100; '+translate('Source range')+': '
+                +number(item.minimum)+' – '+number(item.maximum)+(item.unit ? ' '+item.unit : '');
+        }
+        var category = {type:'category',data:items.map(function(x){return x.id;}),inverse:horizontal,
+            axisLabel:{show:style.showLabels !== false,fontSize:axisFont,color:style.axisColor || colors.text,
+                rotate:style.categoryLabelRotate || 0,fontFamily:fontFamily,
+                width:horizontal ? Math.max(8,left-16) : Math.max(10,cross-6),
+                overflow:'truncate',hideOverlap:true,interval:'auto',formatter:function(id){return labels[id] || '';}},
+            axisTick:{show:style.showAxisTicks === true},axisLine:{lineStyle:{color:colors.border}}};
+        var value = {type:'value',min:0,max:maximum,name:bar.normalized === true ? translate('Normalized (0–100)') : bar.unit || '',nameLocation:horizontal?'middle':'end',
+            nameGap:horizontal?axisFont+18:15,nameTextStyle:{fontSize:axisFont,color:style.axisColor || colors.text},
+            axisLabel:{show:style.showAxisValues !== false,fontSize:axisFont,fontFamily:fontFamily,color:style.axisColor || colors.text,hideOverlap:true},
+            axisTick:{show:style.showAxisTicks === true},
+            splitLine:{show:style.showGrid !== false,lineStyle:{color:style.gridColor || colors.border,
+                width:style.gridWidth == null ? 1 : style.gridWidth,type:style.gridType || 'solid',
+                opacity:style.gridOpacityPercent == null ? 0.25 : style.gridOpacityPercent/100}}};
+        return {
+            ...design.animationOptions(style,{enabled:true,initialDuration:350,updateDuration:500}),
+            backgroundColor:'transparent',textStyle:{fontFamily:fontFamily,color:colors.text},
+            aria:{enabled:true,label:{description:(bar.title || 'PictorialBar')+'. '+items.map(function(item){return item.label+': '+format(item)+(bar.normalized === true ? '; '+normalizationText(item) : '');}).join('; ')}},
+            title:{show:title.show,text:bar.title || '',left:'center',top:title.top,textStyle:{
+                color:style.titleColor || colors.text,fontSize:titleSize,fontFamily:fontFamily,fontWeight:style.titleBold === false?'normal':'bold',
+                overflow:'truncate',width:Math.max(1,width-36)}},
+            grid:{left:left,right:right,top:top,bottom:bottom,containLabel:false},
+            xAxis:horizontal?value:category,yAxis:horizontal?category:value,
+            dataZoom:scroll ? [
+                {id:'category-scroll',type:'slider',...(horizontal ? {yAxisIndex:0,orient:'vertical',right:6,width:12,top:top,bottom:bottom}
+                    : {xAxisIndex:0,orient:'horizontal',bottom:4,height:12,left:left,right:right}),
+                    startValue:first,endValue:first+visibleCount-1,filterMode:'filter',zoomLock:true,showDetail:false,
+                    showDataShadow:false,brushSelect:false,borderColor:colors.border,fillerColor:colors.muted},
+                {id:'category-scroll-inside',type:'inside',...(horizontal ? {yAxisIndex:0} : {xAxisIndex:0}),
+                    startValue:first,endValue:first+visibleCount-1,filterMode:'filter',zoomLock:true,
+                    zoomOnMouseWheel:false,moveOnMouseWheel:true,moveOnMouseMove:true}
+            ] : [],
+            tooltip:{show:style.showTooltip !== false,trigger:'item',confine:true,
+                extraCssText:'max-width:'+Math.max(80,width-24)+'px;white-space:normal;overflow-wrap:anywhere;',
+                formatter:function(p){var item=items[p.dataIndex];return item?escapeHTML(item.label)+'<br>'+escapeHTML(format(item))
+                    +(bar.normalized === true ? '<br>'+escapeHTML(normalizationText(item)) : ''):'';}},
+            series:[{type:'pictorialBar',symbol:compound
+                ? gradientGroupPath(style.symbol || 'rect',horizontal,major,barWidth,size,crossSize,style.symbolGap == null ? 2 : style.symbolGap,style,limit)
+                : singleSymbol,
+                symbolRepeat:repeated && !compound,symbolRepeatDirection:'start',
+                symbolSize:repeated && !compound?(horizontal?[size,crossSize]:[crossSize,size]):['100%','100%'],
+                symbolMargin:style.symbolGap == null ? 2 : style.symbolGap,symbolClip:repeated,
+                ...(repeated?{symbolBoundingData:maximum}:{}),symbolPosition:'start',barWidth:barWidth,clip:true,
+                itemStyle:{opacity:style.opacityPercent == null ? 0.9 : style.opacityPercent/100,
+                    borderWidth:style.borderWidth || 0,borderType:style.borderType || 'solid',
+                    shadowBlur:style.shadowBlur || 0,shadowColor:style.shadowColor || 'rgba(0,0,0,0.35)',
+                    shadowOffsetX:style.shadowOffsetX || 0,shadowOffsetY:style.shadowOffsetY || 0,
+                    ...(style.borderColor?{borderColor:style.borderColor}:{})},
+                emphasis:{disabled:style.emphasisDisabled === true,focus:style.focus || 'self'},
+                blur:{itemStyle:{opacity:style.blurOpacityPercent == null ? 0.1 : style.blurOpacityPercent/100}},
+                label:{show:style.showValues !== false,position:valuePositions[style.valuePosition || 'outside'],color:style.valueColor || colors.text,
+                    distance:style.valueDistance == null ? 5 : style.valueDistance,fontFamily:fontFamily,fontWeight:style.valueBold === true ? 'bold' : 'normal',
+                    fontSize:valueFont,overflow:'truncate',width:horizontal?Math.max(8,right-10-(scroll?28:0)):Math.max(12,cross*0.95),
+                    formatter:function(p){return items[p.dataIndex]?format(items[p.dataIndex]):'';}},
+                labelLayout:compound ? gradientLabelLayout : {hideOverlap:style.hideOverlap !== false},
+                data:items.map(function(x){return {id:x.id,name:x.label,value:Math.min(maximum,x.value),
+                    itemStyle:{color:itemColor(x),...(gradient && !style.borderColor ? {borderColor:itemColor(x)} : {})}};})
+            }]
+        };
+    }
+    function displayError(message) {
+        if (chart) { chart.clear(); }
+        chartElement.hidden = true;
+        emptyElement.hidden = true;
+        warningElement.hidden = true;
+        errorElement.textContent = translate(message || 'The PictorialBar values could not be loaded.');
+        errorElement.hidden = false;
+    }
+    function render(state) {
+        if (retainOnTransientError(state, currentState, chart)) { return; }
+        currentState = state;
+        if (!state || state.status !== 'ready' || !state.chart) {
+            displayError(state && state.error);
+            return;
+        }
+        var model = state.chart;
+        if (!window.echarts || typeof window.echarts.init !== 'function') {
+            displayError('Apache ECharts could not be initialized.');
+            return;
+        }
+        var wasHidden = chartElement.hidden;
+        chartElement.hidden = false;
+        errorElement.hidden = true;
+        emptyElement.hidden = true;
+        warningElement.hidden = true;
+        rootElement.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
+            ? 'transparent' : colorsFor(normalizeTheme(model.theme || 'auto')).background;
+        var theme = normalizeTheme(model.theme || 'auto');
+        rememberCategoryWindow();
+        if (chart && currentTheme !== theme) { chart.dispose(); chart = null; }
+        if (!chart) {
+            chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
+            currentTheme = theme;
+        } else if (wasHidden) {
+            chart.resize();
+        }
+        try {
+            chart.setOption(buildOption(model, theme), true);
+        } catch (error) {
+            var symbol = model.pictorialBar && model.pictorialBar.style.symbol;
+            displayError(symbol === 'svg' ? 'The custom SVG shape is invalid or unsupported. Use a path-only SVG with a viewBox.'
+                : symbol === 'icon' ? 'The selected Symcon icon is unavailable or unsupported.' : 'The PictorialBar values could not be loaded.');
+        }
+
+    }
+    window.handleMessage = function (message) {
+        var state = design.parseVisualizationState(message);
+        if (state) { render(state); }
+    };
+    if (window.ResizeObserver) {
+        new ResizeObserver(function () {
+            if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
+            if (currentState && currentState.status === 'ready') {
+                rememberCategoryWindow();
+                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+            }
+        }).observe(chartElement);
+    } else {
+        window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
+    }
+    window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
+    render(currentState);
+}());

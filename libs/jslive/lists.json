@@ -1,0 +1,547 @@
+{
+    "SymconJSLiveChart": {
+        "Axes": {
+            "AxesStackGroup": {
+                "types": [
+                    "number"
+                ]
+            },
+            "AxesStackOffset": {
+                "types": [
+                    "boolean"
+                ]
+            },
+            "AxesStackWeight": {
+                "types": [
+                    "number"
+                ]
+            },
+            "Bool": {
+                "types": [
+                    "boolean"
+                ]
+            },
+            "BoolFalse": {
+                "types": [
+                    "string"
+                ]
+            },
+            "BoolTrue": {
+                "types": [
+                    "string"
+                ]
+            },
+            "DynScale": {
+                "types": [
+                    "boolean"
+                ]
+            },
+            "Ident": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Max": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Maximum": {
+                "types": [
+                    "number"
+                ]
+            },
+            "Min": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Minimum": {
+                "types": [
+                    "number"
+                ]
+            },
+            "OverrideBoolText": {
+                "types": [
+                    "boolean"
+                ]
+            },
+            "OverrideMinMax": {
+                "types": [
+                    "boolean"
+                ]
+            },
+            "OverrideStepSize": {
+                "types": [
+                    "number"
+                ]
+            },
+            "Profile": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Side": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Steps": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Title": {
+                "types": [
+                    "string"
+                ]
+            },
+            "beginAtZero": {
+                "types": [
+                    "number"
+                ]
+            }
+        },
+        "Datasets": {
+            "Axes": {
+                "types": [
+                    "string"
+                ]
+            },
+            "BackgroundColor": {
+                "types": [
+                    "number"
+                ]
+            },
+            "BackgroundColor_Alpha": {
+                "types": [
+                    "number"
+                ]
+            },
+            "BorderColor": {
+                "types": [
+                    "number"
+                ]
+            },
+            "BorderColor_Alpha": {
+                "types": [
+                    "number"
+                ]
+            },
+            "BorderWidth": {
+                "types": [
+                    "number"
+                ]
+            },
+            "Dash": {
+                "rows": {
+                    "Length": {
+                        "types": [
+                            "number"
+                        ]
+                    },
+                    "Order": {
+                        "types": [
+                            "number"
+                        ]
+                    }
+                },
+                "types": [
+                    "array",
+                    "string"
+                ]
+            },
+            "HighRes": {
+                "types": [
+                    "number"
+                ]
+            },
+            "MonotoneInterpolationMode": {
+                "types": [
+                    "boolean"
+                ]
+            },
+            "Offset": {
+                "types": [
+                    "number"
+                ]
+            },
+            "PointRadius": {
+                "types": [
+                    "number"
+                ]
+            },
+            "PointStyle": {
+                "types": [
+                    "string"
+                ]
+            },
+            "StackGroup": {
+                "types": [
+                    "number"
+                ]
+            },
+            "Tension": {
+                "types": [
+                    "number"
+                ]
+            },
+            "Title": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Type": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Variable": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_BackgroundColor": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_BackgroundColor_Alpha": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_BorderColor": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_BorderColor_Alpha": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_FontColor": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_enable": {
+                "types": [
+                    "boolean"
+                ]
+            },
+            "datalabels_showPrefix": {
+                "types": [
+                    "boolean"
+                ]
+            },
+            "datalabels_showSuffix": {
+                "types": [
+                    "boolean"
+                ]
+            }
+        },
+        "xaxes_override_list": {
+            "ID": {
+                "types": [
+                    "number"
+                ]
+            },
+            "Name": {
+                "types": [
+                    "string"
+                ]
+            },
+            "maxTicksLimit": {
+                "types": [
+                    "number"
+                ]
+            },
+            "stepSize": {
+                "types": [
+                    "number"
+                ]
+            }
+        }
+    },
+    "SymconJSLiveDoughnutPie": {
+        "Datasets": {
+            "Order": {
+                "types": [
+                    "number"
+                ]
+            },
+            "Profile": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Title": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Variables": {
+                "rows": {
+                    "BackgroundColor": {
+                        "types": [
+                            "number"
+                        ]
+                    },
+                    "BackgroundColor_Alpha": {
+                        "types": [
+                            "number"
+                        ]
+                    },
+                    "BorderColor": {
+                        "types": [
+                            "number"
+                        ]
+                    },
+                    "BorderColor_Alpha": {
+                        "types": [
+                            "number"
+                        ]
+                    },
+                    "BorderWidth": {
+                        "types": [
+                            "number"
+                        ]
+                    },
+                    "Label": {
+                        "types": [
+                            "string"
+                        ]
+                    },
+                    "Order": {
+                        "types": [
+                            "number"
+                        ]
+                    },
+                    "Variable": {
+                        "types": [
+                            "number"
+                        ]
+                    }
+                },
+                "types": [
+                    "array"
+                ]
+            },
+            "cutout": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_BackgroundColor": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_BackgroundColor_Alpha": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_BorderColor": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_BorderColor_Alpha": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_FontColor": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_anchoring": {
+                "types": [
+                    "string"
+                ]
+            },
+            "datalabels_enable": {
+                "types": [
+                    "boolean"
+                ]
+            },
+            "datalabels_showPrefix": {
+                "types": [
+                    "boolean"
+                ]
+            },
+            "datalabels_showSuffix": {
+                "types": [
+                    "boolean"
+                ]
+            }
+        }
+    },
+    "SymconJSLiveGauge": {
+        "Highlights": {
+            "From": {
+                "types": [
+                    "number"
+                ]
+            },
+            "HighlightColor": {
+                "types": [
+                    "number"
+                ]
+            },
+            "HighlightColor_Alpha": {
+                "types": [
+                    "number"
+                ]
+            },
+            "To": {
+                "types": [
+                    "number"
+                ]
+            }
+        },
+        "Ticks": {
+            "Value": {
+                "types": [
+                    "number"
+                ]
+            }
+        }
+    },
+    "SymconJSLiveProgressbar": {},
+    "SymconJSLiveRadarChart": {
+        "Datasets": {
+            "BackgroundColor": {
+                "types": [
+                    "number"
+                ]
+            },
+            "BackgroundColor_Alpha": {
+                "types": [
+                    "number"
+                ]
+            },
+            "BorderColor": {
+                "types": [
+                    "number"
+                ]
+            },
+            "BorderColor_Alpha": {
+                "types": [
+                    "number"
+                ]
+            },
+            "BorderWidth": {
+                "types": [
+                    "number"
+                ]
+            },
+            "Dash": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Mode": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Offset": {
+                "types": [
+                    "number"
+                ]
+            },
+            "Order": {
+                "types": [
+                    "number"
+                ]
+            },
+            "PointRadius": {
+                "types": [
+                    "number"
+                ]
+            },
+            "PointStyle": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Reference": {
+                "types": [
+                    "number"
+                ]
+            },
+            "Title": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Variable": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_BackgroundColor": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_BackgroundColor_Alpha": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_BorderColor": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_BorderColor_Alpha": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_FontColor": {
+                "types": [
+                    "number"
+                ]
+            },
+            "datalabels_enable": {
+                "types": [
+                    "boolean"
+                ]
+            },
+            "datalabels_showPrefix": {
+                "types": [
+                    "boolean"
+                ]
+            },
+            "datalabels_showSuffix": {
+                "types": [
+                    "boolean"
+                ]
+            }
+        },
+        "customScale": {
+            "Alias": {
+                "types": [
+                    "string"
+                ]
+            },
+            "Order": {
+                "types": [
+                    "number"
+                ]
+            },
+            "Value": {
+                "types": [
+                    "string"
+                ]
+            }
+        }
+    }
+}

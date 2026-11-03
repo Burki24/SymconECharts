@@ -1,0 +1,287 @@
+(function (global) {
+    'use strict';
+
+    function parseColor(color) {
+        var value = String(color || '').trim();
+        var match = value.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+        if (match) {
+            var hex = match[1];
+            if (hex.length === 3) {
+                hex = hex.split('').map(function (channel) { return channel + channel; }).join('');
+            }
+            return [
+                parseInt(hex.slice(0, 2), 16),
+                parseInt(hex.slice(2, 4), 16),
+                parseInt(hex.slice(4, 6), 16)
+            ];
+        }
+
+        match = value.match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i);
+        if (!match) { return null; }
+        return match.slice(1, 4).map(function (channel) {
+            return Math.max(0, Math.min(255, Number(channel) || 0));
+        });
+    }
+
+    function relativeLuminance(color) {
+        var channels = parseColor(color);
+        if (!channels) { return null; }
+        var linear = channels.map(function (channel) {
+            var normalized = channel / 255;
+            return normalized <= 0.04045
+                ? normalized / 12.92
+                : Math.pow((normalized + 0.055) / 1.055, 2.4);
+        });
+        return (0.2126 * linear[0]) + (0.7152 * linear[1]) + (0.0722 * linear[2]);
+    }
+
+    function contrastRatio(first, second) {
+        var firstLuminance = relativeLuminance(first);
+        var secondLuminance = relativeLuminance(second);
+        if (firstLuminance === null || secondLuminance === null) { return 0; }
+        return (Math.max(firstLuminance, secondLuminance) + 0.05)
+            / (Math.min(firstLuminance, secondLuminance) + 0.05);
+    }
+
+    function readableTextColor(background, firstCandidate, secondCandidate) {
+        var first = firstCandidate || '#FFFFFF';
+        var second = secondCandidate || '#111111';
+        return contrastRatio(background, first) >= contrastRatio(background, second) ? first : second;
+    }
+
+    function interpolateColorStops(stops, fraction) {
+        if (!Array.isArray(stops) || stops.length < 2) { return null; }
+        var position = Math.max(0, Math.min(1, Number(fraction) || 0)) * (stops.length - 1);
+        var index = Math.min(stops.length - 2, Math.floor(position));
+        var first = parseColor(stops[index]);
+        var second = parseColor(stops[index + 1]);
+        if (!first || !second) { return null; }
+        var weight = position - index;
+        return '#' + first.map(function (channel, offset) {
+            return Math.round(channel + (second[offset] - channel) * weight)
+                .toString(16).padStart(2, '0');
+        }).join('');
+    }
+
+    function opacityFromPercent(value, defaultPercent) {
+        var fallback = defaultPercent == null ? 100 : Number(defaultPercent);
+        if (!Number.isFinite(fallback)) { fallback = 100; }
+        var percent = value == null ? fallback : Number(value);
+        if (!Number.isFinite(percent)) { percent = fallback; }
+        return Math.max(0, Math.min(100, percent)) / 100;
+    }
+
+    function prefersReducedMotion() {
+        return typeof global.matchMedia === 'function'
+            && global.matchMedia('(prefers-reduced-motion: reduce)').matches === true;
+    }
+
+    function animationOptions(style, defaults) {
+        var settings = style || {};
+        var fallback = defaults || {};
+        var easings = [
+            'linear', 'quadraticInOut', 'cubicInOut', 'cubicOut',
+            'sinusoidalInOut', 'bounceOut', 'elasticOut'
+        ];
+        var enabled = settings.animationEnabled == null
+            ? fallback.enabled !== false : settings.animationEnabled === true;
+        var animate = enabled && !prefersReducedMotion();
+        function duration(value, defaultValue) {
+            var number = Number(value);
+            return Number.isInteger(number) && number >= 0 && number <= 3000 ? number : defaultValue;
+        }
+        function easing(value) {
+            return easings.indexOf(value) >= 0 ? value : 'cubicInOut';
+        }
+        var initialDuration = animate
+            ? duration(settings.animationDuration, fallback.initialDuration) : 0;
+        var updateDuration = animate
+            ? duration(settings.animationDurationUpdate, fallback.updateDuration) : 0;
+        return {
+            animation: animate,
+            animationDuration: initialDuration,
+            animationDurationUpdate: updateDuration,
+            animationEasing: easing(settings.animationEasing),
+            animationEasingUpdate: easing(settings.animationEasingUpdate),
+            animationDelay: initialDuration > 0 ? duration(settings.animationDelay, 0) : 0,
+            animationDelayUpdate: updateDuration > 0 ? duration(settings.animationDelayUpdate, 0) : 0
+        };
+    }
+
+    function colorWithAlpha(color, alpha) {
+        var hex = /^#([0-9a-f]{6})$/i.exec(color);
+        if (hex) {
+            return 'rgba('
+                + parseInt(hex[1].substring(0, 2), 16) + ','
+                + parseInt(hex[1].substring(2, 4), 16) + ','
+                + parseInt(hex[1].substring(4, 6), 16) + ','
+                + alpha + ')';
+        }
+
+        var rgb = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i.exec(color);
+        if (rgb) {
+            return 'rgba(' + rgb[1] + ',' + rgb[2] + ',' + rgb[3] + ',' + alpha + ')';
+        }
+
+        return color;
+    }
+
+    function barOutlineStyle(width, color, themeBorder) {
+        var pixels = Number(width);
+        if (!Number.isFinite(pixels) || pixels <= 0) {
+            return { borderWidth: 0 };
+        }
+        return { borderWidth: pixels, borderColor: color || themeBorder };
+    }
+
+    function resizeChartIfNeeded(chart, element) {
+        if (!chart || (typeof chart.isDisposed === 'function' && chart.isDisposed())
+            || (chart.getWidth() === element.clientWidth && chart.getHeight() === element.clientHeight)) {
+            return false;
+        }
+        chart.resize();
+        return true;
+    }
+
+    function parseVisualizationState(message) {
+        var state = message;
+        if (typeof message === 'string') {
+            try {
+                state = JSON.parse(message);
+            } catch (error) {
+                return null;
+            }
+        }
+        if (!state || typeof state !== 'object' || Array.isArray(state)
+            || (state.status !== 'ready' && state.status !== 'error')) {
+            return null;
+        }
+        if (state.status === 'ready' && (!state.chart || typeof state.chart !== 'object')) {
+            return null;
+        }
+        if (state.status === 'error' && (typeof state.error !== 'string' || state.error.length === 0)) {
+            return null;
+        }
+        return state;
+    }
+
+    function createTransientFailureRetainer(chartElement, warningElement, translate, transientError) {
+        var failures = 0;
+        return function (state, previousState, chart) {
+            if (state && state.status === 'error' && state.error === transientError
+                && chart && previousState && previousState.status === 'ready'
+                && chartElement.hidden === false) {
+                failures++;
+                warningElement.textContent = translate('Data could not be refreshed. Showing the last available values.');
+                warningElement.hidden = failures < 2;
+                return true;
+            }
+            if (state !== previousState) {
+                failures = 0;
+                warningElement.hidden = true;
+            }
+            return false;
+        };
+    }
+
+    function fontSizePercent(value, base) {
+        var percent = Number(value);
+        return Math.round(base * (Number.isFinite(percent) && percent >= 50 && percent <= 200 ? percent : 100) / 100);
+    }
+
+    function chartTitleLayout(bootstrap, title, fontSize, gap) {
+        var tileHeaderInset = (bootstrap.options && bootstrap.options.tileHeaderInset) || 0;
+        var tileHeaderVisible = tileHeaderInset > 0;
+        var headerInset = tileHeaderInset || 8;
+        var show = Boolean(title);
+        return {
+            show: show,
+            top: tileHeaderVisible ? headerInset : (bootstrap.mode === 'symcon' ? 8 : 4),
+            headerInset: headerInset,
+            contentTop: headerInset + (show ? fontSize + (gap === undefined ? 12 : gap) : 0)
+        };
+    }
+
+    function valueLabel(style, automaticPosition, allowedPositions, automaticDistance) {
+        var position = String(style.valueLabelPosition || 'auto');
+        return {
+            position: position !== 'auto' && allowedPositions.indexOf(position) >= 0
+                ? position : automaticPosition,
+            distance: Number.isFinite(Number(style.valueLabelDistance))
+                && Number(style.valueLabelDistance) >= 0 && Number(style.valueLabelDistance) <= 100
+                ? Number(style.valueLabelDistance) : automaticDistance
+        };
+    }
+
+    function gaugeLabelOffsets(series, style) {
+        function offset(base, x, y) {
+            var center = Array.isArray(base) ? base : [0, 0];
+            return [
+                Number(x) ? ((parseFloat(center[0]) || 0) + Number(x)) + '%' : center[0],
+                Number(y) ? ((parseFloat(center[1]) || 0) + Number(y)) + '%' : center[1]
+            ];
+        }
+        if (series.type !== 'gauge') { return series; }
+        var scaleOffset = Number(style.scaleLabelDistanceOffset) || 0;
+        if (scaleOffset !== 0 && series.axisLabel && series.axisLabel.show !== false) {
+            series.axisLabel.distance = (Number(series.axisLabel.distance) || 15) + scaleOffset;
+        }
+        if (series.title) {
+            series.title.offsetCenter = offset(series.title.offsetCenter,
+                style.titleOffsetXPercent, style.titleOffsetYPercent);
+        }
+        if (series.detail) {
+            series.detail.offsetCenter = offset(series.detail.offsetCenter,
+                style.valueOffsetXPercent, style.valueOffsetYPercent);
+        }
+        return series;
+    }
+
+    // Keep the native hierarchy view root on refresh/resize without persisting navigation.
+    function updateHierarchyChart(chart, option, actionName, enabled) {
+        var series = option.series && option.series[0];
+        var rootId = null;
+        if (enabled && series && typeof chart.getModel === 'function') {
+            var model = chart.getModel();
+            var current = model && model.getSeriesByIndex(0);
+            var root = current && current.id === series.id && typeof current.getViewRoot === 'function'
+                ? current.getViewRoot() : null;
+            rootId = root && typeof root.getId === 'function' ? root.getId() : null;
+        }
+        chart.setOption(option, true);
+        function groupPath(nodes, path) {
+            for (var node of nodes || []) {
+                if (!Array.isArray(node.children)) { continue; }
+                var next = path.concat(node.id);
+                var found = node.id === rootId ? next : groupPath(node.children, next);
+                if (found) { return found; }
+            }
+        }
+        var path = rootId && series && groupPath(series.data, []);
+        if (path && typeof chart.dispatchAction === 'function') {
+            (actionName === 'treemapRootToNode' ? path : [rootId]).forEach(function (id) {
+                chart.dispatchAction({type: actionName, seriesId: series.id, targetNodeId: id});
+            });
+        }
+    }
+
+    global.SYMC_ECHARTS_DESIGN = Object.freeze({
+        updateHierarchyChart: updateHierarchyChart,
+        contrastRatio: contrastRatio,
+        readableTextColor: readableTextColor,
+        interpolateColorStops: interpolateColorStops,
+        relativeLuminance: relativeLuminance,
+        opacityFromPercent: opacityFromPercent,
+        prefersReducedMotion: prefersReducedMotion,
+        animationOptions: animationOptions,
+        colorWithAlpha: colorWithAlpha,
+        barOutlineStyle: barOutlineStyle,
+        fontSizePercent: fontSizePercent,
+        chartTitleLayout: chartTitleLayout,
+        valueLabel: valueLabel,
+        gaugeLabelOffsets: gaugeLabelOffsets,
+        resizeChartIfNeeded: resizeChartIfNeeded,
+        parseVisualizationState: parseVisualizationState,
+        createTransientFailureRetainer: createTransientFailureRetainer
+    });
+}(window));

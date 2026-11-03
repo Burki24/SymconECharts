@@ -1,0 +1,572 @@
+(function () {
+    'use strict';
+
+    var bootstrap = window.SYMC_VISUALIZATION || {};
+    var chartElement = document.getElementById('echarts-bar-polar-chart');
+    var errorElement = document.getElementById('echarts-bar-polar-error');
+    var warningElement = document.getElementById('echarts-bar-polar-warning');
+    var chart = null;
+    var currentState = bootstrap.state || null;
+    var currentTheme = null;
+    var lastWidth = 0;
+    var lastHeight = 0;
+    var pinnedItemId = null;
+    var echartsDesign = window.SYMC_ECHARTS_DESIGN;
+    var selection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
+    var navigation = window.SymconEChartsCategoryNavigation.create();
+    var pageItems = [];
+    var selectedItems = [];
+    var pageWindow = { first: 0, last: 0, visibleCount: 0 };
+    var controls = window.SYMC_ECHARTS_SOURCE_CONTROLS.create({
+        prefix: 'echarts-bar-polar', translate: translate,
+        change: function (id, visible) { selection.select(id, visible); render(currentState); },
+        all: function () { selection.selectAll(true); render(currentState); },
+        inverse: function () { selection.invert(); render(currentState); },
+        move: movePage
+    });
+    var controlsVisible = false;
+    var paletteIndices = Object.create(null);
+    var nextPaletteIndex = 0;
+
+    function translate(value) {
+        return (bootstrap.translations || {})[value] || value;
+    }
+    var retainOnTransientError = echartsDesign.createTransientFailureRetainer(
+        chartElement, warningElement, translate, 'The Polar values could not be loaded.'
+    );
+
+    function palette(theme) {
+        var palettes = bootstrap.options && bootstrap.options.echartsThemes || {};
+        return palettes[theme] || palettes.auto || {
+            background: '#151619', text: '#F4F5F7', muted: '#969AA2', border: '#A5A9B0',
+            accent: '#55CBB5', seriesColors: ['#55CBB5']
+        };
+    }
+
+    function resolveColor(variable, fallback) {
+        var probe = document.createElement('span');
+        probe.style.color = 'var(' + variable + ', ' + fallback + ')';
+        probe.style.display = 'none';
+        document.body.appendChild(probe);
+        var resolved = window.getComputedStyle(probe).color;
+        probe.remove();
+        return resolved || fallback;
+    }
+
+    function normalizeTheme(theme) {
+        var palettes = bootstrap.options && bootstrap.options.echartsThemes || {};
+        return Object.prototype.hasOwnProperty.call(palettes, theme) ? theme : 'auto';
+    }
+
+    function colorsFor(theme) {
+        var colors = palette(theme);
+        if (theme !== 'auto') { return colors; }
+        return {
+            background: resolveColor('--symc-background', colors.background),
+            text: resolveColor('--symc-text', colors.text),
+            muted: resolveColor('--symc-text-muted', colors.muted),
+            border: resolveColor('--symc-border', colors.border),
+            accent: resolveColor('--symc-accent', colors.accent),
+            seriesColors: colors.seriesColors
+        };
+    }
+
+    function formatValue(value, decimals, unit) {
+        return Number(value).toLocaleString(undefined, {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        }) + (unit ? ' ' + unit : '');
+    }
+
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function (character) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
+        });
+    }
+
+    function orderedItems(items, order) {
+        var result = items.slice();
+        if (order === 'ascending' || order === 'descending') {
+            result.sort(function (left, right) {
+                var difference = Number(left.value) - Number(right.value);
+                return (order === 'ascending' ? difference : -difference)
+                    || Number(left.order) - Number(right.order);
+            });
+        }
+        return result;
+    }
+
+    function fontSize(value, fallback) {
+        var size = Number(value);
+        return Number.isInteger(size) && size >= 8 && size <= 24 ? size : fallback;
+    }
+
+    function polarLayout(polar, labels) {
+        var style = polar.style || {};
+        var width = Math.max(1, chartElement.clientWidth || 1);
+        var height = Math.max(1, chartElement.clientHeight || 1);
+        var headerInset = ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8);
+        var labelWidth = Math.min(90, Math.max(36, Math.round(width * 0.13)));
+        var labelMargin = Math.min(24, Math.max(16, Math.round(width * 0.05)));
+        if (style.valueLabelPosition === 'outside') { labelMargin += 14; }
+        if (bootstrap.mode === 'ipsview' && style.showCategoryLabels !== false) {
+            var size = fontSize(style.categoryLabelFontSize, 10);
+            var getTextRect = window.echarts && window.echarts.format
+                && window.echarts.format.getTextRect;
+            var naturalWidth = (labels || []).reduce(function (maximum, label) {
+                var text = String(label || '');
+                var measured = typeof getTextRect === 'function'
+                    ? getTextRect(text, size + 'px sans-serif').width
+                    : Array.from(text).length * size * 0.7;
+                return Math.max(maximum, measured);
+            }, 0);
+            var availableWidth = Math.max(36, Math.min(320, Math.floor(width / 2 - labelMargin - 88)));
+            labelWidth = Math.min(availableWidth, Math.max(labelWidth, Math.ceil(naturalWidth) + 10));
+        }
+        var typography = window.SYMC_ECHARTS_DESIGN || {};
+        var titleSize = typeof typography.fontSizePercent === 'function'
+            ? typography.fontSizePercent(style.titleFontSizePercent, 18) : 18;
+        var top = headerInset + (polar.title ? 50 + Math.max(0, titleSize - 18) : 12);
+        var bottom = (style.showCategoryLabels !== false ? Math.min(45, height * 0.14) : 24)
+            + (controlsVisible ? (width < 260 ? 96 : 48) : 0);
+        var side = style.showCategoryLabels !== false ? labelWidth + labelMargin + 8
+            : style.valueLabelPosition === 'outside' ? 64 : 36;
+        var outerPercent = Math.max(20, Math.min(95, Number(style.outerRadiusPercent) || 76));
+        var innerPercent = Math.max(0, Math.min(75, Number(style.innerRadiusPercent) || 0));
+        var requestedRadius = Math.min(width, height) * outerPercent / 200;
+        var availableRadius = Math.max(1, Math.min(width / 2 - side, (height - top - bottom) / 2));
+        var outerRadius = Math.min(requestedRadius, availableRadius);
+        return {
+            geometry: {
+                center: [width / 2, (top + height - bottom) / 2],
+                radius: [outerRadius * innerPercent / outerPercent, outerRadius]
+            },
+            labelWidth: labelWidth,
+            labelMargin: labelMargin,
+            showValueScale: style.showGrid !== false && (outerRadius >= 110 || style.showValues !== true)
+        };
+    }
+
+    function projectItems(model) {
+        var polar = model.polar || {};
+        var style = polar.style || {};
+        var all = orderedItems(Array.isArray(model.items) ? model.items : [], style.sortOrder);
+        var originalItems = Array.isArray(model.items) ? model.items : [];
+        Object.keys(paletteIndices).forEach(function (id) {
+            if (!originalItems.some(function (item) { return item.id === id; })) { delete paletteIndices[id]; }
+        });
+        originalItems.forEach(function (item) {
+            if (!Object.prototype.hasOwnProperty.call(paletteIndices, item.id)) {
+                paletteIndices[item.id] = nextPaletteIndex++;
+            }
+        });
+        var enabled = polar.enableSourceSelection === true;
+        var visible = selection.reconcile(all.map(function (item) {
+            return { id: item.id, initiallyVisible: !enabled || item.initiallyVisible !== false };
+        }));
+        selectedItems = all.filter(function (item) { return !enabled || visible[item.id] !== false; });
+        controlsVisible = enabled || all.length > 16;
+        var layout = polarLayout(polar, all.map(function (item) { return item.label; }));
+        var size = Math.max(style.showCategoryLabels !== false ? fontSize(style.categoryLabelFontSize, 10) : 8,
+            style.showValues === true ? fontSize(style.valueLabelFontSize, 10) : 8);
+        var span = layout.geometry.radius[1] - layout.geometry.radius[0];
+        var angle = Math.max(30, Math.min(360, Number(style.angularSpan) || 360)) * Math.PI / 180;
+        var capacity = style.mode === 'tangential' ? Math.floor(span / (size * 1.8 + 6))
+            : Math.floor(layout.geometry.radius[1] * 0.75 * angle / (size * 5 + 12));
+        capacity = !controlsVisible ? all.length : Math.max(1, Math.min(32, capacity));
+        pageWindow = navigation.window(selectedItems.map(function (item) { return item.id; }), capacity);
+        pageItems = selectedItems.slice(pageWindow.first, pageWindow.last + 1);
+        controls.update({ items: all, selected: visible, enabled: enabled, visible: controlsVisible,
+            window: pageWindow, total: selectedItems.length });
+        return { all: all, items: pageItems, projected: controlsVisible };
+    }
+
+    function movePage(direction) {
+        if (!currentState || !selectedItems.length) { return; }
+        var index = Math.max(0, Math.min(selectedItems.length - pageWindow.visibleCount,
+            pageWindow.first + direction * pageWindow.visibleCount));
+        navigation.rememberWindow(selectedItems.map(function (item) { return item.id; }), index);
+        render(currentState);
+    }
+
+    function buildOption(model, theme) {
+        var colors = colorsFor(theme);
+        var design = window.SYMC_ECHARTS_DESIGN || {};
+        var polar = model.polar || {};
+        var style = polar.style || {};
+        var highlightMode = ['outline', 'focus', 'off'].indexOf(style.barHighlightMode) >= 0
+            ? style.barHighlightMode : 'standard';
+        var mode = style.mode === 'tangential' ? 'tangential' : 'radial';
+        var valueLabelPosition = ['middle', 'insideStart', 'insideEnd', 'outside', 'start', 'end']
+            .indexOf(style.valueLabelPosition) >= 0
+            ? style.valueLabelPosition : 'middle';
+        var projection = projectItems(model);
+        var items = projection.items;
+        var labels = items.map(function (item) { return String(item.label || ''); });
+        var defaultDecimals = Math.max(0, Math.min(6, Number(polar.decimals) || 0));
+        var unit = String(polar.unit || '');
+        var normalized = polar.normalized === true;
+        function originalValue(item) { return normalized ? item.originalValue : item.value; }
+        function originalUnit(item) { return normalized ? String(item.unit || '') : unit; }
+        function itemDecimals(item) {
+            return item && Number.isInteger(item.decimals)
+                ? Math.max(0, Math.min(6, item.decimals)) : defaultDecimals;
+        }
+        var swatches = colors.seriesColors || [colors.accent];
+        var titleVisible = Boolean(polar.title);
+        var headerInset = ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8);
+        var layout = polarLayout(polar, labels);
+        var categoryFontSize = fontSize(style.categoryLabelFontSize, 10);
+        var valueFontSize = fontSize(style.valueLabelFontSize, 10);
+        var scaleFontSize = fontSize(style.scaleLabelFontSize, 10);
+        var titleFontSize = design.fontSizePercent(style.titleFontSizePercent, 18);
+        var axisStyle = { color: style.gridColor || colors.border, opacity: style.gridColor ? 1 : 0.7 };
+        var splitStyle = { color: style.gridColor || colors.border, opacity: style.gridColor ? 1 : 0.2 };
+        var categoryAxis = {
+            type: 'category',
+            data: labels,
+            z: mode === 'tangential' ? 3 : 0,
+            axisLabel: {
+                show: style.showCategoryLabels !== false, color: style.categoryLabelColor || colors.text,
+                interval: 0, hideOverlap: true,
+                overflow: 'truncate', width: 90, fontSize: categoryFontSize, margin: 24,
+                textBorderColor: colors.background, textBorderWidth: mode === 'tangential' ? 3 : 0
+            },
+            axisLine: { show: style.showGrid !== false, lineStyle: axisStyle },
+            axisTick: { show: style.showGrid !== false, lineStyle: axisStyle },
+            splitLine: { show: style.showGrid !== false, lineStyle: splitStyle }
+        };
+        var valueAxis = {
+            type: 'value',
+            axisLabel: { show: layout.showValueScale, color: style.scaleLabelColor || colors.muted, fontSize: scaleFontSize },
+            axisLine: { show: style.showGrid !== false, lineStyle: axisStyle },
+            axisTick: { show: style.showGrid !== false, lineStyle: axisStyle },
+            splitLine: { show: style.showGrid !== false, lineStyle: splitStyle }
+        };
+        var scaleMinimum = Number(style.valueAxisMinimum);
+        var scaleMaximum = Number(style.valueAxisMaximum);
+        if (normalized) {
+            valueAxis.min = 0;
+            valueAxis.max = 100;
+            valueAxis.startValue = 0;
+            valueAxis.name = translate('Normalized') + ' (0–100)';
+            valueAxis.axisLabel.formatter = '{value}%';
+        } else if (style.valueAxisRangeMode === 'manual'
+            && Number.isFinite(scaleMinimum) && Number.isFinite(scaleMaximum)
+            && scaleMinimum < scaleMaximum) {
+            valueAxis.min = scaleMinimum;
+            valueAxis.max = scaleMaximum;
+            valueAxis.startValue = scaleMinimum;
+        } else if (projection.projected) {
+            valueAxis.min = projection.all.reduce(function (minimum, item) {
+                return Math.min(minimum, Number(item.value));
+            }, 0);
+            valueAxis.max = projection.all.reduce(function (maximum, item) {
+                return Math.max(maximum, Number(item.value));
+            }, 0);
+            if (valueAxis.min === valueAxis.max) { valueAxis.max = valueAxis.min + 1; }
+        }
+        var trackOpacity = design.opacityFromPercent(style.barBackgroundOpacityPercent, 25);
+        var barOpacity = design.opacityFromPercent(style.barOpacityPercent, 100);
+        var animation = design.animationOptions(style, {
+            enabled: true, initialDuration: 350, updateDuration: 500
+        });
+        var normalOutlineWidth = Number(style.barOutlineWidth) || 0;
+        var highlightStyle = design.barOutlineStyle(
+            Math.max(3, Math.min(10, normalOutlineWidth + 2)),
+            style.barHighlightColor, colors.text
+        );
+        highlightStyle.opacity = 1;
+        var startAngle = Math.max(0, Math.min(360, Number(style.startAngle) || 0));
+        var angularSpan = Number(style.angularSpan);
+        var angleAxis = mode === 'radial' ? categoryAxis : valueAxis;
+        angleAxis.startAngle = startAngle;
+        angleAxis.clockwise = style.clockwise !== false;
+        if (Number.isFinite(angularSpan) && angularSpan >= 30 && angularSpan < 360) {
+            angleAxis.endAngle = startAngle + (angleAxis.clockwise ? -angularSpan : angularSpan);
+            if (layout.geometry.radius[0] > 0) {
+                angleAxis.axisLine.show = false;
+            }
+        }
+        categoryAxis.axisLabel.width = layout.labelWidth;
+        categoryAxis.axisLabel.margin = layout.labelMargin;
+        var barThickness = (layout.geometry.radius[1] - layout.geometry.radius[0])
+            / Math.max(1, items.length) * Math.max(20, Math.min(100, Number(style.barWidthPercent) || 60)) / 100;
+        // ECharts adds half a rounded cap to the label anchor. Keep horizontal text
+        // clear of that cap and inside the colored arc, especially on outer rings.
+        function valueLabelDistance(index) {
+            if (Number.isFinite(Number(style.valueLabelDistance))
+                && Number(style.valueLabelDistance) >= 0 && Number(style.valueLabelDistance) <= 100) {
+                return Number(style.valueLabelDistance);
+            }
+            if (mode !== 'tangential' || style.roundCaps !== true
+                || (valueLabelPosition !== 'insideStart' && valueLabelPosition !== 'insideEnd')) { return 5; }
+            var middleRadius = layout.geometry.radius[0]
+                + (index + 0.5) * (layout.geometry.radius[1] - layout.geometry.radius[0]) / Math.max(1, items.length);
+            return barThickness / 2 + Math.max(30, valueFontSize * 3, middleRadius * 0.16);
+        }
+
+        return {
+            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
+                ? 'transparent' : colors.background,
+            animation: animation.animation,
+            animationDuration: animation.animationDuration,
+            animationDurationUpdate: animation.animationDurationUpdate,
+            animationEasing: animation.animationEasing,
+            animationEasingUpdate: animation.animationEasingUpdate,
+            animationDelay: animation.animationDelay,
+            animationDelayUpdate: animation.animationDelayUpdate,
+            aria: {
+                enabled: true,
+                description: projection.all.map(function (item) {
+                    return item.label + ': ' + formatValue(originalValue(item), itemDecimals(item), originalUnit(item));
+                }).join(', ') + (normalized ? '; ' + translate('Normalized') + ' (0–100)' : '')
+            },
+            title: {
+                show: titleVisible || normalized, text: String(polar.title || ''), left: 'center', top: headerInset,
+                textStyle: { color: style.titleColor || colors.text, fontSize: titleFontSize },
+                subtext: normalized ? translate('Normalized') + ' (0–100)' : '',
+                subtextStyle: { color: colors.muted, fontSize: 11 }
+            },
+            tooltip: {
+                confine: normalized,
+                extraCssText: normalized ? 'max-width:' + Math.max(80, chartElement.clientWidth - 24)
+                    + 'px;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box;' : '',
+                trigger: 'item',
+                formatter: function (parameter) {
+                    var item = parameter.data && parameter.data.id != null
+                        ? items.find(function (entry) { return entry.id === parameter.data.id; })
+                        : items[parameter.dataIndex];
+                    if (!item) { return ''; }
+                    return escapeHtml(item.label) + '<br>'
+                        + escapeHtml(formatValue(originalValue(item), itemDecimals(item), originalUnit(item)))
+                        + (normalized ? '<br>' + escapeHtml(translate('Normalized')) + ': '
+                            + escapeHtml(formatValue(item.value, 2, '%')) + '<br>' + escapeHtml(translate('Range')) + ': '
+                            + escapeHtml(formatValue(item.minimum, itemDecimals(item), originalUnit(item))) + ' – '
+                            + escapeHtml(formatValue(item.maximum, itemDecimals(item), originalUnit(item))) : '');
+                }
+            },
+            polar: layout.geometry,
+            angleAxis: angleAxis,
+            radiusAxis: mode === 'radial' ? valueAxis : categoryAxis,
+            series: [{
+                id: 'polar-values',
+                type: 'bar',
+                coordinateSystem: 'polar',
+                barWidth: Math.max(20, Math.min(100, Number(style.barWidthPercent) || 60)) + '%',
+                roundCap: style.roundCaps === true,
+                showBackground: style.showBarBackground === true,
+                backgroundStyle: {
+                    color: style.barBackgroundColor || colors.border,
+                    opacity: trackOpacity
+                },
+                emphasis: highlightMode === 'off' ? { disabled: true }
+                    : highlightMode === 'standard' ? undefined : {
+                        focus: highlightMode === 'focus' ? 'self' : 'none',
+                        blurScope: 'series',
+                        itemStyle: highlightStyle
+                    },
+                blur: highlightMode === 'focus' ? { itemStyle: { opacity: 0.25 } } : undefined,
+                data: items.map(function (item, index) {
+                    var paletteIndex = projection.projected ? paletteIndices[item.id] : index;
+                    var itemColor = item.color || swatches[paletteIndex % swatches.length] || colors.accent;
+                    var gradient = style.barFillMode === 'gradient';
+                    var fill = gradient ? {
+                        type: 'linear', x: 0, y: 1, x2: 0, y2: 0,
+                        colorStops: [
+                            { offset: 0, color: itemColor },
+                            { offset: 1, color: style.barGradientColor || colors.background }
+                        ]
+                    } : itemColor;
+                    var textColor = valueLabelPosition === 'outside' ? (style.valueColor || colors.text)
+                        : typeof design.readableTextColor === 'function'
+                            ? design.readableTextColor(itemColor, colors.text, colors.background)
+                            : colors.text;
+                    var itemStyle = Object.assign(
+                        { color: fill, opacity: barOpacity },
+                        design.barOutlineStyle(style.barOutlineWidth, style.barOutlineColor, colors.border)
+                    );
+                    var shadowBlur = Number(style.barShadowBlur);
+                    if (Number.isFinite(shadowBlur) && shadowBlur > 0) {
+                        itemStyle.shadowBlur = Math.min(20, shadowBlur);
+                        itemStyle.shadowColor = design.colorWithAlpha(
+                            style.barShadowColor || colors.border,
+                            design.opacityFromPercent(style.barShadowOpacityPercent, 35)
+                        );
+                    }
+                    return {
+                        id: item.id,
+                        name: String(item.label || ''),
+                        value: Number(item.value),
+                        itemStyle: itemStyle,
+                        label: {
+                            distance: valueLabelDistance(index),
+                            color: textColor,
+                            textBorderColor: (gradient || barOpacity < 1) && valueLabelPosition !== 'outside'
+                                ? (textColor === colors.text ? colors.background : colors.text) : undefined,
+                            textBorderWidth: (gradient || barOpacity < 1) && valueLabelPosition !== 'outside' ? 2 : 0
+                        }
+                    };
+                }),
+                label: {
+                    show: style.showValues === true,
+                    position: valueLabelPosition,
+                    color: style.valueColor || colors.text,
+                    fontSize: valueFontSize,
+                    align: mode === 'tangential' && valueLabelPosition !== 'outside' ? 'center' : undefined,
+                    rotate: 0,
+                    formatter: function (parameter) {
+                        var item = parameter.data && parameter.data.id != null
+                            ? items.find(function (entry) { return entry.id === parameter.data.id; })
+                            : items[parameter.dataIndex];
+                        return item ? formatValue(originalValue(item), itemDecimals(item), originalUnit(item)) : '';
+                    }
+                }
+            }]
+        };
+    }
+
+    function alignPartialBackgroundTracks(style) {
+        if (!chart || !style || style.mode !== 'tangential' || style.showBarBackground !== true
+            || !Number.isFinite(Number(style.angularSpan)) || Number(style.angularSpan) >= 360
+            || typeof chart.getModel !== 'function' || typeof chart.getViewOfSeriesModel !== 'function') { return; }
+
+        var model = chart.getModel();
+        var series = model && model.getSeriesByIndex(0);
+        var angle = model && model.getComponent('angleAxis');
+        var view = series && chart.getViewOfSeriesModel(series);
+        if (!angle || !view || !Array.isArray(view._backgroundEls)) { return; }
+
+        // ECharts 6.1.0 hardcodes a full circle for tangential bar backgrounds.
+        // Keep its own background sectors, but align them to the actual angle axis.
+        var extent = angle.axis.getExtent();
+        var start = -extent[0] * Math.PI / 180;
+        var end = -extent[1] * Math.PI / 180;
+        view._backgroundEls.forEach(function (track) {
+            if (!track) { return; }
+            track.stopAnimation();
+            track.setShape({ startAngle: start, endAngle: end, clockwise: extent[0] >= extent[1] });
+        });
+    }
+
+    function displayError(message) {
+        if (chart) { chart.clear(); }
+        chartElement.hidden = true;
+        errorElement.textContent = translate(message || 'The Polar values could not be loaded.');
+        errorElement.hidden = false;
+        controls.hide();
+    }
+
+    function currentHighlightMode() {
+        var style = currentState && currentState.chart && currentState.chart.polar
+            && currentState.chart.polar.style;
+        return style && style.barHighlightMode;
+    }
+
+    function pinnedDataIndex() {
+        if (pinnedItemId === null || !currentState || !currentState.chart) { return -1; }
+        return pageItems.findIndex(function (item) { return item.id === pinnedItemId; });
+    }
+
+    function togglePinnedBar(parameter) {
+        if (!chart || !parameter || parameter.componentType !== 'series' || parameter.seriesIndex !== 0
+            || !Number.isInteger(parameter.dataIndex)) { return; }
+        var mode = currentHighlightMode();
+        if (mode !== 'outline' && mode !== 'focus') { return; }
+        var item = pageItems[parameter.dataIndex];
+        if (!item || item.id == null) { return; }
+        var previousIndex = pinnedDataIndex();
+        if (previousIndex >= 0) {
+            chart.dispatchAction({ type: 'downplay', seriesIndex: 0, dataIndex: previousIndex });
+        }
+        pinnedItemId = pinnedItemId === item.id ? null : item.id;
+        if (pinnedItemId !== null) {
+            chart.dispatchAction({ type: 'highlight', seriesIndex: 0, dataIndex: parameter.dataIndex });
+        }
+    }
+
+    function restorePinnedBar() {
+        var mode = currentHighlightMode();
+        if (mode !== 'outline' && mode !== 'focus') {
+            pinnedItemId = null;
+            return;
+        }
+        var index = pinnedDataIndex();
+        if (index < 0) {
+            if (!currentState.chart.items.some(function (item) { return item.id === pinnedItemId; })) {
+                pinnedItemId = null;
+            }
+            return;
+        }
+        chart.dispatchAction({ type: 'highlight', seriesIndex: 0, dataIndex: index });
+    }
+
+    function render(state) {
+        if (retainOnTransientError(state, currentState, chart)) { return; }
+        currentState = state;
+        if (!state || state.status !== 'ready' || !state.chart) {
+            displayError(state && state.error);
+            return;
+        }
+        if (!window.echarts || typeof window.echarts.init !== 'function') {
+            displayError('Apache ECharts could not be initialized.');
+            return;
+        }
+        errorElement.hidden = true;
+        chartElement.hidden = false;
+        var theme = normalizeTheme(state.chart.theme || 'auto');
+        if (chart && currentTheme !== theme) {
+            chart.dispose();
+            chart = null;
+        }
+        if (!chart) {
+            chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
+            currentTheme = theme;
+            chart.on('click', { seriesIndex: 0 }, togglePinnedBar);
+        }
+        chart.setOption(buildOption(state.chart, theme), true);
+        navigation.rememberWindow(selectedItems.map(function (item) { return item.id; }), pageWindow.first);
+        restorePinnedBar();
+        alignPartialBackgroundTracks(state.chart.polar && state.chart.polar.style);
+        lastWidth = chartElement.clientWidth;
+        lastHeight = chartElement.clientHeight;
+    }
+
+    function resizeChart() {
+        if (!chart) { return; }
+        var width = chartElement.clientWidth;
+        var height = chartElement.clientHeight;
+        if (width === lastWidth && height === lastHeight) { return; }
+        chart.resize();
+        lastWidth = width;
+        lastHeight = height;
+        if (currentState && currentState.status === 'ready' && currentState.chart) {
+            if (controlsVisible) { render(currentState); return; }
+            var polar = currentState.chart.polar || {};
+            var labels = Array.isArray(currentState.chart.items)
+                ? currentState.chart.items.map(function (item) { return String(item.label || ''); }) : [];
+            var layout = polarLayout(polar, labels);
+            var categoryAxisName = polar.style && polar.style.mode === 'tangential'
+                ? 'radiusAxis' : 'angleAxis';
+            var valueAxisName = categoryAxisName === 'angleAxis' ? 'radiusAxis' : 'angleAxis';
+            var update = { polar: layout.geometry };
+            update[categoryAxisName] = { axisLabel: { width: layout.labelWidth, margin: layout.labelMargin } };
+            update[valueAxisName] = { axisLabel: { show: layout.showValueScale } };
+            chart.setOption(update);
+            alignPartialBackgroundTracks(polar.style);
+        }
+    }
+
+    window.handleMessage = function (message) {
+        var state = echartsDesign.parseVisualizationState(message);
+        if (state) { render(state); }
+    };
+
+    if (window.ResizeObserver) {
+        new ResizeObserver(resizeChart).observe(chartElement);
+    } else {
+        window.addEventListener('resize', resizeChart);
+    }
+    window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
+    render(bootstrap.state || null);
+}());

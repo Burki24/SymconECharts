@@ -2,42 +2,1663 @@
     "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
     "elements": [
         {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. When adding further charts, select the existing gateway instead of creating another one."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title",
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+        },
+        {
             "type": "SelectVariable",
             "name": "SourceVariableID",
             "caption": "Source variable",
             "validVariableTypes": [
                 1,
                 2
-            ]
+            ],
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+        },
+        {
+            "type": "CheckBox",
+            "name": "UseVariablePresentation",
+            "caption": "Use range, unit and decimal places from the source variable presentation"
+        },
+        {
+            "type": "Label",
+            "caption": "Available presentation values override the manual entries below. Missing or invalid values keep the manual entries as fallback."
         },
         {
             "type": "NumberSpinner",
             "name": "Minimum",
             "caption": "Minimum",
-            "digits": 3
+            "digits": 3,
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
         },
         {
             "type": "NumberSpinner",
             "name": "Maximum",
             "caption": "Maximum",
-            "digits": 3
+            "digits": 3,
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
         },
         {
-            "type": "ValidationTextBox",
-            "name": "Title",
-            "caption": "Title"
+            "type": "Select",
+            "name": "TitlePosition",
+            "caption": "Title position",
+            "options": [
+                {
+                    "caption": "Top",
+                    "value": "top"
+                },
+                {
+                    "caption": "Bottom",
+                    "value": "bottom"
+                }
+            ]
         },
         {
             "type": "ValidationTextBox",
             "name": "Unit",
-            "caption": "Unit"
+            "caption": "Unit",
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
         },
         {
             "type": "NumberSpinner",
             "name": "Decimals",
             "caption": "Decimal places",
             "minimum": 0,
-            "maximum": 6
+            "maximum": 6,
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate Gauge"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "Choose the Gauge layout and its independent ECharts theme. Automatic follows the Symcon design."
+                },
+                {
+                    "type": "Select",
+                    "name": "GaugePreset",
+                    "caption": "Gauge preset",
+                    "width": "300px",
+                    "options": [
+                        {
+                            "caption": "Basic Gauge",
+                            "value": "basic"
+                        },
+                        {
+                            "caption": "Simple Gauge",
+                            "value": "simple"
+                        },
+                        {
+                            "caption": "Progress Gauge",
+                            "value": "progress"
+                        },
+                        {
+                            "caption": "Speed Gauge",
+                            "value": "speed"
+                        }
+                    ],
+                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                },
+                {
+                    "type": "Select",
+                    "name": "EChartsTheme",
+                    "caption": "ECharts theme",
+                    "width": "300px",
+                    "options": [
+                        {
+                            "caption": "Automatic (Symcon design)",
+                            "value": "auto"
+                        },
+                        {
+                            "caption": "Dark",
+                            "value": "dark"
+                        },
+                        {
+                            "caption": "Vintage",
+                            "value": "vintage"
+                        },
+                        {
+                            "caption": "Macarons",
+                            "value": "macarons"
+                        },
+                        {
+                            "caption": "Infographic",
+                            "value": "infographic"
+                        },
+                        {
+                            "caption": "Shine",
+                            "value": "shine"
+                        },
+                        {
+                            "caption": "Roma",
+                            "value": "roma"
+                        }
+                    ],
+                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Geometry and pointer",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Label",
+                            "caption": "Positions use a clock face: 0° is at the top and angles increase clockwise. Preset keeps the geometry and pointer supplied by the selected Gauge preset."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "PointerShape",
+                                    "caption": "Pointer shape",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Needle",
+                                            "value": "needle"
+                                        },
+                                        {
+                                            "caption": "Line",
+                                            "value": "line"
+                                        },
+                                        {
+                                            "caption": "Arrow",
+                                            "value": "arrow"
+                                        },
+                                        {
+                                            "caption": "Custom SVG",
+                                            "value": "custom"
+                                        }
+                                    ],
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "GaugeArcMode",
+                                    "caption": "Scale arc",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Full circle",
+                                            "value": "full"
+                                        },
+                                        {
+                                            "caption": "Three-quarter circle",
+                                            "value": "three-quarter"
+                                        },
+                                        {
+                                            "caption": "Half circle",
+                                            "value": "half"
+                                        },
+                                        {
+                                            "caption": "Quarter circle",
+                                            "value": "quarter"
+                                        },
+                                        {
+                                            "caption": "Custom start and end",
+                                            "value": "custom"
+                                        }
+                                    ],
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "SelectFile",
+                            "name": "CustomPointerSVG",
+                            "caption": "Custom pointer SVG",
+                            "extensions": ".svg",
+                            "width": "540px",
+                            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                        },
+                        {
+                            "type": "Label",
+                            "caption": "Custom SVG pointers require a tightly fitted viewBox and path-only geometry and should face upward. At 100% pointer width their proportions are retained. SVG/default uses data-echarts-pivot or bottom center. Custom percentages place the native ECharts anchor at the selected point."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "CustomPointerPivotMode",
+                                    "caption": "Pointer pivot",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "SVG or bottom center",
+                                            "value": "svg"
+                                        },
+                                        {
+                                            "caption": "Custom percentages",
+                                            "value": "custom"
+                                        }
+                                    ],
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "CustomPointerPivotXPercent",
+                                    "caption": "Pivot horizontal",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                    "digits": 1,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "CustomPointerPivotYPercent",
+                                    "caption": "Pivot vertical",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                    "digits": 1,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "GaugeStartPosition",
+                                    "caption": "Start position",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "0° (top)",
+                                            "value": 0
+                                        },
+                                        {
+                                            "caption": "22.5°",
+                                            "value": 22.5
+                                        },
+                                        {
+                                            "caption": "45°",
+                                            "value": 45
+                                        },
+                                        {
+                                            "caption": "67.5°",
+                                            "value": 67.5
+                                        },
+                                        {
+                                            "caption": "90° (right)",
+                                            "value": 90
+                                        },
+                                        {
+                                            "caption": "112.5°",
+                                            "value": 112.5
+                                        },
+                                        {
+                                            "caption": "135°",
+                                            "value": 135
+                                        },
+                                        {
+                                            "caption": "157.5°",
+                                            "value": 157.5
+                                        },
+                                        {
+                                            "caption": "180° (bottom)",
+                                            "value": 180
+                                        },
+                                        {
+                                            "caption": "202.5°",
+                                            "value": 202.5
+                                        },
+                                        {
+                                            "caption": "225°",
+                                            "value": 225
+                                        },
+                                        {
+                                            "caption": "247.5°",
+                                            "value": 247.5
+                                        },
+                                        {
+                                            "caption": "270° (left)",
+                                            "value": 270
+                                        },
+                                        {
+                                            "caption": "292.5°",
+                                            "value": 292.5
+                                        },
+                                        {
+                                            "caption": "315°",
+                                            "value": 315
+                                        },
+                                        {
+                                            "caption": "337.5°",
+                                            "value": 337.5
+                                        }
+                                    ],
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "GaugeEndPosition",
+                                    "caption": "End position (custom only)",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "0° (top)",
+                                            "value": 0
+                                        },
+                                        {
+                                            "caption": "22.5°",
+                                            "value": 22.5
+                                        },
+                                        {
+                                            "caption": "45°",
+                                            "value": 45
+                                        },
+                                        {
+                                            "caption": "67.5°",
+                                            "value": 67.5
+                                        },
+                                        {
+                                            "caption": "90° (right)",
+                                            "value": 90
+                                        },
+                                        {
+                                            "caption": "112.5°",
+                                            "value": 112.5
+                                        },
+                                        {
+                                            "caption": "135°",
+                                            "value": 135
+                                        },
+                                        {
+                                            "caption": "157.5°",
+                                            "value": 157.5
+                                        },
+                                        {
+                                            "caption": "180° (bottom)",
+                                            "value": 180
+                                        },
+                                        {
+                                            "caption": "202.5°",
+                                            "value": 202.5
+                                        },
+                                        {
+                                            "caption": "225°",
+                                            "value": 225
+                                        },
+                                        {
+                                            "caption": "247.5°",
+                                            "value": 247.5
+                                        },
+                                        {
+                                            "caption": "270° (left)",
+                                            "value": 270
+                                        },
+                                        {
+                                            "caption": "292.5°",
+                                            "value": 292.5
+                                        },
+                                        {
+                                            "caption": "315°",
+                                            "value": 315
+                                        },
+                                        {
+                                            "caption": "337.5°",
+                                            "value": 337.5
+                                        }
+                                    ],
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Hub design",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Label",
+                            "caption": "The hub remains attached to the pointer pivot. Preset preserves the selected Gauge layout; other shapes explicitly override its hub."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "AnchorShape",
+                                    "caption": "Hub shape",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Circle",
+                                            "value": "circle"
+                                        },
+                                        {
+                                            "caption": "Ring",
+                                            "value": "ring"
+                                        },
+                                        {
+                                            "caption": "Custom SVG",
+                                            "value": "custom"
+                                        },
+                                        {
+                                            "caption": "Hidden",
+                                            "value": "hidden"
+                                        }
+                                    ],
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "AnchorColorMode",
+                                    "caption": "Hub color source",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "Gauge or theme colors",
+                                            "value": "theme"
+                                        },
+                                        {
+                                            "caption": "Custom hub colors",
+                                            "value": "custom"
+                                        }
+                                    ],
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "SelectFile",
+                            "name": "CustomAnchorSVG",
+                            "caption": "Custom hub SVG",
+                            "extensions": ".svg",
+                            "width": "540px",
+                            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                        },
+                        {
+                            "type": "Label",
+                            "caption": "Custom hub SVGs use the same secured path-only import as custom pointers. A tightly fitted viewBox is recommended."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "AnchorSizePercent",
+                                    "caption": "Hub size",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "AnchorBorderWidthPercent",
+                                    "caption": "Hub border width",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "AnchorColor",
+                                    "caption": "Hub fill",
+                                    "allowTransparent": false,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "AnchorBorderColor",
+                                    "caption": "Hub border",
+                                    "allowTransparent": false,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Dial plate",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Label",
+                            "caption": "The plate is rendered behind all Gauge elements. Circle includes value and title; follow scale arc uses the configured start and end positions."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "PlateShape",
+                                    "caption": "Plate shape",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "Hidden",
+                                            "value": "hidden"
+                                        },
+                                        {
+                                            "caption": "Circle",
+                                            "value": "circle"
+                                        },
+                                        {
+                                            "caption": "Follow scale arc",
+                                            "value": "arc"
+                                        }
+                                    ],
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "PlateColorMode",
+                                    "caption": "Plate color source",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "ECharts theme",
+                                            "value": "theme"
+                                        },
+                                        {
+                                            "caption": "Custom plate colors",
+                                            "value": "custom"
+                                        }
+                                    ],
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "PlateFillMode",
+                                    "caption": "Plate fill style",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "Solid color",
+                                            "value": "solid"
+                                        },
+                                        {
+                                            "caption": "Linear gradient",
+                                            "value": "linear"
+                                        },
+                                        {
+                                            "caption": "Radial gradient",
+                                            "value": "radial"
+                                        }
+                                    ],
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "PlateGradientMiddleEnabled",
+                                    "caption": "Use middle gradient color",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Label",
+                            "caption": "Gradients require Custom plate colors. The plate fill color is used as the gradient start color."
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "PlateBackgroundEnabled",
+                            "caption": "Use SVG plate background",
+                            "width": "260px",
+                            "onChange": "ECGS_UpdateGaugePreview();"
+                        },
+                        {
+                            "type": "SelectFile",
+                            "name": "PlateBackgroundSVG",
+                            "caption": "Plate background SVG",
+                            "extensions": ".svg",
+                            "width": "540px",
+                            "onChange": "ECGS_UpdateGaugePreview();"
+                        },
+                        {
+                            "type": "Label",
+                            "caption": "SVG backgrounds are sanitized, clipped to the selected plate shape and rendered above its color or gradient. External resources, scripts, text and CSS blocks are not supported."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "PlateBackgroundFit",
+                                    "caption": "SVG fitting",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "Contain",
+                                            "value": "contain"
+                                        },
+                                        {
+                                            "caption": "Cover",
+                                            "value": "cover"
+                                        },
+                                        {
+                                            "caption": "Stretch",
+                                            "value": "stretch"
+                                        }
+                                    ],
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundOpacityPercent",
+                                    "caption": "SVG opacity",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundSizePercent",
+                                    "caption": "SVG size",
+                                    "minimum": 25,
+                                    "maximum": 200,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundRotation",
+                                    "caption": "SVG rotation",
+                                    "minimum": -180,
+                                    "maximum": 180,
+                                    "suffix": "°",
+                                    "digits": 1,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundOffsetXPercent",
+                                    "caption": "SVG horizontal offset",
+                                    "minimum": -100,
+                                    "maximum": 100,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundOffsetYPercent",
+                                    "caption": "SVG vertical offset",
+                                    "minimum": -100,
+                                    "maximum": 100,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "CheckBox",
+                                    "name": "PlateTransparent",
+                                    "caption": "Transparent plate fill",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "PlateShadow",
+                                    "caption": "Plate shadow",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateSizePercent",
+                                    "caption": "Plate size",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBorderWidthPercent",
+                                    "caption": "Plate border width",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "PlateColor",
+                                    "caption": "Plate fill / gradient start",
+                                    "allowTransparent": false,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "PlateBorderColor",
+                                    "caption": "Plate border",
+                                    "allowTransparent": false,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "PlateGradientMiddleColor",
+                                    "caption": "Gradient middle",
+                                    "allowTransparent": false,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "PlateGradientEndColor",
+                                    "caption": "Gradient end",
+                                    "allowTransparent": false,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "PlateGradientDirection",
+                            "caption": "Linear gradient direction",
+                            "width": "540px",
+                            "options": [
+                                {
+                                    "caption": "Top to bottom",
+                                    "value": "top-bottom"
+                                },
+                                {
+                                    "caption": "Left to right",
+                                    "value": "left-right"
+                                },
+                                {
+                                    "caption": "Top left to bottom right",
+                                    "value": "diagonal-down"
+                                },
+                                {
+                                    "caption": "Bottom left to top right",
+                                    "value": "diagonal-up"
+                                }
+                            ],
+                            "onChange": "ECGS_UpdateGaugePreview();"
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateGradientCenterXPercent",
+                                    "caption": "Radial center horizontal",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateGradientCenterYPercent",
+                                    "caption": "Radial center vertical",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "PlateGradientRadiusPercent",
+                            "caption": "Radial gradient radius",
+                            "minimum": 25,
+                            "maximum": 150,
+                            "suffix": "%",
+                            "width": "260px",
+                            "onChange": "ECGS_UpdateGaugePreview();"
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Gauge colors",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Label",
+                            "caption": "Theme colors remain active by default. Custom colors override only the Gauge roles listed below."
+                        },
+                        {
+                            "type": "Select",
+                            "name": "GaugeColorMode",
+                            "caption": "Color source",
+                            "width": "260px",
+                            "options": [
+                                {
+                                    "caption": "ECharts theme",
+                                    "value": "theme"
+                                },
+                                {
+                                    "caption": "Custom Gauge colors",
+                                    "value": "custom"
+                                }
+                            ],
+                            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "PointerColor",
+                                    "caption": "Pointer",
+                                    "allowTransparent": false,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "ProgressColor",
+                                    "caption": "Progress",
+                                    "allowTransparent": false,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "RingColor",
+                                    "caption": "Ring",
+                                    "allowTransparent": false,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "ScaleColor",
+                                    "caption": "Scale and ticks",
+                                    "allowTransparent": false,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "ValueColor",
+                                    "caption": "Value and unit",
+                                    "allowTransparent": false,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "TitleColor",
+                                    "caption": "Title",
+                                    "allowTransparent": false,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Scale and value ranges",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Label",
+                            "caption": "Optional value ranges color the scale ring up to their ascending end values. A remaining range keeps the Gauge ring color. Zero split counts retain the selected preset."
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ScaleZonesEnabled",
+                            "caption": "Use colored value ranges"
+                        },
+                        {
+                            "type": "List",
+                            "name": "ScaleZones",
+                            "caption": "Value ranges",
+                            "rowCount": 4,
+                            "add": true,
+                            "delete": true,
+                            "changeOrder": true,
+                            "columns": [
+                                {
+                                    "caption": "End value",
+                                    "name": "EndValue",
+                                    "width": "180px",
+                                    "add": 100.0,
+                                    "edit": {
+                                        "type": "NumberSpinner",
+                                        "digits": 3
+                                    }
+                                },
+                                {
+                                    "caption": "Color",
+                                    "name": "Color",
+                                    "width": "180px",
+                                    "add": 16711680,
+                                    "edit": {
+                                        "type": "SelectColor"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MajorSplitCount",
+                                    "caption": "Major sections (0 = preset)",
+                                    "minimum": 0,
+                                    "maximum": 24
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MinorSplitCount",
+                                    "caption": "Minor sections (0 = preset)",
+                                    "minimum": 0,
+                                    "maximum": 10
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "ScaleLabelRotation",
+                                    "caption": "Scale label orientation",
+                                    "options": [
+                                        {
+                                            "caption": "Horizontal",
+                                            "value": "horizontal"
+                                        },
+                                        {
+                                            "caption": "Tangential",
+                                            "value": "tangential"
+                                        },
+                                        {
+                                            "caption": "Radial",
+                                            "value": "radial"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "GaugeDirection",
+                                    "caption": "Direction",
+                                    "options": [
+                                        {
+                                            "caption": "Clockwise",
+                                            "value": "clockwise"
+                                        },
+                                        {
+                                            "caption": "Counterclockwise",
+                                            "value": "counterclockwise"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MinorTickDistancePercent",
+                                    "caption": "Minor tick distance",
+                                    "suffix": "%",
+                                    "minimum": 50,
+                                    "maximum": 150
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MajorTickDistancePercent",
+                                    "caption": "Major tick distance",
+                                    "suffix": "%",
+                                    "minimum": 50,
+                                    "maximum": 150
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "ScaleLabelDistancePercent",
+                                    "caption": "Scale label distance",
+                                    "suffix": "%",
+                                    "minimum": 50,
+                                    "maximum": 150
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Position and visibility",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Label",
+                            "caption": "Offsets are relative to the responsive Gauge size. Preset visibility keeps the behavior of the selected layout."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "GaugeRadiusPercent",
+                                    "caption": "Gauge radius",
+                                    "suffix": "%",
+                                    "minimum": 50,
+                                    "maximum": 150
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "GaugeOffsetXPercent",
+                                    "caption": "Gauge horizontal offset",
+                                    "suffix": "%",
+                                    "minimum": -50,
+                                    "maximum": 50
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "GaugeOffsetYPercent",
+                                    "caption": "Gauge vertical offset",
+                                    "suffix": "%",
+                                    "minimum": -50,
+                                    "maximum": 50
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "ValueOffsetXPercent",
+                                    "caption": "Value horizontal offset",
+                                    "suffix": "%",
+                                    "minimum": -100,
+                                    "maximum": 100
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "ValueOffsetYPercent",
+                                    "caption": "Value vertical offset",
+                                    "suffix": "%",
+                                    "minimum": -100,
+                                    "maximum": 100
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "TitleOffsetXPercent",
+                                    "caption": "Title horizontal offset",
+                                    "suffix": "%",
+                                    "minimum": -100,
+                                    "maximum": 100
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "TitleOffsetYPercent",
+                                    "caption": "Title vertical offset",
+                                    "suffix": "%",
+                                    "minimum": -100,
+                                    "maximum": 100
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "PointerVisibility",
+                                    "caption": "Pointer",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "ProgressVisibility",
+                                    "caption": "Progress",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "RingVisibility",
+                                    "caption": "Scale ring",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "MinorTicksVisibility",
+                                    "caption": "Minor ticks",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "MajorTicksVisibility",
+                                    "caption": "Major ticks",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "ScaleLabelsVisibility",
+                                    "caption": "Scale labels",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "ValueVisibility",
+                                    "caption": "Value",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "UnitVisibility",
+                                    "caption": "Unit",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "TitleVisibility",
+                                    "caption": "Title",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Value display and effects",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "ProgressWidthPercent",
+                                    "caption": "Progress width",
+                                    "suffix": "%",
+                                    "minimum": 50,
+                                    "maximum": 150
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "DetailBoxVisibility",
+                                    "caption": "Value box",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "DetailColorMode",
+                                    "caption": "Value box colors",
+                                    "options": [
+                                        {
+                                            "caption": "ECharts theme",
+                                            "value": "theme"
+                                        },
+                                        {
+                                            "caption": "Custom colors",
+                                            "value": "custom"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "DetailBackgroundColor",
+                                    "caption": "Value box fill"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "DetailBorderColor",
+                                    "caption": "Value box border"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "DetailBorderWidthPercent",
+                                    "caption": "Value box border width",
+                                    "suffix": "%",
+                                    "minimum": 50,
+                                    "maximum": 150
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "DetailCornerRadiusPercent",
+                                    "caption": "Value box corner radius",
+                                    "suffix": "%",
+                                    "minimum": 50,
+                                    "maximum": 150
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "CheckBox",
+                                    "name": "DetailShadow",
+                                    "caption": "Value box shadow"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "PointerShadow",
+                                    "caption": "Pointer glow"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "ProgressShadow",
+                                    "caption": "Progress glow"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "RingShadow",
+                                    "caption": "Scale ring shadow"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "AnchorShadow",
+                                    "caption": "Hub shadow"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Fine tuning",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Label",
+                            "caption": "All values range from 50% to 150% of the selected preset. 100% restores the preset default."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "ScaleFontSizePercent",
+                                    "caption": "Scale font size",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "ValueFontSizePercent",
+                                    "caption": "Value font size",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "UnitFontSizePercent",
+                                    "caption": "Unit font size",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "TitleFontSizePercent",
+                                    "caption": "Title font size",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "RingWidthPercent",
+                                    "caption": "Ring width",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PointerWidthPercent",
+                                    "caption": "Pointer width",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PointerLengthPercent",
+                                    "caption": "Pointer length",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MinorTickLengthPercent",
+                                    "caption": "Minor tick length",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MajorTickLengthPercent",
+                                    "caption": "Major tick length",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Image",
+                    "name": "GaugePreview",
+                    "image": "",
+                    "center": true,
+                    "width": "100%"
+                }
+            ]
         }
     ],
     "actions": [
@@ -72,6 +1693,16 @@
             "code": 204,
             "icon": "error",
             "caption": "EChartsGateway request failed"
+        },
+        {
+            "code": 205,
+            "icon": "error",
+            "caption": "Gauge design is invalid"
+        },
+        {
+            "code": 206,
+            "icon": "error",
+            "caption": "ECharts theme is invalid"
         }
     ]
 }

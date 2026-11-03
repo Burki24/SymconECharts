@@ -1,0 +1,42 @@
+{
+    "name": "symcon-echarts-gauge-runtime-build",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "engines": {
+        "node": ">=18"
+    },
+    "scripts": {
+        "build:bar-category-app": "esbuild ../../EChartsBarCategory/visualization/app.js --minify --target=es2018 --outfile=../../EChartsBarCategory/visualization/app.min.js",
+        "build": "npm run build:bar-category-app && npm run build:runtime && npm run build:cartesian && npm run build:bar-category && npm run build:scatter && npm run build:heatmap && npm run build:polar && npm run build:pie && npm run build:tree && npm run build:graph && npm run build:treemap && npm run build:sunburst && npm run build:parallel && npm run build:sankey && npm run build:calendar && npm run build:radar && npm run build:boxplot && npm run build:funnel && npm run build:candlestick && npm run build:pictorial-bar && npm run build:theme-river && npm run build:state-timeline && npm run build:calendar-pie && npm run build:themes",
+        "build:runtime": "esbuild src/gauge-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.gauge.min.js",
+        "build:cartesian": "esbuild src/cartesian-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.cartesian.min.js",
+        "build:bar-category": "esbuild src/bar-category-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.bar-category.min.js",
+        "build:scatter": "esbuild src/scatter-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.scatter.min.js",
+        "build:heatmap": "esbuild src/heatmap-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.heatmap.min.js",
+        "build:polar": "esbuild src/polar-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.polar.min.js",
+        "build:pie": "esbuild src/pie-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.pie.min.js",
+        "build:tree": "esbuild src/tree-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.tree.min.js",
+        "build:graph": "esbuild src/graph-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.graph.min.js",
+        "build:treemap": "esbuild src/treemap-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.treemap.min.js",
+        "build:sunburst": "esbuild src/sunburst-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.sunburst.min.js",
+        "build:parallel": "esbuild src/parallel-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.parallel.min.js",
+        "build:sankey": "esbuild src/sankey-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.sankey.min.js",
+        "build:themes": "node scripts/copy-themes.mjs",
+        "build:calendar": "esbuild src/calendar-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.calendar.min.js",
+        "build:radar": "esbuild src/radar-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.radar.min.js",
+        "build:boxplot": "esbuild src/boxplot-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.boxplot.min.js",
+        "build:funnel": "esbuild src/funnel-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.funnel.min.js",
+        "build:candlestick": "esbuild src/candlestick-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.candlestick.min.js",
+        "build:pictorial-bar": "esbuild src/pictorial-bar-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.pictorial-bar.min.js",
+        "build:theme-river": "esbuild src/theme-river-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.theme-river.min.js",
+        "build:state-timeline": "esbuild src/state-timeline-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.state-timeline.min.js",
+        "build:calendar-pie": "esbuild src/calendar-pie-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.calendar-pie.min.js"
+    },
+    "dependencies": {
+        "echarts": "6.1.0"
+    },
+    "devDependencies": {
+        "esbuild": "0.28.2"
+    }
+}

@@ -1,0 +1,165 @@
+# ADR 0029: Bar chart families and the first Category Bar
+
+## Status
+
+Accepted
+
+## Context
+
+Apache ECharts groups many materially different diagrams under the `bar`
+series type. A current-value category comparison, a historical column chart,
+a waterfall calculation and a polar bar chart do not share the same source
+contract, validation or user workflow. Putting all variants into one device
+would recreate a universal widget with conditional properties and ambiguous
+persistent configuration.
+
+The existing `EChartsTimeSeries` module already owns historical line and area
+series. Its published prefix `ECTS` describes the time-series responsibility,
+not a single ECharts series type, and remains unchanged when further line or
+area layouts are added within that responsibility.
+
+## Decision
+
+Bar diagrams are split by their data and configuration contracts:
+
+- `EChartsBarCategory` is the first implementation. It compares the current
+  values of one to sixteen unique numeric variables with one common effective
+  unit. Its module GUID is `{F9A88437-FE9E-4038-ADAF-775623D2DDC1}` and its
+  prefix is `ECBC`.
+- Historical/category-over-time bars use the separate `EChartsBarHistory`
+  device with prefix `ECBH`; its first implemented contract is specified by
+  ADR 0030.
+- Waterfall and polar bars remain candidates for separate devices with the
+  reserved working prefixes `ECBW` and `ECBP`; this ADR does not assign module
+  GUIDs or claim those modules are implemented.
+
+The Waterfall candidate was subsequently implemented as a separate device by
+ADR 0034; Polar was subsequently implemented as a separate device by ADR 0035.
+
+`EChartsBarCategory` reads current values through the existing versioned
+`current.read` Gateway operation. It provides vertical and horizontal
+orientation, stable configured or value-based ordering, per-source colors,
+live updates and separate Tile/IPSView designs. Every source exposes category
+and data-series names as separate editable fields. Simple bars use the category
+as their axis label and fall back to the variable name. Grouped and stacked
+bars use the category for the category axis and the series for the legend;
+empty categories share one group and empty series fall back to the variable
+name. The source variable ID is always the technical identity. When two sources
+have the same category and series label, their variable IDs are appended to
+the displayed legend labels, including explicitly configured names. Paths and
+parent instance IDs are not used as source keys. Categories may contain
+different series or equal labels from different source IDs; no value is lost
+because of a label collision. Value ordering uses the sum of the values
+available in each category. The default remains `simple`, so existing
+configurations stay valid.
+The two earlier unpublished source layouts (`Label`/`Series` and
+`Category`/`Label`) remain readable during development but are not written by
+the new form.
+Archive access, historical grouping, waterfall arithmetic and polar geometry
+remain outside this contract.
+
+Line and bar renderers share one reproducibly built Cartesian ECharts runtime
+containing `LineChart`, `BarChart` and their common Cartesian components. The
+runtime is repository infrastructure; source validation and ECharts options
+remain in the owning device module.
+
+## Consequences
+
+- Existing Time Series instances, properties and the `ECTS` prefix remain
+  compatible.
+- Category Bar has a small deterministic source contract and can evolve
+  without exposing archive-only controls.
+- New bar variants require an explicit need and their own identity decision;
+  they are not added as unrelated modes of `EChartsBarCategory`.
+- The larger shared Cartesian runtime replaces the former Line-only build,
+  while the PHP Time Series loader remains a compatibility alias.
+
+## Extension: bounded large source sets (2026-10-18)
+
+The source limit is extended from 16 to 100 unique numeric variable assignments.
+It counts all assignments, not 100 sources per category or series. The effective
+common-unit and signed-value contracts are unchanged. No properties, source
+formats, identities or Gateway operations are changed.
+
+More than 16 categories use native slider and inside DataZoom components.
+The initial window is responsive and bounded by
+16 categories; grouped mode also accounts for the number of series. All values
+stay in the model and determine sorting and signed value-axis bounds before
+viewport filtering. Source-ID category keys preserve duplicate Simple labels
+and the visible source on sorted value updates; explicit grouped category keys
+retain their existing grouping meaning. A scrollable legend supports long
+series lists without changing source identity.
+
+The SVG preview resolves all 100 configured sources before sorting and
+selecting its explicitly disclosed six-source subset. Other users of the
+shared preview resolver retain their existing 16-source default.
+
+BarCategory now uses its own reproducible ECharts 6.1.0 subset with BarChart,
+Grid, Legend, Title, Tooltip, Aria, DataZoom and CanvasRenderer. The shared
+Cartesian runtime remains unchanged for its other consumers. Removing unused
+LineChart, ScatterChart, MarkLine and MarkArea components provides room for
+100 source assignments and near-limit 256 KiB SVG patterns below Symcon's
+1 MiB output buffer. The previous Cartesian subset did not include LabelLayout
+and BarCategory uses no such callbacks, so that unused feature is not added.
+No ECharts core code, dependency version, licenses or SVG-import limits change.
+
+## Extension: fixed-domain gradient fill (2026-10-18)
+
+`BarFillMode` and `IPSViewBarFillMode` add the opt-in `gradient` value. Existing
+`solid` defaults and `svg` imports remain unchanged. Each designer owns float
+`ColorMinimum`/`ColorMaximum` (finite, ordered, within ±1e12) and RGB integer
+`LowColor`/`MiddleColor`/`HighColor` properties. Defaults are 0, 100, red, yellow
+and green. Inheritance, design copying, translations and unsaved SVG previews
+include all five fields; no source-format or Gateway contract changes.
+
+The three-stop ramp is sampled at absolute value-axis positions. Each native
+bar receives a relative linear gradient restricted to its actual segment
+domain, including any interior minimum/midpoint/maximum stops. This avoids
+unbounded gradient coordinates and preserves the same colors for short bars,
+signed stacks, viewport filtering and changed values. Positive and negative
+stack accumulators are separate. Legend selection recalculates stack positions
+and persists through gradient refreshes. Out-of-range colors clamp, not values.
+Per-source fill colors are inactive only in this mode; legends retain series
+identity colors. Automatic inside-label contrast uses the actual midpoint
+color; explicitly configured value colors win.
+
+The bounded SVG previews use the same ramp interpolation via
+`EChartsBarPreview::RampColor`, also reused by PictorialBar without changing
+its behavior. They use a user-space gradient over the signed preview value
+axis. Existing six-source preview disclosure is unchanged. Both native Canvas
+outputs and the PHP preview contract are covered by local verification; live
+Symcon/IPSView acceptance after module update remains with the owner.
+
+## Extension: width-dependent category density (2026-10-18)
+
+The fixed sixteen-category window is replaced by a category-space budget.
+`BarWidthPercent` keeps its existing 20–100 range, type and inheritance/copy
+contract. Thinner bars reduce the target category pitch; axis/value font sizes
+establish a minimum pitch, with additional room for grouped series. Thus the
+density may plateau at the readability minimum. Vertical numeric-label width
+is conservatively estimated from the formatted full-model values. Grouped
+value labels that cannot fit are suppressed rather than drawn on top of each
+other; original values stay available in tooltips.
+
+The initial window uses all categories that fit, bounded by the existing total
+of 100 source assignments. Native DataZoom is enabled whenever needed, even
+for fewer than sixteen categories. The category direction of the grid remains
+compact when all categories fit. Resizing and current-value refreshes retain
+the source/category anchor; signed full-model axis bounds and gradients are
+unchanged. The fallback resize handler now recalculates the viewport as well.
+
+The static SVG preview uses width/font-dependent source selection and category
+pitch with an explicit actual/total source count. Sorting precedes selection;
+no draft properties or source values are persisted. Truncated preview names
+retain their complete escaped text in SVG title elements. Neither the source
+format nor Gateway, theme, ECharts-runtime or synchronized-helper contracts
+change.
+
+The expanded application would otherwise exceed the 1 MiB IPSView buffer in
+the existing 100-long-label/near-256-KiB-SVG regression. Only this module's own
+application script is therefore whitespace-minified with the already pinned
+esbuild, using `npm run build:bar-category-app` in `.tools/echarts-runtime`.
+Readable `app.js` remains authoritative; committed `app.min.js` is served via
+the existing scriptAsset option. The native layout suite verifies exact
+reproducibility and exercises the shipped artifact. No ECharts code, upstream
+artifact, dependency version or import/source limit changes.

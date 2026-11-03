@@ -1,0 +1,753 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Time series sources",
+            "rowCount": 6,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "caption": "Initially visible",
+                    "name": "InitiallyVisible",
+                    "width": "120px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
+                    "caption": "Variable",
+                    "name": "VariableID",
+                    "width": "230px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "caption": "Label",
+                    "name": "Label",
+                    "width": "auto",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Variable presentation",
+                    "name": "UseVariablePresentation",
+                    "width": "130px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
+                    "caption": "Unit",
+                    "name": "Unit",
+                    "width": "90px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Decimals",
+                    "name": "Decimals",
+                    "width": "85px",
+                    "add": 1,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 6
+                    }
+                },
+                {
+                    "caption": "Color",
+                    "name": "Color",
+                    "width": "100px",
+                    "add": -1,
+                    "edit": {
+                        "type": "SelectColor",
+                        "allowTransparent": true,
+                        "transparentCaption": "Automatic"
+                    }
+                },
+                {
+                    "caption": "Style",
+                    "name": "Style",
+                    "width": "90px",
+                    "add": "line",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Line",
+                                "value": "line"
+                            },
+                            {
+                                "caption": "Area",
+                                "value": "area"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "caption": "Reducer",
+                    "name": "Reducer",
+                    "width": "110px",
+                    "add": "auto",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Automatic",
+                                "value": "auto"
+                            },
+                            {
+                                "caption": "Average",
+                                "value": "average"
+                            },
+                            {
+                                "caption": "Sum",
+                                "value": "sum"
+                            },
+                            {
+                                "caption": "Minimum",
+                                "value": "minimum"
+                            },
+                            {
+                                "caption": "Maximum",
+                                "value": "maximum"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "caption": "Axis side",
+                    "name": "AxisPosition",
+                    "width": "105px",
+                    "add": "auto",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Automatic",
+                                "value": "auto"
+                            },
+                            {
+                                "caption": "Left",
+                                "value": "left"
+                            },
+                            {
+                                "caption": "Right",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Configure 1–32 unique numeric sources. The total point budget is shared by all sources, including initially hidden rows."
+        },
+        {
+            "type": "Label",
+            "caption": "Sources with the same unit share one value axis and must use the same explicitly selected side. Automatic distributes unit axes between left and right."
+        },
+        {
+            "type": "List",
+            "name": "Annotations",
+            "caption": "Reference lines and value ranges",
+            "rowCount": 4,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "caption": "Source",
+                    "name": "VariableID",
+                    "width": "220px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "caption": "Marker type",
+                    "name": "Type",
+                    "width": "120px",
+                    "add": "line",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Reference line",
+                                "value": "line"
+                            },
+                            {
+                                "caption": "Value range",
+                                "value": "area"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "caption": "Label",
+                    "name": "Label",
+                    "width": "auto",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Value / minimum",
+                    "name": "Value",
+                    "width": "105px",
+                    "add": 0.0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
+                },
+                {
+                    "caption": "Maximum",
+                    "name": "Maximum",
+                    "width": "90px",
+                    "add": 100.0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
+                },
+                {
+                    "caption": "Color",
+                    "name": "Color",
+                    "width": "90px",
+                    "add": -1,
+                    "edit": {
+                        "type": "SelectColor",
+                        "allowTransparent": true,
+                        "transparentCaption": "Series color"
+                    }
+                },
+                {
+                    "caption": "LineType",
+                    "name": "LineType",
+                    "width": "1px",
+                    "visible": false,
+                    "save": true,
+                    "add": "solid"
+                },
+                {
+                    "caption": "LineWidthPercent",
+                    "name": "LineWidthPercent",
+                    "width": "1px",
+                    "visible": false,
+                    "save": true,
+                    "add": 100
+                },
+                {
+                    "caption": "OpacityPercent",
+                    "name": "OpacityPercent",
+                    "width": "1px",
+                    "visible": false,
+                    "save": true,
+                    "add": 18
+                }
+            ]
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "Select",
+                    "name": "Range",
+                    "caption": "Time range",
+                    "width": "190px",
+                    "options": [
+                        {
+                            "caption": "1 hour",
+                            "value": "1h"
+                        },
+                        {
+                            "caption": "6 hours",
+                            "value": "6h"
+                        },
+                        {
+                            "caption": "24 hours",
+                            "value": "24h"
+                        },
+                        {
+                            "caption": "7 days",
+                            "value": "7d"
+                        },
+                        {
+                            "caption": "30 days",
+                            "value": "30d"
+                        },
+                        {
+                            "caption": "Today",
+                            "value": "today"
+                        },
+                        {
+                            "caption": "Yesterday",
+                            "value": "yesterday"
+                        },
+                        {
+                            "caption": "This week",
+                            "value": "current-week"
+                        },
+                        {
+                            "caption": "This month",
+                            "value": "current-month"
+                        },
+                        {
+                            "caption": "Custom",
+                            "value": "custom"
+                        }
+                    ]
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "CustomRangeValue",
+                    "caption": "Range value",
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "width": "130px",
+                    "visible": false
+                },
+                {
+                    "type": "Select",
+                    "name": "CustomRangeUnit",
+                    "caption": "Range unit",
+                    "width": "150px",
+                    "visible": false,
+                    "options": [
+                        {
+                            "caption": "Minutes",
+                            "value": "minute"
+                        },
+                        {
+                            "caption": "Hours",
+                            "value": "hour"
+                        },
+                        {
+                            "caption": "Days",
+                            "value": "day"
+                        },
+                        {
+                            "caption": "Weeks",
+                            "value": "week"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "Select",
+                    "name": "DataMode",
+                    "caption": "Data mode",
+                    "width": "230px",
+                    "options": [
+                        {
+                            "caption": "Real-time values (no archive required)",
+                            "value": "realtime"
+                        },
+                        {
+                            "caption": "Raw values",
+                            "value": "raw"
+                        },
+                        {
+                            "caption": "Automatic aggregation",
+                            "value": "auto"
+                        },
+                        {
+                            "caption": "1 minute",
+                            "value": "minute"
+                        },
+                        {
+                            "caption": "5 minutes",
+                            "value": "five-minutes"
+                        },
+                        {
+                            "caption": "15 minutes",
+                            "value": "fifteen-minutes"
+                        },
+                        {
+                            "caption": "1 hour",
+                            "value": "hour"
+                        },
+                        {
+                            "caption": "1 day",
+                            "value": "day"
+                        }
+                    ]
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "PointBudget",
+                    "caption": "Total point budget",
+                    "minimum": 200,
+                    "maximum": 32000,
+                    "width": "170px"
+                },
+                {
+                    "type": "Select",
+                    "name": "GapDetectionMode",
+                    "caption": "Data gaps",
+                    "width": "190px",
+                    "options": [
+                        {
+                            "caption": "Do not interrupt lines",
+                            "value": "off"
+                        },
+                        {
+                            "caption": "Detect automatically",
+                            "value": "automatic"
+                        },
+                        {
+                            "caption": "Custom maximum interval",
+                            "value": "custom"
+                        }
+                    ]
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "GapThresholdMinutes",
+                    "caption": "Maximum interval",
+                    "suffix": " min",
+                    "minimum": 1,
+                    "maximum": 10080,
+                    "width": "150px",
+                    "visible": false
+                },
+                {
+                    "type": "Select",
+                    "name": "TimeAxisLabelFormat",
+                    "caption": "Time axis labels",
+                    "width": "190px",
+                    "options": [
+                        {
+                            "caption": "Automatic",
+                            "value": "auto"
+                        },
+                        {
+                            "caption": "Time",
+                            "value": "time"
+                        },
+                        {
+                            "caption": "Date",
+                            "value": "date"
+                        },
+                        {
+                            "caption": "Date and time",
+                            "value": "date-time"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Real-time mode starts with the current value and only records changes while the chart is open. Reloading does not restore earlier real-time points."
+        },
+        {
+            "type": "Label",
+            "caption": "Automatic gap detection interrupts a line when an interval exceeds three times the typical interval of that series. A custom interval applies the selected number of minutes to every series."
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate time series"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "width": "250px",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "LegendPosition",
+                            "caption": "Legend position",
+                            "width": "180px",
+                            "options": [
+                                {
+                                    "caption": "Top",
+                                    "value": "top"
+                                },
+                                {
+                                    "caption": "Bottom",
+                                    "value": "bottom"
+                                },
+                                {
+                                    "caption": "Hidden",
+                                    "value": "hidden"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "EnableZoom",
+                            "caption": "Enable zoom"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LineWidthPercent",
+                            "caption": "Line width",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%",
+                            "width": "160px"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "SmoothLines",
+                            "caption": "Smooth lines"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowSymbols",
+                            "caption": "Show data points"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "SymbolSizePercent",
+                            "caption": "Point size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%",
+                            "width": "160px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AreaOpacityPercent",
+                            "caption": "Area opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%",
+                            "width": "160px"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowGrid",
+                            "caption": "Show grid"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowXAxis",
+                            "caption": "Show time axis"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowYAxis",
+                            "caption": "Show value axes"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%",
+                            "width": "150px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LegendFontSizePercent",
+                            "caption": "Legend size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%",
+                            "width": "150px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisFontSizePercent",
+                            "caption": "Axis label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%",
+                            "width": "150px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "TitleColor",
+                            "caption": "Title color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "LegendColor",
+                            "caption": "Legend color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "AxisColor",
+                            "caption": "Axis color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (series/theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "GridColor",
+                            "caption": "Grid color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "Image",
+                    "name": "TimeSeriesPreview",
+                    "image": "",
+                    "center": true,
+                    "width": "100%"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "Button",
+            "caption": "Read current time series data",
+            "onClick": "echo ECTS_GetTimeSeriesDiagnostic($id);"
+        }
+    ],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Time series is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Configure 1 to 8 unique numeric sources"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Time series configuration is invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "EChartsGateway archive request failed"
+        }
+    ]
+}

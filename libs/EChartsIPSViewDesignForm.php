@@ -1,0 +1,187 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SymconECharts;
+
+use RuntimeException;
+
+/** Shared form state for the chart-wide Tile/IPSView design inheritance contract. */
+trait EChartsIPSViewDesignForm
+{
+    private const IPSVIEW_COPY_BUTTON = 'CopyTileDesignToIPSViewButton';
+
+    private const DESIGN_CONTROL_TYPES = [
+        'Button', 'CheckBox', 'HorizontalSlider', 'List', 'NumberSpinner',
+        'Select', 'SelectColor', 'SelectFile', 'SelectVariable', 'ValidationTextBox'
+    ];
+
+    /** Immediately follows an unsaved change to the design inheritance switch. */
+    public function UpdateIPSViewDesignAvailability(bool $UseTileDesign, array $FieldNames = []): void
+    {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $seen = [];
+            foreach ($FieldNames === [] ? [self::IPSVIEW_COPY_BUTTON] : $FieldNames as $name) {
+                if (!is_string($name) || preg_match('/^[A-Za-z][A-Za-z0-9]*$/', $name) !== 1) {
+                    throw new \InvalidArgumentException('Invalid IPSView design field name.');
+                }
+                if (isset($seen[$name])) {
+                    continue;
+                }
+                $seen[$name] = true;
+                $this->UpdateFormField($name, 'enabled', !$UseTileDesign);
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
+    }
+
+    /** @param list<array<string, mixed>> $elements @param list<array<string, mixed>> $timeItems @return list<array<string, mixed>> */
+    private function WithIPSViewTimeSettingsByRange(array $elements, array $timeItems): array
+    {
+        foreach ($elements as $index => $element) {
+            if (($element['type'] ?? null) !== 'RowLayout'
+                || !in_array('Range', array_column($element['items'] ?? [], 'name'), true)) {
+                continue;
+            }
+
+            $insertAfter = $index;
+            $next = $elements[$index + 1] ?? null;
+            if (is_array($next) && ($next['type'] ?? null) === 'RowLayout'
+                && in_array('DataMode', array_column($next['items'] ?? [], 'name'), true)) {
+                $insertAfter++;
+            }
+            array_splice($elements, $insertAfter + 1, 0, $timeItems);
+
+            return $elements;
+        }
+
+        throw new RuntimeException('The Tile time range form section is missing.');
+    }
+
+    /** @param array<string, mixed> $form @return array<string, mixed> */
+    private function WithIPSViewDesignFormState(array $form, string $modulePrefix): array
+    {
+        if (!isset($form['elements']) || !is_array($form['elements'])) {
+            throw new RuntimeException('The IPSView design form section is missing.');
+        }
+
+        foreach ($form['elements'] as &$element) {
+            if (($element['type'] ?? null) !== 'ExpansionPanel'
+                || ($element['caption'] ?? null) !== 'IPSView design') {
+                continue;
+            }
+
+            $checkboxIndex = null;
+            $buttonIndex = null;
+            $independentIndex = null;
+            foreach ($element['items'] as $index => $item) {
+                if (($item['type'] ?? null) === 'CheckBox'
+                    && ($item['name'] ?? null) === 'IPSViewUseTileDesign') {
+                    $checkboxIndex = $index;
+                }
+                if (($item['type'] ?? null) === 'Button'
+                    && ($item['caption'] ?? null) === 'Copy Tile design to IPSView and edit independently') {
+                    $buttonIndex = $index;
+                }
+                if (($item['type'] ?? null) === 'ExpansionPanel'
+                    && ($item['caption'] ?? null) === 'Independent IPSView designer') {
+                    $independentIndex = $index;
+                }
+            }
+            if ($checkboxIndex === null || $independentIndex === null || $buttonIndex === null) {
+                throw new RuntimeException('The IPSView design inheritance controls are incomplete.');
+            }
+
+            $inheritanceHelp = 'Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.';
+            $nextItem = $element['items'][$checkboxIndex + 1] ?? null;
+            if (($nextItem['type'] ?? null) !== 'Label' || ($nextItem['caption'] ?? null) !== $inheritanceHelp) {
+                array_splice($element['items'], $checkboxIndex + 1, 0, [[
+                    'type'    => 'Label',
+                    'caption' => $inheritanceHelp
+                ]]);
+                if ($buttonIndex > $checkboxIndex) {
+                    $buttonIndex++;
+                }
+                if ($independentIndex > $checkboxIndex) {
+                    $independentIndex++;
+                }
+            }
+
+            $copyButton = $element['items'][$buttonIndex];
+            $copyButton['name'] = self::IPSVIEW_COPY_BUTTON;
+            $designerItems = $element['items'][$independentIndex]['items'];
+            array_unshift($designerItems, $copyButton);
+
+            $enabled = !$this->ReadPropertyBoolean('IPSViewUseTileDesign');
+            $fieldNames = [];
+            $unnamedButton = 0;
+            $this->SetIndependentDesignerAvailability(
+                $designerItems,
+                $enabled,
+                $fieldNames,
+                $unnamedButton
+            );
+            $flatItems = [];
+            foreach ($element['items'] as $index => $item) {
+                if ($index === $buttonIndex || $index === $independentIndex) {
+                    continue;
+                }
+                $flatItems[] = $item;
+            }
+            array_push($flatItems, ...$designerItems);
+            $element['items'] = $flatItems;
+
+            $action = $modulePrefix . '_UpdateIPSViewDesignAvailability($id, $IPSViewUseTileDesign, '
+                . var_export(array_values(array_unique($fieldNames)), true) . ');';
+            foreach ($element['items'] as &$item) {
+                if (($item['name'] ?? null) !== 'IPSViewUseTileDesign') {
+                    continue;
+                }
+                $existingAction = trim((string) ($item['onChange'] ?? ''));
+                $item['onChange'] = $action . ($existingAction === '' ? '' : ' ' . $existingAction);
+                break;
+            }
+            unset($item);
+
+            return $form;
+        }
+        unset($element);
+
+        throw new RuntimeException('The IPSView design form section is missing.');
+    }
+
+    /** @param list<array<string, mixed>> $items @param list<string> $fieldNames */
+    private function SetIndependentDesignerAvailability(
+        array &$items,
+        bool $enabled,
+        array &$fieldNames,
+        int &$unnamedButton
+    ): void {
+        foreach ($items as &$item) {
+            $type = $item['type'] ?? null;
+            if (in_array($type, self::DESIGN_CONTROL_TYPES, true)) {
+                if ($type === 'Button' && !isset($item['name'])) {
+                    $unnamedButton++;
+                    $item['name'] = 'IPSViewDesignAction' . $unnamedButton;
+                }
+                if (!is_string($item['name'] ?? null) || $item['name'] === '') {
+                    throw new RuntimeException('An independent IPSView design control has no name.');
+                }
+                $item['enabled'] = $enabled;
+                $fieldNames[] = $item['name'];
+            }
+            if ($type !== 'List' && isset($item['items']) && is_array($item['items'])) {
+                $this->SetIndependentDesignerAvailability($item['items'], $enabled, $fieldNames, $unnamedButton);
+            }
+        }
+        unset($item);
+    }
+}

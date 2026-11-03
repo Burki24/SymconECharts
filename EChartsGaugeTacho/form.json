@@ -1,0 +1,753 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. When adding further charts, select the existing gateway instead of creating another one."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "Label",
+            "caption": "Configure 2 to 5 unique numeric sources. Their order determines their position in the tacho cockpit."
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Gauge sources",
+            "rowCount": 6,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "caption": "Variable",
+                    "name": "VariableID",
+                    "width": "250px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "caption": "Label",
+                    "name": "Label",
+                    "width": "auto",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Use variable presentation",
+                    "name": "UseVariablePresentation",
+                    "width": "160px",
+                    "add": false,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
+                    "caption": "Minimum",
+                    "name": "Minimum",
+                    "width": "100px",
+                    "add": 0.0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
+                },
+                {
+                    "caption": "Maximum",
+                    "name": "Maximum",
+                    "width": "100px",
+                    "add": 100.0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
+                },
+                {
+                    "caption": "Unit",
+                    "name": "Unit",
+                    "width": "90px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Decimal places",
+                    "name": "Decimals",
+                    "width": "120px",
+                    "add": 1,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 6
+                    }
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate Gauge"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "The Tacho Gauge uses one shared base design. Enable the individual design in a source row to override pointer, hub, colors, scale, dial plate, or SVG assets for that instrument."
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "GaugePreset",
+                            "caption": "Gauge preset",
+                            "width": "260px",
+                            "options": [
+                                {
+                                    "caption": "Multi Title",
+                                    "value": "multi-title"
+                                },
+                                {
+                                    "caption": "Ring grid",
+                                    "value": "ring-grid"
+                                },
+                                {
+                                    "caption": "Concentric rings",
+                                    "value": "ring-concentric"
+                                },
+                                {
+                                    "caption": "Weather station",
+                                    "value": "weather-station"
+                                },
+                                {
+                                    "caption": "Tacho cockpit",
+                                    "value": "tacho"
+                                },
+                                {
+                                    "caption": "Chronograph",
+                                    "value": "chronograph"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "width": "260px",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "Fine tuning values range from 50% to 150%. 100% restores the preset default."
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "RingWidthPercent",
+                            "caption": "Ring width",
+                            "minimum": 50,
+                            "maximum": 150,
+                            "suffix": "%",
+                            "width": "260px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ScaleFontSizePercent",
+                            "caption": "Scale font size",
+                            "minimum": 50,
+                            "maximum": 150,
+                            "suffix": "%",
+                            "width": "260px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ValueFontSizePercent",
+                            "caption": "Value font size",
+                            "minimum": 50,
+                            "maximum": 150,
+                            "suffix": "%",
+                            "width": "260px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title font size",
+                            "minimum": 50,
+                            "maximum": 150,
+                            "suffix": "%",
+                            "width": "260px"
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Pointer and hub",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "PointerShape",
+                                    "caption": "Pointer shape",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Needle",
+                                            "value": "needle"
+                                        },
+                                        {
+                                            "caption": "Line",
+                                            "value": "line"
+                                        },
+                                        {
+                                            "caption": "Arrow",
+                                            "value": "arrow"
+                                        },
+                                        {
+                                            "caption": "Custom SVG",
+                                            "value": "custom"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "AnchorShape",
+                                    "caption": "Hub shape",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Circle",
+                                            "value": "circle"
+                                        },
+                                        {
+                                            "caption": "Ring",
+                                            "value": "ring"
+                                        },
+                                        {
+                                            "caption": "Custom SVG",
+                                            "value": "custom"
+                                        },
+                                        {
+                                            "caption": "Hidden",
+                                            "value": "none"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "SelectFile",
+                            "name": "CustomPointerSVG",
+                            "caption": "Custom pointer SVG",
+                            "extensions": ".svg",
+                            "width": "540px"
+                        },
+                        {
+                            "type": "SelectFile",
+                            "name": "CustomAnchorSVG",
+                            "caption": "Custom hub SVG",
+                            "extensions": ".svg",
+                            "width": "540px"
+                        },
+                        {
+                            "type": "Label",
+                            "caption": "SVG pointer and hub files are sanitized and converted to ECharts paths. The same assets are used for every Gauge in this output."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "CustomPointerPivotMode",
+                                    "caption": "Pointer pivot",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "SVG or bottom center",
+                                            "value": "svg"
+                                        },
+                                        {
+                                            "caption": "Custom",
+                                            "value": "custom"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "CustomPointerPivotXPercent",
+                                    "caption": "Pivot X",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                    "digits": 1,
+                                    "suffix": "%",
+                                    "width": "125px"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "CustomPointerPivotYPercent",
+                                    "caption": "Pivot Y",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                    "digits": 1,
+                                    "suffix": "%",
+                                    "width": "125px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PointerWidthPercent",
+                                    "caption": "Pointer width",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PointerLengthPercent",
+                                    "caption": "Pointer length",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "AnchorSizePercent",
+                                    "caption": "Hub size",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "AnchorBorderWidthPercent",
+                                    "caption": "Hub border width",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Scale and colors",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Label",
+                            "caption": "Zero divisions keep the selected preset default. Custom colors apply to every Gauge in this output."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MajorSplitCount",
+                                    "caption": "Major divisions",
+                                    "minimum": 0,
+                                    "maximum": 24,
+                                    "width": "260px"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MinorSplitCount",
+                                    "caption": "Minor divisions",
+                                    "minimum": 0,
+                                    "maximum": 10,
+                                    "width": "260px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "GaugeColorMode",
+                            "caption": "Color assignment",
+                            "width": "260px",
+                            "options": [
+                                {
+                                    "caption": "Theme / preset",
+                                    "value": "theme"
+                                },
+                                {
+                                    "caption": "Custom",
+                                    "value": "custom"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "PointerColor",
+                                    "caption": "Pointer color",
+                                    "width": "170px"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "ProgressColor",
+                                    "caption": "Progress color",
+                                    "width": "170px"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "RingColor",
+                                    "caption": "Ring color",
+                                    "width": "170px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "ScaleColor",
+                                    "caption": "Scale color",
+                                    "width": "170px"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "ValueColor",
+                                    "caption": "Value color",
+                                    "width": "170px"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "TitleColor",
+                                    "caption": "Title color",
+                                    "width": "170px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "AnchorColor",
+                                    "caption": "Hub color",
+                                    "width": "260px"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "AnchorBorderColor",
+                                    "caption": "Hub border color",
+                                    "width": "260px"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Dial plate",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Label",
+                            "caption": "Preset preserves the current template. Custom draws a circular plate behind each dial; Hidden removes template bezels. Ring presets keep their ring layout."
+                        },
+                        {
+                            "type": "Select",
+                            "name": "PlateDesignMode",
+                            "caption": "Plate mode",
+                            "width": "260px",
+                            "options": [
+                                {
+                                    "caption": "Preset",
+                                    "value": "preset"
+                                },
+                                {
+                                    "caption": "Custom",
+                                    "value": "custom"
+                                },
+                                {
+                                    "caption": "Hidden",
+                                    "value": "hidden"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateSizePercent",
+                                    "caption": "Plate size",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBorderWidthPercent",
+                                    "caption": "Plate border width",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "PlateColor",
+                                    "caption": "Plate color",
+                                    "width": "260px"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "PlateBorderColor",
+                                    "caption": "Plate border color",
+                                    "width": "260px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "PlateBackgroundEnabled",
+                            "caption": "Use SVG plate background"
+                        },
+                        {
+                            "type": "SelectFile",
+                            "name": "PlateBackgroundSVG",
+                            "caption": "Plate background SVG",
+                            "extensions": ".svg",
+                            "width": "540px"
+                        },
+                        {
+                            "type": "Label",
+                            "caption": "SVG backgrounds are sanitized before they are embedded. The image is clipped to every custom dial plate."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "PlateBackgroundFit",
+                                    "caption": "Image fitting",
+                                    "width": "170px",
+                                    "options": [
+                                        {
+                                            "caption": "Contain",
+                                            "value": "contain"
+                                        },
+                                        {
+                                            "caption": "Cover",
+                                            "value": "cover"
+                                        },
+                                        {
+                                            "caption": "Stretch",
+                                            "value": "stretch"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundSizePercent",
+                                    "caption": "Image size",
+                                    "minimum": 25,
+                                    "maximum": 200,
+                                    "suffix": "%",
+                                    "width": "170px"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundOpacityPercent",
+                                    "caption": "Image opacity",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                    "suffix": "%",
+                                    "width": "170px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundOffsetXPercent",
+                                    "caption": "Image offset X",
+                                    "minimum": -100,
+                                    "maximum": 100,
+                                    "suffix": "%",
+                                    "width": "170px"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundOffsetYPercent",
+                                    "caption": "Image offset Y",
+                                    "minimum": -100,
+                                    "maximum": 100,
+                                    "suffix": "%",
+                                    "width": "170px"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundRotation",
+                                    "caption": "Image rotation",
+                                    "minimum": -180,
+                                    "maximum": 180,
+                                    "digits": 1,
+                                    "suffix": "°",
+                                    "width": "170px"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Image",
+                    "name": "GaugePreview",
+                    "image": "",
+                    "center": true,
+                    "width": "100%"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "Button",
+            "caption": "Read current Tacho Gauge data",
+            "onClick": "echo ECGT_GetGaugeData($id);"
+        }
+    ],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Tacho Gauge is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Configure 2 to 5 unique numeric sources"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "One or more Gauge ranges are invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "EChartsGateway request failed"
+        },
+        {
+            "code": 205,
+            "icon": "error",
+            "caption": "Tacho Gauge design is invalid"
+        }
+    ]
+}

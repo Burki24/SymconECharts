@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <radialGradient id="temperature-aura" cx="50%" cy="48%" r="52%">
+      <stop offset="0%" stop-color="#d98b5f" stop-opacity="0.18"/>
+      <stop offset="62%" stop-color="#8f5f6f" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#3c3348" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="temperature-metal" x1="10%" y1="85%" x2="90%" y2="15%">
+      <stop offset="0%" stop-color="#76a6a4"/>
+      <stop offset="52%" stop-color="#d3a56f"/>
+      <stop offset="100%" stop-color="#b56562"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="300" cy="300" r="286" fill="url(#temperature-aura)"/>
+  <g fill="none" stroke-linecap="round">
+    <circle cx="300" cy="300" r="274" stroke="url(#temperature-metal)" stroke-width="3" opacity="0.42"/>
+    <circle cx="300" cy="300" r="254" stroke="#d3a56f" stroke-width="1.5" stroke-dasharray="2 11" opacity="0.42"/>
+    <circle cx="300" cy="300" r="222" stroke="#76a6a4" stroke-width="1.5" stroke-dasharray="18 10 2 10" opacity="0.27"/>
+    <path d="M106 338 A210 210 0 0 1 494 338" stroke="#d3a56f" stroke-width="2" opacity="0.25"/>
+    <path d="M138 390 A178 178 0 0 1 462 390" stroke="#b56562" stroke-width="2" opacity="0.22"/>
+  </g>
+
+  <!-- A restrained solar wheel suggests heat without competing with the gauge scale. -->
+  <g transform="translate(300 166)" opacity="0.36">
+    <circle r="28" fill="none" stroke="#d3a56f" stroke-width="3"/>
+    <circle r="12" fill="#d3a56f" opacity="0.2"/>
+    <g stroke="#d3a56f" stroke-width="3" stroke-linecap="round">
+      <line x1="0" y1="-39" x2="0" y2="-53"/>
+      <line x1="0" y1="39" x2="0" y2="53"/>
+      <line x1="-39" y1="0" x2="-53" y2="0"/>
+      <line x1="39" y1="0" x2="53" y2="0"/>
+      <line x1="-28" y1="-28" x2="-38" y2="-38"/>
+      <line x1="28" y1="-28" x2="38" y2="-38"/>
+      <line x1="-28" y1="28" x2="-38" y2="38"/>
+      <line x1="28" y1="28" x2="38" y2="38"/>
+    </g>
+  </g>
+
+  <!-- Alchemical fire triangle and a quiet thermometer column. -->
+  <g opacity="0.28" fill="none" stroke="url(#temperature-metal)" stroke-linejoin="round">
+    <path d="M300 210 L390 370 L210 370 Z" stroke-width="4"/>
+    <path d="M300 246 L352 342 L248 342 Z" stroke-width="2"/>
+    <path d="M300 230 V411" stroke-width="5"/>
+    <circle cx="300" cy="424" r="25" stroke-width="5"/>
+    <path d="M300 274 V410" stroke="#b56562" stroke-width="11" opacity="0.52"/>
+  </g>
+
+  <!-- Four subtle elemental markers. -->
+  <g fill="#d3a56f" opacity="0.38">
+    <polygon points="300,46 307,59 300,72 293,59"/>
+    <polygon points="554,300 541,307 528,300 541,293"/>
+    <polygon points="300,554 293,541 300,528 307,541"/>
+    <polygon points="46,300 59,293 72,300 59,307"/>
+  </g>
+  <circle cx="300" cy="300" r="50" fill="none" stroke="#d3a56f" stroke-width="1.5" opacity="0.17"/>
+</svg>

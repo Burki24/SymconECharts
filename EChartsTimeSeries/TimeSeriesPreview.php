@@ -1,0 +1,383 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SymconECharts;
+
+use Burki24\SymconModuleHelper\SVGPreviewHelper;
+
+require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
+require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
+require_once __DIR__ . '/../libs/EChartsPreviewSymbol.php';
+
+final class EChartsTimeSeriesPreview
+{
+    /**
+     * @param list<array{variableID?:int,label:string,color:string,style:string,unit?:string,axisPosition?:string,design?:array<string,mixed>}> $series
+     * @param array<string,mixed> $design
+     * @param list<array<string,mixed>> $annotations
+     */
+    public static function CreateSvg(
+        array $series,
+        string $title,
+        string $theme,
+        array $design,
+        bool $adaptToBackground = false,
+        string $backgroundColor = '',
+        int $backgroundOpacityPercent = 35,
+        array $annotations = [],
+        string $timeAxisLabelFormat = 'auto',
+        string $sourceCountCaption = 'Preview shows %d of %d sources',
+        string $patternNoticeCaption = 'Large SVG patterns are simplified in the preview.'
+    ): string {
+        $palette = EChartsAsset::ThemePreviewPalette($theme);
+        $allSeries = $series !== [] ? $series : [
+            ['label' => 'Temperature', 'color' => '', 'style' => 'line'],
+            ['label' => 'Humidity', 'color' => '', 'style' => 'area']
+        ];
+        $axisSources = [];
+        foreach ($allSeries as $item) {
+            $position = $item['axisPosition'] ?? 'auto';
+            $axisSources[] = [
+                'Unit'         => (string) ($item['unit'] ?? ''),
+                'AxisPosition' => in_array($position, ['auto', 'left', 'right'], true) ? $position : 'auto'
+            ];
+        }
+        try {
+            $axisModel = EChartsUnitAxes::Build($axisSources);
+        } catch (\InvalidArgumentException) {
+            foreach ($axisSources as &$axisSource) {
+                $axisSource['AxisPosition'] = 'auto';
+            }
+            unset($axisSource);
+            $axisModel = EChartsUnitAxes::Build($axisSources);
+        }
+        foreach ($allSeries as $index => &$item) {
+            $item['previewPaletteIndex'] = $index;
+        }
+        unset($item);
+        $series = array_slice(array_values(array_filter(
+            $allSeries,
+            static fn (array $item): bool => ($item['initiallyVisible'] ?? true) !== false
+        )), 0, 4);
+        $visibleUnits = [];
+        $previewPatternBytes = 0;
+        $simplifiedPatterns = false;
+        foreach ($series as $index => $item) {
+            $visibleUnits[(string) ($item['unit'] ?? '')] ??= $index;
+        }
+        $fallbackColors = $palette['seriesColors'];
+        $effectiveColors = [];
+        foreach ($series as $index => $item) {
+            $effectiveColors[] = preg_match('/^#[0-9A-F]{6}$/i', $item['color']) === 1
+                ? $item['color']
+                : $fallbackColors[$item['previewPaletteIndex'] % count($fallbackColors)];
+        }
+        $legendPosition = (string) ($design['legendPosition'] ?? 'top');
+        $lineWidth = 2.5 * max(50, min(200, (int) ($design['lineWidthPercent'] ?? 100))) / 100;
+        $symbolRadius = 3.5 * max(50, min(200, (int) ($design['symbolSizePercent'] ?? 100))) / 100;
+        $showSymbols = (bool) ($design['showSymbols'] ?? false);
+        $showValues = (bool) ($design['showValues'] ?? false);
+        $valueLabelPosition = (string) ($design['valueLabelPosition'] ?? 'top');
+        $valueLabelDistance = (int) ($design['valueLabelDistance'] ?? 5);
+        $valueColor = self::DesignColor($design['valueColor'] ?? '', $palette['text']);
+        $valueFontSize = self::FontSize($design['valueFontSizePercent'] ?? 100, 12);
+        $smoothLines = (bool) ($design['smoothLines'] ?? false);
+        $showGrid = (bool) ($design['showGrid'] ?? true);
+        $showXAxis = (bool) ($design['showXAxis'] ?? true);
+        $showYAxis = (bool) ($design['showYAxis'] ?? true);
+        $titleColor = self::DesignColor($design['titleColor'] ?? '', $palette['text']);
+        $legendColor = self::DesignColor($design['legendColor'] ?? '', $palette['text']);
+        $axisColor = self::DesignColor($design['axisColor'] ?? '', '');
+        $gridColor = self::DesignColor($design['gridColor'] ?? '', $palette['track']);
+        $titleFontSize = self::FontSize($design['titleFontSizePercent'] ?? 100, 20);
+        $legendFontSize = self::FontSize($design['legendFontSizePercent'] ?? 100, 13);
+        $axisFontSize = self::FontSize($design['axisFontSizePercent'] ?? 100, 11);
+        $timeAxisLabelFormat = in_array($timeAxisLabelFormat, ['auto', 'time', 'date', 'date-time'], true)
+            ? $timeAxisLabelFormat
+            : 'auto';
+        $areaOpacity = max(0, min(100, (int) ($design['areaOpacityPercent'] ?? 22))) / 100;
+        $background = EChartsIPSViewBackground::ResolvedPreviewBackground(
+            $palette,
+            $adaptToBackground,
+            $backgroundColor,
+            $backgroundOpacityPercent
+        );
+        $backgroundOpacityPercent = (int) round($background['opacity'] * 100);
+        $titleBaseline = max(31, $titleFontSize + 6);
+        $legendTop = max(64, $titleBaseline + $legendFontSize + 6);
+        $plotTop = $legendPosition === 'top' ? max(92, $legendTop + 20) : max(62, $titleBaseline + 16);
+        $plotBottom = $legendPosition === 'bottom' ? 300 : 330;
+        $content = '';
+        $definitions = '';
+
+        if ($showGrid) {
+            for ($index = 0; $index < 5; ++$index) {
+                $y = $plotTop + ($plotBottom - $plotTop) * $index / 4;
+                $content .= '<line x1="70" y1="' . self::N($y) . '" x2="680" y2="' . self::N($y)
+                    . '" stroke="' . SVGPreviewHelper::escape($gridColor) . '" stroke-width="1"/>';
+            }
+        }
+        if ($showXAxis) {
+            $content .= '<line x1="70" y1="' . self::N($plotBottom) . '" x2="680" y2="'
+                . self::N($plotBottom) . '" stroke="' . SVGPreviewHelper::escape($axisColor !== '' ? $axisColor : $palette['border']) . '"/>';
+            foreach (self::TimeAxisLabels($timeAxisLabelFormat) as $index => $label) {
+                $x = 70 + 305 * $index;
+                $content .= '<text x="' . self::N($x) . '" y="' . self::N($plotBottom + 19)
+                    . '" text-anchor="' . ($index === 0 ? 'start' : ($index === 2 ? 'end' : 'middle'))
+                    . '" fill="' . SVGPreviewHelper::escape($axisColor !== '' ? $axisColor : $palette['muted'])
+                    . '" font-size="' . $axisFontSize . '">'
+                    . SVGPreviewHelper::escape($label) . '</text>';
+            }
+        }
+        if ($showYAxis) {
+            foreach ($axisModel['Axes'] as $axis) {
+                if (!array_key_exists($axis['unit'], $visibleUnits)) {
+                    continue;
+                }
+                $sourceIndex = $visibleUnits[$axis['unit']];
+                $color = $axisColor !== '' ? $axisColor : $effectiveColors[$sourceIndex];
+                $left = $axis['position'] === 'left';
+                $x = $left ? 70 - $axis['positionIndex'] * 12 : 680 + $axis['positionIndex'] * 12;
+                $content .= '<line data-preview-axis="' . $axis['position'] . '" x1="' . $x
+                    . '" y1="' . self::N($plotTop) . '" x2="' . $x . '" y2="'
+                    . self::N($plotBottom) . '" stroke="' . SVGPreviewHelper::escape($color) . '"/>';
+                if ($axis['unit'] !== '') {
+                    $captionX = $left ? 74 + $axis['positionIndex'] * 80 : 676 - $axis['positionIndex'] * 80;
+                    $content .= '<text data-preview-axis-unit="' . $axis['position'] . '" x="' . $captionX
+                        . '" y="' . self::N($plotTop - 7) . '" text-anchor="' . ($left ? 'start' : 'end')
+                        . '" fill="' . SVGPreviewHelper::escape($color) . '" font-size="' . $axisFontSize . '">'
+                        . SVGPreviewHelper::escape(mb_strimwidth($axis['unit'], 0, 8, '…')) . '</text>';
+                }
+            }
+        }
+
+        $annotationAreas = '';
+        $annotationLines = '';
+        $annotationCount = count($annotations);
+        foreach ($annotations as $annotationIndex => $annotation) {
+            $seriesIndex = (int) ($annotation['seriesIndex'] ?? -1);
+            if ($seriesIndex < 0 || !isset($effectiveColors[$seriesIndex])) {
+                continue;
+            }
+            $color = is_string($annotation['color'] ?? null)
+                && preg_match('/^#[0-9A-F]{6}$/i', $annotation['color']) === 1
+                ? $annotation['color']
+                : $effectiveColors[$seriesIndex];
+            $label = trim(is_string($annotation['label'] ?? null) ? $annotation['label'] : '');
+            $y = $plotTop + ($plotBottom - $plotTop) * ($annotationIndex + 1) / ($annotationCount + 1);
+            if (($annotation['type'] ?? 'line') === 'area') {
+                $opacity = max(0, min(100, (int) ($annotation['opacityPercent'] ?? 18))) / 100;
+                $annotationAreas .= '<rect x="70" y="' . self::N($y - 13) . '" width="610" height="26"'
+                    . ' fill="' . SVGPreviewHelper::escape($color) . '" opacity="' . self::N($opacity) . '"'
+                    . ' data-annotation-type="area"/>';
+                if ($label !== '') {
+                    $annotationAreas .= '<text x="675" y="' . self::N($y - 17) . '" text-anchor="end"'
+                        . ' fill="' . SVGPreviewHelper::escape($color) . '" font-size="11">'
+                        . SVGPreviewHelper::escape($label) . '</text>';
+                }
+                continue;
+            }
+            $lineWidth = 2.0 * max(50, min(200, (int) ($annotation['lineWidthPercent'] ?? 100))) / 100;
+            $dashArray = match ((string) ($annotation['lineType'] ?? 'solid')) {
+                'dashed' => '10 7',
+                'dotted' => '2 6',
+                default  => ''
+            };
+            $annotationLines .= '<line x1="70" y1="' . self::N($y) . '" x2="680" y2="' . self::N($y)
+                . '" stroke="' . SVGPreviewHelper::escape($color) . '" stroke-width="' . self::N($lineWidth) . '"'
+                . ($dashArray !== '' ? ' stroke-dasharray="' . $dashArray . '"' : '')
+                . ' data-annotation-type="line"/>';
+            if ($label !== '') {
+                $annotationLines .= '<text x="675" y="' . self::N($y - 6) . '" text-anchor="end"'
+                    . ' fill="' . SVGPreviewHelper::escape($color) . '" font-size="11">'
+                    . SVGPreviewHelper::escape($label) . '</text>';
+            }
+        }
+        $content .= $annotationAreas;
+
+        foreach ($series as $index => $item) {
+            $color = $effectiveColors[$index];
+            $sourceDesign = is_array($item['design'] ?? null) ? $item['design'] : [];
+            $sourceLineWidth = $sourceDesign !== []
+                ? 2.5 * max(50, min(200, (int) ($sourceDesign['lineWidthPercent'] ?? 100))) / 100
+                : $lineWidth;
+            $sourceSmooth = $sourceDesign !== []
+                ? (bool) ($sourceDesign['smoothLine'] ?? false)
+                : $smoothLines;
+            $sourceSymbol = $sourceDesign !== []
+                ? (string) ($sourceDesign['pointSymbol'] ?? 'none')
+                : ($showSymbols ? 'circle' : 'none');
+            $sourceSymbolRadius = $sourceDesign !== []
+                ? 3.5 * max(50, min(200, (int) ($sourceDesign['pointSizePercent'] ?? 100))) / 100
+                : $symbolRadius;
+            $sourceAreaOpacity = $sourceDesign !== []
+                ? max(0, min(100, (int) ($sourceDesign['areaOpacityPercent'] ?? 22))) / 100
+                : $areaOpacity;
+            $offset = $index * 24.0;
+            $path = $sourceSmooth
+                ? 'M 70 ' . self::N(250 - $offset)
+                    . ' C 155 ' . self::N(210 + $offset) . ', 225 ' . self::N(270 - $offset)
+                    . ', 310 ' . self::N(185 + $offset / 2)
+                    . ' S 470 ' . self::N(225 - $offset) . ', 540 ' . self::N(135 + $offset)
+                    . ' S 625 ' . self::N(170 + $offset / 2) . ', 680 ' . self::N(105 + $offset)
+                : 'M 70 ' . self::N(250 - $offset)
+                    . ' L 190 ' . self::N(215 + $offset)
+                    . ' L 310 ' . self::N(185 + $offset / 2)
+                    . ' L 430 ' . self::N(225 - $offset)
+                    . ' L 540 ' . self::N(135 + $offset)
+                    . ' L 680 ' . self::N(105 + $offset);
+            if (($item['style'] ?? 'line') === 'area') {
+                $fill = $color;
+                $fillMode = (string) ($sourceDesign['areaFillMode'] ?? 'color');
+                if ($fillMode === 'gradient') {
+                    $gradientID = 'area-gradient-' . $index;
+                    $gradientEnd = preg_match('/^#[0-9A-F]{6}$/i', (string) ($sourceDesign['areaGradientColor'] ?? '')) === 1
+                        ? (string) $sourceDesign['areaGradientColor']
+                        : $color;
+                    $gradientEndOpacity = $gradientEnd === $color ? '0' : '1';
+                    $definitions .= '<linearGradient id="' . $gradientID . '" x1="0" y1="0" x2="0" y2="1">'
+                        . '<stop offset="0%" stop-color="' . SVGPreviewHelper::escape($color) . '"/>'
+                        . '<stop offset="100%" stop-color="' . SVGPreviewHelper::escape($gradientEnd)
+                        . '" stop-opacity="' . $gradientEndOpacity . '"/></linearGradient>';
+                    $fill = 'url(#' . $gradientID . ')';
+                } elseif ($fillMode === 'svg'
+                    && str_starts_with((string) ($sourceDesign['areaPatternImage'] ?? ''), 'data:image/svg+xml;base64,')) {
+                    $patternBytes = strlen($sourceDesign['areaPatternImage']);
+                    if ($patternBytes > 12000 || $previewPatternBytes + $patternBytes > 24000) {
+                        $simplifiedPatterns = true;
+                    } else {
+                        $previewPatternBytes += $patternBytes;
+                        $patternID = 'area-pattern-' . $index;
+                        $patternWidth = 64.0 * max(25, min(400, (int) ($sourceDesign['areaSVGSizePercent'] ?? 100))) / 100;
+                        $aspectRatio = max(0.05, min(20.0, (float) ($sourceDesign['areaPatternAspectRatio'] ?? 1.0)));
+                        $patternHeight = $patternWidth / $aspectRatio;
+                        $definitions .= '<pattern id="' . $patternID . '" width="' . self::N($patternWidth)
+                            . '" height="' . self::N($patternHeight) . '" patternUnits="userSpaceOnUse">'
+                            . '<image href="' . SVGPreviewHelper::escape((string) $sourceDesign['areaPatternImage'])
+                            . '" width="' . self::N($patternWidth) . '" height="' . self::N($patternHeight)
+                            . '" preserveAspectRatio="xMidYMid meet"/></pattern>';
+                        $fill = 'url(#' . $patternID . ')';
+                    }
+                }
+                $content .= '<path d="' . $path . ' L 680 ' . self::N($plotBottom) . ' L 70 '
+                    . self::N($plotBottom) . ' Z" fill="' . SVGPreviewHelper::escape($fill)
+                    . '" opacity="' . self::N($sourceAreaOpacity) . '"/>';
+            }
+            $dashArray = match ((string) ($sourceDesign['lineType'] ?? 'solid')) {
+                'dashed' => '10 7',
+                'dotted' => '2 6',
+                default  => ''
+            };
+            $content .= '<path d="' . $path . '" fill="none" stroke="' . SVGPreviewHelper::escape($color)
+                . '" stroke-width="' . self::N($sourceLineWidth) . '" stroke-linecap="round"'
+                . ($dashArray !== '' ? ' stroke-dasharray="' . $dashArray . '"' : '') . '/>';
+            if ($sourceSymbol !== 'none') {
+                $content .= self::Symbol(
+                    $sourceSymbol,
+                    310.0,
+                    185 + $offset / 2,
+                    $sourceSymbolRadius,
+                    $color
+                );
+            }
+            if ($showValues) {
+                $unit = trim((string) ($item['unit'] ?? ''));
+                $placement = EChartsLabelDesign::PreviewRect(
+                    310,
+                    185 + $offset / 2,
+                    0,
+                    0,
+                    $valueLabelPosition === 'auto' ? 'top' : $valueLabelPosition,
+                    $valueLabelDistance
+                );
+                $content .= '<text data-preview-value-label="true" x="' . self::N($placement['x'])
+                    . '" y="' . self::N($placement['y']) . '" text-anchor="' . $placement['anchor']
+                    . '" fill="' . SVGPreviewHelper::escape($valueColor) . '" font-size="' . $valueFontSize . '">'
+                    . SVGPreviewHelper::escape('42' . ($unit !== '' ? ' ' . $unit : '')) . '</text>';
+            }
+        }
+        $content .= $annotationLines;
+
+        if ($legendPosition !== 'hidden') {
+            $legendY = $legendPosition === 'bottom' ? 352 : $legendTop;
+            $legendX = 80.0;
+            foreach ($series as $index => $item) {
+                $color = $effectiveColors[$index];
+                $label = trim($item['label']) !== '' ? $item['label'] : 'Series ' . ($index + 1);
+                $content .= '<line x1="' . self::N($legendX) . '" y1="' . self::N($legendY)
+                    . '" x2="' . self::N($legendX + 22) . '" y2="' . self::N($legendY)
+                    . '" stroke="' . SVGPreviewHelper::escape($color) . '" stroke-width="3"/>';
+                $content .= '<text x="' . self::N($legendX + 29) . '" y="' . self::N($legendY + 5)
+                    . '" fill="' . SVGPreviewHelper::escape($legendColor) . '" font-size="' . $legendFontSize . '">'
+                    . SVGPreviewHelper::escape($label) . '</text>';
+                $legendX += min(190.0, 65.0 + strlen($label) * 7.0 * $legendFontSize / 13);
+            }
+        }
+
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 390" role="img"'
+            . ' data-legend-position="' . SVGPreviewHelper::escape($legendPosition) . '"'
+            . ' data-smooth-lines="' . ($smoothLines ? 'true' : 'false') . '"'
+            . ' data-show-symbols="' . ($showSymbols ? 'true' : 'false') . '"'
+            . ' data-time-axis-label-format="' . SVGPreviewHelper::escape($timeAxisLabelFormat) . '"'
+            . ' data-adapt-to-background="' . ($adaptToBackground ? 'true' : 'false') . '"'
+            . ' data-background-opacity="' . $backgroundOpacityPercent . '"'
+            . ' data-area-opacity="' . self::N($areaOpacity) . '"'
+            . ' data-axis-color="'
+            . SVGPreviewHelper::escape($axisColor !== '' ? $axisColor : ($effectiveColors[0] ?? $palette['border'])) . '">'
+            . '<rect width="750" height="390" rx="18" fill="' . SVGPreviewHelper::escape($background['color']) . '"'
+            . ($adaptToBackground ? ' fill-opacity="' . self::N($backgroundOpacityPercent / 100) . '"' : '') . '/>'
+            . ($definitions !== '' ? '<defs>' . $definitions . '</defs>' : '')
+            . '<text x="375" y="' . $titleBaseline . '" fill="' . SVGPreviewHelper::escape($titleColor)
+            . '" font-size="' . $titleFontSize . '" font-weight="600" text-anchor="middle">'
+            . SVGPreviewHelper::escape(trim($title) !== '' ? $title : 'Time Series') . '</text>'
+            . $content . '</svg>';
+
+        if ($simplifiedPatterns) {
+            $svg = substr($svg, 0, -strlen('</svg>'))
+                . '<text x="20" y="365" font-size="11" fill="' . SVGPreviewHelper::escape($palette['muted'])
+                . '" data-preview-patterns-simplified="true">' . SVGPreviewHelper::escape($patternNoticeCaption) . '</text></svg>';
+        }
+        return EChartsPreviewSourceCount::Append(
+            $svg,
+            count($series),
+            count($allSeries),
+            $sourceCountCaption,
+            $palette['muted'],
+            730,
+            380
+        );
+    }
+
+    private static function DesignColor(mixed $value, string $fallback): string
+    {
+        return is_string($value) && preg_match('/^#[0-9A-F]{6}$/i', $value) === 1 ? $value : $fallback;
+    }
+
+    private static function FontSize(mixed $value, int $base): int
+    {
+        $percent = is_numeric($value) ? (int) $value : 100;
+        return (int) round($base * max(50, min(200, $percent)) / 100);
+    }
+
+    /** @return list<string> */
+    private static function TimeAxisLabels(string $format): array
+    {
+        return match ($format) {
+            'time'      => ['06:00', '12:00', '18:00'],
+            'date'      => ['05.10.26', '06.10.26', '07.10.26'],
+            'date-time' => ['05.10. 06:00', '06.10. 12:00', '07.10. 18:00'],
+            default     => ['-24 h', '-12 h', 'Now']
+        };
+    }
+
+    private static function Symbol(string $symbol, float $x, float $y, float $radius, string $color): string
+    {
+        return EChartsPreviewSymbol::Symbol($symbol, $x, $y, $radius, $color);
+    }
+
+    private static function N(float $value): string
+    {
+        return rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.');
+    }
+}

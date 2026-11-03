@@ -1,0 +1,540 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "CheckBox",
+            "name": "NormalizeValues",
+            "caption": "Normalize leaf weights using source Min/Max"
+        },
+        {
+            "type": "Label",
+            "caption": "Normalization changes areas or angles only. Original values keep their own unit and decimals; normalized group weights are not physical totals."
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Treemap variables",
+            "rowCount": 8,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "caption": "Group path (optional)",
+                    "name": "GroupPath",
+                    "width": "280px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Group",
+                    "name": "Group",
+                    "width": "200px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Subgroup (optional)",
+                    "name": "Subgroup",
+                    "width": "200px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Variable",
+                    "name": "VariableID",
+                    "width": "300px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "caption": "Label (optional)",
+                    "name": "Label",
+                    "width": "200px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Minimum (normalization)",
+                    "name": "Minimum",
+                    "width": "110px",
+                    "add": 0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
+                },
+                {
+                    "caption": "Maximum (normalization)",
+                    "name": "Maximum",
+                    "width": "110px",
+                    "add": 100,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
+                },
+                {
+                    "caption": "Use variable presentation",
+                    "name": "UseVariablePresentation",
+                    "width": "130px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
+                    "caption": "Unit",
+                    "name": "Unit",
+                    "width": "100px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Decimals",
+                    "name": "Decimals",
+                    "width": "90px",
+                    "add": 1,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 6
+                    }
+                }
+            ],
+            "form": [
+                {
+                    "type": "ValidationTextBox",
+                    "name": "GroupPath",
+                    "caption": "Group path (optional)"
+                },
+                {
+                    "type": "Label",
+                    "caption": "Optional group path: House / Floor / Room. Up to seven groups plus the variable. A nonempty path replaces Group and Subgroup; escape a literal slash with \\/ and a backslash with \\\\."
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Group",
+                    "caption": "Group"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Subgroup",
+                    "caption": "Subgroup (optional)"
+                },
+                {
+                    "type": "SelectVariable",
+                    "name": "VariableID",
+                    "caption": "Variable",
+                    "validVariableTypes": [
+                        1,
+                        2
+                    ]
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Label",
+                    "caption": "Label (optional)"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "digits": 3,
+                    "name": "Minimum",
+                    "caption": "Minimum (normalization)"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "digits": 3,
+                    "name": "Maximum",
+                    "caption": "Maximum (normalization)"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "UseVariablePresentation",
+                    "caption": "Use variable presentation"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Unit",
+                    "caption": "Unit"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "minimum": 0,
+                    "maximum": 6,
+                    "name": "Decimals",
+                    "caption": "Decimals"
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Use 1 to 100 unique numeric variables. Rectangle areas use their current non-negative values; zero values have no visible area. Groups and optional subgroups are defined here."
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate Treemap"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowLabels",
+                            "caption": "Show labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowValues",
+                            "caption": "Show leaf values"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LabelFontSizePercent",
+                            "caption": "Value label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "GroupLabelFontSizePercent",
+                            "caption": "Group label size (0 = value labels)",
+                            "minimum": 0,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "SubgroupLabelFontSizePercent",
+                            "caption": "Subgroup label size (0 = value labels)",
+                            "minimum": 0,
+                            "maximum": 200,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "TitleColor",
+                            "caption": "Title color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "LabelColor",
+                            "caption": "Value label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "GroupLabelColor",
+                            "caption": "Group label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "As value labels"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "SubgroupLabelColor",
+                            "caption": "Subgroup label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "As value labels"
+                        }
+                    ]
+                },
+                {
+                    "type": "List",
+                    "name": "GroupColors",
+                    "caption": "Fixed group colors (optional)",
+                    "rowCount": 4,
+                    "add": true,
+                    "delete": true,
+                    "changeOrder": true,
+                    "columns": [
+                        {
+                            "caption": "Group",
+                            "name": "Group",
+                            "width": "240px",
+                            "add": "",
+                            "edit": {
+                                "type": "ValidationTextBox"
+                            }
+                        },
+                        {
+                            "caption": "Color",
+                            "name": "Color",
+                            "width": "180px",
+                            "add": -1,
+                            "edit": {
+                                "type": "SelectColor",
+                                "allowTransparent": true,
+                                "transparentCaption": "Automatic (theme)"
+                            }
+                        }
+                    ],
+                    "form": [
+                        {
+                            "type": "ValidationTextBox",
+                            "name": "Group",
+                            "caption": "Group"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "Color",
+                            "caption": "Color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "GroupGapWidth",
+                            "caption": "Gap between groups",
+                            "minimum": 0,
+                            "maximum": 12,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "Level1BorderWidth",
+                            "caption": "Level 1 frame (groups)",
+                            "minimum": 0,
+                            "maximum": 12,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "Level1GapWidth",
+                            "caption": "Gap inside groups",
+                            "minimum": 0,
+                            "maximum": 12,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "Level2BorderWidth",
+                            "caption": "Level 2 frame",
+                            "minimum": 0,
+                            "maximum": 12,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "Level2GapWidth",
+                            "caption": "Gap inside subgroups",
+                            "minimum": 0,
+                            "maximum": 12,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "Level3BorderWidth",
+                            "caption": "Level 3 frame",
+                            "minimum": 0,
+                            "maximum": 12,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "FrameColor",
+                            "caption": "Frame and gap color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (ECharts)"
+                        }
+                    ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "Level 2 contains subgroups or direct values; level 3 contains values inside subgroups."
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AllowPanZoom",
+                            "caption": "Allow pan and zoom"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ClickToZoom",
+                            "caption": "Zoom on node click"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowBreadcrumb",
+                            "caption": "Show navigation path"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Treemap is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Treemap variables or groups are invalid"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Treemap design is invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "Treemap values could not be loaded"
+        },
+        {
+            "code": 205,
+            "icon": "error",
+            "caption": "Treemap values must be non-negative"
+        }
+    ]
+}

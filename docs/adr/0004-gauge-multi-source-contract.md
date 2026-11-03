@@ -28,7 +28,11 @@ JSON-Liste aus mindestens 2 und höchstens 16 Einträgen. Jeder Eintrag besitzt:
 - `Minimum` und `Maximum`: eigener numerischer Wertebereich mit
   `Minimum < Maximum`;
 - `Unit`: optionale Einheit;
-- `Decimals`: Ganzzahl zwischen 0 und 6.
+- `Decimals`: Ganzzahl zwischen 0 und 6;
+- `UseVariablePresentation`: optionaler Schalter, um Wertebereich, Einheit und
+  Nachkommastellen aus der nativen Variablendarstellung oder einem kompatiblen
+  Legacy-Profil zu übernehmen. Manuelle Werte bleiben je Angabe der Rückfall,
+  wenn die Darstellung keinen gültigen Wert liefert.
 
 Die Listenreihenfolge ist fachlich relevant und bestimmt später die Zuordnung
 zu den Positionen einer Multi-Vorlage. Doppelte Variablen sind nicht erlaubt.
@@ -45,6 +49,10 @@ Wertebereiche oder Nachkommastellen führen zu Status 202.
 `family: gauge`, `variant: multi`, gemeinsamem Titel und einer geordneten
 `items`-Liste. Jeder Eintrag enthält stabile ID, Quellidentität, Zeitstempel,
 Skalen- und Formatierungsdaten sowie den aktuellen numerischen Wert.
+
+Die optionale Darstellungsübernahme ist rückwärtskompatibel: Bereits
+persistierte Listen enthalten das Feld nicht und verwenden daher weiterhin
+vollständig ihre manuellen Werte.
 
 Das Gateway-Protokoll `current.read` wird für jede Quelle wiederverwendet.
 Eine neue Bulk-Operation wird erst eingeführt, wenn Messungen einen

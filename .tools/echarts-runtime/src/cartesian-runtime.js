@@ -1,0 +1,30 @@
+import * as echarts from 'echarts/core';
+import {BarChart, LineChart, ScatterChart} from 'echarts/charts';
+import {
+    AriaComponent,
+    DataZoomComponent,
+    GridComponent,
+    LegendComponent,
+    MarkAreaComponent,
+    MarkLineComponent,
+    TitleComponent,
+    TooltipComponent
+} from 'echarts/components';
+import {CanvasRenderer} from 'echarts/renderers';
+
+echarts.use([
+    BarChart,
+    LineChart,
+    ScatterChart,
+    AriaComponent,
+    DataZoomComponent,
+    GridComponent,
+    LegendComponent,
+    MarkAreaComponent,
+    MarkLineComponent,
+    TitleComponent,
+    TooltipComponent,
+    CanvasRenderer
+]);
+
+window.echarts = echarts;

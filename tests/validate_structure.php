@@ -6,7 +6,55 @@ $root = dirname(__DIR__);
 $errors = [];
 
 $requiredFiles = [
+    'docs/adr/0111-confirmed-jslive-import.md',
+    'libs/EChartsJSLiveJournal.php',
+    'libs/EChartsJSLiveCreationRuntime.php',
+    'libs/EChartsJSLiveCreationForm.php',
+    'EChartsProgress/ProgressData.php',
+    'EChartsProgress/ProgressRenderer.js',
+    'EChartsRadarHistory/RadarHistoryData.php',
+    'EChartsRadarHistory/RadarHistoryRenderer.js',
+    'tests/jslive_execution.php',
+    'tests/jslive_safety.php',
+    'tests/jslive_targets.php',
+    'docs/adr/0060-calendar-pie-data-modes.md',
+    'EChartsCalendarPie/CalendarPieData.php',
+    'EChartsCalendarPie/CalendarPiePreview.php',
+    'EChartsCalendarPie/visualization/index.html',
+    'EChartsCalendarPie/visualization/style.css',
+    'EChartsCalendarPie/visualization/app.js',
+    'libs/echarts/6.1.0/echarts.calendar-pie.min.js',
+    '.tools/echarts-runtime/src/calendar-pie-runtime.js',
+    'tests/calendar_pie_data.php',
+    'tests/calendar_pie_integration.php',
+    'tests/calendar_pie_layout.js',
+    'docs/adr/0059-archive-state-timeline.md',
+    'EChartsStateTimeline/StateTimelineData.php',
+    'EChartsStateTimeline/StateTimelinePreview.php',
+    'EChartsStateTimeline/visualization/index.html',
+    'EChartsStateTimeline/visualization/style.css',
+    'EChartsStateTimeline/visualization/app.js',
+    'libs/echarts/6.1.0/echarts.state-timeline.min.js',
+    '.tools/echarts-runtime/src/state-timeline-runtime.js',
+    'tests/archive_states_gateway.php',
+    'tests/state_timeline_data.php',
+    'tests/state_timeline_integration.php',
+    'tests/state_timeline_layout.js',
+    'docs/adr/0058-archive-theme-river.md',
+    'EChartsThemeRiver/ThemeRiverData.php',
+    'EChartsThemeRiver/ThemeRiverPreview.php',
+    'EChartsThemeRiver/visualization/index.html',
+    'EChartsThemeRiver/visualization/style.css',
+    'EChartsThemeRiver/visualization/app.js',
+    'libs/echarts/6.1.0/echarts.theme-river.min.js',
+    '.tools/echarts-runtime/src/theme-river-runtime.js',
+    'tests/theme_river_data.php',
+    'tests/theme_river_integration.php',
+    'tests/theme_river_layout.js',
     'AGENTS.md',
+    '.gitattributes',
+    '.gitignore',
+    'CHANGELOG.md',
     'README.md',
     'README1.md',
     'THIRD_PARTY_NOTICES.md',
@@ -15,9 +63,50 @@ $requiredFiles = [
     'docs/adr/0002-gateway-gauge-contract.md',
     'docs/adr/0003-single-and-multi-gauge-modules.md',
     'docs/adr/0004-gauge-multi-source-contract.md',
+    'docs/adr/0005-echarts-runtime-and-native-renderer.md',
+    'docs/adr/0006-gauge-single-tile-designer.md',
+    'docs/adr/0007-echarts-theme-assets-and-selection.md',
+    'docs/adr/0016-dedicated-tacho-and-chronograph-modules.md',
+    'docs/adr/0030-first-historical-bar-vertical.md',
+    'docs/adr/0019-timeseries-realtime-without-archive.md',
+    'docs/adr/0023-timeseries-source-design-and-svg-area-patterns.md',
+    'docs/adr/0027-timeseries-custom-ranges-and-time-axis-labels.md',
+    'docs/adr/0029-bar-chart-families-and-category-bar.md',
+    'docs/adr/0035-polar-bar-current-values.md',
     'library.json',
+    'libs/EChartsAsset.php',
     'libs/EChartsDataProtocol.php',
+    'libs/EChartsGaugeDesign.php',
+    'libs/EChartsTimeSeriesDesign.php',
+    'libs/EChartsArchiveQuery.php',
+    'libs/EChartsVariablePresentation.php',
+    'libs/echarts-design.js',
+    'libs/echarts-pattern.js',
+    'libs/EChartsSvgImage.php',
+    'libs/EChartsSvgPath.php',
+    'libs/echarts/6.1.0/echarts.gauge.min.js',
+    'libs/echarts/6.1.0/echarts.cartesian.min.js',
+    'libs/echarts/6.1.0/echarts.polar.min.js',
+    'libs/echarts/6.1.0/echarts.pie.min.js',
+    'libs/echarts/6.1.0/echarts.tree.min.js',
+    'libs/echarts/6.1.0/themes/dark.js',
+    'libs/echarts/6.1.0/themes/vintage.js',
+    'libs/echarts/6.1.0/themes/macarons.js',
+    'libs/echarts/6.1.0/themes/infographic.js',
+    'libs/echarts/6.1.0/themes/shine.js',
+    'libs/echarts/6.1.0/themes/roma.js',
+    'libs/echarts/6.1.0/LICENSE.txt',
+    'libs/echarts/6.1.0/NOTICE.txt',
+    'libs/helper/ConfigurationFormHelper.php',
     'libs/helper/DataFlowHelper.php',
+    'libs/helper/HelperTranslationHelper.php',
+    'libs/helper/IPSViewHTMLPageHelper.php',
+    'libs/helper/ResponsiveVisualizationHelper.php',
+    'libs/helper/SVGPreviewHelper.php',
+    'libs/helper/VariableSearchHelper.php',
+    'libs/helper/VisualizationAssetHelper.php',
+    'libs/helper/VisualizationThemeHelper.php',
+    'libs/helper/translations/IPSViewHTMLPageHelper.json',
     'libs/helper/README.md',
     'libs/helper/manifest.json',
     '.helper-sync.json',
@@ -28,13 +117,200 @@ $requiredFiles = [
     '.github/workflows/update-library-metadata.yml',
     'tests/README.md',
     'tests/data_protocol.php',
+    'tests/echarts_assets.php',
+    'tests/gauge_design.php',
+    'tests/time_series_design.php',
+    'tests/gauge_multi_layout.js',
+    'tests/gauge_tacho_layout.js',
+    'tests/gauge_chronograph_layout.js',
+    'tests/fixtures/gauge-pointer-ornate.svg',
     'tests/gateway_gauges.php',
     'tests/helper_integrity.py',
     'tests/module_contracts.php',
+    'tests/quality.php',
+    'tests/zigbee_graph_export_reader.php',
+    'tests/svg_path.php',
     'tests/run.php',
     'tests/symcon_strict.php',
     'tests/test_update_library_metadata.py',
-    'tests/validate_structure.php'
+    'tests/time_series_layout.js',
+    'tests/bar_category_layout.js',
+    'tests/bar_history_layout.js',
+    'tests/validate_structure.php',
+    '.tools/echarts-runtime/package.json',
+    '.tools/echarts-runtime/package-lock.json',
+    '.tools/echarts-runtime/README.md',
+    '.tools/echarts-runtime/scripts/copy-themes.mjs',
+    '.tools/echarts-runtime/src/gauge-runtime.js',
+    '.tools/echarts-runtime/src/cartesian-runtime.js',
+    '.tools/echarts-runtime/src/polar-runtime.js',
+    'EChartsGaugeSingle/visualization/index.html',
+    'EChartsGaugeSingle/visualization/style.css',
+    'EChartsGaugeSingle/visualization/app.js',
+    'EChartsGaugeSingle/GaugePreview.php',
+    'EChartsTimeSeries/TimeSeriesPreview.php',
+    'EChartsBarCategory/visualization/index.html',
+    'EChartsBarCategory/visualization/style.css',
+    'EChartsBarCategory/visualization/app.js',
+    'EChartsBarHistory/visualization/index.html',
+    'EChartsBarHistory/visualization/style.css',
+    'EChartsBarHistory/visualization/app.js',
+    'EChartsBarWaterfall/visualization/index.html',
+    'EChartsBarWaterfall/visualization/style.css',
+    'EChartsBarWaterfall/visualization/app.js',
+    'tests/bar_waterfall_layout.js',
+    'EChartsBarPolar/visualization/index.html',
+    'EChartsBarPolar/visualization/style.css',
+    'EChartsBarPolar/visualization/app.js',
+    'EChartsPie/visualization/index.html',
+    'EChartsPie/visualization/style.css',
+    'EChartsPie/visualization/app.js',
+    'EChartsScatter/ScatterPairing.php',
+    'EChartsScatter/visualization/index.html',
+    'EChartsScatter/visualization/style.css',
+    'EChartsScatter/visualization/app.js',
+    'EChartsHeatmap/HeatmapAggregation.php',
+    'EChartsHeatmap/visualization/index.html',
+    'EChartsHeatmap/visualization/style.css',
+    'EChartsHeatmap/visualization/app.js',
+    'libs/TreeHierarchy.php',
+    'EChartsTree/visualization/index.html',
+    'EChartsTree/visualization/style.css',
+    'EChartsTree/visualization/app.js',
+    'EChartsTreeSystemHealth/TreeHealth.php',
+    'EChartsTreeSystemHealth/visualization/index.html',
+    'EChartsTreeSystemHealth/visualization/style.css',
+    'EChartsTreeSystemHealth/visualization/app.js',
+    'libs/GraphModel.php',
+    'EChartsGraph/visualization/index.html',
+    'EChartsGraph/visualization/style.css',
+    'EChartsGraph/visualization/app.js',
+    '.tools/echarts-runtime/src/graph-runtime.js',
+    'libs/echarts/6.1.0/echarts.graph.min.js',
+    'docs/adr/0047-general-and-zigbee-graph-split.md',
+    'tests/graph_model.php',
+    'tests/graph_layout.js',
+    'libs/ZigbeeGraphModel.php',
+    'EChartsGraphZ2M/ZigbeeGraphExportReader.php',
+    'EChartsGraphZ2M/visualization/index.html',
+    'EChartsGraphZ2M/visualization/style.css',
+    'EChartsGraphZ2M/visualization/app.js',
+    'tests/zigbee_graph_model.php',
+    'tests/zigbee_graph_layout.js',
+    'libs/TreemapModel.php',
+    'EChartsTreemap/visualization/index.html',
+    'EChartsTreemap/visualization/style.css',
+    'EChartsTreemap/visualization/app.js',
+    '.tools/echarts-runtime/src/treemap-runtime.js',
+    'libs/echarts/6.1.0/echarts.treemap.min.js',
+    'docs/adr/0048-manual-current-value-treemap.md',
+    'tests/treemap_model.php',
+    'tests/treemap_layout.js',
+    'EChartsSunburst/visualization/index.html',
+    'EChartsSunburst/visualization/style.css',
+    'EChartsSunburst/visualization/app.js',
+    '.tools/echarts-runtime/src/sunburst-runtime.js',
+    'libs/echarts/6.1.0/echarts.sunburst.min.js',
+    'docs/adr/0049-manual-current-value-sunburst.md',
+    'tests/sunburst_layout.js',
+    'EChartsParallel/ParallelPairing.php',
+    'EChartsParallel/visualization/index.html',
+    'EChartsParallel/visualization/style.css',
+    'EChartsParallel/visualization/app.js',
+    '.tools/echarts-runtime/src/parallel-runtime.js',
+    'libs/echarts/6.1.0/echarts.parallel.min.js',
+    'docs/adr/0050-archive-parallel-chart.md',
+    'tests/parallel_pairing.php',
+    'tests/parallel_layout.js',
+    'EChartsSankey/SankeyModel.php',
+    'EChartsSankey/SankeyPreview.php',
+    'EChartsSankey/visualization/index.html',
+    'EChartsSankey/visualization/style.css',
+    'EChartsSankey/visualization/app.js',
+    '.tools/echarts-runtime/src/sankey-runtime.js',
+    'libs/echarts/6.1.0/echarts.sankey.min.js',
+    'docs/adr/0051-manual-current-value-sankey.md',
+    'tests/sankey_model.php',
+    'tests/sankey_layout.js',
+    'EChartsRadar/RadarModel.php',
+    'EChartsRadar/RadarPreview.php',
+    'libs/EChartsPreviewSymbol.php',
+    'EChartsRadar/visualization/index.html',
+    'EChartsRadar/visualization/style.css',
+    'EChartsRadar/visualization/app.js',
+    'libs/echarts/6.1.0/echarts.radar.min.js',
+    '.tools/echarts-runtime/src/radar-runtime.js',
+    'docs/adr/0053-current-value-radar.md',
+    'tests/radar_model.php',
+    'tests/radar_integration.php',
+    'tests/radar_layout.js',
+    'libs/EChartsCurrentComparisonSources.php',
+    'EChartsPictorialBar/PictorialBarPreview.php',
+    'EChartsPictorialBar/visualization/index.html',
+    'EChartsPictorialBar/visualization/style.css',
+    'EChartsPictorialBar/visualization/app.js',
+    '.tools/echarts-runtime/src/pictorial-bar-runtime.js',
+    'libs/echarts/6.1.0/echarts.pictorial-bar.min.js',
+    'docs/adr/0057-current-value-pictorial-bar.md',
+    'tests/pictorial_bar_integration.php',
+    'tests/pictorial_bar_layout.js',
+    'EChartsFunnel/FunnelPreview.php',
+    'EChartsFunnel/visualization/index.html',
+    'EChartsFunnel/visualization/style.css',
+    'EChartsFunnel/visualization/app.js',
+    'libs/echarts/6.1.0/echarts.funnel.min.js',
+    '.tools/echarts-runtime/src/funnel-runtime.js',
+    'docs/adr/0055-current-value-funnel.md',
+    'tests/funnel_integration.php',
+    'tests/funnel_layout.js',
+    'EChartsCandlestick/CandlestickData.php',
+    'EChartsCandlestick/CandlestickPreview.php',
+    'EChartsCandlestick/visualization/app.js',
+    'EChartsCandlestick/visualization/index.html',
+    'EChartsCandlestick/visualization/style.css',
+    'tests/candlestick_data.php',
+    'tests/candlestick_integration.php',
+    'tests/candlestick_layout.js',
+    'docs/adr/0056-archive-candlestick.md',
+    'libs/echarts/6.1.0/echarts.candlestick.min.js',
+    '.tools/echarts-runtime/src/candlestick-runtime.js',
+    'EChartsBoxplot/BoxplotStatistics.php',
+    'EChartsBoxplot/BoxplotPreview.php',
+    'EChartsBoxplot/visualization/index.html',
+    'EChartsBoxplot/visualization/style.css',
+    'EChartsBoxplot/visualization/app.js',
+    'libs/echarts/6.1.0/echarts.boxplot.min.js',
+    '.tools/echarts-runtime/src/boxplot-runtime.js',
+    'docs/adr/0054-hourly-archive-boxplot.md',
+    'tests/boxplot_statistics.php',
+    'tests/boxplot_integration.php',
+    'tests/boxplot_layout.js',
+    'EChartsCalendar/CalendarData.php',
+    'EChartsCalendar/CalendarPreview.php',
+    'EChartsCalendar/visualization/index.html',
+    'EChartsCalendar/visualization/style.css',
+    'EChartsCalendar/visualization/app.js',
+    '.tools/echarts-runtime/src/calendar-runtime.js',
+    'libs/echarts/6.1.0/echarts.calendar.min.js',
+    'docs/adr/0052-calendar-daily-archive-means.md',
+    'tests/calendar_data.php',
+    'tests/calendar_layout.js',
+    'tests/calendar_integration.php',
+    '.tools/echarts-runtime/src/tree-runtime.js',
+    'docs/adr/0044-tree-symcon-object-hierarchy.md',
+    'docs/adr/0046-tree-system-health-module-split.md',
+    'tests/tree_hierarchy.php',
+    'tests/tree_layout.js',
+    'libs/echarts/6.1.0/echarts.heatmap.min.js',
+    '.tools/echarts-runtime/src/heatmap-runtime.js',
+    'docs/adr/0041-heatmap-weekday-hour-family.md',
+    'tests/heatmap_aggregation.php',
+    'tests/heatmap_layout.js',
+    'tests/bar_polar_layout.js',
+    'tests/pie_layout.js',
+    'tests/scatter_pairing.php',
+    'tests/scatter_layout.js',
+    'libs/EChartsCurrentSources.php'
 ];
 
 foreach ($requiredFiles as $requiredFile) {
@@ -49,8 +325,56 @@ foreach (['.shared', '.tests'] as $forbiddenDirectory) {
     }
 }
 
+$symconLibraryDirectories = ['actions', 'docs', 'imgs', 'libs', 'tests'];
+foreach (new DirectoryIterator($root) as $entry) {
+    if ($entry->isDot() || !$entry->isDir()) {
+        continue;
+    }
+
+    $directoryName = $entry->getFilename();
+    if (str_starts_with($directoryName, '.')
+        || in_array($directoryName, $symconLibraryDirectories, true)
+        || is_file($entry->getPathname() . '/module.json')
+    ) {
+        continue;
+    }
+
+    $containsFiles = false;
+    $contents = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($entry->getPathname(), FilesystemIterator::SKIP_DOTS)
+    );
+    foreach ($contents as $content) {
+        if ($content->isFile()) {
+            $containsFiles = true;
+            break;
+        }
+    }
+
+    // Git does not distribute empty directories, so local empty placeholders
+    // cannot invalidate the installed library package.
+    if (!$containsFiles) {
+        continue;
+    }
+
+    $errors[] = 'Unsupported top-level directory for an IP-Symcon library: '
+        . $directoryName
+        . ' (non-dot directories must be a supported library directory or contain module.json).';
+}
+
+$gitAttributesPath = $root . '/.gitattributes';
+if (is_file($gitAttributesPath)) {
+    $gitAttributes = (string) file_get_contents($gitAttributesPath);
+    if (!str_contains($gitAttributes, '/libs/echarts/** -text')) {
+        $errors[] = '.gitattributes must disable line-ending conversion for vendored ECharts artifacts.';
+    }
+}
+
 if (is_file($root . '/libs/helper/EChartsDataProtocol.php')) {
     $errors[] = 'Project-specific EChartsDataProtocol.php must not be stored with synchronized ModuleHelpers.';
+}
+
+if (is_file($root . '/libs/echarts/6.1.0/echarts.min.js')) {
+    $errors[] = 'The full ECharts build exceeds the Symcon tile output-buffer budget and must not be distributed.';
 }
 
 $gitmodulesPath = $root . '/.gitmodules';
@@ -166,13 +490,25 @@ if ($helperSync !== null) {
         $errors[] = '.helper-sync.json must generate German helper documentation.';
     }
     if (($helperSync['helpers'] ?? null) !== [
-        'DataFlowHelper' => ['target' => 'libs/helper/DataFlowHelper.php']
+        'ConfigurationFormHelper'                 => ['target' => 'libs/helper/ConfigurationFormHelper.php'],
+        'DataFlowHelper'                          => ['target' => 'libs/helper/DataFlowHelper.php'],
+        'IPSViewHTMLPageHelper'                   => ['target' => 'libs/helper/IPSViewHTMLPageHelper.php'],
+        'ResponsiveVisualizationHelper'           => ['target' => 'libs/helper/ResponsiveVisualizationHelper.php'],
+        'SVGPreviewHelper'                        => ['target' => 'libs/helper/SVGPreviewHelper.php'],
+        'VariableSearchHelper'                    => ['target' => 'libs/helper/VariableSearchHelper.php'],
+        'VisualizationAssetHelper'                => ['target' => 'libs/helper/VisualizationAssetHelper.php'],
+        'VisualizationThemeHelper'                => ['target' => 'libs/helper/VisualizationThemeHelper.php'],
+        'DebugFlowHelper'                         => ['target' => 'libs/helper/DebugFlowHelper.php'],
+        'VariablePresentationNormalizationHelper' => ['target' => 'libs/helper/VariablePresentationNormalizationHelper.php']
     ]) {
-        $errors[] = '.helper-sync.json must subscribe exactly to DataFlowHelper.';
+        $errors[] = '.helper-sync.json does not contain the required visualization helper subscriptions.';
     }
 }
 
-$expectedModules = ['EChartsGateway', 'EChartsGaugeMulti', 'EChartsGaugeSingle'];
+$expectedModules = [
+    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsBoxplot', 'EChartsCalendar', 'EChartsCalendarPie', 'EChartsCandlestick', 'EChartsFunnel', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPictorialBar', 'EChartsPie', 'EChartsProgress', 'EChartsRadar', 'EChartsRadarHistory', 'EChartsSankey', 'EChartsScatter', 'EChartsStateTimeline', 'EChartsSunburst', 'EChartsThemeRiver', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
+];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {
     $discoveredModules[] = basename(dirname($modulePath));
@@ -213,9 +549,34 @@ if ($readme === false) {
     $errors[] = 'Cannot read README.md.';
 } else {
     foreach ($expectedModules as $moduleDirectory) {
-        if (!str_contains($readme, '](' . $moduleDirectory . ')')) {
+        if (!str_contains($readme, '](' . $moduleDirectory . '/README.md)')) {
             $errors[] = 'README.md does not link module directory: ' . $moduleDirectory;
         }
+    }
+
+    if (!str_contains($readme, '[CHANGELOG.md](CHANGELOG.md)')) {
+        $errors[] = 'README.md does not link CHANGELOG.md.';
+    }
+}
+
+$userReadmePaths = [$root . '/README.md'];
+foreach ($expectedModules as $moduleDirectory) {
+    $userReadmePaths[] = $root . '/' . $moduleDirectory . '/README.md';
+}
+
+foreach ($userReadmePaths as $userReadmePath) {
+    $userReadme = (string) file_get_contents($userReadmePath);
+    if (preg_match('/^#{1,6}\s+(?:Entwicklung|Entwicklungsstand|Tests?|CI|Debugging|Architektur)\b/mi', $userReadme) === 1) {
+        $errors[] = str_replace($root . '/', '', $userReadmePath)
+            . ' contains an internal-development heading.';
+    }
+}
+
+$changelogPath = $root . '/CHANGELOG.md';
+if (is_file($changelogPath)) {
+    $changelog = (string) file_get_contents($changelogPath);
+    if (!str_starts_with($changelog, '# Unveröffentlicht')) {
+        $errors[] = 'CHANGELOG.md must start with # Unveröffentlicht during development.';
     }
 }
 
@@ -279,6 +640,9 @@ if ($runner === false) {
         "__DIR__ . '/module_contracts.php'",
         "__DIR__ . '/symcon_strict.php'",
         "__DIR__ . '/data_protocol.php'",
+        "__DIR__ . '/echarts_assets.php'",
+        "__DIR__ . '/svg_path.php'",
+        "__DIR__ . '/time_series_design.php'",
         "__DIR__ . '/gateway_gauges.php'",
         'python3 tests/helper_integrity.py',
         'python3 tests/test_update_library_metadata.py'

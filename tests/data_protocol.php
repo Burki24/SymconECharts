@@ -29,6 +29,48 @@ assertProtocol(
 $decodedRequest = EChartsDataProtocol::DecodeRequest(['DataID' => '{TEST}'] + $request);
 assertProtocol($decodedRequest === $request, 'Request decoding must discard only the transport DataID.');
 
+$archiveRequest = EChartsDataProtocol::CreateRequest(
+    EChartsDataProtocol::OPERATION_ARCHIVE_READ,
+    [
+        'VariableID'     => 4711,
+        'StartTimestamp' => 1780000000,
+        'EndTimestamp'   => 1780000400,
+        'Mode'           => 'raw',
+        'Reducer'        => 'auto',
+        'Limit'          => 1000
+    ]
+);
+assertProtocol(
+    $archiveRequest['Operation'] === 'archive.read',
+    'Archive request operation changed.'
+);
+
+$statesRequest = EChartsDataProtocol::CreateRequest(
+    EChartsDataProtocol::OPERATION_ARCHIVE_STATES_READ,
+    ['VariableID' => 4713, 'StartTimestamp' => 1780000000, 'EndTimestamp' => 1780000400, 'Limit' => 100]
+);
+assertProtocol(
+    $statesRequest['ProtocolVersion'] === 1 && $statesRequest['Operation'] === 'archive.states.read',
+    'Discrete archive states must add an operation without changing protocol version one.'
+);
+
+$ipsViewPush = EChartsDataProtocol::CreateRequest(
+    EChartsDataProtocol::OPERATION_IPSVIEW_PUSH,
+    ['InstanceID' => 5000, 'Channel' => str_repeat('a', 32), 'Message' => ['status' => 'ready']]
+);
+assertProtocol(
+    $ipsViewPush['Operation'] === 'ipsview.push',
+    'Persistent IPSView push operation changed.'
+);
+$ipsViewState = EChartsDataProtocol::CreateRequest(
+    EChartsDataProtocol::OPERATION_IPSVIEW_STATE,
+    ['InstanceID' => 5000, 'Channel' => str_repeat('a', 32)]
+);
+assertProtocol(
+    $ipsViewState['Operation'] === 'ipsview.state',
+    'Persistent IPSView state operation changed.'
+);
+
 $success = EChartsDataProtocol::EncodeSuccessResponse(
     EChartsDataProtocol::OPERATION_CURRENT_READ,
     ['VariableID' => 4711, 'Value' => 0.0, 'Timestamp' => 1780000000]

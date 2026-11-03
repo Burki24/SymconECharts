@@ -1,0 +1,213 @@
+<?php
+
+declare(strict_types=1);
+
+use SymconECharts\EChartsGaugeDesign;
+
+require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
+
+function assertGaugeDesign(bool $condition, string $message): void
+{
+    if (!$condition) {
+        throw new RuntimeException($message);
+    }
+}
+
+$pointer = EChartsGaugeDesign::ImportPointer(
+    '<svg viewBox="10 20 40 80"><path d="M30 20L50 100L10 100Z"/></svg>',
+    'custom',
+    25.0,
+    75.0
+);
+assertGaugeDesign(
+    $pointer['pointerPath'] === 'M30 20L50 100L10 100Z'
+        && $pointer['pointerViewBox'] === '10 20 40 80'
+        && $pointer['pointerPivotX'] === 20.0
+        && $pointer['pointerPivotY'] === 80.0
+        && $pointer['pointerShowAnchor'] === true,
+    'The shared Gauge pointer import contract changed.'
+);
+
+$anchor = EChartsGaugeDesign::ImportAnchor(
+    '<svg viewBox="0 0 100 100"><path d="M50 0L100 50L50 100L0 50Z"/></svg>'
+);
+assertGaugeDesign(
+    $anchor['anchorPath'] === 'M50 0L100 50L50 100L0 50Z'
+        && $anchor['anchorViewBox'] === '0 0 100 100',
+    'The shared Gauge anchor import contract changed.'
+);
+
+$background = EChartsGaugeDesign::ImportPlateBackground(
+    '<svg viewBox="0 0 200 100"><rect width="200" height="100" fill="#123456"/></svg>',
+    'contain',
+    125,
+    10,
+    -5,
+    60,
+    15.0
+);
+assertGaugeDesign(
+    $background['plateBackgroundEnabled'] === true
+        && $background['plateBackgroundFit'] === 'contain'
+        && $background['plateBackgroundAspectRatio'] === 2.0
+        && str_starts_with($background['plateBackgroundImage'], 'data:image/svg+xml;base64,'),
+    'The shared Gauge plate background import contract changed.'
+);
+assertGaugeDesign(EChartsGaugeDesign::ColorToHex(-1) === '#000000', 'Negative colors must be clamped.');
+assertGaugeDesign(EChartsGaugeDesign::ColorToHex(0x123456) === '#123456', 'RGB conversion changed.');
+assertGaugeDesign(EChartsGaugeDesign::ColorToHex(0xFFFFFF + 1) === '#FFFFFF', 'Large colors must be clamped.');
+
+$sourceDefaults = EChartsGaugeDesign::SourceDesignDefaults();
+$sourceColumns = EChartsGaugeDesign::SourceDesignColumns();
+$sourceForm = EChartsGaugeDesign::SourceEditorForm();
+foreach (['ScaleLabelDistanceOffset', 'TitleOffsetXPercent', 'TitleOffsetYPercent',
+    'ValueOffsetXPercent', 'ValueOffsetYPercent'] as $field) {
+    assertGaugeDesign(array_key_exists($field, $sourceDefaults), 'An individual Gauge label offset is missing.');
+}
+$sourceFormJson = json_encode($sourceForm, JSON_THROW_ON_ERROR);
+assertGaugeDesign(
+    str_contains($sourceFormJson, '"name":"ScaleLabelDistanceOffset"')
+        && str_contains($sourceFormJson, '"name":"IPSViewValueOffsetYPercent"'),
+    'Individual Gauge source editors must expose tile and IPSView label offsets.'
+);
+assertGaugeDesign(
+    ($sourceDefaults['UseIndividualDesign'] ?? null) === false
+        && count($sourceColumns) === count($sourceDefaults) * 2
+        && ($sourceColumns[0]['name'] ?? null) === 'UseIndividualDesign'
+        && ($sourceColumns[0]['save'] ?? null) === true
+        && array_is_list($sourceForm),
+    'The shared source-row Gauge design form contract changed.'
+);
+$formItems = [
+    ['type' => 'ExpansionPanel', 'caption' => 'Tile designer', 'items' => [
+        ['type' => 'List', 'name' => 'Sources', 'columns' => [['name' => 'VariableID']]],
+        ['type' => 'Select', 'name' => 'GaugePreset'],
+        ['type' => 'Input', 'name' => 'PointerShape'],
+        ['type' => 'Image', 'name' => 'GaugePreview']
+    ]]
+];
+$sourceDesigner = EChartsGaugeDesign::WithSourceEditor($formItems, 'add()', 'edit()', 'delete()');
+$sourceList = $sourceDesigner[0]['items'][0];
+assertGaugeDesign(
+    ($sourceList['columns'][0]['name'] ?? null) === 'VariableID'
+        && count($sourceList['columns']) === count($sourceColumns) + 1
+        && ($sourceList['onAdd'] ?? null) === 'add()'
+        && ($sourceList['onEdit'] ?? null) === 'edit()'
+        && ($sourceList['onDelete'] ?? null) === 'delete()'
+        && ($sourceList['form'] ?? null) === $sourceForm,
+    'The shared nested Gauge source editor changed its columns or callbacks.'
+);
+$withoutPresets = EChartsGaugeDesign::WithoutPresetSelectors($sourceDesigner);
+assertGaugeDesign(
+    array_column($withoutPresets[0]['items'], 'name') === ['Sources', 'PointerShape', 'GaugePreview'],
+    'Fixed Gauge layouts must not expose preset selectors.'
+);
+$previewFields = EChartsGaugeDesign::PreviewFieldNames(
+    ['Sources', 'Title', 'EChartsTheme', 'IPSViewEChartsTheme'],
+    ['PointerShape', 'PlateBackgroundSVG']
+);
+assertGaugeDesign(
+    $previewFields === [
+        'Sources', 'Title', 'EChartsTheme', 'IPSViewEChartsTheme',
+        'PointerShape', 'PlateBackgroundSVG', 'IPSViewPointerShape', 'IPSViewPlateBackgroundSVG'
+    ],
+    'Gauge preview field order or IPSView prefixes changed.'
+);
+$previewAction = EChartsGaugeDesign::PreviewFormAction('ECGT', $previewFields);
+$sourceAction = EChartsGaugeDesign::PreviewFormAction('ECGC', $previewFields, 'edit');
+$previewItems = EChartsGaugeDesign::WithPreviewActions($withoutPresets, $previewFields, $previewAction);
+assertGaugeDesign(
+    str_starts_with($previewAction, 'ECGT_UpdateGaugePreviewFromForm($id, json_encode([')
+        && str_contains($previewAction, "'IPSViewPlateBackgroundSVG' => $" . 'IPSViewPlateBackgroundSVG')
+        && str_starts_with($sourceAction, 'ECGC_UpdateGaugePreviewSourceFromForm($id, json_encode([')
+        && str_ends_with($sourceAction, "]), 'edit');")
+        && ($previewItems[0]['items'][1]['onChange'] ?? null) === $previewAction
+        && !isset($previewItems[0]['items'][2]['onChange']),
+    'Shared Gauge preview actions must preserve prefix, source action, and nested targets.'
+);
+$ipsViewDesigner = EChartsGaugeDesign::IPSViewDesignerForm(
+    $formItems,
+    [['type' => 'CheckBox', 'name' => 'EnableIPSView']],
+    ['GaugePreset', 'PointerShape'],
+    $previewAction,
+    'ECGT_CopyTileDesignToIPSView($id);'
+);
+$independentItems = $ipsViewDesigner['items'][5]['items'];
+assertGaugeDesign(
+    ($ipsViewDesigner['caption'] ?? null) === 'IPSView design'
+        && ($ipsViewDesigner['items'][0]['name'] ?? null) === 'EnableIPSView'
+        && ($ipsViewDesigner['items'][1]['items'][0]['onChange'] ?? null) === $previewAction
+        && ($ipsViewDesigner['items'][4]['onClick'] ?? null) === 'ECGT_CopyTileDesignToIPSView($id);'
+        && array_column($independentItems, 'name') === [
+            'IPSViewGaugePreset', 'IPSViewPointerShape', 'IPSViewGaugePreview'
+        ],
+    'Shared Gauge IPSView form must omit shared sources while preserving design fields and callbacks.'
+);
+try {
+    EChartsGaugeDesign::IPSViewDesignerForm([], [], [], '', '');
+    throw new RuntimeException('A missing Tile designer section was accepted.');
+} catch (RuntimeException $exception) {
+    assertGaugeDesign(
+        $exception->getMessage() === 'The Tile designer form section is missing.',
+        'The missing Tile designer diagnostic changed.'
+    );
+}
+$sourceStyle = EChartsGaugeDesign::StyleFromSource(array_merge($sourceDefaults, [
+    'PointerShape'               => 'custom',
+    'CustomPointerSVG'           => '<svg viewBox="10 20 40 80"><path d="M30 20L50 100L10 100Z"/></svg>',
+    'CustomPointerPivotMode'     => 'custom',
+    'CustomPointerPivotXPercent' => 25.0,
+    'CustomPointerPivotYPercent' => 75.0,
+    'AnchorShape'                => 'custom',
+    'CustomAnchorSVG'            => '<svg viewBox="0 0 100 100"><path d="M50 0L100 50L50 100L0 50Z"/></svg>',
+    'PlateDesignMode'            => 'custom',
+    'PlateBackgroundEnabled'     => true,
+    'PlateBackgroundSVG'         => '<svg viewBox="0 0 200 100"><rect width="200" height="100"/></svg>',
+    'PlateBackgroundFit'         => 'contain'
+]));
+$ipsViewSourceStyle = EChartsGaugeDesign::StyleFromSource([
+    'IPSViewPointerShape'        => 'line',
+    'IPSViewPlateDesignMode'     => 'hidden',
+    'IPSViewTitleOffsetXPercent' => 12
+], 'IPSView');
+assertGaugeDesign(
+    ($sourceStyle['pointerPivotX'] ?? null) === 20.0
+        && ($sourceStyle['anchorPath'] ?? null) === 'M50 0L100 50L50 100L0 50Z'
+        && ($sourceStyle['anchorViewBox'] ?? null) === '0 0 100 100'
+        && ($sourceStyle['plateMode'] ?? null) === 'custom'
+        && ($sourceStyle['plateBackgroundAspectRatio'] ?? null) === 2.0
+        && ($ipsViewSourceStyle['pointerShape'] ?? null) === 'line'
+        && ($ipsViewSourceStyle['plateMode'] ?? null) === 'hidden'
+        && ($ipsViewSourceStyle['titleOffsetXPercent'] ?? null) === 12,
+    'The shared source-row SVG design could not be materialized.'
+);
+try {
+    EChartsGaugeDesign::StyleFromSource(['ValueOffsetYPercent' => 101]);
+    throw new RuntimeException('An invalid individual Gauge label offset was accepted.');
+} catch (InvalidArgumentException) {
+}
+
+foreach ([
+    static fn (): array => EChartsGaugeDesign::ImportPointer('<svg/>', 'invalid'),
+    static fn (): array => EChartsGaugeDesign::ImportAnchor(
+        '<svg viewBox="0 0 10 10"><script>alert(1)</script><path d="M0 0L10 10Z"/></svg>'
+    ),
+    static fn (): array => EChartsGaugeDesign::ImportPointer(
+        '<svg viewBox="0 0 10 10"><path d="M0 0L10 10Z"/></svg>',
+        'custom',
+        101.0,
+        50.0
+    ),
+    static fn (): array => EChartsGaugeDesign::ImportPlateBackground(
+        '<svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="5"/></svg>',
+        'invalid'
+    )
+] as $invalidImport) {
+    try {
+        $invalidImport();
+        throw new RuntimeException('An invalid shared Gauge design was accepted.');
+    } catch (InvalidArgumentException) {
+    }
+}
+
+echo "Shared ECharts Gauge design contracts verified.\n";

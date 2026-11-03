@@ -1,0 +1,154 @@
+'use strict';
+
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+
+const source = fs.readFileSync(path.join(__dirname, '..', 'EChartsGaugeSingle', 'visualization', 'app.js'), 'utf8');
+const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
+const palette = {
+    background: '#202020', text: '#ffffff', muted: '#aaaaaa', subtle: '#888888',
+    border: '#cccccc', track: '#444444', surface: '#333333', accent: '#55cbb5'
+};
+
+function render(mode, width, height, preset, style = {}, reducedMotion = false, observeResize = false,
+    tileHeaderVisible = true) {
+    const chartElement = {
+        clientWidth: width,
+        clientHeight: height,
+        hidden: false,
+        setAttribute: () => {}
+    };
+    const errorElement = { hidden: true, textContent: '' };
+    let option;
+    let resizeCallback;
+    let resized = 0;
+    let optionUpdates = 0;
+    let chartWidth = width;
+    let chartHeight = height;
+    const chart = {
+        setOption: next => { option = next; optionUpdates++; },
+        getWidth: () => chartWidth,
+        getHeight: () => chartHeight,
+        resize: () => {
+            resized++;
+            chartWidth = chartElement.clientWidth;
+            chartHeight = chartElement.clientHeight;
+        }
+    };
+    const window = {
+        SYMC_VISUALIZATION: {
+            mode,
+            state: {
+                status: 'ready',
+                chart: {
+                    theme: 'dark', value: 50,
+                    gauge: { minimum: 0, maximum: 100, title: 'Wind speed', unit: 'm/s', decimals: 1, preset, style }
+                }
+            },
+            options: { echartsThemes: { dark: palette }, tileHeaderVisible: mode === 'symcon' && tileHeaderVisible, tileHeaderInset: mode === 'symcon' && tileHeaderVisible ? 58 : 0 }
+        },
+        echarts: { init: () => chart },
+        ResizeObserver: observeResize ? class {
+            constructor(callback) { resizeCallback = callback; }
+            observe() {}
+        } : undefined,
+        matchMedia: query => ({ matches: reducedMotion && query === '(prefers-reduced-motion: reduce)' }),
+        addEventListener: () => {}
+    };
+    const document = {
+        getElementById: id => id === 'echarts-gauge-chart' ? chartElement : errorElement
+    };
+    const context = { window, document, ResizeObserver: window.ResizeObserver };
+    vm.runInNewContext(designSource, context);
+    vm.runInNewContext(source, context);
+    assert.ok(option, 'The Gauge Single option must be rendered.');
+    if (observeResize) {
+        Object.defineProperty(option, 'resizeTest', { value: {
+            notify: () => resizeCallback(),
+            resizeWidth: next => { chartElement.clientWidth = next; resizeCallback(); },
+            get resized() { return resized; },
+            get optionUpdates() { return optionUpdates; }
+        } });
+    }
+    return option;
+}
+
+for (const mode of ['symcon', 'ipsview']) {
+    for (const preset of ['basic', 'simple', 'progress', 'speed']) {
+        const width = 620;
+        const height = 630;
+        const option = render(mode, width, height, preset, { plateShape: 'circle' });
+        const series = option.series[0];
+        const plate = option.graphic.find(element => element.id === 'gauge-plate');
+        assert.ok(series.radius > (mode === 'symcon' ? 170 : (preset === 'speed' ? 225 : 215)),
+            `${mode} ${preset} should use the space below its tile header.`);
+        assert.ok(plate.shape.cx - plate.shape.r >= 8, `${mode} ${preset} plate must stay inside the left edge.`);
+        assert.ok(plate.shape.cx + plate.shape.r <= width - 8, `${mode} ${preset} plate must stay inside the right edge.`);
+        assert.ok(plate.shape.cy - plate.shape.r >= (mode === 'symcon' ? 66 : 8),
+            `${mode} ${preset} plate must clear the tile header (top: ${plate.shape.cy - plate.shape.r}).`);
+        assert.ok(plate.shape.cy + plate.shape.r <= height - 8, `${mode} ${preset} plate must stay inside the bottom edge.`);
+        if (preset === 'speed') {
+            assert.equal(series.pointer.itemStyle.shadowColor, 'rgba(85,203,181,0.45)',
+                'Centralized color transparency must preserve the existing Gauge shadow.');
+        }
+    }
+}
+
+const topTitle = render('symcon', 620, 630, 'simple', { titlePosition: 'top' });
+assert.ok(topTitle.series[0].center[1] + topTitle.series[0].title.offsetCenter[1]
+    - topTitle.series[0].title.fontSize >= 58,
+    'A top-positioned Gauge Single title must clear the Symcon tile header.');
+const hiddenTileHeader = render('symcon', 620, 630, 'simple', { titlePosition: 'top' }, false, false, false);
+assert.ok(hiddenTileHeader.series[0].center[1] + hiddenTileHeader.series[0].title.offsetCenter[1]
+    < topTitle.series[0].center[1] + topTitle.series[0].title.offsetCenter[1],
+    'Hiding the Symcon tile header must release the space above the Gauge title.');
+
+const narrow = render('ipsview', 320, 240, 'simple', { plateShape: 'circle' });
+const resizeGauge = render('symcon', 620, 630, 'simple', {}, false, true).resizeTest;
+resizeGauge.notify();
+assert.equal(resizeGauge.resized, 0, 'An unchanged Gauge notification must not cancel animation.');
+assert.equal(resizeGauge.optionUpdates, 1, 'An unchanged Gauge notification must not rebuild options.');
+resizeGauge.resizeWidth(500);
+assert.equal(resizeGauge.resized, 1, 'A genuine Gauge width change must resize.');
+assert.equal(resizeGauge.optionUpdates, 2, 'A genuine Gauge width change must rebuild its responsive option.');
+const reducedGauge = render('ipsview', 620, 630, 'simple', { plateShape: 'circle' }, true);
+assert.equal(reducedGauge.animation, false, 'Gauge Single must keep honoring reduced-motion preferences.');
+assert.equal(reducedGauge.animationDuration, 0);
+const timedGauge = render('symcon', 620, 630, 'simple', {
+    animationEnabled: true, animationDuration: 750, animationDurationUpdate: 1250,
+    animationEasing: 'bounceOut', animationEasingUpdate: 'linear',
+    animationDelay: 120, animationDelayUpdate: 240
+});
+assert.equal(timedGauge.animationDuration, 750);
+assert.equal(timedGauge.animationDurationUpdate, 1250);
+assert.equal(timedGauge.animationEasing, 'bounceOut');
+assert.equal(timedGauge.animationEasingUpdate, 'linear');
+assert.equal(timedGauge.animationDelay, 120);
+assert.equal(timedGauge.animationDelayUpdate, 240);
+assert.equal(timedGauge.series[0].detail.valueAnimation, true);
+const stoppedGauge = render('ipsview', 620, 630, 'simple', {
+    animationEnabled: false, animationDuration: 750, animationDurationUpdate: 1250
+});
+assert.equal(stoppedGauge.animation, false);
+assert.equal(stoppedGauge.series[0].detail.valueAnimation, false);
+assert.ok(narrow.series[0].radius > 0);
+assert.ok(narrow.graphic[0].shape.cx - narrow.graphic[0].shape.r >= 0);
+assert.ok(narrow.graphic[0].shape.cy - narrow.graphic[0].shape.r >= 0);
+
+const customized = render('ipsview', 620, 630, 'simple', {
+    plateShape: 'circle', gaugeRadiusPercent: 150, gaugeOffsetXPercent: 20
+});
+assert.ok(customized.series[0].radius > narrow.series[0].radius);
+assert.ok(customized.series[0].radius < 300, 'An oversized custom design must not receive extra automatic zoom.');
+
+const background = render('ipsview', 620, 630, 'simple', {
+    plateShape: 'circle', plateBackgroundEnabled: true,
+    plateBackgroundImage: `data:image/svg+xml;base64,${Buffer.from('<svg/>').toString('base64')}`,
+    plateBackgroundAspectRatio: 1, plateBackgroundFit: 'contain', plateBackgroundOpacityPercent: 60
+});
+assert.equal(background.graphic.find(element => element.id === 'gauge-plate-background').children[0].style.opacity,
+    0.6, 'Gauge Single must retain its configured plate opacity in IPSView.');
+
+process.stdout.write('Gauge Single responsive layout verified for tile and IPSView.\n');

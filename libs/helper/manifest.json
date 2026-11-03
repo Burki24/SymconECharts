@@ -2,11 +2,124 @@
     "schema": 1,
     "source_repository": "Burki24/Symcon_ModuleHelper",
     "helpers": {
+        "ConfigurationFormHelper": {
+            "version": "1.0.1",
+            "sha256": "bd45f15a1c2f6e2800eff51eefeb3094f5745a3469434d6a57b98d54f30d363f",
+            "path": "libs/helper/ConfigurationFormHelper.php",
+            "source_sha": "85edd95c7344f3740058f19fa7672cbe2e2219c0"
+        },
         "DataFlowHelper": {
             "version": "1.0.0",
             "sha256": "4c25828b283367692d0db1631d2b7d71ba6012883798bc5ffddb8f2d551d6dfb",
             "path": "libs/helper/DataFlowHelper.php",
             "source_sha": "5f8fdc0c202c532be4897a939f940106bb0f8378"
+        },
+        "IPSViewHTMLPageHelper": {
+            "version": "1.5.5",
+            "sha256": "83b049678e9901514101e74c9e2d9a247adac0b05d1ed5e0c3f368e6be5e9d05",
+            "path": "libs/helper/IPSViewHTMLPageHelper.php",
+            "source_sha": "b9af1ef9a6864f61e03b3102d060e78f54fadceb",
+            "assets": [
+                {
+                    "path": "libs/helper/translations/IPSViewHTMLPageHelper.json",
+                    "sha256": "137ca0ac2f11f871953e71c0fecf20bf584f14a5fac26f4633a83b0890f62c9a"
+                }
+            ],
+            "dependencies": [
+                {
+                    "name": "HelperTranslationHelper",
+                    "version": "1.0.0",
+                    "sha256": "d3deee581eca9f8eb11e9adce060170227a2dc836ee898bd134f93d27604f639",
+                    "path": "libs/helper/HelperTranslationHelper.php",
+                    "source_sha": "8e3df7e07ede7a7e298a6d69f132bc4cb697ab91"
+                },
+                {
+                    "name": "VisualizationAssetHelper",
+                    "version": "1.1.1",
+                    "sha256": "5df251b5ceb7a9867f2330de6b0476b0c11f1762aeda7c03f08d3ad66f4433d6",
+                    "path": "libs/helper/VisualizationAssetHelper.php",
+                    "source_sha": "b70deba539c9b7ed0c758320d9d4ef52eb9ebfc1",
+                    "assets": [
+                        {
+                            "path": "libs/helper/visualization/http-origin.js",
+                            "sha256": "c6c8dd8355b426ddaa38d1789164aac06b4d7d0ccfb8196fcaa88b2ebc2c0456"
+                        },
+                        {
+                            "path": "libs/helper/visualization/interaction.js",
+                            "sha256": "ed03a790da87ccaf747dac426107bf9b9b57a54c5bcab2281b199d662cbaa3ed"
+                        },
+                        {
+                            "path": "libs/helper/visualization/interaction.min.js",
+                            "sha256": "0bd1aa60899bd9859a26943a9506b5b52126f45f9cd19532a573e6cb0cb28289"
+                        }
+                    ]
+                }
+            ]
+        },
+        "ResponsiveVisualizationHelper": {
+            "version": "1.0.2",
+            "sha256": "158d643156820c7c1e6979d4b28099b6b0e2f71eafbd8c6a7feb717200b6c700",
+            "path": "libs/helper/ResponsiveVisualizationHelper.php",
+            "source_sha": "d7d96ace1c7285b6cd670d36a74b3fa8a5e7dc95"
+        },
+        "SVGPreviewHelper": {
+            "version": "1.0.0",
+            "sha256": "14313a55020df27931e1ffe071fa599a39152493c6305ab2ef5322922981817b",
+            "path": "libs/helper/SVGPreviewHelper.php",
+            "source_sha": "7a28a4d68fdb81d1c4edc492628ae2f2ae256940"
+        },
+        "VisualizationAssetHelper": {
+            "version": "1.1.1",
+            "sha256": "5df251b5ceb7a9867f2330de6b0476b0c11f1762aeda7c03f08d3ad66f4433d6",
+            "path": "libs/helper/VisualizationAssetHelper.php",
+            "source_sha": "b70deba539c9b7ed0c758320d9d4ef52eb9ebfc1",
+            "assets": [
+                {
+                    "path": "libs/helper/visualization/http-origin.js",
+                    "sha256": "c6c8dd8355b426ddaa38d1789164aac06b4d7d0ccfb8196fcaa88b2ebc2c0456"
+                },
+                {
+                    "path": "libs/helper/visualization/interaction.js",
+                    "sha256": "ed03a790da87ccaf747dac426107bf9b9b57a54c5bcab2281b199d662cbaa3ed"
+                },
+                {
+                    "path": "libs/helper/visualization/interaction.min.js",
+                    "sha256": "0bd1aa60899bd9859a26943a9506b5b52126f45f9cd19532a573e6cb0cb28289"
+                }
+            ]
+        },
+        "VisualizationThemeHelper": {
+            "version": "1.1.0",
+            "sha256": "29fe61a7eccafeb8b2beb77fe3f7a4896f43b3eaace9ebe428a4fc8250fd9088",
+            "path": "libs/helper/VisualizationThemeHelper.php",
+            "source_sha": "8e3df7e07ede7a7e298a6d69f132bc4cb697ab91"
+        },
+        "VariableSearchHelper": {
+            "version": "1.0.0",
+            "sha256": "f7f18b03a320578ecb2ffd816879df2e280e0d96c18cac27320198c73b564f22",
+            "path": "libs/helper/VariableSearchHelper.php",
+            "source_sha": "721c13515f5b80369f36020271efa0788f5c49d6"
+        },
+        "DebugFlowHelper": {
+            "version": "1.1.0",
+            "sha256": "ee763d210b8883c5e8a483e51f6a87e9cefeee73a89f6ef7bc7b4cfd61e28005",
+            "path": "libs/helper/DebugFlowHelper.php",
+            "source_sha": "a80c7b9fc1d943651a37128d174ee56be0cb275f",
+            "dependencies": [
+                {
+                    "name": "DebugHelper",
+                    "version": "1.0.3",
+                    "sha256": "b58cd75c9c2c01fc0a6e2610b3f41d817e9799400f08179d380eaa81791864e3",
+                    "path": "libs/helper/DebugHelper.php",
+                    "source_sha": "68aef587ee458e0155ec04ba19c3e20855209b86"
+                }
+            ]
+        },
+        "VariablePresentationNormalizationHelper": {
+            "version": "1.0.2",
+            "sha256": "5ce425a8a54872ea2c0ecd4d065a540300ef6a6d6b5e97627e25b075b8d3c0fd",
+            "path": "libs/helper/VariablePresentationNormalizationHelper.php",
+            "source_sha": "b57c4a3cb11e096281c4429f0f604ba8c7c8f6e5"
         }
     }
 }

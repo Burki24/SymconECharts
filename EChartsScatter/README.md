@@ -1,0 +1,200 @@
+# EChartsScatter
+
+`EChartsScatter` vergleicht archivierte Werte zweier numerischer Symcon-Variablen
+als Streudiagramm. Eine dritte Archivvariable kann die Punktgröße steuern
+(Bubble-Darstellung). Ein gemeinsames `EChartsGateway` genügt für alle
+ECharts-Instanzen.
+
+Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+[Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsscatter).
+
+## Einrichtung
+
+Die Modulinstanz anlegen und mit dem vorhandenen EChartsGateway verbinden.
+Die unten beschriebenen Quellen und Datenregeln konfigurieren, Titel und
+Design einstellen und die Änderungen übernehmen. Für IPSView bei Bedarf
+die zusätzliche HTML-Ausgabe aktivieren und ihre WebContent-Variable einbinden.
+
+## Quellen und Daten
+
+Im Abschnitt **Streudiagramm (optional mit Blasengröße)** pro Vergleich genau
+eine Variable für **X-Achse** und eine für **Y-Achse** wählen. **Blasengröße** ist
+optional. Ohne **Vergleichsgruppe** bleibt die bisherige einzelne Punktwolke
+unverändert nutzbar. Für mehrere Vergleiche denselben Gruppennamen an den
+zugehörigen X-/Y- und gegebenenfalls Größenzeilen eintragen. Bis zu 16 Gruppen
+mit insgesamt höchstens 48 Zuordnungen sind möglich. Beispielsweise:
+
+| Vergleichsgruppe | Rolle | Quelle |
+| --- | --- | --- |
+| Wohnzimmer | X-Achse | Temperatur im Wohnzimmer |
+| Wohnzimmer | Y-Achse | Luftfeuchtigkeit im Wohnzimmer |
+| Bad | X-Achse | Temperatur im Bad |
+| Bad | Y-Achse | Luftfeuchtigkeit im Bad |
+
+Eine leere Gruppe kann zusätzlich zu benannten Gruppen als **Vergleich** bestehen.
+Gruppennamen dürfen bis zu 80 Zeichen enthalten. Innerhalb eines Vergleichs
+benötigt jede Rolle eine andere Variablen-ID; gleiche angezeigte Namen sind
+zulässig. Ein ausdrücklich konfigurierter Name hat Vorrang, andernfalls
+erscheint der aktuelle Symcon-Name. IDs werden in der Grafik nicht angezeigt.
+Einheit und Nachkommastellen können aus der Variablendarstellung stammen oder
+je Quelle gesetzt werden.
+Dieselbe Variable darf in mehreren Gruppen wiederverwendet werden, auch mit
+unterschiedlichen Archivkennzahlen. Vollständig identische Rollenzuordnungen
+einschließlich Kennzahlen sind keine zusätzlichen Vergleiche.
+Pro gemeinsamer Rolle müssen die Einheiten der Gruppen übereinstimmen:
+beispielsweise alle X-Werte in °C, alle Y-Werte in % und alle Größenwerte in m/s.
+X, Y und Größe untereinander dürfen weiterhin unterschiedliche Einheiten haben.
+
+Das Modul liest ausschließlich abgeschlossene, aggregierte Archivintervalle.
+Ein Punkt entsteht nur, wenn X und Y für **denselben Intervall-Zeitstempel**
+vorliegen. Im Bubble-Modus muss auch die Größenquelle in diesem Intervall
+vorliegen. Fehlende Werte werden weder interpoliert noch mit einem älteren
+Wert aufgefüllt. Gruppen werden unabhängig verknüpft: Eine fehlende Stunde im
+Bad entfernt keine gültige Stunde des Wohnzimmers. Der Tooltip nennt Gruppe,
+Intervallzeit und die Originalwerte mit ihren jeweiligen Einheiten.
+Die Blasengröße wird standardmäßig zwischen der kleinsten und größten
+vorhandenen Größe skaliert; bei lauter gleichen Größen gilt die normale Punktgröße.
+Bei mehreren Bubble-Gruppen berücksichtigt die automatische Größenskala alle
+Gruppen gemeinsam, auch über die Legende ausgeblendete. Normale Scatter-Gruppen
+ohne Größenquelle können daneben bestehen und behalten ihre feste Punktgröße.
+Optional verwendet **Bezugsbereich der Blasengröße → Feste Grenzen** ein eigenes
+Minimum und Maximum in der Einheit der Größenquelle, beispielsweise 0–100 %.
+Das Minimum entspricht der eingestellten **Punktgröße**, das Maximum der
+**maximalen Blasengröße**; der Durchmesser wird dazwischen linear skaliert.
+So erhält derselbe Wert bei unverändertem Design über verschiedene Zeiträume
+und Aktualisierungen hinweg dieselbe Blasengröße, auch bei nur einem Punkt.
+Werte außerhalb der Grenzen werden nur in ihrer dargestellten Größe begrenzt.
+Die Originalwerte samt Einheit bleiben im Tooltip erhalten.
+Die Grenzen müssen endlich sein und das Minimum muss unter dem Maximum liegen.
+Negative Grenzen sind zulässig. Ohne Größenquelle bleibt es bei normalen
+Scatter-Punkten. Die Einstellung verändert weder X/Y-Achsen noch Farbbereich.
+
+Zeitraum, automatische oder feste Archiv-Verdichtung und Punktbudget sind
+einstellbar. Ein abgeschnittener Archivbereich wird in der Grafik kenntlich
+gemacht. Die Anzahl sichtbarer Punkte kann durch fehlende gemeinsame
+Intervalle kleiner sein als das Punktbudget.
+Die 200–2000 Archivwerte werden weiterhin auf **alle Quellenzuordnungen zusammen**
+verteilt, nicht je Gruppe neu bereitgestellt. Eine häufig verwendete Quelle
+beansprucht je Zuordnung ihren Budgetanteil. Bei 16 Gruppen aus X und Y und
+Budget 2000 werden je Zuordnung höchstens 62 Aggregate geladen; nach Verknüpfung
+sind damit höchstens 16 × 62 Vergleichspunkte möglich. Weniger Gruppen oder
+ein gröberes Archivintervall ermöglichen längere vollständige Ausschnitte.
+
+## Design und Ausgabe
+
+Benannte Vergleiche erhalten eine scrollbare Legende zum Ein-/Ausblenden.
+Auswahl und Legendenposition bleiben bei Aktualisierung und Umordnung erhalten;
+Umbenennen ändert die interne Zuordnung nicht. Ohne ausdrückliche Punktfarbe
+unterscheiden Theme-Farben die Gruppen. Eine gesetzte Punktfarbe bleibt für alle
+Gruppen gültig. Wertabhängige Farben verwenden eine gemeinsame Farbskala;
+für Größenfarben benötigen alle Gruppen eine Größenquelle. Bereichsauswahl
+und Tooltips berücksichtigen die tatsächlich ausgewählte Gruppe.
+
+Der Kacheldesigner bietet Theme, Raster, Punkt- und maximale Blasengröße,
+optionale Wertebeschriftungen, Schriftgrößen, Farben und Animation. X- und
+Y-Achse sind unabhängig skalierbar: **An Daten anpassen** nutzt den sichtbaren
+Wertebereich ohne erzwungenen Nullpunkt, **Null einschließen** zeigt den
+Nullpunkt mit an und **Manuell** setzt Minimum und Maximum selbst. Bei vielen
+Punkten blendet ECharts sich überlagernde Wertbeschriftungen aus. Zusätzlich
+kann die adaptive Beschriftung eingeschaltet werden: Sie wählt abhängig von
+Diagrammgröße, Schriftgröße und Punktdichte eine lesbare Teilmenge der Labels.
+Sie ist für bestehende Instanzen ausgeschaltet und in Kachel und unabhängigem
+IPSView-Design separat einstellbar. Alle Punkte und ihre X-/Y- sowie optionalen
+Größenwerte bleiben per Tooltip erreichbar. Sichtbare
+Punktbeschriftungen zeigen wahlweise den X-Wert, den Y-Wert (Voreinstellung)
+oder beide Werte mit ihren jeweiligen Einheiten. Kachel und unabhängiges
+IPSView-Design können die Auswahl getrennt festlegen.
+Optional können die Punkte anhand von X, Y oder – mit dritter Quelle – der
+Blasengröße eingefärbt werden. Der Farbbereich folgt den Daten oder verwendet
+ein manuelles Minimum und Maximum; niedrige und hohe Farbe sowie eine
+Farblegende sind einstellbar. Die horizontale Farblegende passt ihre Länge
+an die Kachel- oder Widgetbreite an. Ohne diese Option bleibt die bisherige
+einheitliche Punktfarbe erhalten. Kachel und IPSView können die Farbkodierung
+unabhängig konfigurieren; beide Live-Vorschauen zeigen den Verlauf.
+Ein zuschaltbarer X/Y-Zoom stellt für beide Achsen eigene schmale Schieberegler
+mit derselben Reglerstärke wie bei den Zeitdiagrammen bereit. In der Kachel
+lässt sich die Punktwolke zusätzlich mit dem Mausrad
+zoomen; in IPSView wird das Mausrad gesondert verarbeitet. Beide Achsenausschnitte
+bleiben bei einer Aktualisierung desselben Zeitraums erhalten und werden beim
+Wechsel des Zeitraums zurückgesetzt. Der Zoom ist im Kachel- und im
+unabhängigen IPSView-Designer getrennt abschaltbar.
+Optional aktiviert die Bereichsauswahl zwei ECharts-Werkzeuge: Ein Rechteck
+markiert Punkte in der X/Y-Fläche, das zweite hebt die Auswahl auf. Die
+nutzbare Symbolgröße passt sich dabei der Kachel- oder Widgetgröße an. Die
+nicht gewählten Punkte werden abgeblendet. Für die Auswahl erscheinen Anzahl
+sowie der kleinste und größte X- und Y-Wert mit ihren Einheiten. Die Auswahl
+ist nur eine lokale Ansicht und wird bei neuen Daten oder einem Designwechsel
+zurückgesetzt; sie ändert keine Symcon-Variablen. Kachel und unabhängiges
+IPSView-Design können das Werkzeug getrennt aktivieren.
+Die SVG-Live-Vorschau zeigt die Gestaltung schematisch mit Beispieldaten und
+berücksichtigt auch die gewählten Achsenbereiche; sie liest beim Ändern des
+Formulars keine Archivdaten.
+Bei vielen Gruppen zeigt sie einen ausdrücklich bezeichneten Ausschnitt von
+höchstens sechs Gruppen, prüft aber zuvor sämtliche konfigurierten Zuordnungen.
+
+Optional erstellt das Modul eine WebContent-Variable `IPSViewScatter` für
+IPSView. Dort kann das Kacheldesign geerbt oder unabhängig gestaltet werden;
+auch ein eigener Zeitraum ist möglich. Die Vorschau und Hintergrundanpassung
+stehen in beiden Designern zur Verfügung.
+Auch die festen Größenbezüge lassen sich unabhängig für IPSView einstellen
+oder mit dem Kacheldesign übernehmen. Beide Vorschauen zeigen die gewählten
+Bezüge anhand derselben Beispieldaten, ohne Archive zu lesen.
+
+Bei einem vorübergehenden Ladefehler bleibt eine zuletzt gültige Grafik zunächst
+stehen. Nach wiederholtem Fehler erscheint ein Hinweis und das Modul versucht
+nach 60 Sekunden erneut zu lesen. Ohne frühere Daten oder bei ungültiger
+Konfiguration erscheint eine Fehlermeldung.
+
+## Konfigurationsreferenz und Skriptzugriff
+
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartsscatter) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
+
+### Ausgabevariable
+
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewScatter` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
+
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
+
+### Öffentliche PHP-Funktionen
+
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
+
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECSC_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECSC_GetScatterData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
+| `ECSC_GetScatterDiagnostic(int $InstanzID): string` | JSON-Momentaufnahme der Konfigurationsprüfung und letzten Fehlermeldung; kein Nachweis einer erfolgreichen Datenabfrage. |
+| `ECSC_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+| `ECSC_RefreshArchive(int $InstanzID): void` | Aktualisiert die Diagrammausgaben aus den konfigurierten Quellen. Kein Erfolgswert und keine Änderung von Quellen/Archiven. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
+
+```php
+$instanceID = 12000;
+$model = json_decode(ECSC_GetScatterData($instanceID), true, 512, JSON_THROW_ON_ERROR);
+```
+
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
+
+## Lizenz
+
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

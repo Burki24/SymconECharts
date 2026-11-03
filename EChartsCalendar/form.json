@@ -1,0 +1,731 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "SelectVariable",
+            "name": "SourceVariableID",
+            "caption": "Archive variable",
+            "validVariableTypes": [
+                1,
+                2
+            ]
+        },
+        {
+            "type": "Select",
+            "name": "Metric",
+            "caption": "Metric",
+            "options": [
+                {
+                    "caption": "Daily mean",
+                    "value": "average"
+                },
+                {
+                    "caption": "Daily minimum",
+                    "value": "minimum"
+                },
+                {
+                    "caption": "Daily maximum",
+                    "value": "maximum"
+                },
+                {
+                    "caption": "Daily consumption",
+                    "value": "consumption"
+                }
+            ]
+        },
+        {
+            "type": "Select",
+            "name": "Period",
+            "caption": "Calendar period",
+            "onChange": "ECCL_UpdateCalendarPeriodForm($id, $Period);",
+            "options": [
+                {
+                    "caption": "Year",
+                    "value": "year"
+                },
+                {
+                    "caption": "Quarter",
+                    "value": "quarter"
+                },
+                {
+                    "caption": "Month",
+                    "value": "month"
+                },
+                {
+                    "caption": "Fixed historical period",
+                    "value": "absolute"
+                }
+            ]
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "Month",
+            "caption": "Month (0 = current month)",
+            "minimum": 0,
+            "maximum": 12,
+            "visible": false
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "Quarter",
+            "caption": "Quarter (0 = current quarter)",
+            "minimum": 0,
+            "maximum": 4,
+            "visible": false
+        },
+        {
+            "type": "SelectDate",
+            "name": "AbsoluteStart",
+            "caption": "From (included)",
+            "visible": false
+        },
+        {
+            "type": "SelectDate",
+            "name": "AbsoluteEnd",
+            "caption": "Until (excluded)",
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "name": "CalendarPeriodHint",
+            "caption": "From is included, Until is excluded. Choose at most 366 calendar days; the end must not be in the future. Navigation moves by the same number of calendar days.",
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "name": "CalendarTimeZone",
+            "caption": "Symcon time zone: %s"
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "NumberSpinner",
+                    "name": "Year",
+                    "caption": "Year (0 = current year)",
+                    "minimum": 0,
+                    "maximum": 9999
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Completed calendar days only. Mean, minimum and maximum require a standard archive; consumption requires a counter archive. Missing days remain empty."
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "CheckBox",
+                    "name": "UseVariablePresentation",
+                    "caption": "Use variable presentation"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Unit",
+                    "caption": "Unit"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "Decimals",
+                    "caption": "Decimal places",
+                    "minimum": 0,
+                    "maximum": 6
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate Calendar"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "Orientation",
+                            "caption": "Orientation",
+                            "options": [
+                                {
+                                    "value": "auto",
+                                    "caption": "Automatic"
+                                },
+                                {
+                                    "value": "horizontal",
+                                    "caption": "Horizontal"
+                                },
+                                {
+                                    "value": "vertical",
+                                    "caption": "Vertical"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowTooltip",
+                            "caption": "Show tooltip"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowMonthLabels",
+                            "caption": "Show month labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowWeekdayLabels",
+                            "caption": "Show weekday labels"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "FirstWeekday",
+                            "caption": "First weekday",
+                            "options": [
+                                {
+                                    "value": 1,
+                                    "caption": "Monday"
+                                },
+                                {
+                                    "value": 0,
+                                    "caption": "Sunday"
+                                },
+                                {
+                                    "value": 6,
+                                    "caption": "Saturday"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowMonthSeparators",
+                            "caption": "Show month separators"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "MonthLineWidth",
+                            "caption": "Separator width (0 = cell border)",
+                            "minimum": 0,
+                            "maximum": 6,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "MonthLineType",
+                            "caption": "Separator line type",
+                            "options": [
+                                {
+                                    "value": "solid",
+                                    "caption": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "caption": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "caption": "Dotted"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "MonthLineColor",
+                            "caption": "Separator color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "LowColor",
+                            "caption": "Low value color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "HighColor",
+                            "caption": "High value color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowColorScale",
+                            "caption": "Show color scale"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ReverseColorScale",
+                            "caption": "Reverse color order"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "UseFixedColorRange",
+                            "caption": "Use fixed color range"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ColorScaleMinimum",
+                            "caption": "Color scale minimum",
+                            "minimum": -1000000000000,
+                            "maximum": 1000000000000,
+                            "digits": 2
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ColorScaleMaximum",
+                            "caption": "Color scale maximum",
+                            "minimum": -1000000000000,
+                            "maximum": 1000000000000,
+                            "digits": 2
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "CellBorderWidth",
+                            "caption": "Cell border width",
+                            "minimum": 0,
+                            "maximum": 4,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "CellBorderColor",
+                            "caption": "Cell border color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "EmptyCellColor",
+                            "caption": "Empty day color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "CellBorderType",
+                            "caption": "Cell border type",
+                            "options": [
+                                {
+                                    "value": "solid",
+                                    "caption": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "caption": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "caption": "Dotted"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "CellOpacityPercent",
+                            "caption": "Cell opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "HoverHighlight",
+                            "caption": "Highlight hovered day"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "HoverBorderColor",
+                            "caption": "Hover border color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowDayNumbers",
+                            "caption": "Show day numbers"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowValues",
+                            "caption": "Show daily values"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "LabelBold",
+                            "caption": "Bold calendar labels"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "MonthLabelPosition",
+                            "caption": "Month label position",
+                            "options": [
+                                {
+                                    "value": "start",
+                                    "caption": "Start"
+                                },
+                                {
+                                    "value": "end",
+                                    "caption": "End"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "MonthLabelMargin",
+                            "caption": "Month label distance",
+                            "minimum": 0,
+                            "maximum": 40,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "WeekdayLabelPosition",
+                            "caption": "Weekday label position",
+                            "options": [
+                                {
+                                    "value": "start",
+                                    "caption": "Start"
+                                },
+                                {
+                                    "value": "end",
+                                    "caption": "End"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "WeekdayLabelMargin",
+                            "caption": "Weekday label distance",
+                            "minimum": 0,
+                            "maximum": 40,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "MonthLabelAlign",
+                            "caption": "Month label alignment",
+                            "options": [
+                                {
+                                    "value": "center",
+                                    "caption": "Centered"
+                                },
+                                {
+                                    "value": "left",
+                                    "caption": "Start of month"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "MonthLabelFormat",
+                            "caption": "Month label format",
+                            "options": [
+                                {
+                                    "value": "name",
+                                    "caption": "Month name"
+                                },
+                                {
+                                    "value": "number",
+                                    "caption": "Month number"
+                                },
+                                {
+                                    "value": "year-month",
+                                    "caption": "Year and month"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowYearLabel",
+                            "caption": "Show year label"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "YearLabelPosition",
+                            "caption": "Year label position",
+                            "options": [
+                                {
+                                    "value": "auto",
+                                    "caption": "Automatic"
+                                },
+                                {
+                                    "value": "top",
+                                    "caption": "Top"
+                                },
+                                {
+                                    "value": "bottom",
+                                    "caption": "Bottom"
+                                },
+                                {
+                                    "value": "left",
+                                    "caption": "Left"
+                                },
+                                {
+                                    "value": "right",
+                                    "caption": "Right"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "YearLabelMargin",
+                            "caption": "Year label distance",
+                            "minimum": 0,
+                            "maximum": 60,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "YearFontSizePercent",
+                            "caption": "Year label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "YearColor",
+                            "caption": "Year label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisFontSizePercent",
+                            "caption": "Axis label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ValueFontSizePercent",
+                            "caption": "Cell label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "TitleColor",
+                            "caption": "Title color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "AxisColor",
+                            "caption": "Axis color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "ValueColor",
+                            "caption": "Cell label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Calendar is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Calendar archive variable is invalid"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Calendar settings are invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "Calendar archive values could not be loaded"
+        }
+    ]
+}

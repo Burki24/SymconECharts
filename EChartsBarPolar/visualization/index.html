@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="{{HTML_LANGUAGE}}" class="{{HTML_CLASSES}}" style="font-size: {{ROOT_FONT_SIZE}};">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="{{VIEWPORT_CONTENT}}">
+    <title>{{DOCUMENT_TITLE}}</title>
+    <style>
+{{VISUALIZATION_THEME}}
+{{MODULE_STYLE}}
+{{IPSVIEW_STYLE}}
+    </style>
+    {{INTERACTION_SCRIPT}}
+</head>
+<body>
+    <main id="echarts-bar-polar-root" class="echarts-bar-polar-root">
+        <div id="echarts-bar-polar-chart" class="echarts-bar-polar-chart" role="img"></div>
+        <div id="echarts-bar-polar-controls" class="echarts-source-controls" hidden>
+            <details id="echarts-bar-polar-selection" hidden>
+                <summary id="echarts-bar-polar-selection-title"></summary>
+                <div class="echarts-source-picker">
+                    <div class="echarts-source-picker-actions">
+                        <button id="echarts-bar-polar-all" type="button"></button>
+                        <button id="echarts-bar-polar-inverse" type="button"></button>
+                    </div>
+                    <div id="echarts-bar-polar-sources" class="echarts-source-list"></div>
+                </div>
+            </details>
+            <nav id="echarts-bar-polar-pages" hidden>
+                <button id="echarts-bar-polar-previous" type="button">‹</button>
+                <output id="echarts-bar-polar-range" role="status" aria-live="polite"></output>
+                <button id="echarts-bar-polar-next" type="button">›</button>
+            </nav>
+        </div>
+        <div id="echarts-bar-polar-warning" class="echarts-refresh-warning" role="status" hidden></div>
+        <div id="echarts-bar-polar-error" class="echarts-bar-polar-error" role="alert" hidden></div>
+    </main>
+    <script>{{ECHARTS_SCRIPT}}</script>
+    <script>{{ECHARTS_THEME_SCRIPT}}</script>
+    <script>{{ECHARTS_DESIGN_SCRIPT}}</script>
+    <script>window.SYMC_VISUALIZATION = {{BOOTSTRAP_JSON}};</script>
+    <script>{{MODULE_SCRIPT}}</script>
+    <script>{{IPSVIEW_TRANSPORT_SCRIPT}}</script>
+</body>
+</html>
+

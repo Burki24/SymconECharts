@@ -1,0 +1,398 @@
+<?php
+
+declare(strict_types=1);
+
+use SymconECharts\EChartsAsset;
+
+require_once dirname(__DIR__) . '/libs/EChartsAsset.php';
+
+function assertEChartsAsset(bool $condition, string $message): void
+{
+    if (!$condition) {
+        throw new RuntimeException($message);
+    }
+}
+
+$root = dirname(__DIR__);
+$categoryRuntime = EChartsAsset::BarCategoryJavaScript();
+$categoryRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/bar-category-runtime.js');
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.bar-category.min.js') === EChartsAsset::BAR_CATEGORY_SHA256
+        && strlen($categoryRuntime) < 575000 && str_contains($categoryRuntime, 'window.echarts')
+        && str_contains($categoryRuntimeSource, 'BarChart') && str_contains($categoryRuntimeSource, 'DataZoomComponent')
+        && str_contains($categoryRuntimeSource, 'LegendComponent') && !str_contains($categoryRuntimeSource, 'LineChart')
+        && !str_contains($categoryRuntimeSource, 'ScatterChart') && !str_contains($categoryRuntimeSource, 'MarkAreaComponent')
+        && !str_contains($categoryRuntimeSource, 'MarkLineComponent'),
+    'Category Bar must use its pinned sub-575 KB bar-only runtime with native category navigation.'
+);
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.state-timeline.min.js') === EChartsAsset::STATE_TIMELINE_SHA256
+    && strlen(EChartsAsset::StateTimelineJavaScript()) < 575000
+    && str_contains(EChartsAsset::StateTimelineJavaScript(), 'window.echarts')
+    && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/state-timeline-runtime.js'), 'CustomChart'),
+    'StateTimeline must load its own integrity-pinned bounded custom-series runtime.'
+);
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.theme-river.min.js') === EChartsAsset::THEME_RIVER_SHA256
+    && strlen(EChartsAsset::ThemeRiverJavaScript()) < 550000
+    && str_contains(EChartsAsset::ThemeRiverJavaScript(), 'window.echarts'),
+    'ThemeRiver must load its own integrity-pinned bounded local runtime.'
+);
+$pictorialRuntime = EChartsAsset::PictorialBarJavaScript();
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.pictorial-bar.min.js') === EChartsAsset::PICTORIAL_BAR_SHA256
+    && strlen($pictorialRuntime) < 600000 && str_contains($pictorialRuntime, 'window.echarts')
+    && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/pictorial-bar-runtime.js'), 'DataZoomComponent'),
+    'PictorialBar runtime must include category zoom, remain pinned and below 600 KB.'
+);
+$funnelRuntime = EChartsAsset::FunnelJavaScript();
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.funnel.min.js') === EChartsAsset::FUNNEL_SHA256
+        && strlen($funnelRuntime) < 550000 && str_contains($funnelRuntime, 'window.echarts'),
+    'The Funnel runtime must be pinned and remain below 550 KB.'
+);
+$candlestickRuntime = EChartsAsset::CandlestickJavaScript();
+assertEChartsAsset(hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.candlestick.min.js') === EChartsAsset::CANDLESTICK_SHA256
+    && strlen($candlestickRuntime) < 550000 && str_contains($candlestickRuntime, 'window.echarts'), 'Pinned Candlestick runtime below 550 KB.');
+$boxplotRuntime = EChartsAsset::BoxplotJavaScript();
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.boxplot.min.js') === EChartsAsset::BOXPLOT_SHA256
+        && strlen($boxplotRuntime) < 560000 && str_contains($boxplotRuntime, 'window.echarts')
+        && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/boxplot-runtime.js'), 'BoxplotChart')
+        && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/boxplot-runtime.js'), 'DataZoomComponent'),
+    'The Boxplot/Scatter runtime must be pinned and remain below 560 KB.'
+);
+$radarRuntime = EChartsAsset::RadarJavaScript();
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.radar.min.js') === EChartsAsset::RADAR_SHA256
+        && strlen($radarRuntime) < 550000 && str_contains($radarRuntime, 'window.echarts')
+        && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/radar-runtime.js'), 'LabelLayout'),
+    'The Radar runtime must be pinned and remain below 550 KB.'
+);
+$calendarPieRuntime = EChartsAsset::CalendarPieJavaScript();
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.calendar-pie.min.js') === EChartsAsset::CALENDAR_PIE_SHA256
+        && strlen($calendarPieRuntime) < 600000 && str_contains($calendarPieRuntime, 'window.echarts')
+        && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/calendar-pie-runtime.js'), 'CalendarComponent')
+        && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/calendar-pie-runtime.js'), 'PieChart')
+        && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/calendar-pie-runtime.js'), 'LabelLayout'),
+    'CalendarPie must use the pinned native Calendar/Pie runtime below 600 KB.'
+);
+$calendarRuntime = EChartsAsset::CalendarJavaScript();
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.calendar.min.js') === EChartsAsset::CALENDAR_SHA256
+        && strlen($calendarRuntime) < 550000 && str_contains($calendarRuntime, 'window.echarts')
+        && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/calendar-runtime.js'), 'CalendarComponent'),
+    'The Calendar runtime must be pinned, expose the browser API and remain below 550 KB.'
+);
+$runtimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.gauge.min.js';
+$cartesianRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.cartesian.min.js';
+$scatterRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.scatter.min.js';
+$heatmapRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.heatmap.min.js';
+$polarRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.polar.min.js';
+$pieRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.pie.min.js';
+$treeRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.tree.min.js';
+$graphRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.graph.min.js';
+$treemapRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.treemap.min.js';
+$sunburstRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.sunburst.min.js';
+$parallelRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.parallel.min.js';
+$sankeyRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.sankey.min.js';
+$licensePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/LICENSE.txt';
+$noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
+$runtime = (string) file_get_contents($runtimePath);
+$cartesianRuntime = (string) file_get_contents($cartesianRuntimePath);
+$scatterRuntime = (string) file_get_contents($scatterRuntimePath);
+$heatmapRuntime = (string) file_get_contents($heatmapRuntimePath);
+$polarRuntime = (string) file_get_contents($polarRuntimePath);
+$pieRuntime = (string) file_get_contents($pieRuntimePath);
+$treeRuntime = (string) file_get_contents($treeRuntimePath);
+$graphRuntime = (string) file_get_contents($graphRuntimePath);
+$treemapRuntime = (string) file_get_contents($treemapRuntimePath);
+$sunburstRuntime = (string) file_get_contents($sunburstRuntimePath);
+$parallelRuntime = (string) file_get_contents($parallelRuntimePath);
+$sankeyRuntime = (string) file_get_contents($sankeyRuntimePath);
+$designUtilitiesPath = $root . '/libs/echarts-design.js';
+$designUtilities = (string) file_get_contents($designUtilitiesPath);
+$zoomUtilities = (string) file_get_contents($root . '/libs/echarts-zoom.js');
+$patternUtilities = (string) file_get_contents($root . '/libs/echarts-pattern.js');
+$runtimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/gauge-runtime.js');
+$cartesianRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/cartesian-runtime.js');
+$scatterRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/scatter-runtime.js');
+$heatmapRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/heatmap-runtime.js');
+$polarRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/polar-runtime.js');
+$pieRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/pie-runtime.js');
+$treeRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/tree-runtime.js');
+$graphRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/graph-runtime.js');
+$treemapRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/treemap-runtime.js');
+$sunburstRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/sunburst-runtime.js');
+$parallelRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/parallel-runtime.js');
+$sankeyRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/sankey-runtime.js');
+$windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
+$expectedThemeIDs = ['auto', 'dark', 'vintage', 'macarons', 'infographic', 'shine', 'roma'];
+
+assertEChartsAsset(is_file($runtimePath), 'The pinned Apache ECharts runtime is missing.');
+assertEChartsAsset(
+    hash_file('sha256', $runtimePath) === EChartsAsset::SHA256,
+    'The pinned Apache ECharts runtime checksum changed.'
+);
+assertEChartsAsset(EChartsAsset::JavaScript() === $runtime, 'The asset loader changed the runtime.');
+assertEChartsAsset(
+    strlen($runtime) < 524288,
+    'The Gauge-specific ECharts runtime must remain below 512 KiB.'
+);
+assertEChartsAsset(str_contains($runtime, 'window.echarts'), 'The Gauge runtime must expose the ECharts browser API.');
+assertEChartsAsset(is_file($cartesianRuntimePath), 'The pinned Cartesian runtime is missing.');
+assertEChartsAsset(
+    hash_file('sha256', $cartesianRuntimePath) === EChartsAsset::CARTESIAN_SHA256,
+    'The pinned Cartesian runtime checksum changed.'
+);
+assertEChartsAsset(
+    EChartsAsset::TIME_SERIES_SHA256 === EChartsAsset::CARTESIAN_SHA256,
+    'The Time Series runtime checksum compatibility alias changed.'
+);
+assertEChartsAsset(
+    EChartsAsset::CartesianJavaScript() === $cartesianRuntime
+        && EChartsAsset::TimeSeriesJavaScript() === $cartesianRuntime,
+    'The asset loader changed the Cartesian runtime or its compatibility alias.'
+);
+assertEChartsAsset(
+    strlen($cartesianRuntime) < 655360 && str_contains($cartesianRuntime, 'window.echarts'),
+    'The Cartesian ECharts runtime must expose the browser API and remain below 640 KiB.'
+);
+assertEChartsAsset(
+    is_file($scatterRuntimePath)
+        && hash_file('sha256', $scatterRuntimePath) === EChartsAsset::SCATTER_SHA256
+        && EChartsAsset::ScatterJavaScript() === $scatterRuntime
+        && strlen($scatterRuntime) < 786432
+        && str_contains($scatterRuntime, 'window.echarts'),
+    'The Scatter ECharts runtime must be pinned, expose the browser API and remain below 768 KiB.'
+);
+assertEChartsAsset(
+    is_file($heatmapRuntimePath)
+        && hash_file('sha256', $heatmapRuntimePath) === EChartsAsset::HEATMAP_SHA256
+        && EChartsAsset::HeatmapJavaScript() === $heatmapRuntime
+        && strlen($heatmapRuntime) < 655360
+        && str_contains($heatmapRuntime, 'window.echarts'),
+    'The Heatmap ECharts runtime must be pinned, expose the browser API and remain below 640 KiB.'
+);
+assertEChartsAsset(is_file($polarRuntimePath), 'The pinned Polar runtime is missing.');
+assertEChartsAsset(
+    hash_file('sha256', $polarRuntimePath) === EChartsAsset::POLAR_SHA256,
+    'The pinned Polar runtime checksum changed.'
+);
+assertEChartsAsset(
+    EChartsAsset::PolarJavaScript() === $polarRuntime
+        && strlen($polarRuntime) < 524288
+        && str_contains($polarRuntime, 'window.echarts'),
+    'The Polar runtime must expose the browser API and remain below 512 KiB.'
+);
+assertEChartsAsset(is_file($pieRuntimePath), 'The pinned Pie runtime is missing.');
+assertEChartsAsset(
+    hash_file('sha256', $pieRuntimePath) === EChartsAsset::PIE_SHA256
+        && EChartsAsset::PieJavaScript() === $pieRuntime
+        && strlen($pieRuntime) < 524288
+        && str_contains($pieRuntime, 'window.echarts'),
+    'The Pie runtime must be pinned, expose the browser API and remain below 512 KiB.'
+);
+assertEChartsAsset(
+    is_file($treeRuntimePath)
+        && hash_file('sha256', $treeRuntimePath) === EChartsAsset::TREE_SHA256
+        && EChartsAsset::TreeJavaScript() === $treeRuntime
+        && strlen($treeRuntime) < 524288
+        && str_contains($treeRuntime, 'window.echarts'),
+    'The Tree runtime must be pinned, expose the browser API and remain below 512 KiB.'
+);
+assertEChartsAsset(
+    is_file($graphRuntimePath)
+        && hash_file('sha256', $graphRuntimePath) === EChartsAsset::GRAPH_SHA256
+        && EChartsAsset::GraphJavaScript() === $graphRuntime
+        && strlen($graphRuntime) < 550000
+        && str_contains($graphRuntime, 'window.echarts'),
+    'The Graph runtime must be pinned, expose the browser API and remain below 512 KiB.'
+);
+assertEChartsAsset(
+    is_file($treemapRuntimePath)
+        && hash_file('sha256', $treemapRuntimePath) === EChartsAsset::TREEMAP_SHA256
+        && EChartsAsset::TreemapJavaScript() === $treemapRuntime
+        && strlen($treemapRuntime) < 550000
+        && str_contains($treemapRuntime, 'window.echarts')
+        && str_contains($treemapRuntimeSource, 'TreemapChart'),
+    'The Treemap runtime must be pinned, expose the browser API and remain below 550 KB.'
+);
+assertEChartsAsset(
+    is_file($sunburstRuntimePath)
+        && hash_file('sha256', $sunburstRuntimePath) === EChartsAsset::SUNBURST_SHA256
+        && EChartsAsset::SunburstJavaScript() === $sunburstRuntime
+        && strlen($sunburstRuntime) < 550000
+        && str_contains($sunburstRuntime, 'window.echarts')
+        && str_contains($sunburstRuntimeSource, 'SunburstChart'),
+    'The Sunburst runtime must be pinned, expose the browser API and remain below 550 KB.'
+);
+assertEChartsAsset(
+    is_file($parallelRuntimePath)
+        && hash_file('sha256', $parallelRuntimePath) === EChartsAsset::PARALLEL_SHA256
+        && EChartsAsset::ParallelJavaScript() === $parallelRuntime
+        && strlen($parallelRuntime) < 550000
+        && str_contains($parallelRuntime, 'window.echarts')
+        && str_contains($parallelRuntimeSource, 'ParallelChart'),
+    'The Parallel runtime must be pinned, expose the browser API and remain below 550 KB.'
+);
+assertEChartsAsset(
+    hash_file('sha256', $sankeyRuntimePath) === EChartsAsset::SANKEY_SHA256
+        && EChartsAsset::SankeyJavaScript() === $sankeyRuntime
+        && strlen($sankeyRuntime) < 550000
+        && str_contains($sankeyRuntime, 'window.echarts')
+        && str_contains($sankeyRuntimeSource, 'SankeyChart')
+        && str_contains($sankeyRuntimeSource, 'LabelLayout'),
+    'The Sankey runtime must be pinned, expose the browser API and remain below 550 KB.'
+);
+assertEChartsAsset(
+    EChartsAsset::DesignJavaScript() === $designUtilities
+        && str_contains($designUtilities, 'readableTextColor')
+        && str_contains($designUtilities, 'relativeLuminance'),
+    'The shared ECharts design utilities must expose deterministic contrast helpers.'
+);
+assertEChartsAsset(
+    EChartsAsset::ZoomJavaScript() === $zoomUtilities
+        && str_contains($zoomUtilities, 'SymconEChartsZoom'),
+    'The shared ECharts zoom controls must be loaded from the local asset.'
+);
+assertEChartsAsset(
+    EChartsAsset::PatternJavaScript() === $patternUtilities
+        && str_contains($patternUtilities, 'SymconEChartsPattern'),
+    'The shared ECharts SVG pattern renderer must be loaded from the local asset.'
+);
+assertEChartsAsset(
+    str_contains($cartesianRuntimeSource, 'LineChart')
+        && str_contains($cartesianRuntimeSource, 'BarChart')
+        && str_contains($cartesianRuntimeSource, 'MarkLineComponent')
+        && str_contains($cartesianRuntimeSource, 'MarkAreaComponent'),
+    'The Cartesian runtime must include Line, Bar and native marker components.'
+);
+assertEChartsAsset(
+    str_contains($scatterRuntimeSource, 'VisualMapComponent')
+        && str_contains($scatterRuntimeSource, 'cartesian-runtime.js'),
+    'The Scatter runtime must extend the shared Cartesian source with Visual Map.'
+);
+assertEChartsAsset(
+    str_contains($heatmapRuntimeSource, 'HeatmapChart')
+        && str_contains($heatmapRuntimeSource, 'VisualMapComponent')
+        && str_contains($heatmapRuntimeSource, 'CanvasRenderer'),
+    'The Heatmap runtime must include Heatmap, Visual Map and Canvas components.'
+);
+assertEChartsAsset(
+    str_contains($polarRuntimeSource, 'BarChart')
+        && str_contains($polarRuntimeSource, 'PolarComponent')
+        && str_contains($polarRuntimeSource, 'CanvasRenderer'),
+    'The Polar runtime must include Bar, Polar and Canvas components.'
+);
+assertEChartsAsset(
+    str_contains($pieRuntimeSource, 'PieChart')
+        && str_contains($pieRuntimeSource, 'LegendComponent')
+        && str_contains($pieRuntimeSource, 'CanvasRenderer'),
+    'The Pie runtime must include Pie, Legend and Canvas components.'
+);
+assertEChartsAsset(
+    str_contains($treeRuntimeSource, 'TreeChart')
+        && str_contains($treeRuntimeSource, 'CanvasRenderer'),
+    'The Tree runtime must include Tree and Canvas components.'
+);
+assertEChartsAsset(
+    str_contains($graphRuntimeSource, 'GraphChart')
+        && str_contains($graphRuntimeSource, 'LabelLayout')
+        && str_contains($graphRuntimeSource, 'CanvasRenderer'),
+    'The Graph runtime must include Graph and Canvas components.'
+);
+assertEChartsAsset(
+    str_contains($runtimeSource, 'GraphicComponent'),
+    'The Gauge runtime must include the native ECharts Graphic Component used by dial plates.'
+);
+assertEChartsAsset(
+    hash('sha256', $windowsCheckoutRuntime) !== EChartsAsset::SHA256,
+    'The Windows-checkout regression fixture must differ byte-for-byte.'
+);
+assertEChartsAsset(
+    EChartsAsset::HasExpectedIntegrity($windowsCheckoutRuntime),
+    'The loader must accept the pinned runtime after a Windows CRLF checkout.'
+);
+assertEChartsAsset(
+    !EChartsAsset::HasExpectedIntegrity($windowsCheckoutRuntime . 'changed'),
+    'The loader must reject content changes beyond line-ending normalization.'
+);
+assertEChartsAsset(str_contains((string) file_get_contents($licensePath), 'Apache License'), 'ECharts license is missing.');
+assertEChartsAsset(str_contains((string) file_get_contents($noticePath), 'Apache ECharts'), 'ECharts NOTICE is missing.');
+
+assertEChartsAsset(EChartsAsset::ThemeIDs() === $expectedThemeIDs, 'The supported ECharts theme catalog changed.');
+assertEChartsAsset(EChartsAsset::ColorToHex(-1) === '#000000', 'Negative ECharts colors must be clamped.');
+assertEChartsAsset(EChartsAsset::ColorToHex(0x6B4423) === '#6B4423', 'ECharts RGB conversion changed.');
+assertEChartsAsset(EChartsAsset::ColorToHex(0xFFFFFF + 1) === '#FFFFFF', 'Large ECharts colors must be clamped.');
+assertEChartsAsset(
+    array_keys(EChartsAsset::ThemePalettes()) === $expectedThemeIDs,
+    'Every supported ECharts theme must provide a readable renderer palette.'
+);
+foreach (EChartsAsset::ThemePalettes() as $themeID => $palette) {
+    assertEChartsAsset(
+        count($palette['seriesColors']) >= 8,
+        'Every ECharts theme must expose enough series colors for all Time Series sources: ' . $themeID
+    );
+}
+$themeBundle = EChartsAsset::ThemeJavaScript();
+foreach (array_slice($expectedThemeIDs, 1) as $themeID) {
+    $themePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/themes/' . $themeID . '.js';
+    assertEChartsAsset(is_file($themePath), 'The pinned Apache ECharts theme is missing: ' . $themeID);
+    assertEChartsAsset(
+        hash_file('sha256', $themePath) === EChartsAsset::THEME_SHA256[$themeID],
+        'The pinned Apache ECharts theme checksum changed: ' . $themeID
+    );
+    assertEChartsAsset(
+        str_contains($themeBundle, "registerTheme('" . $themeID . "'"),
+        'The ECharts theme bundle must register: ' . $themeID
+    );
+    $themeContent = (string) file_get_contents($themePath);
+    assertEChartsAsset(
+        EChartsAsset::HasExpectedThemeIntegrity($themeID, str_replace("\n", "\r\n", $themeContent)),
+        'The theme loader must tolerate Windows line endings: ' . $themeID
+    );
+}
+assertEChartsAsset(
+    strlen($runtime) + strlen($themeBundle) < 524288,
+    'The Gauge runtime and all official themes must remain below 512 KiB.'
+);
+assertEChartsAsset(
+    EChartsAsset::ThemePreviewPalette('auto')['accent'] === '#55CBB5',
+    'The automatic Symcon theme preview palette changed.'
+);
+assertEChartsAsset(
+    EChartsAsset::ThemePreviewPalette('auto')['seriesColors'][0] === '#5070DD'
+        && EChartsAsset::ThemePreviewPalette('dark')['seriesColors'][0] === '#4992FF',
+    'The automatic and dark Time Series palettes must match the pinned ECharts runtime and theme.'
+);
+assertEChartsAsset(
+    EChartsAsset::ThemePreviewPalette('vintage')['background'] === '#FEF8EF',
+    'The Vintage preview must use the official theme background.'
+);
+assertEChartsAsset(
+    EChartsAsset::ThemePreviewPalette('shine')['gaugeAxisLine'] === [
+        [0.2, '#2B821D'],
+        [0.8, '#005EAA'],
+        [1.0, '#C12E34']
+    ],
+    'The Shine preview must use the official segmented Gauge axis line.'
+);
+assertEChartsAsset(
+    !EChartsAsset::HasExpectedThemeIntegrity('vintage', (string) file_get_contents(
+        $root . '/libs/echarts/' . EChartsAsset::VERSION . '/themes/vintage.js'
+    ) . 'changed'),
+    'The theme loader must reject content changes beyond line-ending normalization.'
+);
+
+assertEChartsAsset(
+    str_contains(EChartsAsset::CategoryNavigationJavaScript(), 'SymconEChartsCategoryNavigation'),
+    'The project-owned category navigation must be loadable for both consumers.'
+);
+assertEChartsAsset(
+    !str_contains(EChartsAsset::CategoryNavigationJavaScript(), "\r"),
+    'The shared category navigation loader must normalize line endings.'
+);
+
+echo 'Pinned Apache ECharts ' . EChartsAsset::VERSION . " assets verified.\n";

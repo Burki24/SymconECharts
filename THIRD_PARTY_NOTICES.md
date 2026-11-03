@@ -1,37 +1,232 @@
 # Fremdkomponenten und Lizenzabgrenzung
 
-## Aktueller Stand
-
-Diese Projektbasis enthält noch keine Bibliotheken, Builds, Schriftarten oder
-sonstigen Fremdkomponenten. Die folgenden Angaben beschreiben die vorgesehene
-Einbindung; sie sind kein Nachweis einer bereits ausgelieferten Abhängigkeit.
-
 Die Projektlizenz [LICENSE](LICENSE) gilt für die eigenen Beiträge zu
 SymconECharts. Sie ersetzt oder beschränkt nicht die Originallizenzen separat
 gekennzeichneter Fremdkomponenten.
 
-## Apache ECharts – zur Einbindung vorgesehen
+## Apache ECharts
 
-Projekt: [Apache ECharts](https://github.com/apache/echarts)  
-Lizenz: [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)  
-SPDX-Identifier: `Apache-2.0`  
-Ausgelieferte Version: noch keine
+Projekt: [Apache ECharts](https://github.com/apache/echarts)
 
-Bei der tatsächlichen Einbindung werden die Lizenz- und NOTICE-Dateien des
-konkret verwendeten Releases sowie weitere erforderliche Drittanbieterhinweise
-zusammen mit den Bibliotheksdateien ausgeliefert. Die Dokumentation wird dann um
-Version, Herkunft und enthaltene Abhängigkeiten ergänzt.
+Lizenz: [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-ECharts bleibt unter seiner Originallizenz. Ein Build darf erforderliche
-Copyright-, Lizenz- und Herkunftshinweise nicht entfernen. Etwaige Änderungen
-an Fremddateien sind entsprechend deren Lizenzbedingungen zu kennzeichnen.
+SPDX-Identifier: `Apache-2.0`
+
+Ausgelieferte Version: `6.1.0`
+
+Herkunft: offizielles npm-Paket `echarts@6.1.0`
+(`https://registry.npmjs.org/echarts/-/echarts-6.1.0.tgz`)
+
+Paket-SHA-1 laut npm: `ae0f68590f5ebbd728d900907c27acde7c5456d1`
+
+Ausgelieferte Dateien:
+
+- `libs/echarts/6.1.0/echarts.bar-category.min.js` – reproduzierbarer
+  BarCategory-Browser-Build aus ECharts Core, Bar Chart, Grid, Legende, Titel,
+  Tooltip, Aria, DataZoom und Canvas Renderer; 570.705 Byte; SHA-256
+  `2d0c0742e63d9a044183dc61db8981d57c3d4d2fa1134aa09e2bf0c56411c818`;
+
+- `libs/echarts/6.1.0/echarts.calendar-pie.min.js` – reproduzierbarer
+  CalendarPie-Browser-Build aus ECharts Core, Pie Chart, Scatter Chart,
+  Calendar, Legende, Titel, Tooltip, Aria, LabelLayout und Canvas Renderer; 563.136 Byte;
+  SHA-256 `cfa29cc588f00c30c27f5843923f6993717c48aa1b1b5321b1c82a3814568ab9`;
+
+- `libs/echarts/6.1.0/echarts.state-timeline.min.js` – reproduzierbarer
+  StateTimeline-Browser-Build aus ECharts Core, Custom Chart, Grid, Data Zoom,
+  Titel, Tooltip, Aria und Canvas Renderer; 550.199 Byte; SHA-256
+  `ff7da41ec7d669f7daf7ef2346ee06e4af1b341dcf307a538500184af63c9d39`;
+
+- `libs/echarts/6.1.0/echarts.theme-river.min.js` – reproduzierbarer
+  ThemeRiver-Browser-Build aus ECharts Core, ThemeRiver Chart, SingleAxis,
+  Legende, Graphic, Titel, Tooltip, Aria und Canvas Renderer; 520.099 Byte; SHA-256
+  `d4739d560c4fc4ce0ac1ad3f81334aa7c8e10d7143cb86d89853a6008955d8dc`;
+
+- `libs/echarts/6.1.0/echarts.pictorial-bar.min.js` – reproduzierbarer
+  PictorialBar-Browser-Build aus ECharts Core, PictorialBar Chart, Grid,
+  Titel, Tooltip, Aria, DataZoom, LabelLayout und CanvasRenderer; 556.814 Byte; SHA-256
+  `ce03a142a661d6a32ee931a9e6efcb390c311220f1e53cdeb89a32f1bee9ef5d`;
+
+- `libs/echarts/6.1.0/echarts.candlestick.min.js` – reproduzierbarer
+  Candlestick-Browser-Build aus ECharts Core, Candlestick Chart, Grid, Titel,
+  Tooltip, Aria, DataZoom und Canvas Renderer; 537.955 Byte; SHA-256
+  `22dfd0a2530eabfb1b2ca3e6cfb16c77b7e5462b66c8ca72c884a3a590a5633e`;
+
+- `libs/echarts/6.1.0/echarts.funnel.min.js` – reproduzierbarer
+  Funnel-Browser-Build aus ECharts Core, Funnel Chart, Titel, Tooltip,
+  Aria, Label Layout und Canvas Renderer; 487.801 Byte; SHA-256
+  `da9750dd18363325d23b1bcd4ea3af7e1011620b80b994ad6c2d5e3ee819314d`;
+
+- `libs/echarts/6.1.0/echarts.boxplot.min.js` – reproduzierbarer
+  Boxplot-Browser-Build aus ECharts Core, Boxplot und Scatter Chart, Grid, Titel, Tooltip,
+  Aria, Data Zoom und Canvas Renderer; 550.841 Byte; SHA-256
+  `485a64860d8f254bdfb18c230fc38ec996c96dea6af29ef0d7830d346fe0d9a6`;
+
+- `libs/echarts/6.1.0/echarts.gauge.min.js` – reproduzierbarer,
+  Gauge-spezifischer Browser-Build aus ECharts Core, Gauge Chart, Aria,
+  Titel, Tooltip, Graphic Component und Canvas Renderer; 489.536 Byte; SHA-256
+  `8c6216a27ffe06481fe81ae101cb17c2f39fafe9357c99adc110434f03dd9bbc`;
+- `libs/echarts/6.1.0/echarts.cartesian.min.js` – reproduzierbarer,
+  kartesischer Browser-Build aus ECharts Core, Line Chart, Bar Chart, Scatter Chart, Grid,
+  Legende, Titel, Tooltip, Data Zoom, Mark Line, Mark Area, Aria und Canvas
+  Renderer; 627.600 Byte;
+  SHA-256
+  `92954fbddaa6b7c09f25819ab7b4743eb6afd5efa92351f129b14d298d2ab31a`;
+- `libs/echarts/6.1.0/echarts.scatter.min.js` – reproduzierbarer
+  Scatter-Browser-Build mit den kartesischen Komponenten, Visual Map, Brush
+  und Toolbox; 709.931 Byte; SHA-256
+  `d759229d5b223da5b3badff736a732f978efc30c3e91d8913aa3e90d01b2974a`;
+- `libs/echarts/6.1.0/echarts.heatmap.min.js` – reproduzierbarer
+  Heatmap-Browser-Build aus ECharts Core, Heatmap Chart, Grid, Visual Map,
+  Titel, Tooltip, Aria und Canvas Renderer; 535.630 Byte; SHA-256
+  `2ed5eac005bb669e165d16bbd12003bf8e7f6fb6a95a6d103579bad92b1418bc`;
+- `libs/echarts/6.1.0/echarts.polar.min.js` – reproduzierbarer,
+  Polar-Browser-Build aus ECharts Core, Bar Chart, Polar Component, Titel,
+  Tooltip, Aria und Canvas Renderer; 514.353 Byte; SHA-256
+  `f31daec4db27dee855d736f2443b15b5642011bc99bbe6f9bc1fdb91da1ef69c`;
+- `libs/echarts/6.1.0/echarts.pie.min.js` – reproduzierbarer,
+  Pie-Browser-Build aus ECharts Core, Pie Chart, Legende, Titel, Tooltip,
+  Aria und Canvas Renderer; 504.031 Byte; SHA-256
+  `b61d6fb1b4652e2365cb91813ce23cc3e2f5afac06610a47bc0ab9eb706440ea`;
+- `libs/echarts/6.1.0/echarts.tree.min.js` – reproduzierbarer,
+  Tree-Browser-Build aus ECharts Core, Tree Chart, Titel, Tooltip, Aria und
+  Canvas Renderer; 500.034 Byte; SHA-256
+  `5debc28928d9d9d51e1611252e494585dc5aa196667542698ee68d40bc22bdb4`;
+- `libs/echarts/6.1.0/echarts.graph.min.js` – reproduzierbarer,
+  Graph-Browser-Build aus ECharts Core, Graph Chart, Titel, Tooltip, Aria,
+  Label Layout und Canvas Renderer; 532.951 Byte; SHA-256
+  `b1bc4e3bda0e48a359e3d08d55695894b45e3dc186fbec8bdb4d6265fea23f1b`;
+- `libs/echarts/6.1.0/echarts.treemap.min.js` – reproduzierbarer
+  Treemap-Browser-Build aus ECharts Core, Treemap Chart, Titel, Tooltip,
+  Aria und Canvas Renderer; 507.134 Byte; SHA-256
+  `e9020d97d1f90d3967dbb717485edcafed098f3ee7b2b632b6f01055582a148e`;
+- `libs/echarts/6.1.0/echarts.sunburst.min.js` – reproduzierbarer
+  Sunburst-Browser-Build aus ECharts Core, Sunburst Chart, Titel, Tooltip,
+  Aria und Canvas Renderer; 480.093 Byte; SHA-256
+  `95ef117d648729e87199ab20a815f773cbe660da2f007fd65441add95c1daa43`;
+- `libs/echarts/6.1.0/echarts.parallel.min.js` – reproduzierbarer
+  Parallel-Browser-Build aus ECharts Core, Parallel Chart und Component,
+  Titel, Tooltip, Aria und Canvas Renderer; 495.113 Byte; SHA-256
+  `ded2b972e4032a840353eabc34809047d70c5bc9e7f700b6a09f617d9bc21295`;
+- `libs/echarts/6.1.0/echarts.sankey.min.js` – reproduzierbarer
+  Sankey-Browser-Build aus ECharts Core, Sankey Chart, Titel, Tooltip,
+  Aria, Label Layout und Canvas Renderer; 514.893 Byte; SHA-256
+  `02c589e73e13a571727f7320e2b7bc859bc3ea6f46914871831f7a562d0b32dc`;
+- `libs/echarts/6.1.0/echarts.calendar.min.js` – reproduzierbarer
+  Calendar-Browser-Build aus ECharts Core, Heatmap Chart, Calendar Component,
+  Visual Map, Titel, Tooltip, Aria und Canvas Renderer; 524.343 Byte; SHA-256
+  `9879dece9194b401d95d4e8061b43bf83bc3d6c08dacb320406f48de5b8d31a5`;
+- `libs/echarts/6.1.0/echarts.radar.min.js` – reproduzierbarer
+  Radar-Browser-Build aus ECharts Core, Radar Chart und Component, Custom Chart,
+  Legende, Titel, Tooltip, Aria, Label Layout und Canvas Renderer; 539.843 Byte; SHA-256
+  `a2ddd9fcc7d8b8873c648e9ea4f494c700ddf131d58f12e82f2ca8e766586b6a`;
+- `libs/echarts/6.1.0/themes/dark.js` – offizielles Theme Dark; 5.981 Byte;
+  SHA-256 `ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458`;
+- `libs/echarts/6.1.0/themes/vintage.js` – offizielles Theme Vintage;
+  1.922 Byte; SHA-256
+  `15c22b1f26961f972d23a9297362d42c4e59764e4b38025364f341cf144fb84f`;
+- `libs/echarts/6.1.0/themes/macarons.js` – offizielles Theme Macarons;
+  5.869 Byte; SHA-256
+  `1aa73f933f0fd92b02e3e1de18299b15a2d536eb29c4b9755b8ab25d54f5640d`;
+- `libs/echarts/6.1.0/themes/infographic.js` – offizielles Theme
+  Infographic; 5.829 Byte; SHA-256
+  `43f803926e8625a1f1cbf6b6189d1735c0526e3e9e7e12aa8531a8296550c1b4`;
+- `libs/echarts/6.1.0/themes/shine.js` – offizielles Theme Shine;
+  4.412 Byte; SHA-256
+  `33f28aaec40952dbad84de2d8cb3d58f49ea131806fad9497f06ad4d46f2a8f3`;
+- `libs/echarts/6.1.0/themes/roma.js` – offizielles Theme Roma;
+  3.044 Byte; SHA-256
+  `01303d34787f242664d5ad35bb1d535bb21d701ff60f6f1412e8c872008b5a05`;
+- `libs/echarts/6.1.0/LICENSE.txt` – Originallizenz aus demselben Paket;
+- `libs/echarts/6.1.0/NOTICE.txt` – Originalhinweise aus demselben Paket.
+
+Der Build wird lokal ausgeliefert und zur Laufzeit nicht von einem CDN geladen.
+Sein Einstiegspunkt, die exakt festgeschriebenen npm-Abhängigkeiten und der
+Buildbefehl liegen unter `.tools/echarts-runtime`. Die ECharts-Quellen werden
+nicht inhaltlich verändert, sondern über die offizielle Tree-Shaking-API auf
+die von den jeweiligen Diagrammfamilien benötigten Bestandteile begrenzt. Die Theme-Dateien werden
+unverändert aus dem Paket übernommen.
+
+Das Preset `speed` adaptiert die charakteristische Konfiguration und den
+SVG-Zeigerpfad aus dem offiziellen Apache-ECharts-Beispiel
+[`gauge-speed`](https://echarts.apache.org/examples/en/editor.html?c=gauge-speed).
+Wertebereich, Skalenteilung, Theme-Farben, Beschriftung und responsive
+Dimensionierung werden projektspezifisch ergänzt; Beispiel und übernommener
+Zeigerpfad verbleiben unter der Apache License 2.0.
+
+`.gitattributes` verhindert eine Zeilenendenkonvertierung der Fremdartefakte.
+`libs/EChartsAsset.php` normalisiert bei Runtime und Theme-Dateien zusätzlich
+eine bereits durch einen Windows-Modulcheckout erfolgte CRLF-Konvertierung
+zurück auf die originalen LF-Zeilenenden und prüft anschließend die
+SHA-256-Prüfsumme. Andere
+Byteabweichungen werden abgelehnt. Der ECharts-Kern und die genannten
+Fremddateien wurden nicht projektspezifisch verändert. ECharts und die im
+offiziellen Bundle enthaltenen Komponenten bleiben unter ihren in
+`LICENSE.txt` und `NOTICE.txt` genannten Bedingungen.
 
 ## Weitere Komponenten
+
+PictorialBar verwendet auf Wunsch ausgewählte Pfadformen aus der bereits
+installierten Symcon-Icon-Bibliothek. Diese enthält unter anderem Font Awesome
+Light/Brands und Symcon-spezifische Icons; es gelten deren jeweilige, mit
+Symcon ausgelieferte Lizenzbedingungen. SymconECharts liefert keine Kopie
+dieser Bibliothek, Fonts oder kommerziellen Iconbestände aus. Der lokale
+Adapter liest nur die ausgewählte Form für die eigene Diagrammausgabe.
+Die Test-Fixtures enthalten ausschließlich selbst erstellte synthetische
+Formen, keine übernommenen Icon-Artworks.
 
 Vor Aufnahme weiterer Bibliotheken, Helper, Vorlagen, Bilder oder Schriftarten
 werden deren Herkunft, Lizenz und Weitergabebedingungen geprüft und dokumentiert.
 Vorhandene Copyright- und Lizenzhinweise bleiben erhalten. Fremdcode wird nicht
 pauschal mit dem PolyForm-Lizenzkopf des Projekts versehen.
 
-Insbesondere werden mit einer späteren ECharts-Bündelung enthaltene Abhängigkeiten
-separat erfasst; allein die Nennung von ECharts ersetzt deren Hinweise nicht.
+Vorhandene Copyright-, Lizenz- und Herkunftshinweise werden nicht entfernt.
+
+## JSLive-Übernahme: Referenzdaten und Schriften
+
+Die neuen Adapter sind eigenständige native ECharts-Implementierungen.
+Chart.js, CanvasGauges und progressbar.js werden nicht als neue Laufzeitabhängigkeiten
+mitgeliefert. Die unterstützten Quellverträge wurden anhand von
+[Burki24/JSLive](https://github.com/Burki24/JSLive), Version 0.111,
+Commit `286e5e9de39190178f510191f0911ee82f74271d`, geprüft.
+Die Progressbar-Standardvorlage wurde zusätzlich für JSLive 0.113 anhand von
+Commit `909f0aea28a86a78ecfdc01e681a1fe354610790` geprüft. Inhaltlicher Unterschied,
+exakte LF-/CRLF-Prüfsummen und Prüfgrenzen stehen im
+[Migrationsnachweis](docs/JSLIVE_MIGRATION_ABNAHME.md#geprüfte-vorlagenänderung).
+
+Die Koordinaten-Kompatibilität in `EChartsGaugeSingle/JSLiveRenderer.js`
+adaptiert die erforderlichen Geometrie- und Schriftmaßregeln aus Canvas Gauges
+2.1.7 (Copyright 2016 Mykhailo Stadnyk, MIT). Die vollständige ursprüngliche
+MIT-Erlaubnis steht im Dateikopf und bleibt damit auch in vollständigen
+HTML-Ausgaben enthalten. Es werden ausschließlich native ECharts-Primitiven
+erzeugt; Canvas Gauges wird nicht als Laufzeitbibliothek mitgeliefert.
+Die geprüfte Referenz ist JSLives Asset `2.1.7-jslive.1`, SHA-256
+`2cde1666441e112088cf3094f29e187f0d818ce4a2b9939091b890e9f132520e`.
+Die übrigen eigenen Bibliotheksbeiträge behalten ihre bestehende Lizenz.
+
+Die Preset- und Einpassungs-Kompatibilität in
+`EChartsProgress/ProgressRenderer.js` adaptiert die notwendigen SVG-Maßregeln
+und die feste Textform aus loading-bar 0.1.1 (Copyright 2017 loading.io, MIT),
+JSLives Asset `0.1.1-jslive.1`, SHA-256
+`6e79d56f0c289cdebd4c0351451a8a28a431cacc18405241be4530df4f2a4a86`.
+Der vollständige ursprüngliche MIT-Hinweis steht im Renderer und bleibt in den
+HTML-Ausgaben erhalten. Es werden native ECharts-Grafiken und inerte SVG-Bilder
+erzeugt; die loading-bar-Engine wird nicht mitgeliefert. Die optionale
+Quellreferenzprüfung liest sie nur aus einem separaten JSLive-Checkout.
+
+`tests/fixtures/jslive-templates` enthält unveränderte Standard-HTML-Vorlagen
+einschließlich der geprüften Progressbar-0.113-Bytevarianten ausschließlich als
+inerte Hash-/Vertragsreferenz unter der dort
+beigefügten ursprünglichen GPL-3.0-Lizenz. Sie werden weder ausgeführt noch in
+Zielvisualisierungen eingebunden. Produktion liefert lediglich das
+Prüfsummenmanifest `libs/jslive/templates.json`. Die Fremdbytes bleiben durch
+`.gitattributes` unverändert.
+
+`libs/jslive/fonts.json` verzeichnet für jede erlaubte Schrift Familie,
+Quelldatei/-URL, SHA-256 und OFL-1.1 beziehungsweise Apache-2.0-Lizenz. Unveränderte
+Lizenztexte stehen in `libs/jslive/licenses`. Produktionsausgaben verwenden nur
+die geprüften Schriftbytes des vom Anwender ausgewählten Exportpakets und laden
+keine externen Font-URLs. Drei WOFF2-Dateien in `tests/fixtures/jslive-assets`
+dienen ausschließlich den anonymisierten Migrationstests und behalten ihre
+jeweiligen Font-Lizenzen. Der Anonymisierungsumfang und die genaue Herkunft stehen
+in `tests/fixtures/jslive-packages/README.md`. Diese Fremdartefakte fallen nicht
+unter die PolyForm-Lizenz der eigenen Beiträge.
