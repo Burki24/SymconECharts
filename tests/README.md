@@ -22,7 +22,8 @@ Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
   vollständige 40er-Berichtsmenge: kompletter Bericht oder ausdrückliche
   8-MiB-Grenzmeldung, niemals stilles Kürzen. Keine Anhebung von Schutzbudgets.
 - `php tests/jslive_execution.php`: öffentliche Gateway-APIs und tatsächlicher
-  Kerneladapter mit kontrollierten Symcon-Doppeln. Genau 40 neue Ziele, beide
+  Kerneladapter mit kontrollierten Symcon-Doppeln. 40 neue Ziele und eine
+  ausdrücklich getrennte Kopie mit Wiederanlauf/Wiederholung, beide
   Ausgaben, erneute Bestätigung ohne Schreibaufrufe, unveränderte Originale,
   Profile, Actions und Archive. Native Acht-Argumente-Formularscripts werden
   tatsächlich ausgeführt. Fehlende und veränderte Ausgabe-Besitznachweise
@@ -30,7 +31,9 @@ Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
 - `php tests/jslive_journal.php`: 23 Unterbrechungspunkte einschließlich neuer
   Apply-Kinder, kanonische Persistenz, Reihenfolge mehrerer Revisionen,
   Erzeugungs-/Markierungslücke, explizite Zuordnung, Teilfehler und fremde
-  Reservierungen. Kein automatisches Löschen oder blindes Neuerzeugen.
+  Reservierungen. Zusätzlich 184 Unterbrechungsfälle getrennter Neuanlagen
+  mit denselben oder aktualisierten Importregeln. Kein automatisches Löschen
+  oder blindes Neuerzeugen.
   Geplante und aktive Einstellungen sind im Kernel-Doppel getrennt. Sechs
   Szenarien bilden alte Version-1-Fehlerstände mit noch geplantem, verlorenem
   oder beim Update aktiviertem Stand sowie aktive/fremde Entwürfe nach.

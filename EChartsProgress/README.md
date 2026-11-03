@@ -5,6 +5,16 @@ einer nativen Symcon-Kachel und optional in IPSView dar. Das Modul übernimmt
 JSLive-Progressbar-Modelle. Für wiederholte Symbolbalken mit mehreren Quellen
 verwenden Sie [EChartsPictorialBar](../EChartsPictorialBar/README.md).
 
+![Übernommene eigene SVG-Batterieform mit Farbverlauf](../docs/images/jslive-svg-progress.jpg)
+
+Aufnahme einer übernommenen JSLive-Testinstanz aus der nativen Kachelausgabe.
+Die Farben und die Form stammen aus dem geprüften Importmodell.
+
+Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsprogress).
+
 ## Einrichtung
 
 1. Im gemeinsamen [EChartsGateway](../EChartsGateway/README.md) das JSLive-
@@ -104,15 +114,59 @@ Die Farbkarte ist eine gekennzeichnete schematische Vorschau. **Native Vorschau
 herunterladen** liefert die tatsächliche ECharts-Ausgabe einschließlich noch
 nicht gespeicherter Formularanpassungen, ohne sie zu übernehmen.
 
-## Status und PHP-Befehle
+## Status und Verfügbarkeit
 
 Eine leere Instanz meldet die fehlende Importkonfiguration. Ungültige Modelle
 oder fehlende Quellen werden als nicht verfügbar angezeigt. Das Modul legt
 keine Profile an; die optionale Stringvariable für IPSView verwendet die native
 WebContent-Darstellung.
 
-`ECPG_GetJSLiveImportData(int $InstanzID): string` liefert das aktuelle Modell
-als JSON. `ECPG_GetJSLiveImportHTML(int $InstanzID, bool $IPSView): string`
-liefert das vollständige HTML für die gewählte Ausgabe.
+## Konfigurationsreferenz und Skriptzugriff
 
-Lizenz der eigenen Beiträge: [PolyForm Noncommercial 1.0.0](../LICENSE).
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartsprogress) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
+
+### Ausgabevariable
+
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewProgress` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
+
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
+
+### Öffentliche PHP-Funktionen
+
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
+
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECPG_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+| `ECPG_GetJSLiveImportHTML(int $InstanzID, bool $IPSView): string` | `$IPSView=false`: Kachelausgabe; `true`: IPSView-Ausgabe eines übernommenen JSLive-Modells als vollständiges HTML. |
+| `ECPG_RefreshJSLiveImport(int $InstanzID): void` | Aktualisiert die Diagrammausgaben aus den konfigurierten Quellen. Kein Erfolgswert und keine Änderung von Quellen/Archiven. Nur für importierte Modelle. |
+| `ECPG_GetJSLiveImportData(int $InstanzID): string` | JSON-Zustand eines übernommenen JSLive-Modells einschließlich Verfügbarkeit; nur für importierte Varianten. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
+
+```php
+$instanceID = 12000;
+$model = json_decode(ECPG_GetJSLiveImportData($instanceID), true, 512, JSON_THROW_ON_ERROR);
+```
+
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
+
+## Lizenz
+
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

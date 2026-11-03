@@ -3,6 +3,11 @@
 PictorialBar vergleicht aktuelle Symcon-Werte als Symbolbalken.
 Es verwendet das gemeinsame EChartsGateway und benötigt kein Archiv.
 
+Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartspictorialbar).
+
 ## Einrichtung
 
 1. Instanz anlegen und das vorhandene EChartsGateway auswählen.
@@ -170,7 +175,7 @@ drei Farbmodi einschließlich des festen Verlaufs entlang der Skala
 funktionieren wie bei Symcon-Icons. Wiederholte Formen behalten ihre
 Proportionen; einzelne Formen passen sich an die Balkengeometrie an.
 
-#### Geeignete Größe und Vorbereitung
+### Geeignete Größe und Vorbereitung
 
 Eine feste ideale Pixelgröße oder DPI-Zahl gibt es bei SVG nicht: Das Modul
 skaliert die Vektorform. Eine größere Zeichenfläche erzeugt deshalb nicht
@@ -197,7 +202,7 @@ Auch andere Größen sind innerhalb der unten genannten Grenzen zulässig.
   Elemente oder externe Ressourcen. Eine kleine Datei mit wenigen Kilobytes
   ist ein sinnvoller Ausgangspunkt; die Importgrenzen sind keine Zielgröße.
 
-#### Beispiel: einfache Batterieform
+### Beispiel: einfache Batterieform
 
 Die mitgelieferte [battery.svg](examples/battery.svg) ist eine direkt
 importierbare, waagerechte Batteriesilhouette mit dem Seitenverhältnis 2:1.
@@ -219,7 +224,7 @@ und Skalenmaximum **100** einstellen. Bei wiederholten Symbolen läuft der
 Verlauf über den gesamten Balken, nicht erneut durch jede einzelne Batterie.
 Für ein einziges an den Balken angepasstes Motiv **Symbole wiederholen** ausschalten.
 
-#### Technische Importgrenzen
+### Technische Importgrenzen
 
 Skripte, Ereignisbehandler, externe Referenzen, eingebettete Bilder, eigene
 SVG-Verläufe/Filter und nicht unterstützte Elemente werden abgewiesen.
@@ -292,3 +297,53 @@ und oberhalb des Farbmaximums gilt die jeweilige Randfarbe. Der Modus
 funktioniert horizontal und vertikal sowie mit einzelnen und wiederholten
 Symbolen; Nullwerte und optisch begrenzte Originalwerte bleiben erhalten.
 Kachel und unabhängiges IPSView-Design können unterschiedliche Modi nutzen.
+
+## Konfigurationsreferenz und Skriptzugriff
+
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartspictorialbar) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
+
+### Ausgabevariable
+
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewPictorialBar` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
+
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
+
+### Öffentliche PHP-Funktionen
+
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
+
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECPB_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECPB_GetPictorialBarData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
+| `ECPB_GetPictorialBarDiagnostic(int $InstanzID): string` | JSON-Momentaufnahme der Konfigurationsprüfung und letzten Fehlermeldung; kein Nachweis einer erfolgreichen Datenabfrage. |
+| `ECPB_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
+
+```php
+$instanceID = 12000;
+$model = json_decode(ECPB_GetPictorialBarData($instanceID), true, 512, JSON_THROW_ON_ERROR);
+```
+
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
+
+## Lizenz
+
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

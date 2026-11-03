@@ -1,181 +1,172 @@
 # EChartsBarCategory
 
-## Value-label options
+Vergleicht aktuelle Werte von einer bis 100 numerischen Symcon-Variablen als
+Kategorienbalken. Die Darstellung ist vertikal oder horizontal sowie einfach,
+gruppiert oder gestapelt möglich. Ohne Normalisierung müssen alle Quellen
+dieselbe wirksame Einheit besitzen. Historische Balken gehören zu
+[EChartsBarHistory](../EChartsBarHistory/README.md).
 
-Value labels keep their automatic position by default. They can also be placed above, below, left, right or inside a bar, with a 0–100 px gap. Manually placed inside labels use a contrasting text color unless a custom value color is selected.
+Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsbarcategory).
 
-These options apply to the tile and the independent IPSView design. In
-inherited mode, IPSView follows the tile settings.
+## Einrichtung und Quellen
 
-`EChartsBarCategory` compares the current values of one to one hundred numeric
-IP-Symcon variables as a category bar chart. Without normalization, all
-configured sources must use the same effective unit so that the shared value
-axis remains meaningful.
+Die [Library installieren](../README.md#installation-und-erstes-diagramm), eine
+BarCategory-Instanz anlegen und mit dem gemeinsamen EChartsGateway verbinden.
+Integer- oder Float-Variablen auswählen, Titel und Design festlegen und übernehmen.
+Ein Archiv ist nicht erforderlich. Für IPSView die optionale HTML-Ausgabe aktivieren.
 
-## Optional Min/Max normalization
+Jede Variable darf nur einmal vorkommen. In jeder Quellenzeile stehen eine
+**Kategorie** (`Category`) und ein optionaler **Datenreihenname** (`Series`).
+Die Kategorie beschriftet die Kategorienachse, die Reihe den Legendeneintrag.
+Eine leere Kategorie verwendet im einfachen Modus den Variablennamen, sonst
+die gemeinsame Gruppe. Eine leere Reihe verwendet den Variablennamen.
+Gleiche Beschriftungen bleiben getrennte Quellen, ohne IDs in der Grafik anzuzeigen.
+Fehlende Kategorie-/Reihenkombinationen bleiben leer. Bei Sortierung nach Werten
+zählt die Summe der verfügbaren Werte je Kategorie. Standard ist **Einfach**.
 
-Enable **Normalize numeric sources using their Min/Max** to compare different
-units, for example temperature, humidity and LQI. Set **Min (normalization)**
-and **Max (normalization)** separately in each source row. They default to
-0 and 100, must be finite and have Min below Max. These explicit bounds do
-not come from the variable presentation. They are ignored while normalization
-is disabled, which remains the default.
+## Optionale Min/Max-Normalisierung
 
-The displayed length is `(value - Min) / (Max - Min) × 100`, limited to 0–100.
-Values below or above the range retain their original values but draw at
-0 or 100. Negative original values are allowed with suitable bounds. Value
-labels and tooltips keep each source's original value, unit and precision;
-the tooltip additionally shows its normalized position and original range.
-Native variable presentation or manually configured formatting is still
-selected per source. The comparison axis is explicitly labeled **Normalized
-0–100 per source** rather than using any original unit.
+**Numerische Quellen anhand ihrer Min/Max normalisieren** erlaubt relative
+Vergleiche unterschiedlicher Einheiten, etwa Temperatur, Feuchte und LQI.
+Je Quelle eigene Grenzen setzen: Standard 0 und 100, beide endlich und Minimum
+kleiner als Maximum. Sie stammen nicht automatisch aus der Variablendarstellung.
+Bei ausgeschalteter Normalisierung werden diese Grenzen nicht ausgewertet.
 
-Sorting compares normalized values. Grouped bars retain separate source
-positions. Stacked bars add their individual normalized values and can exceed
-100; this is **not** a 100-percent share calculation. Categories, source IDs,
-navigation and original values remain unchanged. Gradient colors follow the
-normalized value-axis positions while this mode is active; a 0–100 gradient
-range is suitable for simple or grouped bars. Saved gradient/style settings
-are not changed automatically.
-Normalized grouped/stacked segments hide value labels when their zero or tiny
-length cannot accommodate readable text. Their original values remain in the
-tooltip; larger segments keep their labels.
+Die Balkenlänge entspricht `(Wert − Min) / (Max − Min) × 100`, begrenzt auf 0–100.
+Auch negative Originalwerte sind mit passenden Grenzen zulässig. Beschriftung
+und Tooltip behalten Originalwert, Einheit und Präzision; der Tooltip ergänzt
+die normalisierte Position und den Originalbereich. Die Vergleichsachse ist
+ausdrücklich als **Normalisiert 0–100 je Quelle** gekennzeichnet.
 
-The option applies to Tile, IPSView and both live previews, including unsaved
-changes. Disable it to return to the original same-unit signed comparison.
+Sortiert wird nach normalisierten Werten. Gruppierte Balken bleiben getrennt;
+gestapelte Balken addieren ihre Gewichte und können über 100 hinausgehen.
+Das ist keine 100-%-Anteilsberechnung. Zu kleine normalisierte Stapelsegmente
+blenden ihre Wertbeschriftung aus; die Originalwerte bleiben im Tooltip.
+Farbverläufe folgen im normalisierten Modus der normalisierten Wertachse.
+Gespeicherte Farb- und Designwerte werden nicht automatisch geändert.
 
-## Large category lists
+## Kategoriennavigation und Abstände
 
-The source limit is **100 variable assignments in total**, including all
-categories and series in grouped or stacked mode. A category slider and
-mouse-wheel navigation appear when the categories do not fit the available
-space, in either orientation and in both Tile and IPSView. There is no fixed
-sixteen-category window: its size follows the chart dimensions, **Bar width**
-and the axis/value-label font sizes.
+Die Grenze von **100 Quellen** gilt insgesamt über alle Kategorien und Reihen.
+Passen sie nicht in den verfügbaren Raum, erscheinen Kategorienschieber und
+Mausradnavigation. Die Zahl sichtbarer Kategorien folgt der Ausgabegröße,
+**Balkenbreite** sowie Achsen- und Wertschriftgröße; es gibt kein festes
+16-Kategorien-Fenster. Das gilt horizontal und vertikal in Kachel und IPSView.
 
-Thinner bars bring category centers closer together and expose more categories.
-Larger fonts protect a minimum distance; once this minimum is reached, reducing
-the width changes the bar thickness without packing the labels more tightly.
-Short lists remain compact instead of stretching across the whole category
-direction. Grouped bars reserve additional room for their series; if their
-value labels cannot fit without overlap, the labels are omitted and the full
-values remain in the tooltip. Vertical category names truncate to their slot.
-A scrollable legend helps
-with many series; navigation changes the visible categories, not the sources.
+Dünnere Balken rücken die Kategorien enger zusammen. Die Schriftgröße schützt
+einen Mindestabstand; darunter ändert sich nur die Balkendicke. Kurze Listen
+bleiben kompakt. Gruppierte Balken reservieren Platz je sichtbarer Reihe.
+Überlappende Werte werden ausgeblendet, vertikale Kategorienamen bei Bedarf
+gekürzt; vollständige Namen und Werte bleiben über Tooltip/Legende verfügbar.
+Viele Reihen erhalten eine scrollbare Legende.
 
-All configured values remain in the model. Sorting and the shared signed
-value scale use the full data set, including positive and negative stack
-totals, so scrolling does not change the comparison scale. Current-value
-updates retain the visible category; in Simple mode this follows the source
-ID even if names are equal or a value update changes the sorting order.
-Sources, saved design settings and variable values are not modified by navigation.
+Alle Quellen bleiben im Modell. Sortierung und vorzeichenbehaftete Werteskala
+verwenden den vollständigen Bestand einschließlich positiver und negativer
+Stapelsummen. Navigation verändert keine Skala oder Quelle. Aktualisierungen
+erhalten die sichtbare Kategorie, im einfachen Modus anhand der Variablen-ID
+auch bei gleichen Namen oder einer geänderten Sortierung.
 
-## Gradient fill
+## Füllung, Farben und Beschriftungen
 
-Select **Gradient along the value axis** under **Bar fill** to color the inside
-of each bar along a fixed scale. Set its **Color range minimum/maximum** and
-the colors for the minimum, midpoint and maximum (default: red, yellow, green).
-For batteries use 0–100; for LQI use 0–255. Fractional and signed limits are
-supported. Values outside the color range keep the nearest endpoint color;
-the actual values and axis scale are not clipped or normalized.
+**Balkenfüllung: Farbverlauf entlang der Wertachse** färbt jeden Balken entlang
+eines festen Bereichs mit Minimum-, Mittel- und Maximumfarbe. Standardfarben
+sind Rot, Gelb und Grün. Für Batterien passt 0–100, für LQI 0–255; auch
+gebrochene oder negative Grenzen sind möglich. Außerhalb des Farbbereichs gilt
+die nächste Endfarbe, ohne die tatsächlichen Werte zu begrenzen.
 
-A 16% bar uses only the first 16% of a 0–100 ramp, rather than stretching the
-whole red-to-green range across that short bar. Horizontal gradients run from
-left to right; vertical gradients run from bottom to top. Stacked segments
-continue at their position on the shared value axis, with positive and negative
-stacks treated separately. Hiding a series in the legend recalculates the
-remaining segments' colors. Tooltips retain the original values and units.
+Ein 16-%-Balken nutzt nur die ersten 16 % eines Verlaufs von 0–100. Der Verlauf
+wird nicht vollständig auf den kurzen Balken gestreckt. Er verläuft horizontal
+von links nach rechts und vertikal von unten nach oben. Gestapelte Segmente
+setzen den Verlauf an ihrer Position auf der gemeinsamen Wertachse fort;
+positive und negative Stapel bleiben getrennt. Eine geänderte Legendenauswahl
+berechnet diese Positionen neu. Legendenfarben kennzeichnen weiterhin die Reihe.
+**Einfarbig** bleibt die Standardfüllung.
 
-The option works in both designers and previews. IPSView inherits it unless
-**Use Tile design** is disabled. Gradient fill replaces per-source fill colors
-only while selected; legend colors still identify each series. **Solid color**
-remains the default, and **SVG pattern** remains a separate fill choice.
+**SVG-Muster** wiederholt ein geprüftes SVG innerhalb der rechteckigen Balken;
+es verändert nicht deren Form. Zulässig sind eigenständige Dateien bis 256 KiB
+ohne Skripte oder externe Referenzen. Die Mustergröße ist einstellbar.
+Kann ein Browser das SVG nicht laden, bleibt die Quellenfarbe als Rückfall.
 
-## Temporary loading errors
+Wertbeschriftungen können automatisch, oberhalb, unterhalb, links, rechts oder
+innen mit 0–100 px Abstand stehen. Innenbeschriftungen erhalten automatischen
+Kontrast, sofern keine eigene Wertfarbe gewählt ist. Titel, Legende, Achsen und
+Werte besitzen getrennte Schriftgrößen von 50–200 % und eigene Farben;
+automatische Farben folgen dem Theme. Balkenbreite, Gitter und Rundung sind
+ebenfalls einstellbar.
 
-If current values cannot be loaded briefly, the last valid chart remains
-visible in the tile and IPSView. Repeated failures show a notice, and the
-module retries after 60 seconds. With no previously loaded data or an invalid
-configuration, an error is still shown.
+## Kachel, IPSView und Vorschau
 
-Both designers group bar layout, labels and geometry, fill patterns, and typography and colors in
-collapsible sections. The live preview remains below these sections.
+IPSView verwendet standardmäßig das Kacheldesign. Für eigene Werte zuerst
+**Kacheldesign verwenden** ausschalten. Der Kopierknopf übernimmt das zuletzt
+gespeicherte Kacheldesign einmalig und überschreibt die bisherigen unabhängigen
+IPSView-Designwerte. Die Datenquellen bleiben gemeinsam.
 
-## Live preview
+Die SVG-Vorschau reagiert auf ungespeicherte Änderungen. Sie verwendet aktuelle
+Quellen oder deutlich gekennzeichnete Beispieldaten. Der begrenzte Ausschnitt
+folgt Größe, Orientierung und Schrift; sortiert wird zuvor der vollständige
+Bestand. Angezeigte und gesamte Quellenzahl werden bei einem Ausschnitt genannt.
+Ein SVG-Motiv wird schematisch schraffiert. Die tatsächliche Kachel beziehungsweise
+das IPSView-Widget bleibt maßgeblich für Motiv, Navigation und responsive Geometrie.
 
-The Tile and IPSView designers each show an SVG preview. Unsaved changes to
-the title, sources, theme, orientation, bar mode, ordering and basic appearance
-update it immediately. Configured category names take precedence over variable
-names; variable IDs are never displayed. With **Use Tile design** enabled,
-the IPSView preview follows the Tile design. Without valid sources, the preview
-is explicitly marked as example data. Value labels use the effective unit and
-decimal precision from the sources. The preview illustrates the layout; an
-imported SVG motif is shown only as a schematic hatch. The actual chart in
-the tile or IPSView widget remains the visual reference.
-The preview uses the same width/font-dependent spacing principle. Its bounded
-source subset adapts to the preview dimensions, orientation and fonts rather
-than always showing six sources. It sorts all sources before selecting the
-subset and states the shown and total counts whenever sources are omitted.
-The actual chart still uses all sources; a static preview is not a navigable
-or pixel-identical replacement for it.
+Animationen für Start und Aktualisierung lassen sich getrennt von 0–3000 ms
+einstellen, zusätzlich Bewegungskurve und Verzögerung von 0–3000 ms.
+Standard ist cubicInOut ohne Verzögerung. Die Verzögerung gilt für den ganzen
+Übergang, nicht nacheinander für einzelne Werte. 0 ms unterdrückt den Übergang;
+reduzierte Bewegung des Systems schaltet Animationen ab.
 
-## Animation
+Bei vorübergehendem Ladefehler bleibt eine zuletzt gültige Grafik sichtbar.
+Wiederholte Fehler zeigen einen Hinweis; nach 60 Sekunden wird erneut geladen.
+Ohne vorherige Daten oder bei ungültiger Konfiguration erscheint eine Fehlermeldung.
 
-Initial and update transitions also have separate **easing** and a fixed
-**delay** (0–3000 ms). Both default to cubicInOut without delay. The delay
-applies to the whole chart transition, not to each data point in sequence.
+## Konfigurationsreferenz und Skriptzugriff
 
-In the Tile and independent IPSView designers, **Animate chart**, **Initial animation**, and **Update animation** control ECharts transitions independently. Durations range from 0 to 3000 ms; 0 ms suppresses that transition. The system's reduced-motion setting always disables animation. IPSView inherits Tile settings while **Use Tile design** is enabled.
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartsbarcategory) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
 
-## Output
+### Ausgabevariable
 
-- Native Symcon HTML-SDK tile with live value updates
-- Optional standalone IPSView WebContent output
-- Vertical or horizontal bars
-- Simple, grouped or stacked bars with separately editable categories and
-  data-series names per source
-- Configured, ascending or descending value order
-- Per-source color or automatic theme colors
-- Optional repeated SVG pattern for all bars, with adjustable pattern size;
-  source colors remain the fallback if the browser cannot load the SVG
-- Automatic light/dark value-label contrast on stacked bar segments
-- Separate title, legend, axis and value-label font sizes (50–200%) and colors,
-  plus a grid color. Automatic colors follow the theme; stacked value labels
-  retain automatic contrast unless a value-label color is explicitly set.
-- Independent Tile and IPSView design settings
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewBarCategory` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
 
-In **IPSView design**, **Use Tile design** is enabled by default. While it is
-enabled, the independent design inputs and the **Copy Tile design to IPSView
-and edit independently** button are shown directly in **IPSView design** but
-disabled. Turn off **Use Tile design** first; the inputs and button become
-available immediately. Clicking it copies the current
-Tile design once and replaces previously saved independent IPSView design
-values. Subsequent Tile design changes are not copied automatically. Sources
-and live values remain shared. Save changes to the Tile designer before copying.
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
 
-The module reads current values through the connected `EChartsGateway`. It
-does not read archive data; historical bar charts belong to a separate chart
-family.
+### Öffentliche PHP-Funktionen
 
-Select **SVG pattern** under **Bar fill** in the Tile designer to reveal the
-SVG file and pattern-size controls. The selected motif repeats inside the
-normal rectangular bars; it does not change their shape. Only self-contained,
-validated SVG files are accepted. The file may be at most 256 KiB and may not
-contain scripts or external references. An independent IPSView design can use
-a different motif after disabling **Use Tile design**.
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
 
-Every source row provides an explicit `Category` and an optional `Series`
-field in both the table and its edit dialog. `Category` labels the category
-axis; `Series` names the legend entry in grouped and stacked modes. An empty
-category uses the variable name in Simple mode and the shared group in grouped
-or stacked mode. An empty series uses the variable name. The variable ID is
-always the technical identity of a source; neither names nor object paths are
-used to identify it. If multiple sources have the same category and series
-label, the legend keeps that label without exposing variable IDs.
-This also applies to explicitly named series. Thus four variables named
-`Temperature` can share the `Temperature` category and still appear as four
-distinct bars. Categories may contain different data series; a missing
-combination remains empty instead of invalidating the chart. In
-value-based ordering, categories are sorted by the sum of their available
-values. Existing configurations remain in the compatible `Simple` mode by
-default.
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECBC_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECBC_GetBarData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
+| `ECBC_GetBarDiagnostic(int $InstanzID): string` | JSON-Momentaufnahme der Konfigurationsprüfung und letzten Fehlermeldung; kein Nachweis einer erfolgreichen Datenabfrage. |
+| `ECBC_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
+
+```php
+$instanceID = 12000;
+$model = json_decode(ECBC_GetBarData($instanceID), true, 512, JSON_THROW_ON_ERROR);
+```
+
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
+
+## Lizenz
+
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

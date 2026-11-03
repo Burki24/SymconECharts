@@ -1,17 +1,21 @@
 # EChartsGaugeMulti
 
+Gerätemodul der SymconECharts-Library für einen zusammengesetzten Gauge-Chart
+mit mehreren Werten oder Zeigern. Eine Gauge-Multi-Instanz bietet die native
+Symcon-Kacheldarstellung und ein optionales HTML-Widget in IPSView.
+Datenquellen und Diagrammkonfiguration werden dabei nur einmal gepflegt.
+
+Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsgaugemulti).
+
 ## Beschriftungsoptionen
 
 Skalenbeschriftungen lassen sich um -100 bis +100 px relativ zur Vorlage verschieben. Titel und Werte können separat horizontal und vertikal um -100 bis +100 % versetzt werden; null bewahrt die bisherige Vorlagengeometrie.
 
 Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
 IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen.
-
-Gerätemodul der SymconECharts-Library für einen zusammengesetzten Gauge-Chart
-mit mehreren Werten oder Zeigern. Eine Gauge-Multi-Instanz soll die native
-Symcon-Kacheldarstellung und ein separat platzierbares HTML-Widget in IPSView
-bereitstellen können. Datenquellen und Diagrammkonfiguration werden dabei nur
-einmal gepflegt.
 
 ## Vorübergehende Ladefehler
 
@@ -45,7 +49,7 @@ Einheit und Wertanzeige in einem responsiven Instrumentenraster. Beide
 Ausgaben verwenden dieselben Quellen und denselben Renderer; IPSView kann
 das Kacheldesign erben oder ein eigenes Design verwenden.
 
-### Quellenauswahl und Seiten
+## Quellenauswahl und Seiten
 
 **Quellenauswahl aktivieren** ist zunächst ausgeschaltet. Aktiviert bietet
 **Quellen** eine einzeln schaltbare Liste sowie **Alle** und **Umkehren**.
@@ -81,7 +85,7 @@ Der IPSView-Designer kann den Dokumenthintergrund transparent schalten und
 eine automatische Theme-Farbe oder eigene Hintergrundfarbe mit einstellbarer
 Deckkraft über den tatsächlichen IPSView-Hintergrund legen.
 
-### Inhaltsverzeichnis
+## Inhaltsverzeichnis
 
 1. [Funktionsumfang](#1-funktionsumfang)
 2. [Voraussetzungen](#2-voraussetzungen)
@@ -89,9 +93,9 @@ Deckkraft über den tatsächlichen IPSView-Hintergrund legen.
 4. [Einrichten der Instanzen in Symcon](#4-einrichten-der-instanzen-in-symcon)
 5. [Statusvariablen und Profile](#5-statusvariablen-und-profile)
 6. [Visualisierung](#6-visualisierung)
-7. [PHP-Befehlsreferenz](#7-php-befehlsreferenz)
+7. [Konfigurationsreferenz und Skriptzugriff](#konfigurationsreferenz-und-skriptzugriff)
 
-### 1. Funktionsumfang
+## 1. Funktionsumfang
 
 Das Modul besitzt eine wiederverwendbare Verbindung zu EChartsGateway. Jede
 konfigurierte Quelle besitzt eine eindeutige
@@ -110,7 +114,7 @@ Eine Instanz bildet genau einen zusammengesetzten Gauge-Chart ab. Gauges mit
 genau einer numerischen Quellvariable gehören zu
 [EChartsGaugeSingle](../EChartsGaugeSingle).
 
-### 2. Voraussetzungen
+## 2. Voraussetzungen
 
 Erforderlich sind **Symcon 9.0 oder 9.1 und PHP 8.5**. Eine Kompatibilität zu
 älteren Symcon-Versionen wird nicht versprochen.
@@ -124,7 +128,7 @@ aus der nativen Variablendarstellung übernehmen. Kompatible Legacy-Profile
 werden ebenfalls ausgewertet. Fehlen einzelne gültige Darstellungsangaben,
 bleiben die manuellen Werte der betreffenden Zeile als Rückfall erhalten.
 
-### 3. Software-Installation
+## 3. Software-Installation
 
 Das Gauge-Modul wird gemeinsam mit EChartsGateway über die Library
 **SymconECharts** eingebunden. Es gibt kein separat zu installierendes
@@ -137,7 +141,7 @@ installiert:
 https://github.com/Burki24/SymconECharts
 ```
 
-### 4. Einrichten der Instanzen in Symcon
+## 4. Einrichten der Instanzen in Symcon
 
 Eine EChartsGaugeMulti-Instanz wird je unabhängig konfigurierbarem
 zusammengesetztem Gauge-Chart. Mehrere Gauge-Instanzen sollen ein gemeinsames
@@ -169,9 +173,9 @@ automatisch übernommen: Eine einzelne Quelle erfüllt den Multi-Vertrag nicht.
 Bereits angelegte Instanzen dieses unveröffentlichten Zwischenstands müssen ihre Quellenliste neu
 konfigurieren.
 
-### 5. Statusvariablen und Profile
+## 5. Statusvariablen und Profile
 
-#### Statusvariablen
+### Statusvariablen
 
 Standardmäßig werden keine eigenen Variablen angelegt. Bei aktivierter
 IPSView-Ausgabe entsteht eine Stringvariable mit WebContent-Darstellung und
@@ -185,15 +189,15 @@ werden nicht angelegt. Beim Abschalten der IPSView-Ausgabe bleibt eine
 bestehende HTML-Variable erhalten. Sie wird nur über die ausdrücklich
 bestätigte Löschfunktion des gemeinsamen Helpers entfernt.
 
-#### Profile
+### Profile
 
 Das Modul legt keine Profile oder eigenen Variablendarstellungen an.
 
-### 6. Visualisierung
+## 6. Visualisierung
 
 **Vier Multi-Vorlagen und die optionale IPSView-Ausgabe sind implementiert.**
 
-#### Native Symcon-Kachel
+### Native Symcon-Kachel
 
 Die Chart-Instanz wird über das Symcon-HTML-SDK dargestellt und benötigt keine
 IPSView-Ausgabe. Jede Quelle besitzt eine eigene ECharts-Gauge-Serie mit
@@ -248,7 +252,7 @@ Die gemeinsamen Einstellungen einschließlich der SVG-Assets gelten für alle
 Quellen der jeweiligen Ausgabe. Ein individuelles Design je Quelle bieten die
 eigenständigen Module Gauge Tacho und Gauge Chronograph.
 
-#### IPSView
+### IPSView
 
 Im Abschnitt **IPSView-Design** wird die WebContent-Ausgabe aktiviert. Die
 erzeugte Variable wird in IPSView als HTML-Widget platziert; Größe und Position
@@ -264,29 +268,58 @@ IPSView-Designer separat bearbeitet werden. Beide Ausgaben behalten dieselben
 Quellen, Wertebereiche, Einheiten und Live-Daten.
 Änderungen am Kacheldesigner vor dem Kopieren speichern.
 
-#### Gemeinsame Darstellung
+### Gemeinsame Darstellung
 
 ECharts-Konfiguration, Datenaufbereitung und Zeichenlogik werden gemeinsam
 verwendet. Ausgabespezifische Anpassungen wie Hintergrund, Transparenz
 und Schriftgrößen dürfen getrennt eingestellt werden, ohne die andere
 Visualisierung unbeabsichtigt zu verändern.
 
-### 7. PHP-Befehlsreferenz
+## Konfigurationsreferenz und Skriptzugriff
 
-Das festgelegte Funktionspräfix lautet `ECGM`.
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartsgaugemulti) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
+
+### Ausgabevariable
+
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewGauge` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
+
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
+
+### Öffentliche PHP-Funktionen
+
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
+
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECGM_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECGM_GetGaugeData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
+| `ECGM_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
 
 ```php
-$json = ECGM_GetGaugeData($InstanceID);
+$instanceID = 12000;
+$model = json_decode(ECGM_GetGaugeData($instanceID), true, 512, JSON_THROW_ON_ERROR);
 ```
 
-`ECGM_GetGaugeData()` validiert Konfiguration und aktive Gateway-Verbindung
-und liefert das aktuelle Gauge-Datenmodell als JSON. Das Modell enthält
-`schemaVersion: 1`, `family: gauge`, `variant: multi`, den gemeinsamen Titel
-und eine geordnete `items`-Liste. Jeder Eintrag enthält eine aus der
-Variablen-ID abgeleitete stabile ID, Quellvariable, Zeitstempel,
-Gauge-Konfiguration und numerischen Wert. Es ist die technische Grenze für die
-beiden Ausgabeadapter und noch kein gerendertes ECharts-Diagramm.
-`ECGM_GetIPSViewHTML($InstanceID)` liefert die eigenständige HTML-Seite für IPSView.
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
 
-Lizenz der eigenen Beiträge: [PolyForm Noncommercial License 1.0.0](../LICENSE).
+## Lizenz
 
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

@@ -10,8 +10,8 @@ Lieferartefakt und neuer SHA-256 stehen in `THIRD_PARTY_NOTICES.md`.
 
 `npm run build:bar-category-app` erzeugt zusätzlich das eigene BarCategory-
 Anwendungsskript `EChartsBarCategory/visualization/app.min.js` aus der lesbaren
-`app.js`. Es wird ausschließlich mit dem bereits festgeschriebenen esbuild
-whitespace-minifiziert (Ziel ES2018), ohne ECharts einzubündeln oder dessen
+`app.js`. Es wird mit dem bereits festgeschriebenen esbuild vollständig
+minifiziert (`--minify`, Ziel ES2018), ohne ECharts einzubündeln oder dessen
 Runtime zu verändern. `npm run build` enthält diesen Schritt. Die Layouttests
 vergleichen das ausgelieferte Artefakt exakt mit der erneuten Transformation
 und führen die Tests darauf aus. Die kleinere Anwendung erhält den 1-MiB-
@@ -121,7 +121,7 @@ Startseite, llms.txt, stabile npm-Version, Lizenz und Lieferartefakt wurden am
 Scatter zeichnet die separat berechneten IQR-Ausreißer; es wird kein ECharts-
 Datentransform mit abweichender Quartils- oder Whiskerberechnung verwendet.
 Native Slider-/Inside-DataZoom-APIs werden am gepinnten Paket getestet;
-Bytezahl und SHA-256 stehen in `THIRD_PARTY_NOTICES.md`.
+Bytezahl und SHA-256 stehen in [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md).
 
 Der Funnel-Einstieg enthält Funnel Chart, Titel, Tooltip, Aria, Label Layout
 und Canvas Renderer. `npm run build:funnel` erzeugt ausschließlich
@@ -142,19 +142,38 @@ npm ci
 npm run build
 ```
 
-Die Ergebnisse werden als
-`../../libs/echarts/6.1.0/echarts.gauge.min.js`,
-`../../libs/echarts/6.1.0/echarts.cartesian.min.js`,
-`../../libs/echarts/6.1.0/echarts.bar-category.min.js`,
-`../../libs/echarts/6.1.0/echarts.scatter.min.js`,
-`../../libs/echarts/6.1.0/echarts.heatmap.min.js`,
-`../../libs/echarts/6.1.0/echarts.polar.min.js`,
-`../../libs/echarts/6.1.0/echarts.pie.min.js` und
-`../../libs/echarts/6.1.0/echarts.tree.min.js`,
-`../../libs/echarts/6.1.0/echarts.parallel.min.js`,
-`../../libs/echarts/6.1.0/echarts.sankey.min.js`,
-`../../libs/echarts/6.1.0/echarts.calendar.min.js` sowie unter
-`../../libs/echarts/6.1.0/themes` geschrieben. Nach einem bewussten Neuaufbau
-müssen Dateigrößen und SHA-256-Werte in `libs/EChartsAsset.php`, den Tests und
-`THIRD_PARTY_NOTICES.md` geprüft und aktualisiert werden. `node_modules` wird
-nicht eingecheckt.
+Die Runtime-Dateien liegen unter `../../libs/echarts/6.1.0/` und heißen
+`echarts.<Familie>.min.js`. Der vollständige Build erzeugt folgende Familien:
+
+| Build-Kürzel | Familie im Dateinamen |
+| --- | --- |
+| `runtime` | `gauge` |
+| `cartesian` | `cartesian` |
+| `bar-category` | `bar-category` |
+| `scatter` | `scatter` |
+| `heatmap` | `heatmap` |
+| `polar` | `polar` |
+| `pie` | `pie` |
+| `tree` | `tree` |
+| `graph` | `graph` |
+| `treemap` | `treemap` |
+| `sunburst` | `sunburst` |
+| `parallel` | `parallel` |
+| `sankey` | `sankey` |
+| `calendar` | `calendar` |
+| `radar` | `radar` |
+| `boxplot` | `boxplot` |
+| `funnel` | `funnel` |
+| `candlestick` | `candlestick` |
+| `pictorial-bar` | `pictorial-bar` |
+| `theme-river` | `theme-river` |
+| `state-timeline` | `state-timeline` |
+| `calendar-pie` | `calendar-pie` |
+
+Einzelne Runtimes werden mit `npm run build:<Kürzel>` gebaut. Hinzu kommen
+`build:bar-category-app` für die Anwendung und `build:themes` für die sechs
+unveränderten offiziellen Themes unter `../../libs/echarts/6.1.0/themes`.
+Nach einem bewussten Neuaufbau müssen Dateigrößen und SHA-256-Werte in
+`libs/EChartsAsset.php`, den Tests und
+[THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md) geprüft und aktualisiert
+werden. `node_modules` wird nicht eingecheckt.

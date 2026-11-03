@@ -1,17 +1,22 @@
 # EChartsBarWaterfall
 
+`EChartsBarWaterfall` zeigt, wie sich ein aktueller Wert durch mehrere
+Änderungen zu einer Endsumme entwickelt. Das Modul benötigt zwei bis 100
+eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit.
+Die erste Quelle ist der Startwert; bis zu 99 weitere Quellen sind standardmäßig Änderungen.
+Die berechnete Endsumme ist keine zusätzliche Quellvariable.
+
+Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsbarwaterfall).
+
 ## Beschriftungsoptionen
 
 Die automatische Wertposition folgt weiter dem Vorzeichen des Schritts. Alternativ lässt sich die Position oberhalb, unterhalb, links, rechts oder innerhalb des Balkens festlegen. Ein eigener Abstand von 0 bis 100 px ist möglich.
 
 Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
 IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen.
-
-`EChartsBarWaterfall` zeigt, wie sich ein aktueller Wert durch mehrere
-Änderungen zu einer Endsumme entwickelt. Das Modul benötigt zwei bis 100
-eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit.
-Die erste Quelle ist der Startwert; bis zu 99 weitere Quellen sind standardmäßig Änderungen.
-Die berechnete Endsumme ist keine zusätzliche Quellvariable.
 
 ## Optionale Zwischensummen und Neustarts
 
@@ -161,3 +166,52 @@ Werte bleiben in beiden Ausgaben gleich.
 Die öffentliche Funktion `ECBW_GetWaterfallData($InstanzID)` liefert das
 aktuelle Chart-Modell als JSON. Sie liest nur Werte und verändert keine
 Quellvariablen.
+
+## Konfigurationsreferenz und Skriptzugriff
+
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartsbarwaterfall) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
+
+### Ausgabevariable
+
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewBarWaterfall` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
+
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
+
+### Öffentliche PHP-Funktionen
+
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
+
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECBW_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECBW_GetWaterfallData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
+| `ECBW_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
+
+```php
+$instanceID = 12000;
+$model = json_decode(ECBW_GetWaterfallData($instanceID), true, 512, JSON_THROW_ON_ERROR);
+```
+
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
+
+## Lizenz
+
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

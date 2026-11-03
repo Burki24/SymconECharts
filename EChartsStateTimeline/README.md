@@ -5,6 +5,11 @@ Jede Variable erhält eine eigene Zeile. Geeignet ist das beispielsweise
 für Fensterkontakte, Pumpenbetrieb oder Betriebsarten eines Geräts.
 Das Modul liest nur; es schaltet keine Geräte und verändert keine Archivdaten.
 
+Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsstatetimeline).
+
 ## Einrichtung
 
 1. Eine Instanz `EChartsStateTimeline` anlegen und mit dem vorhandenen
@@ -157,11 +162,53 @@ Bei mehr als acht Quellen kennzeichnet die statische Vorschau ausdrücklich
 die ersten acht von insgesamt bis zu 32 Zeilen. Scrollen und Zeitzoom sind
 nur im eigentlichen Diagramm bedienbar.
 
-## Öffentliche Funktionen
+## Konfigurationsreferenz und Skriptzugriff
 
-- `ECST_GetStateTimelineData(int $InstanzID): string` liefert das aktuelle
-  Diagrammmodell mit Zeilen, Zustandsabschnitten, Zeitraum und Kacheldesign als JSON.
-- `ECST_GetIPSViewHTML(int $InstanzID): string` liefert das vollständige
-  HTML-Dokument der optionalen IPSView-Ausgabe.
-- `ECST_RefreshArchive(int $InstanzID): void` fordert die Aktualisierung der
-  Diagrammausgaben an. Die Quellen und ihre Archivdaten bleiben unverändert.
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartsstatetimeline) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
+
+### Ausgabevariable
+
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewStateTimeline` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
+
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
+
+### Öffentliche PHP-Funktionen
+
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
+
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECST_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECST_GetStateTimelineData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
+| `ECST_GetStateTimelineDiagnostic(int $InstanzID): string` | JSON-Momentaufnahme der Konfigurationsprüfung und letzten Fehlermeldung; kein Nachweis einer erfolgreichen Datenabfrage. |
+| `ECST_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+| `ECST_RefreshArchive(int $InstanzID): void` | Aktualisiert die Diagrammausgaben aus den konfigurierten Quellen. Kein Erfolgswert und keine Änderung von Quellen/Archiven. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
+
+```php
+$instanceID = 12000;
+$model = json_decode(ECST_GetStateTimelineData($instanceID), true, 512, JSON_THROW_ON_ERROR);
+```
+
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
+
+## Lizenz
+
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

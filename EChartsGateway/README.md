@@ -1,8 +1,8 @@
 # EChartsGateway
 
-Gemeinsame Zentrale der SymconECharts-Library. Das Modul ist als Splitter
-angelegt und soll mehrere Geräteinstanzen verschiedener Chartfamilien mit
-gemeinsamen Diensten versorgen. Eine eigene I/O-Instanz ist nicht vorgesehen.
+Gemeinsame Zentrale der SymconECharts-Library. Das Splitter-Modul versorgt
+Diagramminstanzen aller enthaltenen Chartfamilien mit gemeinsamen Diensten.
+Eine eigene I/O-Instanz ist nicht erforderlich.
 
 Das Gateway liest für die verbundenen Diagramme numerische Momentanwerte sowie
 rohe und aggregierte Archivwerte. Identische erfolgreiche Archivabfragen
@@ -13,7 +13,7 @@ Für Zustandszeitdiagramme liest es zusätzlich rohe Boolean- und
 Integer-Archivzustände einschließlich eines vorhandenen Vorgängers vor dem
 Zeitfenster. Diese Zustände werden nicht zu Mittelwerten verdichtet.
 
-### Inhaltsverzeichnis
+## Inhaltsverzeichnis
 
 1. [Funktionsumfang](#1-funktionsumfang)
 2. [Voraussetzungen](#2-voraussetzungen)
@@ -23,7 +23,7 @@ Zeitfenster. Diese Zustände werden nicht zu Mittelwerten verdichtet.
 6. [Visualisierung](#6-visualisierung)
 7. [PHP-Befehlsreferenz](#7-php-befehlsreferenz)
 
-### 1. Funktionsumfang
+## 1. Funktionsumfang
 
 Momentanwerte werden mit Typ und Änderungszeitpunkt bereitgestellt.
 Archivabfragen berücksichtigen Variable, Zeitraum, Datenmodus,
@@ -33,7 +33,7 @@ geliefert; gekürzte Antworten sind ausdrücklich gekennzeichnet.
 
 Die reine Kachelnutzung bleibt unabhängig von einer optionalen IPSView-Ausgabe.
 
-### 2. Voraussetzungen
+## 2. Voraussetzungen
 
 Erforderlich sind **Symcon 9.0 oder 9.1 und PHP 8.5**. Eine Kompatibilität zu
 älteren Symcon-Versionen wird nicht versprochen.
@@ -41,7 +41,7 @@ Erforderlich sind **Symcon 9.0 oder 9.1 und PHP 8.5**. Eine Kompatibilität zu
 Historische Diagramme sollen das vorhandene Symcon-Archiv verwenden. Eine
 zusätzliche Archivinstanz oder eigene Datenbank ist nicht vorgesehen.
 
-### 3. Software-Installation
+## 3. Software-Installation
 
 Das Gateway ist Bestandteil der gemeinsamen Library **SymconECharts** und
 wird nicht als getrennte Library installiert.
@@ -53,13 +53,11 @@ installiert:
 https://github.com/Burki24/SymconECharts
 ```
 
-### 4. Einrichten der Instanzen in Symcon
+## 4. Einrichten der Instanzen in Symcon
 
-Das vorgesehene Modell ist eine gemeinsame EChartsGateway-Instanz mit einer
-oder mehreren Gauge-Single-, Gauge-Multi-, Gauge-Tacho- und
-Gauge-Chronograph-Instanzen sowie
-EChartsTimeSeries und späteren weiteren Chartfamilien-Geräten. Das Gateway hat
-keinen übergeordneten Datenfluss; die Geräteinstanzen werden mit ihm verbunden.
+Eine gemeinsame EChartsGateway-Instanz bedient die verbundenen
+[Diagrammmodule](../README.md#enthaltene-module). Das Gateway hat keinen
+übergeordneten Datenfluss; die Diagramminstanzen werden mit ihm verbunden.
 
 Im regulären Betrieb genügt eine Gateway-Instanz für alle ECharts-Geräte. Sie
 wird beim Anlegen des ersten Diagramms erstellt; bei weiteren Diagrammen wird
@@ -75,10 +73,15 @@ verbleibendes Gateway automatisch; während der kurzen Übergabe kann eine
 Verbindung vorübergehend neu aufgebaut werden. Bestehende Diagramm-URLs,
 Quellen und Designs müssen dafür nicht angepasst werden.
 
-Beide Gauge-Module bieten über `GetCompatibleParents()` vorhandene kompatible
-Gateway-Instanzen zur Verbindung an. Mehrere Chart-Instanzen können dadurch
-bewusst dasselbe Gateway verwenden; die Geräte erzeugen nicht über
-`RequireParent()` automatisch ein weiteres Gateway.
+Beim Anlegen weiterer Diagramme im Parent-Dialog das vorhandene Gateway wählen.
+Das Gateway hat keine konfigurierbaren Properties. Die Angaben der Importseite
+bleiben flüchtig; sie werden nicht als dauerhafte Gateway-Konfiguration gespeichert.
+Siehe auch die [Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsgateway).
+
+### Migration von JSLive
+
+Die vollständige [Migrationsanleitung](../docs/JSLIVE_MIGRATION.md) erklärt
+Export, Zuordnung, Vorschauen, Bestätigung und sicheren Wiederanlauf.
 
 **Konfigurationsseite:** Unter **JSLive-Export und Metadatenprüfung** die Datei
 `.jslive-echarts.json` auswählen. Die erste Ansicht prüft nur Paket und Metadaten;
@@ -172,32 +175,28 @@ Technische Regeln und Detailtexte des Berichts sind englisch, das Formular ist
 lokalisiert. Dateien und Zuordnungen bleiben im geöffneten Formular; das Journal
 speichert Zuordnung und Prüfnachweise, nicht noch einmal das gesamte Exportpaket.
 
-### 5. Statusvariablen und Profile
+## 5. Statusvariablen und Profile
 
-#### Statusvariablen
+### Statusvariablen
 
 Das Modul legt keine eigenen Statusvariablen an.
 
-#### Profile
+### Profile
 
 Das Modul legt keine Variablenprofile oder eigenen
 Variablendarstellungen an.
 
-### 6. Visualisierung
+## 6. Visualisierung
 
-Das Gateway ist ein Hintergrunddienst. Es soll weder eine eigene Chart-Kachel
-noch eine große HTML-Dashboard-Seite erzeugen.
+Das Gateway ist ein Hintergrunddienst ohne eigene Diagrammkachel.
 
 Die native Symcon-Kachel und das optionale IPSView-HTML-Widget gehören zur
-jeweiligen Geräteinstanz
-([Gauge Single](../EChartsGaugeSingle), [Gauge Multi](../EChartsGaugeMulti),
-[Gauge Tacho](../EChartsGaugeTacho),
-[Gauge Chronograph](../EChartsGaugeChronograph)).
-Beide Ausgabewege sind in den Gerätemodulen implementiert. Der Gateway liefert
+jeweiligen [Diagramminstanz](../README.md#enthaltene-module).
+Beide Ausgabewege sind in den Gerätemodulen implementiert. Das Gateway liefert
 dabei ausschließlich die gemeinsame Laufzeitkommunikation; das jeweilige
 Diagrammmodell und seine Darstellung verbleiben im Gerät.
 
-### 7. PHP-Befehlsreferenz
+## 7. PHP-Befehlsreferenz
 
 `ECGW_PreviewJSLiveImport(int $InstanzID, string $Package, string $Options): string`
 prüft ein JSLive-Paket 1.0 und liefert den vollständigen JSON-Bericht.
@@ -220,8 +219,6 @@ Argumente (Instanz-ID, Base64-Dateiinhalt, Zuordnungen, Diagrammindex,
 Seitenindex und Download-Schalter) werden von allen Formularaktionen
 ausdrücklich übergeben. PHP-Standardwerte der Modulmethoden ersetzen keine
 Argumente der von Symcon bereitgestellten Funktionen.
-
-Lizenz der eigenen Beiträge: [PolyForm Noncommercial License 1.0.0](../LICENSE).
 
 ### Bestätigte Übernahme per PHP
 
@@ -278,3 +275,28 @@ Der neue Formularadapter `ECGW_JSLiveImportFromForm` verlangt alle acht
 Argumente: Instanz-ID, Base64-Dateiinhalt, Zuordnungen, Zielkategorie, Aktion,
 Bestätigungs-JSON, Diagrammindex und IPSView-Schalter. Der ältere lesende
 Sechs-Argumente-Adapter bleibt unverändert verfügbar.
+
+### Beispiel: lesende Paketprüfung
+
+Die Instanz-ID ist synthetisch und muss durch die eigene Gateway-ID ersetzt
+werden. Der Dateipfad bezeichnet eine zuvor lokal abgelegte Exportdatei.
+
+```php
+$gatewayID = 12000;
+$package = file_get_contents('/path/to/chart.jslive-echarts.json');
+if ($package === false) {
+    throw new RuntimeException('Exportdatei konnte nicht gelesen werden.');
+}
+$report = json_decode(ECGW_PreviewJSLiveImport($gatewayID, $package, '{}'), true, 512, JSON_THROW_ON_ERROR);
+```
+
+Dies erzeugt keine Zielinstanz. Für Neuanlagen gelten die oben beschriebenen
+Plan- und Bestätigungsargumente; aus einem erfolgreichen Metadatenbericht
+keine pauschale Bestätigung ableiten. Bei einem Teilfehler die Ergebnisse je
+Diagramm und die Journalphase auswerten, bevor eine Wiederholung erfolgt.
+
+## Lizenz
+
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

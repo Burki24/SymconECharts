@@ -1,5 +1,14 @@
 # EChartsGaugeChronograph
 
+`EChartsGaugeChronograph` rendert zwei bis fünf numerische Symcon-Variablen in
+einem gemeinsamen Chronographen. Die erste Quelle bildet das Hauptinstrument;
+bis zu vier weitere Quellen erscheinen als eingebettete Hilfszifferblätter.
+
+Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsgaugechronograph).
+
 ## Beschriftungsoptionen
 
 Skalenbeschriftungen lassen sich um -100 bis +100 px relativ zur Vorlage verschieben. Titel und Werte können separat horizontal und vertikal um -100 bis +100 % versetzt werden; null bewahrt die bisherige Vorlagengeometrie.
@@ -8,10 +17,6 @@ Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
 IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen. Im
 Quelleneditor können diese Abstände und Verschiebungen bei aktivem
 individuellem Gauge-Design zusätzlich pro Instrument festgelegt werden.
-
-`EChartsGaugeChronograph` rendert zwei bis fünf numerische Symcon-Variablen in
-einem gemeinsamen Chronographen. Die erste Quelle bildet das Hauptinstrument;
-bis zu vier weitere Quellen erscheinen als eingebettete Hilfszifferblätter.
 
 ## Vorübergehende Ladefehler
 
@@ -93,17 +98,6 @@ IPSView-Ausgabe wird die Stringvariable **Gauge für IPSView** mit dem Ident
 `IPSViewGauge` und einer WebContent-Darstellung erzeugt. Beim Abschalten bleibt
 eine bereits angelegte Variable erhalten, bis sie im Formular ausdrücklich
 gelöscht wird.
-## Funktionen
-
-Das Modulpräfix ist `ECGC`:
-
-```php
-$json = ECGC_GetGaugeData($InstanceID);
-$html = ECGC_GetIPSViewHTML($InstanceID);
-```
-
-Eine gemeinsame `EChartsGateway`-Instanz genügt für alle Chart-Instanzen.
-
 ## Beispielhintergründe
 
 Unter `examples` liegen drei zurückhaltende SVG-Zifferblattmotive für
@@ -111,7 +105,51 @@ Temperatur, Luftfeuchtigkeit und Luftdruck. Sie besitzen einen transparenten
 Grund und sind für die Kombination mit einer eigenen Plattenfarbe oder einem
 Plattenverlauf vorgesehen.
 
+## Konfigurationsreferenz und Skriptzugriff
+
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartsgaugechronograph) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
+
+### Ausgabevariable
+
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewGauge` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
+
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
+
+### Öffentliche PHP-Funktionen
+
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
+
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECGC_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECGC_GetGaugeData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
+| `ECGC_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
+
+```php
+$instanceID = 12000;
+$model = json_decode(ECGC_GetGaugeData($instanceID), true, 512, JSON_THROW_ON_ERROR);
+```
+
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
+
 ## Lizenz
 
-Lizenz der eigenen Beiträge:
+Die eigenen Beiträge stehen unter der
 [PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

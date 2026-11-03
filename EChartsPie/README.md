@@ -1,16 +1,28 @@
 # EChartsPie
 
+`EChartsPie` vergleicht Anteile aktueller numerischer Symcon-Werte als Kreis,
+Donut oder Nightingale-Rose. Für alle ECharts-Diagramme genügt ein gemeinsames
+`EChartsGateway`; bei weiteren Instanzen wählen Sie das vorhandene Gateway.
+Ein Archiv ist nicht erforderlich.
+
+Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartspie).
+
+## Einrichtung
+
+Die Modulinstanz anlegen und mit dem vorhandenen EChartsGateway verbinden.
+Die unten beschriebenen Quellen und Datenregeln konfigurieren, Titel und
+Design einstellen und die Änderungen übernehmen. Für IPSView bei Bedarf
+die zusätzliche HTML-Ausgabe aktivieren und ihre WebContent-Variable einbinden.
+
 ## Beschriftungsoptionen
 
 Außenbeschriftungen lassen sich natürlich, entlang der Führungslinie oder am Containerrand ausrichten. Die beiden Linienlängen, der Textabstand zur Linie und der Randabstand sind getrennt einstellbar. Innenbeschriftungen bleiben davon unberührt; die bisherige Randausrichtung ist der Standard.
 
 Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
 IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen.
-
-`EChartsPie` vergleicht Anteile aktueller numerischer Symcon-Werte als Kreis,
-Donut oder Nightingale-Rose. Für alle ECharts-Diagramme genügt ein gemeinsames
-`EChartsGateway`; bei weiteren Instanzen wählen Sie das vorhandene Gateway.
-Ein Archiv ist nicht erforderlich.
 
 ## Quellen
 
@@ -148,3 +160,56 @@ Quellen und vollständige ursprüngliche Stile stammen aus dem Importmodell;
 sie werden nicht in die reguläre Quellen-/Designerstruktur zurückübersetzt.
 Bei einer neuen Übernahme eines geänderten Exports ist ausdrücklich eine
 separate Neuanlage erforderlich. Das bisherige Ziel wird nicht überschrieben.
+
+## Konfigurationsreferenz und Skriptzugriff
+
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartspie) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
+
+### Ausgabevariable
+
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewPie` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
+
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
+
+### Öffentliche PHP-Funktionen
+
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
+
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECPI_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECPI_GetPieData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
+| `ECPI_GetPieDiagnostic(int $InstanzID): string` | JSON-Momentaufnahme der Konfigurationsprüfung und letzten Fehlermeldung; kein Nachweis einer erfolgreichen Datenabfrage. |
+| `ECPI_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+| `ECPI_GetJSLiveImportHTML(int $InstanzID, bool $IPSView): string` | `$IPSView=false`: Kachelausgabe; `true`: IPSView-Ausgabe eines übernommenen JSLive-Modells als vollständiges HTML. |
+| `ECPI_RefreshJSLiveImport(int $InstanzID): void` | Aktualisiert die Diagrammausgaben aus den konfigurierten Quellen. Kein Erfolgswert und keine Änderung von Quellen/Archiven. Nur für importierte Modelle. |
+| `ECPI_GetJSLiveImportData(int $InstanzID): string` | JSON-Zustand eines übernommenen JSLive-Modells einschließlich Verfügbarkeit; nur für importierte Varianten. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
+
+```php
+$instanceID = 12000;
+$model = json_decode(ECPI_GetPieData($instanceID), true, 512, JSON_THROW_ON_ERROR);
+```
+
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
+
+## Lizenz
+
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

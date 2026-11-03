@@ -5,6 +5,11 @@ Die Anteile können Tagesmittelwerte, Tagesverbrauch oder Zustandsdauern sein.
 Das Modul liest ausschließlich: Quellen, Archivaufzeichnung und Archivwerte
 werden weder verändert noch automatisch ergänzt.
 
+Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartscalendarpie).
+
 ## Einrichtung
 
 1. Eine Instanz `EChartsCalendarPie` anlegen und mit dem vorhandenen
@@ -180,13 +185,53 @@ Beispiele, keine tatsächlichen Archivwerte. Mausinteraktion und Animation
 sind in der statischen Vorschau nicht enthalten. Gespeichert wird erst beim
 Übernehmen der Konfiguration.
 
-## Öffentliche Funktionen
+## Konfigurationsreferenz und Skriptzugriff
 
-- `ECCP_GetCalendarPieData(int $InstanzID): string` liefert das aktuelle
-  Monatsmodell mit Tagesanteilen, Fehlstellen, Datengrundlage und Kacheldesign.
-- `ECCP_GetCalendarPieDiagnostic(int $InstanzID): string` liefert die
-  Konfigurationsdiagnose als JSON.
-- `ECCP_GetIPSViewHTML(int $InstanzID): string` liefert das vollständige
-  HTML-Dokument der optionalen IPSView-Ausgabe.
-- `ECCP_RefreshArchive(int $InstanzID): void` aktualisiert die Ausgaben,
-  ohne Quellen oder Archivdaten zu verändern.
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartscalendarpie) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
+
+### Ausgabevariable
+
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewCalendarPie` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
+
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
+
+### Öffentliche PHP-Funktionen
+
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
+
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECCP_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECCP_GetCalendarPieData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
+| `ECCP_GetCalendarPieDiagnostic(int $InstanzID): string` | JSON-Momentaufnahme der Konfigurationsprüfung und letzten Fehlermeldung; kein Nachweis einer erfolgreichen Datenabfrage. |
+| `ECCP_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+| `ECCP_RefreshArchive(int $InstanzID): void` | Aktualisiert die Diagrammausgaben aus den konfigurierten Quellen. Kein Erfolgswert und keine Änderung von Quellen/Archiven. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
+
+```php
+$instanceID = 12000;
+$model = json_decode(ECCP_GetCalendarPieData($instanceID), true, 512, JSON_THROW_ON_ERROR);
+```
+
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
+
+## Lizenz
+
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

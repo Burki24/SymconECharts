@@ -1,16 +1,21 @@
 # EChartsTimeSeries
 
+Gerätemodul für historische numerische Symcon-Werte als responsive Apache-
+ECharts-Zeitreihe. Eine Instanz verarbeitet eine bis 32 eindeutige Quellen,
+bis zu acht Einheitengruppen und rendert eine native Symcon-Kachel sowie
+optional ein eigenständiges IPSView-WebContent-Widget.
+
+Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+(IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
+Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
+[Konfigurationsreferenz](../docs/KONFIGURATION.md#echartstimeseries).
+
 ## Beschriftungsoptionen
 
 Punktwerte können bei Bedarf eingeblendet werden. Position, Abstand, Schriftgröße und Farbe sind unabhängig vom Achsen- und Legendentext einstellbar. Standardmäßig bleiben Punktwerte ausgeblendet; bei dichten Reihen können viele Labels überlappen.
 
 Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
 IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen.
-
-Gerätemodul für historische numerische Symcon-Werte als responsive Apache-
-ECharts-Zeitreihe. Eine Instanz verarbeitet eine bis 32 eindeutige Quellen,
-bis zu acht Einheitengruppen und rendert eine native Symcon-Kachel sowie
-optional ein eigenständiges IPSView-WebContent-Widget.
 
 Linien und Datenpunkte, Flächen und Achsen sowie Schrift und Farben sind in
 beiden Designern als eigene einklappbare Bereiche angeordnet; die Vorschau
@@ -234,23 +239,13 @@ IPSView-Ausgabe wird die Stringvariable **Zeitreihe für IPSView** mit dem Ident
 bleibt eine bereits angelegte Variable erhalten, bis sie im Formular
 ausdrücklich gelöscht wird.
 
-## Öffentliche Funktionen
-
-```php
-$json = ECTS_GetTimeSeriesData($InstanceID);
-$html = ECTS_GetIPSViewHTML($InstanceID);
-```
-
-`ECTS_GetTimeSeriesData()` liefert das aktuelle versionierte Datenmodell als
-JSON. `ECTS_GetIPSViewHTML()` liefert das vollständige eigenständige
-HTML-Dokument für IPSView.
-
-## Lizenz
-
-Lizenz der eigenen Beiträge:
-[PolyForm Noncommercial License 1.0.0](../LICENSE).
-
 ## Übernommene JSLive-Modelle
+
+![Übernommener SVG-Fortschritt links und Linien-/Balkenmischdiagramm mit zwei Werteskalen rechts](../docs/images/jslive-svg-and-history.jpg)
+
+Die Aufnahme zeigt native Kachelausgaben aus der Testinstallation. Rechts
+ist eine importierte TimeSeries-Mischdarstellung zu sehen; links eine
+separate EChartsProgress-Instanz. Beide bleiben eigenständige Diagramme.
 
 Das [EChartsGateway](../EChartsGateway/README.md) kann geprüfte JSLive-Pakete
 nach ausdrücklicher Bestätigung als **neue** Instanzen übernehmen. Bestehende
@@ -268,3 +263,57 @@ Quellen und vollständige ursprüngliche Stile stammen aus dem Importmodell;
 sie werden nicht in die reguläre Quellen-/Designerstruktur zurückübersetzt.
 Bei einer neuen Übernahme eines geänderten Exports ist ausdrücklich eine
 separate Neuanlage erforderlich. Das bisherige Ziel wird nicht überschrieben.
+
+## Konfigurationsreferenz und Skriptzugriff
+
+Die [Feldreferenz](../docs/KONFIGURATION.md#echartstimeseries) enthält
+Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
+Für Skriptänderungen gelten die dort erläuterten JSON- und Anwenderegeln.
+
+### Ausgabevariable
+
+| Ident | Typ / Darstellung | Bedeutung | Einheit | Bedienbar |
+| --- | --- | --- | --- | --- |
+| `IPSViewTimeSeries` | String / WebContent | HTML-Dokument für das optionale IPSView-Widget | keine | Nein |
+
+Die Variable entsteht bei aktivierter IPSView-Ausgabe. Nach deren Abschalten
+bleibt sie erhalten, wird aber nicht weiter aktualisiert. Die ausdrückliche
+Löschaktion im Formular entfernt sie samt ihrer bisherigen Verknüpfbarkeit.
+Quellvariablen und deren Archive bleiben unverändert. Weitere Statusvariablen
+werden für das reguläre Diagramm nicht angelegt.
+
+### Öffentliche PHP-Funktionen
+
+`$InstanzID` bezeichnet immer diese Modulinstanz, nicht eine Quellvariable
+oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
+
+| Signatur | Rückgabe und Wirkung |
+| --- | --- |
+| `ECTS_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECTS_GetTimeSeriesData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
+| `ECTS_GetTimeSeriesDiagnostic(int $InstanzID): string` | JSON-Momentaufnahme der Konfigurationsprüfung und letzten Fehlermeldung; kein Nachweis einer erfolgreichen Datenabfrage. |
+| `ECTS_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
+| `ECTS_RefreshArchive(int $InstanzID): void` | Aktualisiert die Diagrammausgaben aus den konfigurierten Quellen. Kein Erfolgswert und keine Änderung von Quellen/Archiven. |
+| `ECTS_GetJSLiveImportHTML(int $InstanzID, bool $IPSView): string` | `$IPSView=false`: Kachelausgabe; `true`: IPSView-Ausgabe eines übernommenen JSLive-Modells als vollständiges HTML. |
+| `ECTS_RefreshJSLiveImport(int $InstanzID): void` | Aktualisiert die Diagrammausgaben aus den konfigurierten Quellen. Kein Erfolgswert und keine Änderung von Quellen/Archiven. Nur für importierte Modelle. |
+| `ECTS_GetJSLiveImportData(int $InstanzID): string` | JSON-Zustand eines übernommenen JSLive-Modells einschließlich Verfügbarkeit; nur für importierte Varianten. |
+
+Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
+
+```php
+$instanceID = 12000;
+$model = json_decode(ECTS_GetTimeSeriesData($instanceID), true, 512, JSON_THROW_ON_ERROR);
+```
+
+Die fachlichen Grenzen dieser Anleitung gelten auch bei Skriptaufrufen.
+Ungültige Konfigurationen, fehlende Quellen oder ein nicht verfügbares Gateway
+können eine Ausnahme beziehungsweise einen ausdrücklich nicht verfügbaren
+Zustand liefern. Solche Rückgaben nicht als leeren oder mit null aufgefüllten
+Messbestand auswerten. Archivabfragen können den kurzzeitigen Gateway-Cache
+nutzen; ein Aufruf garantiert keinen neu protokollierten Messwert.
+
+## Lizenz
+
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
+Für Fremdkomponenten gelten deren [Originallizenzen](../THIRD_PARTY_NOTICES.md).

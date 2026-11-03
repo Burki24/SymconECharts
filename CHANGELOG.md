@@ -2,6 +2,12 @@
 
 ## Neu
 
+- Die Benutzeranleitungen sind vereinheitlicht und um eine zentrale
+  Konfigurationsreferenz mit Standardwerten, Quellenfeldern und vollständigen
+  Skriptsignaturen ergänzt. Ein eigenes Migrationskapitel führt durch die
+  JSLive-Übernahme; echte Aufnahmen aus der Testinstallation zeigen ausgewählte
+  native Kachelausgaben.
+
 - Der JSLive-Import erkennt die inhaltlich geprüfte Progressbar-Standardvorlage
   aus JSLive 0.113 mit ihren exakten LF-/CRLF-Prüfsummen. Bisherige Vorlagen
   bleiben verwendbar; unbekannte oder geänderte Templates bleiben gesperrt.
