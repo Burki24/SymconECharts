@@ -2,6 +2,11 @@
 
 ## Neu
 
+- Die Migrationsanleitung zeigt 14 bereitgestellte JSLive-/ECharts-
+  Vergleichspaare und vier echte Formularausschnitte für Export, Paketprüfung,
+  Planvorbereitung und Bestätigung. Die Haupt-README enthält ausgewählte
+  Gegenüberstellungen und verlinkt die vollständige Galerie.
+
 - Alle Installationsanleitungen nennen den Symcon-Modulstore und den
   Eintragsnamen **SymconECharts** statt einer Installation über die Repository-URL.
 
@@ -124,7 +129,7 @@
   ab. Bestehende Instanzen, Quellen und Archivwerte bleiben unverändert.
 
 <!-- symconecharts:prepared-beta -->
-# 31.10.2026 - Version 1.390 (Beta)
+# 31.10.2026 - Version 1.395 (Beta)
 
 Vorbereiteter Stand für die erste Beta; die Veröffentlichung im Module Store
 steht noch aus.

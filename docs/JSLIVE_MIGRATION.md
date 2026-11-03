@@ -39,11 +39,9 @@ ursprünglichen Stile werden nicht nachträglich in die regulären Quellenlisten
 und Designer zurückübersetzt. Titel, unterstützte Zeitsteuerung, Hintergrund,
 Schriftvergrößerung und Sichtbarkeit lassen sich im Ziel anpassen.
 
-![Übernommene JSLive-Testdiagramme: Gauge, Pie, Verlauf, historisches Radar, Mischdiagramm und eigene SVG-Form](images/jslive-import-gallery.jpg)
-
-Aufnahme aus der Testinstallation: native ECharts-Kachelausgaben bereits
-übernommener JSLive-Testdiagramme. Die Palette eines bewegten Verlaufs zeigt
-eine einzelne Animationsphase. Die Galerie zeigt keine beliebige 1:1-Konvertierung.
+Die [Vergleichsgalerie](#vergleichsgalerie-jslive-und-echarts) zeigt 14 echte
+Gegenüberstellungen aus der lokalen Browseransicht der Testinstallation:
+jeweils das JSLive-Original links und das übernommene ECharts-Diagramm rechts.
 
 ## 1. In JSLive exportieren
 
@@ -55,6 +53,11 @@ eine einzelne Animationsphase. Die Galerie zeigt keine beliebige 1:1-Konvertieru
 3. Bereits gemeldete fehlende Quellen, nicht übersetzbare Darstellungen oder
    Ressourcen vor der Übernahme klären. Das Paket lokal aufbewahren: Es enthält
    installationsbezogene Angaben und gehört nicht in öffentliche Foren.
+
+![JSLive-Formular: Export für SymconECharts mit optionalen inerten Vorlageninhalten](images/jslive-migration-export.jpg)
+
+Der eigene Exportbereich in der JSLive-Instanz. Der Schalter für
+Vorlageninhalte ist in dieser Aufnahme ausgeschaltet.
 
 Der ältere allgemeine JSLive-Konfigurationsexport ist **kein** Paket dieses
 Formats. Eine andere Dateiendung allein wandelt ihn nicht um.
@@ -75,6 +78,11 @@ das Paket macht sie nicht zu ausführbaren ECharts-Vorlagen.
    prüfen. Die hier angezeigten Zielfamilien sind Kandidaten; maßgeblich ist
    der anschließende vollständige native Übernahmeplan.
 
+![Gateway-Formular: Exportdatei auswählen und mögliche Zielfamilien prüfen](images/jslive-migration-package.jpg)
+
+Dateiauswahl und Ergebnisübersicht vor dem Laden eines Pakets. Nach der
+Dateiauswahl erscheinen die tatsächlichen Prüfergebnisse und Zuordnungen.
+
 ## 3. Vollständigen Übernahmeplan ansehen
 
 1. Unter **Bestätigte JSLive-Übernahme** die Kategorie für neue Instanzen wählen
@@ -86,6 +94,13 @@ das Paket macht sie nicht zu ausführbaren ECharts-Vorlagen.
    Original vergleichen. Eine schematische Farbkarte im Formular ersetzt
    diese Ausgabe nicht. Gegebenenfalls Titel, Formatierung, Skalen, Werte,
    Verlauf und Zeitsteuerung gezielt vergleichen.
+
+![Gateway-Formular: Zielkategorie, Diagrammnummer, Übernahmeplan, Bericht und native Vorschauen](images/jslive-migration-plan.jpg)
+
+Der Bereich für den vollständigen Plan mit Bericht und beiden Vorschauen.
+Die Aufnahme zeigt die Ausgangsansicht ohne vorbereitetes Paket; die
+Kategorie steht hier noch auf der Wurzel. Vor dem Vorbereiten die gewünschte
+Zielkategorie wählen.
 
 Eine erfolgreiche Paketprüfung beweist weder vollständige Archivabdeckung
 noch identisches Rendering. Auch ein gespeicherter Parameter kann in der
@@ -100,18 +115,18 @@ solche Unterschiede statt sie im Ziel still zu aktivieren.
    ausführen und das Ergebnis samt Ziel-ID im Journal prüfen. Für weitere
    Diagramme die jeweilige Auswahl und Bestätigung wiederholen.
 
+![Gateway-Formular: ausdrückliche Bestätigung der Neuanlage und Journalbedienung](images/jslive-migration-confirm.jpg)
+
+Bestätigungsschalter und Anlageaktion sind von der Planvorbereitung getrennt.
+Hier ist noch keine Neuanlage bestätigt und das Journal noch nicht geladen.
+Die Formularaufnahmen zeigen die Bedienelemente, keinen ausgeführten Import.
+
 Eine Zustimmung hebt keine Sperre auf. Fehlerhafte Quellen, nicht unterstützte
 native Darstellungen, fremde ausführbare Vorlagen, aktive SVG-Inhalte und
 überschrittene Schutzgrenzen bleiben abgewiesen. Bestehende Zielinstanzen sind
 keine überschreibbaren Importziele.
 
 ## 5. Neue Kachel und IPSView einbinden
-
-![Zwei übernommene Testdiagramme: SVG-Fortschritt mit Verlauf und Linien-/Balkenmodell](images/jslive-svg-and-history.jpg)
-
-Links eine eigene SVG-Form in EChartsProgress, rechts ein importiertes
-Linien-/Balkenmodell in EChartsTimeSeries. Beide Aufnahmen stammen aus den
-nativen Kachelausgaben der Testinstallation und zeigen ECharts-Ziele.
 
 Die neue Diagramminstanz in einer eigenen Kachel anzeigen. Für IPSView die
 HTML-Ausgabe aktivieren und die erzeugte WebContent-Variable verwenden.
@@ -124,6 +139,103 @@ Originalwerte samt Einheit, Archivzeitraum und Datenverarbeitung vergleichen.
 Verlaufsanimationen in getrennten Dokumenten haben unabhängige Startphasen.
 Eine pixelgleiche Darstellung beliebiger Chart.js-, CanvasGauges- oder
 Progressbar-Konfigurationen wird nicht versprochen.
+
+## Vergleichsgalerie: JSLive und ECharts
+
+Die folgenden 14 Aufnahmen hat der Eigentümer am 03.11.2026 aus seiner lokalen
+Browseransicht der Testinstallation bereitgestellt. Sie wurden unverändert
+übernommen. **Links steht immer JSLive, rechts ECharts.** Die Gruppen lassen
+sich einzeln aufklappen; jedes Bild lässt sich für eine größere Ansicht öffnen.
+
+Die Bilder zeigen konkrete übernommene Testmodelle. Sichtbare Unterschiede
+etwa bei Achsenteilung, Zahlenformatierung, Schrift, Legenden und Abständen
+bleiben erkennbar. Ein Screenshot eines bewegten Verlaufs hält nur eine
+Animationsphase fest; getrennte Dokumente laufen nicht phasengleich.
+
+<details>
+<summary>Zeitreihen: mehrere Skalen, Zustände und Neon-Gestaltung (3 Beispiele)</summary>
+
+![JSLive und ECharts: Temperatur und Wind mit zwei Werteskalen und Flächenfüllung](images/jslive-compare-timeseries.png)
+
+Temperatur und Wind mit zwei Skalen, Messpunkten und Flächenfüllung.
+
+![JSLive und ECharts: Schaltzustand und Vergleichsreihen](images/jslive-compare-timeseries-states.png)
+
+Schaltzustand und Vergleichsreihen. Das Original zeigt in dieser Aufnahme
+andere sichtbare Reihen als das Ziel; das Beispiel ist kein Nachweis einer
+identischen Reihensichtbarkeit.
+
+![JSLive und ECharts: Neon-Farben, negative Werte und Sternsymbole](images/jslive-compare-timeseries-neon.png)
+
+Negative Werte, Sternsymbole, Flächenfüllung und eine seitliche Legende.
+
+</details>
+
+<details>
+<summary>Doughnut und historisches Radar (2 Beispiele)</summary>
+
+![JSLive und ECharts: zwei halbkreisförmige Doughnut-Ringe](images/jslive-compare-doughnut.png)
+
+Zwei Halbkreis-Ringe mit Segmentbeschriftungen. Der Tooltip links gehört zum
+Aufnahmezustand des Originals.
+
+![JSLive und ECharts: historische Radar-Verteilungen im Neon-Design](images/jslive-compare-radar.png)
+
+Zwei historische Verteilungen auf gemeinsamen Klassenachsen.
+
+</details>
+
+<details>
+<summary>Gauges: radial, Kompass, linear und Neon-Gestaltung (4 Beispiele)</summary>
+
+![JSLive und ECharts: radiale Gauge mit Fortschrittsring und Zahlenanzeige](images/jslive-compare-gauge-radial.png)
+
+Radiale Auslastungsanzeige mit Fortschrittsring, Skalenbereichen und Zeiger.
+
+![JSLive und ECharts: Kompassanzeige der Windrichtung](images/jslive-compare-gauge-compass.png)
+
+Kompass mit eigener Schrift, Zeiger und dunklem Zifferblatt.
+
+![JSLive und ECharts: vertikale lineare Gauge mit Skala und Zahlenanzeige](images/jslive-compare-gauge-linear.png)
+
+Lineare Auslastungsanzeige mit beidseitigen Skalen.
+
+![JSLive und ECharts: radiale Temperaturanzeige im Neon-Design](images/jslive-compare-gauge-neon.png)
+
+Temperaturanzeige mit negativem Skalenbeginn und eigener Farbgestaltung.
+
+</details>
+
+<details>
+<summary>Fortschritt und eigene SVG-Formen (3 Beispiele)</summary>
+
+![JSLive und ECharts: ringförmiger Fortschritt mit Zahlenbeschriftung](images/jslive-compare-progress-ring.png)
+
+Ringförmiger Fortschritt mit darunterliegendem Originalwert.
+
+![JSLive und ECharts: Fortschritt entlang eines eigenen Zickzackpfads](images/jslive-compare-progress-path.png)
+
+Fortschritt entlang eines eigenen Pfads.
+
+![JSLive und ECharts: eigene SVG-Schriftform LOADING mit Teilfüllung](images/jslive-compare-progress-svg.png)
+
+Eine eigene SVG-Schriftform mit Teilfüllung und Zahlenbeschriftung.
+Der Schriftzug „LOADING“ ist die dargestellte Form, keine Lademeldung.
+
+</details>
+
+<details>
+<summary>Farbverläufe in Fortschrittsanzeige und Gauge (2 Beispiele)</summary>
+
+![JSLive und ECharts: Fortschrittsbalken mit mehrfarbigem Verlauf](images/jslive-compare-progress-gradient.png)
+
+Mehrfarbiger Verlauf innerhalb eines Fortschrittsbalkens.
+
+![JSLive und ECharts: lineare Gauge mit Farbverlauf im Hintergrund](images/jslive-compare-gauge-gradient.png)
+
+Vertikale Gauge mit gestaltetem Hintergrund und eigener Farbgebung.
+
+</details>
 
 ## Wiederholung, Unterbrechung und Modulupdates
 

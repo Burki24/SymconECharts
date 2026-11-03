@@ -172,8 +172,22 @@ bestätigende Abweichungen. Erst die ausdrückliche Bestätigung legt neue
 Instanzen an. Importjournal und kontrollierter Wiederanlauf erhalten das
 JSLive-Original, Quellen, Archivwerte und bestehende Zielkonfigurationen.
 
+Die folgenden Vergleichskacheln stammen aus der Testinstallation. Jeweils
+**links steht das JSLive-Original, rechts die importierte ECharts-Ausgabe**.
+
+![JSLive und ECharts nebeneinander: Temperatur und Wind als Zeitreihen](docs/images/jslive-compare-timeseries.png)
+
+Zeitreihen mit zwei Werteskalen, Punkten und Flächenfüllung.
+
+![JSLive und ECharts nebeneinander: radiale Auslastungsanzeige](docs/images/jslive-compare-gauge-radial.png)
+
+Radiale Gauge mit Fortschrittsring, Skalenbereichen, Zeiger und Zahlenanzeige.
+Weitere Beispiele einschließlich Radar, Doughnut, Farbverläufen und eigenen
+SVG-Formen stehen in der [Vergleichsgalerie](docs/JSLIVE_MIGRATION.md#vergleichsgalerie-jslive-und-echarts).
+
 Die [Migrationsanleitung](docs/JSLIVE_MIGRATION.md) beschreibt Export, Prüfung,
-Bestätigung, Wiederholung und den Vergleich der Darstellungen Schritt für Schritt.
+Bestätigung, Wiederholung und den Vergleich der Darstellungen Schritt für Schritt
+mit Aufnahmen der tatsächlichen Formulare.
 Profilinformationen werden in profilunabhängige native Formatierungen übersetzt;
 die Quellvariablen werden dabei nicht umgestellt. Fremde Skripte und eigene
 ausführbare Vorlagen werden nicht ausgeführt. Eine pixelgleiche oder beliebige
