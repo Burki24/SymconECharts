@@ -1,6 +1,6 @@
 # ADR 0111: Bestätigte JSLive-Neuanlage und familienbezogene Altmodelle
 
-- Status: Import, Wiederanlauf und Farb-/SVG-Darstellung bestätigt; J01-Updatefall unter 1.385 live bestätigt fehlerhaft, Restkorrektur lokal geprüft; erneute Live-Nachprüfung ausstehend
+- Status: Import, Wiederanlauf und Farb-/SVG-Darstellung bestätigt; J01 nach Modulupdates unter 1.386 per MCP live abgenommen
 - Datum: 2026-10-31
 - Ergänzt: ADR 0109, ADR 0110 und Vertrag 1.0
 
@@ -210,7 +210,13 @@ prüft zusätzlich Wiederaufnahme und identische Bestätigungswiederholung mit
 dem konkreten Kerneladapter und einem aus einem früheren Regel-Fingerabdruck
 berechneten historischen Plan; veraltete Regeln und Bestätigungen bleiben
 gesperrt. Ein abgeschlossener Wiederaufruf schreibt keine
-nativen Einstellungen. Die Live-Nachprüfung nach Eigentümer-Update steht aus.
+nativen Einstellungen. Die Live-Nachprüfung nach Eigentümer-Update ist unter
+1.386 bestanden: 53 erhaltene Testziele aus sechs Familien wurden je zweimal
+mit aktuell bestätigtem Plan und `separateFrom` erfolgreich aufgerufen.
+Ziel-/Journal-IDs, geschützte Konfigurationen und das vollständige Journal
+blieben unverändert. Alte Bestätigungen und ungültige Vorgänger wurden korrekt
+abgewiesen. Einzelheiten und verbleibende Testlücken stehen in der
+[Migrationsabnahme](../JSLIVE_MIGRATION_ABNAHME.md).
 
 ## Familienintegration
 

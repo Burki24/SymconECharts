@@ -1,8 +1,8 @@
 # JSLive-Migrationsabnahme
 
-Stand: 02.11.2026. Dieser Bericht trennt bestätigte Funktionen, lokale Prüfungen
-und die lokal korrigierte, noch live nachzuprüfende Journalabweichung aktueller
-Quellpakete. Er ersetzt veraltete
+Stand: 03.11.2026. Die vereinbarte technische Migrationsabnahme einschließlich
+J01 ist unter 1.386 live bestanden. Dieser Bericht trennt bestätigte Funktionen,
+lokale Regressionen und tatsächliche Testlücken. Er ersetzt veraltete
 Offen-Vermerke früherer Zwischenstände, nicht deren historischen Prüfumfang.
 Eine beliebige oder pixelgleiche Chart.js-Migration wird nicht zugesagt.
 
@@ -23,8 +23,9 @@ Eine beliebige oder pixelgleiche Chart.js-Migration wird nicht zugesagt.
 | Live-Ausgaben 1.383 | Alle 53 Ziele aktiv und Datenstatus ready; 106 vollständige Kachel-/IPSView-HTML-Dokumente, größte Ausgabe 760280 Bytes. Das ist ein Daten-/HTML-Nachweis, kein erneuter Bildvergleich aller Paare. |
 | Live-Wiederanlauf 1.383 | Je ein neues Ziel aller sechs Familien wurde ohne Gateway-Verbindung initialisiert (Status 298). Nach Wiederverbinden erfolgte die Rückkehr über den bestehenden Timer zu Status 102/ready, ohne weiteres ApplyChanges. |
 | Normaler Live-Wiederaufruf | Alle 53 Importe liefern ohne den Neuanlagezusatz separateFrom dieselben Ziel-IDs; deren Konfigurationen bleiben gleich. |
-| Journal und Bestandsschutz | 106 vollständige Einträge in drei Metadatenseiten, 106 eindeutige Ziele; die vorherigen 53 Einträge sind unverändert. 108 geschützte Konfigurationen, zwölf Quellvariablen samt Werten/Darstellungen und vier Profile unverändert; enthalten ist auch die Archivkonfiguration. Die neuen Testziele bleiben zur Nachprüfung erhalten. |
-| J01 – exakte Bestätigungswiederholung | Erste Korrektur lokal geprüft. Unter 1.385 scheitern alle 53 erhaltenen getrennten Anlagen noch nach einem Regelupdate, auch mit aktuell bestätigtem Plan. Restkorrektur lokal regressionsgeprüft; erneute Live-Nachprüfung ausstehend. |
+| Journal und Bestandsschutz 1.383 | 106 vollständige Einträge in drei Metadatenseiten, 106 eindeutige Ziele; die vorherigen 53 Einträge sind unverändert. 108 geschützte Konfigurationen, zwölf Quellvariablen samt Werten/Darstellungen und vier Profile unverändert; enthalten ist auch die Archivkonfiguration. Die Testziele bleiben erhalten. |
+| J01 – Live-Abnahme 1.386 | Bestanden: 53 vorhandene Testziele aus sechs Familien jeweils zweimal mit aktuell bestätigtem Plan und `separateFrom` aufgerufen. Alle 106 Ausführungen liefern dieselben Ziel-/Journal-IDs. Alte Bestätigungen und ungültige Vorgänger werden korrekt abgewiesen. |
+| Bestandsschutz 1.386 | Alle 161 Konfigurationen einschließlich Designs, 53 Instanz-/Objektmetadaten, zwölf Quellen samt Werten/Darstellungen und vier Profile unverändert. Vollständiger Journal-Fingerabdruck identisch; 106 vollständige Einträge, 106 eindeutige Ziele, drei Metadatenseiten. Keine zusätzlichen Instanzen und keine Archivschreibzugriffe. Alle 53 Testziele bleiben aktiv. |
 
 ## Geprüfte Vorlagenänderung
 
@@ -50,8 +51,10 @@ gesperrt, auch mit korrekt neu berechneten Integritätsdaten.
 
 ## J01: Wiederholung einer getrennten Neuanlage
 
-Die frühere Vorlagensperre unter 1.382 ist mit 1.383 beseitigt. Der vollständige
-Live-Lauf zeigt jedoch einen eigenständigen Journalfehler:
+### Historischer Befund unter 1.383
+
+Die frühere Vorlagensperre unter 1.382 war mit 1.383 beseitigt. Der damalige
+vollständige Live-Lauf zeigte jedoch einen eigenständigen Journalfehler:
 
 1. Ein bereits vorhandenes Original erhält einen neuen Plan mit separater
    Zielkategorie. Die Bestätigung enthält `separateFrom` mit dem bisherigen
@@ -91,7 +94,7 @@ Beide Vorlagenläufe (`php tests/jslive_execution.php` mit und ohne
 Qualitätssuite `php tests/quality.php --fix` sind bestanden. Schutzbudgets und
 Versionsmetadaten wurden nicht erhöht.
 
-### Restbefund nach Modulupdate unter 1.385
+### Historischer Restbefund nach Modulupdate unter 1.385
 
 Die gezielte MCP-Nachprüfung hat alle 53 erhaltenen Testkopien geprüft. Gegenüber
 ihren früheren Plänen haben sich ausschließlich `ruleFingerprint` und `planHash`
@@ -119,16 +122,43 @@ altes Journal mit einem aus anderem Regel-Fingerabdruck berechneten Plan-Hash ab
 die aktuelle Bestätigung setzt dasselbe Ziel fort, alte Regeln und Bestätigungen
 bleiben gesperrt. Abgeschlossene Wiederaufrufe schreiben keine nativen Einstellungen.
 
-Die erneute Live-Nachprüfung der Restkorrektur bleibt nach Eigentümer-Commit und
-Modulupdate offen. Die erhaltenen Testziele werden dafür wiederverwendet;
-für diese lokale Korrektur wurde nicht auf die Installation zugegriffen.
+### Bestandene Live-Nachprüfung unter 1.386
+
+Die Restkorrektur wurde nach dem Eigentümer-Update auf der verbundenen
+Testinstallation per MCP geprüft. Verwendet wurden ausschließlich die 53
+erhaltenen Testziele aus sechs Familien: Progress (27), Gauge Single (12),
+TimeSeries (4), Pie (4), RadarHistory (4) und BarHistory (2).
+
+Für jede Quelle wurde der aktuelle Plan neu geprüft. Gegenüber dem früheren
+Plan änderten sich ausschließlich Regel-Fingerabdruck und Plan-Hash;
+Zieldefinitionen, Revisionen, Quellen und akzeptierte Abweichungen blieben gleich.
+Jede aktuelle Bestätigung mit unverändertem `separateFrom` wurde zweimal
+identisch gesendet. Alle 106 Ausführungen meldeten `complete` und dieselben
+Ziel-/Journal-IDs. Die zuvor fehlgeschlagenen Progress- und Gauge-Fälle bestanden
+ebenfalls. Alte Bestätigungen und ungültige Vorgänger wurden gezielt geprüft
+und korrekt mit `PLAN_CHANGED` abgewiesen.
+
+Der Vorher-/Nachher-Vergleich umfasst 161 Konfigurationen einschließlich Designs
+und Archivkonfiguration, 53 Instanz-/Objektmetadaten, zwölf Quellvariablen mit
+Werten und Darstellungen sowie vier Profile. Alle sind unverändert, ebenso der
+Fingerabdruck des vollständigen Journals und seine drei Metadatenseiten mit
+106 vollständigen Einträgen und 106 eindeutigen Zielen. Die Testkategorie enthält
+weiterhin genau die erwarteten 53 Ziele; alle sind aktiv mit dem Gateway
+verbunden. Keine zusätzlichen Instanzen und keine Archivschreibzugriffe.
+
+Damit ist J01 auf dieser Testebene abgeschlossen. Die 184 gezielten
+Abbruchszenarien sind lokale Regressionen; der Live-Lauf verwendete vorhandene
+abgeschlossene Journalziele nach dem tatsächlichen Modulupdate. Die bestehenden
+Kachel-/IPSView-Darstellungsabnahmen bleiben gültig; dieser Lauf ist kein neuer
+Bildvergleich oder Touch-/Langzeitnachweis.
 
 ## Beta-Entscheidung
 
 Die Nutzungsgrenzen-Roadmap bleibt abgeschlossen. Familienmapper, Importjournal
 und die oben bestätigten Bildvergleiche sind erledigt. Die aktuelle
-0.113-Herkunftserkennung und Neuanlage sind live bestätigt. Für den technischen
-Migrationsabschluss fehlt die erneute Live-Nachprüfung des lokal korrigierten J01-Updatefalls.
+0.113-Herkunftserkennung und Neuanlage sind live bestätigt. Mit der bestandenen
+J01-Abnahme unter 1.386 ist die vereinbarte technische Migrationsabnahme auf
+der erreichbaren Testebene abgeschlossen.
 
 Echte Restlücken bleiben sichtbar: nicht separat belegte native Dateiauswahl-,
 Tabellen-/Download-Grenzbedienungen, weitere Touch-/Gerätevarianten, längere Last-

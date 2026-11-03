@@ -8,8 +8,8 @@
   sind gemäß [ADR 0110](adr/0110-jslive-import-preview.md) implementiert.
   Familienmapper, neue Zielmodelle, bestätigte Anlage mit Journal und die
   vereinbarten Darstellungsvergleiche sind inzwischen abgenommen. Der aktuelle
-  Stand mit live übernommenen 0.113-Paketen und der lokal geprüften, noch live
-  nachzuprüfenden J01-Restkorrektur für Regelupdates steht in der
+  Stand mit live übernommenen 0.113-Paketen und der unter 1.386 live bestandenen
+  J01-Abnahme nach Modulupdates steht in der
   [Migrationsabnahme](JSLIVE_MIGRATION_ABNAHME.md).
 - Entscheidungen: [ECharts ADR 0109](adr/0109-jslive-migration-contract.md) und
   [JSLive ADR 0007](https://github.com/Burki24/JSLive/blob/dev/docs/adr/0007-echarts-migration-contract.md).
@@ -553,17 +553,16 @@ Kantenglättung von verschobener Geometrie, fehlenden Reihen oder falschen Farbe
    Neuziele. Die gemeinsame MCP-Übernahme-/Wiederanlaufabnahme und die vereinbarten
    Original-/Ziel-Darstellungsvergleiche sind erfolgt. Für frische Pakete mit der
    nun geprüften 0.113-Vorlagenkennung sind Planung und getrennte Neuanlage unter
-   1.383 bestätigt. Die identische Bestätigungswiederholung mit separateFrom
-   scheitert unter 1.385 noch nach einem Regelupdate. Die Restkorrektur ist lokal
-   regressionsgeprüft (J01); aktuelle Planbestätigung und Eigentumsprüfung bleiben
-   erforderlich. Die erneute Live-Nachprüfung steht aus. Normaler Wiederaufruf
-   und Bestandsschutz sind bestätigt.
+   1.383 bestätigt. Auch die Wiederaufnahme mit `separateFrom` nach Regelupdates
+   ist unter 1.386 live bestanden (J01): 53 erhaltene Testziele aus sechs Familien
+   liefern in 106 Wiederaufrufen dieselben Ziel-/Journal-IDs. Aktuelle
+   Planbestätigung und Eigentumsprüfung bleiben erforderlich; alte Bestätigungen
+   und ungültige Vorgänger bleiben gesperrt. Der Bestandsschutz ist bestätigt.
 
-Die grundsätzliche Übernahme ist damit implementiert und live bestätigt; die
-aktuelle Quellvorlagenfreigabe ist live geprüft. Die erste SymconECharts-Beta
-bleibt bis zur Live-Nachprüfung von J01 auf Eigentümerentscheidung
-zurückgestellt. Vor Einreichung sind tatsächlicher Umfang,
-offene Varianten und Release-Metadaten erneut abzugleichen. Es gibt durch diese
+Die vereinbarte technische Migrationsabnahme einschließlich J01 ist damit
+abgeschlossen. Tatsächliche Testlücken bleiben in der Migrationsabnahme benannt.
+Vor Einreichung sind tatsächlicher Umfang, Release-Commit samt CI/Metadaten,
+Store-Unterlagen und Termin erneut abzugleichen. Es gibt durch diese
 Spezifikation keine neue Library-Version, keinen Termin und keine Veröffentlichung.
 
 ### Grenzen der lesenden Vorschau

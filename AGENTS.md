@@ -445,8 +445,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Original-/Ziel-Bildvergleiche sind bestätigt. Frische 0.113-Pakete sind unter
   1.383 live übernommen. Die exakte Wiederholung getrennter Neuanlagen mit
   `separateFrom` benötigt nach Regelupdates eine aktuelle Planbestätigung.
-  Der unter 1.385 live bestätigte J01-Restfehler ist lokal regressionsgeprüft
-  korrigiert; die erneute Live-Nachprüfung steht aus. Der aktuelle Nachweis steht in
+  J01 ist unter 1.386 per MCP live bestanden: 53 erhaltene Testziele aus sechs
+  Familien liefern bei jeweils zwei Wiederaufrufen mit aktuell bestätigtem Plan
+  dieselben Ziel-/Journal-IDs; geschützte Bestände bleiben unverändert.
+  Der aktuelle Nachweis und echte verbleibende Testlücken stehen in
   `docs/JSLIVE_MIGRATION_ABNAHME.md`. Es wird keine
   Renderinggleichheit vorgetäuscht.
   Profilinformationen werden

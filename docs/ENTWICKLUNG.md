@@ -23,10 +23,10 @@ Animationen. Die Zahlenprüfung trennt originale Profiltexte vom nativen Tooltip
 Der Gegenversuch ohne auflösungsangepasste SVG-Rasterung wird erkannt.
 
 Die Live-Abnahme von zyklischem Verlauf und Zahlenbeschriftung ist unter 1.382
-vom Eigentümer bestätigt. Die Journalabweichung J01 bei frischen
-JSLive-0.113-Paketen umfasst noch den unter 1.385 live bestätigten Updatefall.
-Die Restkorrektur ist lokal regressionsgeprüft; die erneute Live-Nachprüfung
-nach Eigentümer-Update steht aus. Der Gesamtstand steht in der
+vom Eigentümer bestätigt. Auch die Journalabweichung J01 nach Modulupdates ist
+unter 1.386 per MCP live abgenommen: 53 erhaltene Testziele aus sechs Familien,
+je zwei erfolgreiche Wiederaufrufe mit aktuell bestätigtem Plan und unveränderte
+geschützte Bestände. Der Gesamtstand mit den tatsächlichen Testlücken steht in der
 [Migrationsabnahme](JSLIVE_MIGRATION_ABNAHME.md). Frühere Abnahmen bleiben erhalten.
 
 ## Bisheriger JSLive-Export- und Importstand
@@ -113,8 +113,10 @@ Der JSLive-Vorlagenfix behält Engine und
 persistierte Einstellungen; die unabhängigen Quellreferenzen bleiben gleich.
 Die Observer-Meldung tritt auch an einer reinen Symcon-Zahlenkachel auf und ist
 weiterhin kein nachgewiesener Chartfehler.
-Die Beta bleibt bis zur
-vereinbarten Migrationsabnahme zurückgestellt. Die bereits abgeschlossene
+Die vereinbarte technische Migrationsabnahme einschließlich J01 ist unter 1.386
+abgeschlossen. Release-Commit, dessen CI/Metadaten, Termin und Store-Einreichung
+bleiben gesonderte Eigentümerschritte gemäß den [Beta-Unterlagen](BETA_STORE.md).
+Die bereits abgeschlossene
 Nutzungsgrenzen-Roadmap und die Eigentümerabnahmen bestehender Modelle bleiben gültig.
 
 Der gemeinsame [JSLive-Export-/Importvertrag 1.0](JSLIVE_MIGRATION_CONTRACT.md)
