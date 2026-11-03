@@ -28,6 +28,7 @@ $tests = [
     __DIR__ . '/jslive_time.php',
     __DIR__ . '/jslive_safety.php',
     __DIR__ . '/jslive_models.php',
+    __DIR__ . '/jslive_radar_dash.php',
     __DIR__ . '/jslive_templates.php',
     __DIR__ . '/jslive_progress_paints.php',
     __DIR__ . '/jslive_plans.php',

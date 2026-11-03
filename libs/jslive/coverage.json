@@ -2003,6 +2003,16 @@
                 "rule": "native-nested-geometry-1",
                 "effect": "Datasets/Dash: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
             },
+            "Datasets/Dash/Length": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Dash/Length: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
+            "Datasets/Dash/Order": {
+                "status": "approximate",
+                "rule": "native-nested-geometry-1",
+                "effect": "Datasets/Dash/Order: native ECharts uses the imported field in its own geometry; font metrics, spacing and native automatic layout can differ."
+            },
             "Datasets/Mode": {
                 "status": "exact",
                 "rule": "legacy-binding-or-query-1",

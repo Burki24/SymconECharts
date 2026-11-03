@@ -57,6 +57,12 @@
 
 ## Fixes
 
+- Der JSLive-Radar-Import akzeptiert leere und gefüllte Strichmusterlisten
+  einschließlich ihrer Reihenfolge und Längen. Die vollständige Feldbilanz
+  berücksichtigt deren Einträge; ungültige Typen, unbekannte Felder und
+  überschrittene Listenbudgets bleiben gesperrt. Bestehende Textwerte bleiben
+  verwendbar; Quellen, Archivwerte und gespeicherte Designs werden nicht geändert.
+
 - Identische Bestätigungen getrennter JSLive-Neuanlagen mit `separateFrom`
   verwenden das nachgewiesene neue Ziel wieder und setzen unterbrochene Anlagen
   fort, statt mit `PLAN_CHANGED` abzubrechen. Nach Modulupdates genügt ein frisch

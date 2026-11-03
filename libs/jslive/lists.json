@@ -441,7 +441,20 @@
                 ]
             },
             "Dash": {
+                "rows": {
+                    "Length": {
+                        "types": [
+                            "number"
+                        ]
+                    },
+                    "Order": {
+                        "types": [
+                            "number"
+                        ]
+                    }
+                },
                 "types": [
+                    "array",
                     "string"
                 ]
             },

@@ -28,6 +28,21 @@ for (const [index, wire] of states.entries()) {
             assert.match(svg, /<svg/);
             const invalid = /NaN|Infinity|undefined/.exec(svg);
             assert.ok(!invalid, 'Invalid geometry in case ' + (index + 1) + ': ' + (invalid ? svg.slice(Math.max(0,invalid.index-80),invalid.index+100) : ''));
+            if (state.family === 'radar-history') {
+                for (const [dash, expected] of [[[], '[]'], [[{Order:2,Length:7},{Order:1,Length:0}], '[0,7]']]) {
+                    const dashed = JSON.parse(JSON.stringify(state));
+                    dashed.data.series[0].settings.Dash = dash;
+                    const before = JSON.stringify(dashed);
+                    const dashedOption = window.SYMC_JSLIVE_OPTION(dashed, width, height);
+                    assert.equal(JSON.stringify(dashedOption.series[0].data[0].lineStyle.type), expected, 'Radar must sort the dash pattern by Order and retain zero lengths.');
+                    assert.equal(JSON.stringify(dashed), before, 'Building a Radar must not mutate the imported dash order.');
+                    dashedOption.animation = false;
+                    chart.setOption(dashedOption, true);
+                    const dashedSVG = chart.renderToSVGString();
+                    assert.doesNotMatch(dashedSVG, /NaN|Infinity|undefined/);
+                    if (dash.length) assert.match(dashedSVG, /stroke-dasharray="0,7"/, 'The native renderer must draw the imported dash lengths.');
+                }
+            }
             const sourceFill=sourceFills.find(r=>r.case===index+1&&!r.variant);
             if(sourceFill&&(!sourceFill.bounds.width||!sourceFill.bounds.height)){
                 assert.match(svg,/<text\b/,'Zero-area fills must retain their value label.');
