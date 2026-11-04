@@ -56,6 +56,10 @@ final class EChartsJSLivePlan
                 'issues'       => [], 'fieldCoverage' => $pre['fieldCoverage'], 'metadataCoverage' => $pre['metadataCoverage'], 'verdicts' => $pre['verdicts'],
                 'reference'    => ['exportId' => $package->exportId, 'createdAt' => $package->createdAt,
                     'window'                  => $chart->time->resolvedWindow ?? null, 'output' => 'Native ECharts; no source template is executed.']];
+            $row['presentationComparisons'] = array_map(static fn (array $source): array => [
+                'sourceKey'  => $source['sourceKey'],
+                'comparison' => $source['presentationComparison'] ?? ['status' => 'unverified', 'normalizations' => []]
+            ], $pre['sources']);
             try {
                 if ($plan['issues'] !== []) {
                     throw new InvalidArgumentException('FORMAT_UNSUPPORTED: unresolved package extensions.');

@@ -57,6 +57,13 @@
 
 ## Fixes
 
+- Der JSLive-Import erkennt bei ausdrücklich zugeordneten numerischen Quellen
+  bekannte Standardfelder und exakt gleiche Integer-/Float-Grenzen als
+  gleichwertige Darstellungsmetadaten. Der vollständige Plan nennt die Regeln;
+  Originalformatierung, aktuelle Quell-Fingerabdrücke und strenge Prüfungen für
+  echte Format-, Aktions- und Archivänderungen bleiben erhalten. Bestehende
+  Instanzen und Quelldarstellungen werden nicht umgestellt.
+
 - Der JSLive-Radar-Import akzeptiert leere und gefüllte Strichmusterlisten
   einschließlich ihrer Reihenfolge und Längen. Die vollständige Feldbilanz
   berücksichtigt deren Einträge; ungültige Typen, unbekannte Felder und

@@ -453,6 +453,16 @@ Zielregel samt Auswirkung nennen; keine pauschale Freigabe aller Warnungen.
 
 ## 10. Vorschau, Bestätigung, Wiederholung und Rückfall
 
+Die anfängliche Quellenzuordnung vergleicht numerische native Wertdarstellungen
+gemäß [ADR 0112](adr/0112-jslive-source-presentation-equivalence.md) semantisch:
+bekannte fehlende Standardfelder, exakt gleiche Integer-/Float-Grenzen und das
+numerisch wirkungslose `MULTILINE=false` dürfen sich strukturell unterscheiden.
+`presentationComparisons` protokolliert die Regeln. Original-Snapshots und
+Zielmodell bleiben unverändert; die Ausführung bindet weiterhin den vollständigen
+aktuellen Quell-Fingerabdruck und verlangt bei späteren Änderungen einen neuen
+Plan. Unbekannte Felder, echte Formatänderungen und Archivabweichungen bleiben
+blockierend. Das Austauschformat bleibt Version 1.0.
+
 1. **Analysieren:** Paket lokal prüfen, Quellen/Archive lesen, Ressourcen und
    Zielunterstützung prüfen. Keine Zielinstanz, kein Gateway und kein Skript
    wird hierbei erzeugt. Metadaten-Snapshots mit dem aktuellen Zustand vergleichen.

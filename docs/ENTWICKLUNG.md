@@ -1,5 +1,16 @@
 # Entwicklung von SymconECharts
 
+## Semantische JSLive-Quellenzuordnung
+
+ADR 0112 ergänzt die migrationsbezogene, zentrale Policy
+`libs/EChartsJSLivePresentation.php`. Die gemeinsame Profilnormalisierung bleibt
+unverändert. `php tests/jslive_presentation_equivalence.php` reproduziert die
+bisherige Sperre fremder Quellen durch bekannte Standardfelder und exakt gleiche
+Zahlentypen. Der Test prüft vollständige Pläne, erhaltene Originalformatierung,
+unveränderte aktuelle Quell-Fingerabdrücke und blockierende echte Unterschiede.
+Die neue Policy benötigt nach dem Modulupdate eine eigene Live-Abnahme; die
+bereits bestandene OPcache- und Radar-Strichmuster-Abnahme bleibt erhalten.
+
 ## Validierte Progressbar-Farben und SVG-Füllbilder
 
 Der neue Adapter aus ADR 0111 hebt die pauschale Importsperre ausschließlich

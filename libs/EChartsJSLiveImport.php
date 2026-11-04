@@ -10,6 +10,7 @@ use stdClass;
 use Throwable;
 
 require_once __DIR__ . '/EChartsJSLivePackage.php';
+require_once __DIR__ . '/EChartsJSLivePresentation.php';
 require_once __DIR__ . '/helper/VariablePresentationNormalizationHelper.php';
 require_once __DIR__ . '/EChartsValueRange.php';
 
@@ -186,7 +187,8 @@ final class EChartsJSLiveImport
                 $row['currentFingerprint'] = EChartsImportJson::Hash($current);
                 $normalized = self::Presentation($source->presentation, $source->variableType);
                 $row['native'] = EChartsJSLivePackage::Wire($normalized['native']);
-                if (EChartsImportJson::Canonical(EChartsJSLivePackage::Wire($current['native'] ?? null)) !== EChartsImportJson::Canonical(EChartsJSLivePackage::Wire($normalized['native']))) {
+                $row['presentationComparison'] = EChartsJSLivePresentation::Compare($normalized['native'], $current['native'] ?? null, $source->variableType);
+                if ($row['presentationComparison']['status'] === 'different') {
                     $result['issues'][] = self::Issue('SOURCE_CHANGED', $chart->chartKey, $pointer . '/presentation', 'Current native source metadata differs from the export snapshot.', 'Export again or review a fresh source mapping.');
                     $result['verdicts']['sourcesArchive'] = 'blocked';
                 }

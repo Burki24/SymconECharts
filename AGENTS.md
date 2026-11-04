@@ -460,6 +460,12 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - Eine Übernahme benötigt Vorschau und ausdrückliche Bestätigung. Sie muss bei
   Wiederholung sicher bleiben, Teilfehler kontrolliert melden und das
   JSLive-Original als Vergleich und Rückfall erhalten.
+- ADR 0112 erlaubt ausschließlich bekannte semantisch gleichwertige Metadaten
+  numerischer Wertdarstellungen bei der anfänglichen Quellenzuordnung. Die
+  migrationsbezogene Policy liegt zentral in `libs/EChartsJSLivePresentation.php`;
+  Originalformatierung und vollständige aktuelle Quell-Fingerabdrücke bleiben
+  erhalten. Echte Format-/Archivänderungen und spätere Snapshot-Änderungen bleiben
+  strikt; `presentationComparisons` macht die Regeln im Bericht sichtbar.
 - Nicht übertragbare Einstellungen, eigene Templates, Skripte sowie
   Chart.js-spezifische Erweiterungen werden sichtbar gemeldet. Skript- oder
   Templateinhalte werden nicht stillschweigend ausgeführt oder als verlustfrei

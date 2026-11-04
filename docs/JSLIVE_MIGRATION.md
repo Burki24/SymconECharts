@@ -78,6 +78,15 @@ das Paket macht sie nicht zu ausführbaren ECharts-Vorlagen.
    prüfen. Die hier angezeigten Zielfamilien sind Kandidaten; maßgeblich ist
    der anschließende vollständige native Übernahmeplan.
 
+Bei numerischen Wertdarstellungen können Legacy-Profile und native
+Darstellungen dieselbe Formatierung mit unterschiedlich vielen Standardfeldern
+beschreiben. Bekannte Standardwerte und exakt gleiche Integer-/Float-Grenzen
+werden bei der Zuordnung als gleichwertig erkannt. Der vollständige Bericht
+benennt diese Vergleiche unter `presentationComparisons`. Originalformatierung
+und Quelldarstellung bleiben erhalten. Andere Einheiten, Nachkommastellen,
+Bereiche, Intervalle oder Aktionen bleiben blockierend; nach Änderungen am
+bestätigten Quellstand ist weiterhin ein neuer Plan erforderlich.
+
 ![Gateway-Formular: Exportdatei auswählen und mögliche Zielfamilien prüfen](images/jslive-migration-package.jpg)
 
 Dateiauswahl und Ergebnisübersicht vor dem Laden eines Pakets. Nach der
