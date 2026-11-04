@@ -165,6 +165,10 @@ benennt Fehlerklasse und JSON-Pointer. Nach einem nicht eindeutig bestätigten
 Speicherfehler wird eine `PERSISTENCE_FAILED`-Ausnahme gemeldet; dann vor einer
 Wiederholung aktive und geplante Konfiguration prüfen. Bei häufigen
 Aktualisierungen ist die Stringvariable der passendere Eingabeweg.
+Die Kernel-Getter lesen nur aktive Werte. Der Setter prüft deshalb vor dem
+Vormerken auf ausstehende Änderungen und nach dem Anwenden die gesamte aktive
+Konfiguration. Gleichzeitige Formular- oder Skriptänderungen an derselben Instanz
+mit dem Producer abstimmen; die Settersperre schützt nur weitere Setter-Aufrufe.
 
 Die Formularfunktionen `ECTR_TreeJSONFromForm(int $InstanzID, string $FileData,
 string $Document, string $Configuration, bool $TakeOver): string` und

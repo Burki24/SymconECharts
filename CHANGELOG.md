@@ -64,6 +64,12 @@
 
 ## Fixes
 
+- `ECTR_SetTreeJSON` behandelt Kernel-Getter korrekt als Abruf aktiver Werte.
+  Das neue Dokument wird vorgemerkt und angewandt; anschließend werden die
+  vollständige aktive Konfiguration und verbleibende Änderungen geprüft.
+  Bereits erkennbare fremde Entwürfe bleiben gesperrt. Abweichungen werden als
+  Speicherfehler gemeldet, ohne fremde Zustände automatisch zurückzuschreiben.
+
 - Die Tree-JSON-Datenquelle verwendet die vorhandene abgesicherte IPSView-
   Variablenauflösung statt einer im echten Symcon-SDK fehlenden `VariableExists`-
   Modulmethode. Datei/Text, Stringquelle und öffentliche Funktionen werden dadurch

@@ -33,7 +33,18 @@ Helpers. Das gemeinsame Kernel-Doppel enthält die zusätzliche Methode nicht
 mehr; der Tree-JSON-Test erzwingt ihre Abwesenheit und prüft fehlende, aktive
 sowie deaktiviert erhaltene IPSView-Ausgaben. Der vorherige Adapter scheitert
 damit bereits an der gültigen Vertragsdatei; die lokale Korrektur besteht.
-Die erneute MCP-/Host-Abnahme nach diesem Fix bleibt offen.
+Die MCP-Nachprüfung unter 1.403 bestätigt den SDK-Fix sowie Datei/Text und
+Stringquelle einschließlich Fehler-/Erholungsverhalten. Der Setter scheiterte
+anschließend an der falschen Annahme, `IPS_GetConfiguration` lese vorgemerkte
+Werte. Beide öffentlichen Kernel-Getter liefern tatsächlich aktive Properties.
+Das Testdoppel trennt nun diese Getter von seinem expliziten `Planned`-Speicher.
+Die Korrektur folgt dem vorhandenen Importjournal-Muster: letzte Vorprüfung nach
+allen Quellenlesungen, Vormerken bei unverändertem Aktivstand, Anwenden und
+vollständiger Nachvergleich einschließlich `IPS_HasChanges`. Regressionen
+prüfen Erstübernahme, Wiederholung, späte fremde Entwürfe, Aktivierungsfehler,
+abweichend aktivierte Designs und neue Entwürfe nach dem Anwenden. Abweichungen
+führen zu Fehlern ohne automatischen Rollback fremder Zustände. Die erneute
+Setter-MCP-Abnahme und die visuelle Host-Abnahme bleiben offen.
 
 Der optionale Befehl `node tests/tree_json_browser.mjs <Chromium-Pfad>` startet
 nur eine anonyme lokale Fixture und ein isoliertes Browserprofil. Echte Browser-

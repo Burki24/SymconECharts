@@ -216,11 +216,26 @@ instanzbezogenen Sperre erneut geprüft. Ausstehende Property-Änderungen
 führen zu `CONFIGURATION_PENDING`; der Setter darf sie nicht beiläufig
 anwenden. Die bereits angewandte Konfiguration und geplante Kernel-Properties
 werden dafür getrennt betrachtet; ein Entwurf ist keine aktive Quellenwahl.
-Parallele vollständige Ersetzungen werden serialisiert; der zuletzt
+Die letzte Prüfung erfolgt nach allen Quellenlesungen einschließlich des
+Vergleichs mit dem bisherigen Dokument. `IPS_GetConfiguration` und
+`IPS_GetProperty` liefern aktive Werte, keine vorgemerkten Properties.
+Nach dem Vormerken müssen die aktive Konfiguration unverändert und Änderungen
+vorhanden sein. Nach dem Anwenden muss die vollständige aktive Konfiguration
+dem erwarteten Ergebnis entsprechen und `IPS_HasChanges` wieder false liefern.
+Parallele Aufrufe dieses Setters werden serialisiert; der zuletzt
 erfolgreich angenommene Aufruf gewinnt, ohne Felder verschiedener Dokumente
 zu mischen. Eine fachliche Versionsreihenfolge muss der Producer durch einen
 geordneten Schreibpfad gewährleisten. `unchanged` schreibt nichts und führt
 kein zusätzliches `ApplyChanges()` aus.
+
+Formulare und andere Skripte verwenden diese Settersperre nicht automatisch.
+Der Kernel bietet über die öffentlichen Getter keine atomare Prüfung fremder
+vorgemerkter Werte zwischen eigenem Vormerken und Anwenden. Gleichzeitige
+externe Konfigurationsschreiber müssen daher mit dem Producer abgestimmt werden.
+Eine erkennbare Abweichung der aktiven Konfiguration oder ein neuer Entwurf
+nach dem Anwenden führt zu `PERSISTENCE_FAILED`, niemals zu einer behaupteten
+erfolgreichen Übernahme. Ein bereits aktivierter fremder Stand wird nicht durch
+eine automatische Korrektur aus einem älteren Snapshot überschrieben.
 
 Nach einem erfolgreichen Speichern kann ein späterer Transportfehler auftreten:
 der Bericht unterscheidet deshalb `applied` von der aktuellen Anzeigeverfügbarkeit.

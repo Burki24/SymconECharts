@@ -9,6 +9,8 @@ final class TreeJSONKernelFixture extends EChartsTree
     public array $Planned = [];
     public int $Applies = 0;
     public bool $FailSave = false;
+    public ?Closure $BeforeCommit = null;
+    public ?Closure $AfterApply = null;
 
     public function PlanProperty(string $name, mixed $value): void
     {
@@ -20,21 +22,26 @@ final class TreeJSONKernelFixture extends EChartsTree
 
     public function CommitProperties(): void
     {
+        if ($this->BeforeCommit !== null) {
+            $callback = $this->BeforeCommit;
+            $this->BeforeCommit = null;
+            $callback($this);
+        }
         foreach ($this->Planned as $name => $value) {
             parent::SetTestProperty($name, $value);
         }
         $this->Planned = [];
     }
 
-    public function GetTestProperties(): array
-    {
-        return array_replace(parent::GetTestProperties(), $this->Planned);
-    }
-
     public function ApplyChanges(): void
     {
         ++$this->Applies;
         parent::ApplyChanges();
+        if ($this->AfterApply !== null) {
+            $callback = $this->AfterApply;
+            $this->AfterApply = null;
+            $callback($this);
+        }
     }
 
     public function Restart(): void
@@ -71,6 +78,11 @@ function IPS_HasChanges(int $id): bool
     return ($GLOBALS['symconTestModuleObjects'][$id]->Planned ?? []) !== [];
 }
 
+function IPS_GetProperty(int $id, string $name): mixed
+{
+    return $GLOBALS['symconTestModuleObjects'][$id]->GetTestProperties()[$name];
+}
+
 function IPS_SemaphoreEnter(string $ident, int $timeout): bool
 {
     if ($GLOBALS['treeJSONLocks'][$ident] ?? false) {
@@ -104,10 +116,26 @@ assertGatewayGauge($result['status'] === 'rejected' && $result['errors'][0]['cod
 $module->SetTestProperty('SourceMode', 'json');
 $module->SetTestProperty('Title', 'Preserved design');
 $before = $module->GetTestProperties();
+IPS_SetProperty($module->InstanceID, 'JsonDocument', $document);
+assertGatewayGauge(
+    IPS_HasChanges($module->InstanceID) && $module->Planned['JsonDocument'] === $document,
+    'SetProperty stages the document without activating it.'
+);
+assertGatewayGauge(
+    json_decode(IPS_GetConfiguration($module->InstanceID), true)['JsonDocument'] === ''
+    && IPS_GetProperty($module->InstanceID, 'JsonDocument') === '' && $module->GetTestProperties() === $before,
+    'Public Kernel getters must expose active settings while a different document is planned.'
+);
+$module->Planned = [];
 $result = json_decode($module->SetTreeJSON($document), true, 32, JSON_THROW_ON_ERROR);
 assertGatewayGauge($result['status'] === 'applied' && $result['dataQuality'] === 'ready' && $result['displayConfirmed'] === false
     && $module->GetTestStatus() === IS_ACTIVE, 'The setter must confirm persisted data without falsely confirming an unseen client display.');
 $after = $module->GetTestProperties();
+assertGatewayGauge(
+    json_decode(IPS_GetConfiguration($module->InstanceID), true)['JsonDocument'] === IPS_GetProperty($module->InstanceID, 'JsonDocument')
+    && json_decode(IPS_GetProperty($module->InstanceID, 'JsonDocument')) == json_decode($document),
+    'After ApplyChanges both public getters expose the newly activated document.'
+);
 unset($after['JsonDocument'], $before['JsonDocument']);
 assertGatewayGauge($before === $after && !$module->Planned, 'Only JsonDocument may be changed and applied.');
 $applies = $module->Applies;
@@ -136,6 +164,64 @@ try {
 } finally {
     $module->FailSave = false;
 }
+
+$expectPersistenceFailure = static function (callable $operation): void
+{
+    try {
+        $operation();
+        throw new RuntimeException('An uncertain activation was reported as success.');
+    } catch (RuntimeException $exception) {
+        assertGatewayGauge(str_starts_with($exception->getMessage(), 'PERSISTENCE_FAILED:'), 'A failed or divergent activation must remain an explicit persistence failure.');
+    }
+};
+$activeBefore = $module->GetTestProperties();
+$applies = $module->Applies;
+$module->BeforeCommit = static function (): void
+{
+    throw new RuntimeException('private fixture activation failure');
+};
+$expectPersistenceFailure(static fn () => $module->SetTreeJSON(json_encode($bad, JSON_THROW_ON_ERROR)));
+assertGatewayGauge(
+    $module->GetTestProperties() === $activeBefore && isset($module->Planned['JsonDocument']) && $module->Applies === $applies,
+    'A failure before activation preserves the active configuration and leaves the actual staged document for inspection.'
+);
+$result = json_decode($module->SetTreeJSON($document), true);
+assertGatewayGauge(
+    $result['errors'][0]['code'] === 'CONFIGURATION_PENDING' && $module->Applies === $applies,
+    'Retry must not silently apply a document left planned by a failed activation.'
+);
+$module->Planned = [];
+
+$module->BeforeCommit = static function (TreeJSONKernelFixture $target): void
+{
+    $target->PlanProperty('Title', 'Foreign applied title');
+};
+$expectPersistenceFailure(static fn () => $module->SetTreeJSON(json_encode($bad, JSON_THROW_ON_ERROR)));
+assertGatewayGauge(
+    $module->Applies === $applies + 1 && $module->GetTestProperties()['Title'] === 'Foreign applied title'
+    && json_decode(IPS_GetProperty($module->InstanceID, 'JsonDocument'), true)['nodes'][0]['name'] === 'NEW ROOT',
+    'Compare the entire activated configuration, not just JsonDocument; retain external changes instead of performing a corrective write.'
+);
+$module->SetTestProperty('Title', $activeBefore['Title']);
+$module->SetTestProperty('JsonDocument', $activeBefore['JsonDocument']);
+$module->ApplyChanges();
+
+$applies = $module->Applies;
+$module->AfterApply = static function (TreeJSONKernelFixture $target): void
+{
+    $target->PlanProperty('Title', 'Foreign pending title');
+};
+$expectPersistenceFailure(static fn () => $module->SetTreeJSON(json_encode($bad, JSON_THROW_ON_ERROR)));
+assertGatewayGauge($module->Applies === $applies + 1 && $module->GetTestProperties()['Title'] === $activeBefore['Title']
+    && $module->Planned === ['Title' => 'Foreign pending title'], 'A new pending edit after activation must be retained and must prevent a success response.');
+$module->Planned = [];
+$result = json_decode($module->SetTreeJSON(json_encode($bad, JSON_THROW_ON_ERROR)), true);
+assertGatewayGauge(
+    $result['status'] === 'unchanged' && $module->Applies === $applies + 1,
+    'Once the unrelated pending edit is resolved, an already activated document is an idempotent replay.'
+);
+$module->SetTestProperty('JsonDocument', $activeBefore['JsonDocument']);
+$module->ApplyChanges();
 
 $draft = $module->GetTestProperties();
 $formBefore = $module->GetTestProperties();
@@ -242,6 +328,28 @@ $boundTree = json_decode($module->GetTreeData(), true)['tree'];
 assertGatewayGauge($boundTree['root']['children'][1]['displayValue'] === '21.3 °C'
     && $boundTree['root']['children'][2]['displayValue'] === '21.3 °C', 'Bound occurrences must read the existing formatted value.');
 assertGatewayGauge($GLOBALS['symconTestTreeValues'][9002] === '21.3 °C', 'Bindings must not write values or presentation metadata.');
+$candidate = $bound;
+$candidate['nodes'][0]['name'] = 'Late concurrent change';
+$reads = 0;
+$activeBefore = $module->GetTestProperties();
+$applies = $module->Applies;
+$GLOBALS['treeJSONObjectHook'] = static function (int $objectID) use ($module, &$reads): void
+{
+    if ($objectID === 9002 && ++$reads === 2) {
+        $module->PlanProperty('Title', 'Late foreign draft');
+    }
+};
+try {
+    $result = json_decode($module->SetTreeJSON(json_encode($candidate, JSON_THROW_ON_ERROR)), true);
+    assertGatewayGauge(
+        $reads === 2 && $result['errors'][0]['code'] === 'CONFIGURATION_PENDING' && $module->Applies === $applies
+        && $module->GetTestProperties() === $activeBefore && $module->Planned === ['Title' => 'Late foreign draft'],
+        'An edit arriving while the old document is compared must be rejected before staging or applying the new document.'
+    );
+} finally {
+    unset($GLOBALS['treeJSONObjectHook']);
+    $module->Planned = [];
+}
 $expanded = ['format' => 'de.burki24.symconecharts.tree', 'formatVersion' => '1.0', 'rootId' => 'root', 'nodes' => [
     ['id' => 'root', 'parentId' => null, 'name' => 'Root', 'kind' => 'category']
 ]];

@@ -50,7 +50,12 @@ trait EChartsTreeJSONSource
                     $projection = $this->ProjectTreeJSON($model);
                     $this->CheckTreeJSONOutputs($projection);
                     $this->CheckTreeJSONConfiguration($model['document']);
-                    // Check again after bounded reads; never apply somebody else's planned properties.
+                    try {
+                        $same = $this->ReadTreeJSONDocument($this->ReadPropertyString('JsonDocument'), []);
+                    } catch (Throwable) {
+                        $same = null;
+                    }
+                    // Check after every bounded source read, including comparison with the active document.
                     if (IPS_HasChanges($this->InstanceID) || $this->TreeJSONActiveConfiguration() !== $expectedConfiguration) {
                         throw new InvalidArgumentException('CONFIGURATION_PENDING:');
                     }
@@ -61,26 +66,21 @@ trait EChartsTreeJSONSource
                     return EChartsImportJson::Canonical(['status' => 'rejected'] + $this->TreeJSONRejected($exception));
                 }
                 $hash = $model['documentHash'];
-                try {
-                    $same = $this->ReadTreeJSONDocument($this->ReadPropertyString('JsonDocument'), []);
-                } catch (Throwable) {
-                    $same = null;
-                }
                 if (($same['documentHash'] ?? null) === $hash) {
                     return EChartsImportJson::Canonical(['status' => 'unchanged', 'documentHash' => $hash]);
                 }
-                $configuration = $this->TreeJSONActiveConfiguration();
+                $configuration = $expectedConfiguration;
+                $configuration['JsonDocument'] = $model['document'];
                 try {
                     if (!IPS_SetProperty($this->InstanceID, 'JsonDocument', $model['document'])) {
                         throw new RuntimeException('PERSISTENCE_FAILED');
                     }
-                    // A raced external edit is left planned, never implicitly applied.
-                    $planned = json_decode(IPS_GetConfiguration($this->InstanceID), true, 64, JSON_THROW_ON_ERROR);
-                    $configuration['JsonDocument'] = $model['document'];
-                    if ($planned !== $configuration) {
+                    // Kernel getters expose active settings, not the staged document.
+                    if (!IPS_HasChanges($this->InstanceID) || $this->TreeJSONActiveConfiguration() !== $expectedConfiguration) {
                         throw new RuntimeException('PERSISTENCE_FAILED');
                     }
-                    if (!IPS_ApplyChanges($this->InstanceID) || $this->ReadPropertyString('JsonDocument') !== $model['document']) {
+                    if (!IPS_ApplyChanges($this->InstanceID) || IPS_HasChanges($this->InstanceID)
+                        || $this->TreeJSONActiveConfiguration() !== $configuration) {
                         throw new RuntimeException('PERSISTENCE_FAILED');
                     }
                 } catch (Throwable) {
@@ -315,15 +315,7 @@ trait EChartsTreeJSONSource
 
     private function TreeJSONActiveConfiguration(): array
     {
-        $configuration = json_decode(IPS_GetConfiguration($this->InstanceID), true, 64, JSON_THROW_ON_ERROR);
-        foreach ($configuration as $key => &$value) {
-            $value = match (gettype($value)) {
-                'boolean' => $this->ReadPropertyBoolean($key), 'integer' => $this->ReadPropertyInteger($key),
-                'double'  => $this->ReadPropertyFloat($key), default => $this->ReadPropertyString($key)
-            };
-        }
-        unset($value);
-        return $configuration;
+        return json_decode(IPS_GetConfiguration($this->InstanceID), true, 64, JSON_THROW_ON_ERROR);
     }
 
     private function CheckTreeJSONConfiguration(string $document, array $draft = []): void

@@ -14,6 +14,13 @@ Die gemeinsame Kernel-Fixture besitzt wie das echte SDK keine `VariableExists`-
 Modulmethode. Der Regressionstest erzwingt dies, prüft alle Eingabewege ohne
 IPSView-Variable und validiert anschließend mit aktiver beziehungsweise
 deaktiviert erhaltener Ausgabe. Ihre Nutzung als eigene Wertquelle bleibt gesperrt.
+`IPS_GetConfiguration` und `IPS_GetProperty` lesen im Doppel ausschließlich aktive
+Properties; `IPS_SetProperty` schreibt getrennt nach `Planned`, erst
+`IPS_ApplyChanges` aktiviert sie. Die zuvor fehlerhafte Setter-Prüfung scheitert
+damit wie im Kernel mit `PERSISTENCE_FAILED`. Regressionen sichern die erfolgreiche
+Erstübernahme, idempotente Wiederholung, späte Entwürfe während der Quellenlesung
+und Fehler bzw. konkurrierende Änderungen beim/nach dem Anwenden ab. Es werden
+weder unbestätigte Erfolge gemeldet noch fremde Zustände automatisch repariert.
 
 `php tests/gateway_gauges.php --tree-depth`, `--tree-health-depth` sowie
 `php tests/tree_hierarchy.php`, `php tests/tree_preview.php` und
