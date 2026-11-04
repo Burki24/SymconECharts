@@ -26,6 +26,15 @@ Sperren, konkurrierende Entwürfe, Speicherfehler, reine Vorschauen, VM_UPDATE,
 letzter Stand und Wiederanlauf werden geprüft. Die bisherigen Tiefen-/Health-
 Prüfungen sowie `node tests/tree_layout.js` bleiben grün.
 
+Die MCP-Prüfung von 1.402 zeigte einen durch das Kernel-Doppel verdeckten SDK-
+Unterschied: `VariableExists` ist keine native Modulmethode. Der JSON-Adapter
+verwendet deshalb die vorhandene `IPSViewHTMLVariableID`-Auflösung des regulären
+Helpers. Das gemeinsame Kernel-Doppel enthält die zusätzliche Methode nicht
+mehr; der Tree-JSON-Test erzwingt ihre Abwesenheit und prüft fehlende, aktive
+sowie deaktiviert erhaltene IPSView-Ausgaben. Der vorherige Adapter scheitert
+damit bereits an der gültigen Vertragsdatei; die lokale Korrektur besteht.
+Die erneute MCP-/Host-Abnahme nach diesem Fix bleibt offen.
+
 Der optionale Befehl `node tests/tree_json_browser.mjs <Chromium-Pfad>` startet
 nur eine anonyme lokale Fixture und ein isoliertes Browserprofil. Echte Browser-
 Mausradereignisse sind in beiden Ausgabe-Layouts als trusted empfangen;

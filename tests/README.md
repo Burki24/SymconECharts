@@ -10,6 +10,10 @@ Kernel-Doppel trennt aktive und geplante Properties. Es prüft neben Datei/Text
 und öffentlichen APIs auch pure Vorschauen, reine Größenprüfungen ohne neuen
 Transportkanal, idempotente Übernahme, konkurrierende Entwürfe, Speicherfehler,
 String-VM_UPDATE, Rate-Limit, sichtbaren alten Stand, Quellenwechsel und Neustart.
+Die gemeinsame Kernel-Fixture besitzt wie das echte SDK keine `VariableExists`-
+Modulmethode. Der Regressionstest erzwingt dies, prüft alle Eingabewege ohne
+IPSView-Variable und validiert anschließend mit aktiver beziehungsweise
+deaktiviert erhaltener Ausgabe. Ihre Nutzung als eigene Wertquelle bleibt gesperrt.
 
 `php tests/gateway_gauges.php --tree-depth`, `--tree-health-depth` sowie
 `php tests/tree_hierarchy.php`, `php tests/tree_preview.php` und

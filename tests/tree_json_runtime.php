@@ -89,6 +89,7 @@ function IPS_SemaphoreLeave(string $ident): bool
 $module = new TreeJSONKernelFixture();
 $module->InstanceID = 58000;
 $module->Create();
+assertGatewayGauge(!method_exists($module, 'VariableExists') && method_exists($module, 'GetIDForIdent'), 'The Kernel fixture must match the real SDK without the additional VariableExists method.');
 $module->CaptureDebug = true;
 $GLOBALS['symconTestCopyTarget'] = $module;
 $document = file_get_contents(__DIR__ . '/../docs/examples/tree-network-1.0.json');
@@ -194,6 +195,29 @@ foreach ([$module->GetVisualizationTile(), $module->GetIPSViewHTML()] as $html) 
     assertGatewayGauge(strlen($html) > 500000 && strlen($html) < SYMCON_OUTPUT_BUFFER_LIMIT
         && str_contains($html, 'SYMC_ECHARTS_TREE') && str_contains($html, 'json:document:network'), 'Both real module outputs must include the shipped runtime and JSON tree under the original byte limit.');
 }
+
+$module->SetTestProperty('EnableIPSView', true);
+$GLOBALS['symconTestLinkOutputObjects'] = true;
+try {
+    $module->ApplyChanges();
+} finally {
+    unset($GLOBALS['symconTestLinkOutputObjects']);
+}
+$outputs = array_keys(array_filter($GLOBALS['symconTestTreeObjects'], static fn (array $object): bool => ($object['ParentID'] ?? null) === 58000 && ($object['ObjectIdent'] ?? '') === 'IPSViewTree'));
+assertGatewayGauge(count($outputs) === 1 && $module->GetTestVariableValue('IPSViewTree') !== null, 'Enabling IPSView must create one owned output without the non-SDK method.');
+$module->SetTestProperty('UseJsonObjectBindings', true);
+$selfBound = json_decode($document, true, 32, JSON_THROW_ON_ERROR);
+$selfBound['nodes'][] = ['id' => 'output', 'parentId' => 'network', 'name' => 'Own output', 'kind' => 'variable', 'objectId' => $outputs[0]];
+foreach ([true, false] as $enabled) {
+    $module->SetTestProperty('EnableIPSView', $enabled);
+    $module->ApplyChanges();
+    $before = $module->GetTestProperties();
+    $ownOutput = json_decode($module->ValidateTreeJSON(json_encode($selfBound, JSON_THROW_ON_ERROR)), true);
+    assertGatewayGauge(!$ownOutput['valid'] && $ownOutput['errors'][0]['code'] === 'OBJECT_BINDING_INVALID', 'Owned IPSView output stays forbidden as a source, including a retained disabled output.');
+    assertGatewayGauge($module->GetTestProperties() === $before, 'Output-source validation must preserve active properties and designs.');
+    assertGatewayGauge(json_decode($module->ValidateTreeJSON($document), true)['valid'], 'Ordinary JSON must remain valid with an existing output.');
+}
+$module->SetTestProperty('UseJsonObjectBindings', false);
 
 $bound = json_decode($document, true, 32, JSON_THROW_ON_ERROR);
 $bound['nodes'][] = ['id' => 'sensor-a', 'parentId' => 'network', 'name' => 'Same label', 'kind' => 'variable', 'objectId' => 9002];

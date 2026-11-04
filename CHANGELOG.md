@@ -64,6 +64,12 @@
 
 ## Fixes
 
+- Die Tree-JSON-Datenquelle verwendet die vorhandene abgesicherte IPSView-
+  Variablenauflösung statt einer im echten Symcon-SDK fehlenden `VariableExists`-
+  Modulmethode. Datei/Text, Stringquelle und öffentliche Funktionen werden dadurch
+  nicht mehr vor der JSON-Prüfung mit `SOURCE_UNAVAILABLE` abgewiesen. Eigene
+  Ausgabevariablen bleiben als Wertquellen gesperrt; Designs und Budgets bleiben gleich.
+
 - Der JSLive-Import erkennt bei ausdrücklich zugeordneten numerischen Quellen
   bekannte Standardfelder und exakt gleiche Integer-/Float-Grenzen als
   gleichwertige Darstellungsmetadaten. Der vollständige Plan nennt die Regeln;

@@ -271,8 +271,9 @@ trait EChartsTreeJSONSource
     {
         $ids = ($draft['SourceMode'] ?? $this->ReadPropertyString('SourceMode')) === 'variable'
             ? [(int) ($draft['JsonVariableID'] ?? $this->ReadPropertyInteger('JsonVariableID'))] : [];
-        if ($this->VariableExists(self::IPSVIEW_OUTPUT_IDENT)) {
-            $ids[] = $this->GetIDForIdent(self::IPSVIEW_OUTPUT_IDENT);
+        $outputID = $this->IPSViewHTMLVariableID(self::IPSVIEW_OUTPUT_IDENT);
+        if ($outputID > 0) {
+            $ids[] = $outputID;
         }
         return $ids;
     }

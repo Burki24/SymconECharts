@@ -678,11 +678,6 @@ abstract class IPSModuleStrict
         return $this->variableIDs[$ident];
     }
 
-    protected function VariableExists(string $ident): bool
-    {
-        return isset($this->variableIDs[$ident]);
-    }
-
     protected function ReadPropertyInteger(string $name): int
     {
         return (int) $this->properties[$name];
