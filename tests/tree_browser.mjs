@@ -51,7 +51,7 @@ function page(mode, health, orientation) {
     }
     return html;
 }
-http.createServer((req, res) => {
+const server = http.createServer((req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
     const health = url.searchParams.get('family') === 'health';
     const orientation = ['LR', 'RL', 'TB', 'BT', 'radial'].includes(url.searchParams.get('orientation'))
@@ -76,4 +76,4 @@ http.createServer((req, res) => {
         + query + '" style="border:0;width:400px;height:520px"></iframe></section><section><h2>IPSView</h2><iframe title="IPSView" src="/chart?mode=ipsview'
         + query + '" style="border:0;width:720px;height:520px"></iframe></section></div>'
         + '<h2>Schematische Vorschau</h2><img alt="Vorschau" src="/preview.svg?orientation=' + orientation + '" width="720" height="360"></body></html>');
-}).listen(8812, '127.0.0.1', () => console.log('Tree browser fixture: http://127.0.0.1:8812'));
+}).listen(Number(process.env.TREE_BROWSER_PORT ?? 8812), '127.0.0.1', () => console.log('Tree browser fixture: http://127.0.0.1:' + server.address().port));

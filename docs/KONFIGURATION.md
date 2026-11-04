@@ -2251,6 +2251,10 @@ Die [gemeinsamen IPSView-Regeln](#gemeinsame-ipsview-einstellungen) und gegebene
 
 | Formularfeld | Technischer Name | Typ | Standard | Auswahl / Bedienbereich |
 | --- | --- | --- | --- | --- |
+| Datenquelle des Baums | `SourceMode` | String | `"objects"` | `objects` Symcon-Objektbaum; `json` gespeichertes JSON; `variable` Stringvariable |
+| JSON-Dokument des Baums | `JsonDocument` | String | `""` | Tree-JSON 1.0; nur im Modus `json` aktiv |
+| JSON-Stringvariable | `JsonVariableID` | Integer | `0` | Vorhandene Stringvariable; nur im Modus `variable` aktiv |
+| Lokale Objektbindungen im JSON erlauben | `UseJsonObjectBindings` | Boolean | `false` | `objectId` ausdrücklich freigeben; keine Änderung gebundener Objekte |
 | Wurzelkategorie oder -instanz | `RootObjectID` | Integer | `0` | Vorhandene ID |
 | Symcon-Wurzel (gesamter Objektbaum) verwenden | `UseSymconRoot` | Boolean | `false` | `true` / `false` |
 | Titel | `Title` | String | `""` | Siehe Modulanleitung |

@@ -1,6 +1,6 @@
 # ADR 0113: JSON-Hierarchien als zusätzliche Datenquelle für EChartsTree
 
-- Status: Vertrag festgelegt; Laufzeitimplementierung und Abnahme offen
+- Status: lokal implementiert und geprüft; MCP-/Host-Abnahme offen
 - Datum: 2026-11-04
 - Ergänzt: ADR 0044, ADR 0046 und ADR 0065
 - Kanonischer Vertrag: [Tree-JSON 1.0](../TREE_JSON_CONTRACT.md)
@@ -28,7 +28,7 @@ Optionale lokale Objektbindungen und statische Werttexte sind ausdrücklich
 geregelt. Es importiert keine ECharts-Optionen oder Designs und führt keine
 Skripte, Templates oder Netzwerkabfragen aus. JSON-Daten sind kein JSLive-Paket.
 
-Die geplanten öffentlichen Funktionen `ECTR_ValidateTreeJSON` und
+Die öffentlichen Funktionen `ECTR_ValidateTreeJSON` und
 `ECTR_SetTreeJSON` verwenden denselben Validator wie Formular und Stringquelle.
 Der Setter ist eine ausdrückliche Schreibaktion nur im Modus `json`; er
 wechselt keinen Modus und verändert keine Designs oder fremden Objekte.
@@ -71,8 +71,12 @@ Die neue Quelle erweitert die Herkunft der Hierarchie, nicht die Diagrammfamilie
 Mehrfach-Eltern und Querverbindungen bleiben Graph-Beziehungen. Links des
 Symcon-Objektbaums werden durch diese Entscheidung nicht neu interpretiert.
 
-Vertrag, Schema und synthetisches Beispiel sind eine Spezifikation. Öffentliche
-Funktionen, Properties, Fehlerpfade, Laufzeitsnapshot und Formularaktionen sind erst mit
-der Implementierung verfügbar. Die Pflichtmatrix im Vertrag umfasst
-Modell-, Modul-, Formular-, Renderer- und Live-Nachweise. Dieser Schritt
-verändert keine Instanzen, Quellen, Archive, Designs oder Versionsmetadaten.
+Validator und Quellenlebenszyklus liegen in `EChartsTreeJSON` beziehungsweise
+`EChartsTreeJSONSource`. Lokale Regressionen prüfen das echte Modul mit getrennten
+geplanten/aktiven Kernel-Properties und tatsächlichen Formularscripts. Ein
+gemeinsamer read-only Transportoptionenpfad prüft Ausgabegrößen ohne Erzeugung
+eines dauerhaften IPSView-Kanals. Node- und Chromium-Prüfungen belegen JSON-
+Werte, Warnhinweise, Quellenwechsel und Mausradzoom in lokalen Einbettungen.
+Die Pflichtmatrix und die noch ausstehende echte MCP-/Kachel-/IPSView-Abnahme
+stehen im Vertrag. Entwicklungsprüfungen verändern keine installierten
+Instanzen, Quellen, Archive, Designs oder Versionsmetadaten.

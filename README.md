@@ -73,7 +73,7 @@ Archiv- und Ausgabegrenzen der verlinkten Modulanleitung.
 | [EChartsPie](EChartsPie/README.md) | 1–100 aktuelle Quellen als Kreis, Donut oder Rose mit optionaler Auswahl. |
 | [EChartsScatter](EChartsScatter/README.md) | Historische X/Y-Punktwolken und Bubble-Diagramme; bis zu 16 benannte Vergleichsgruppen. |
 | [EChartsHeatmap](EChartsHeatmap/README.md) | Archiv-Stundenkennzahlen nach Tagen oder Wochentagen, mit Zeitnavigation und bis zu vier Vergleichsansichten. |
-| [EChartsTree](EChartsTree/README.md) | Lesender Symcon-Objektbaum mit bis zu zwölf Nachkommensebenen. |
+| [EChartsTree](EChartsTree/README.md) | Lesender Symcon-Objektbaum oder eigene JSON-Hierarchie aus Datei, Text, Stringvariable oder Skript; bis zu zwölf Nachkommensebenen. |
 | [EChartsTreeSystemHealth](EChartsTreeSystemHealth/README.md) | Objektbaum mit ausdrücklich festgelegten Zustandsregeln; bis zu zwölf Nachkommensebenen. |
 | [EChartsGraph](EChartsGraph/README.md) | Bis zu 300 manuelle Objektknoten und 1000 Verbindungen, optional gerichtet und gewichtet. |
 | [EChartsGraphZ2M](EChartsGraphZ2M/README.md) | Lesende Darstellung einer vorhandenen Zigbee2MQTT-Netzwerkkarte; kein Netzwerkscan. |

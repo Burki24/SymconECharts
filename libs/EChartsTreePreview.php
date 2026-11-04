@@ -135,7 +135,7 @@ final class EChartsTreePreview
                 $vertical = !$radial && in_array($orientation, ['TB', 'BT'], true);
                 $available = $radial ? 170 : ($vertical ? min(110, 650 / max(1, $leafCount)) : min(125, 560 / $maximumDepth - 12));
                 $label = (string) ($node['name'] ?? '');
-                if (($style['showValues'] ?? false) === true && $kind === 'variable' && ($node['displayValue'] ?? '') !== '') {
+                if (($style['showValues'] ?? false) === true && ($node['displayValue'] ?? '') !== '') {
                     $label .= ' ' . (string) $node['displayValue'];
                 }
                 $label = mb_strimwidth($label, 0, max(2, (int) floor(max(12, $available) / ($fontSize * 0.6))), '…', 'UTF-8');

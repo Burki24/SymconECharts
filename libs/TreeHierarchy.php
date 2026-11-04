@@ -15,6 +15,34 @@ final class TreeHierarchy
     public const STARTUP_COMPRESSION_BYTES = 200000;
     private const FILTER_SCAN_LIMIT = 30000;
 
+    /** Pure, parent-preserving view projection shared by validated JSON and filtered object trees. */
+    public static function Project(array $root, int $maxDepth, int $maxNodes): array
+    {
+        if ($maxDepth < 1 || $maxDepth > self::MAXIMUM_DEPTH || $maxNodes < 2 || $maxNodes > self::MAXIMUM_NODES) {
+            throw new InvalidArgumentException('The Tree selection or limits are invalid.');
+        }
+        $count = 0;
+        $truncated = false;
+        $visit = static function (array $node, int $depth) use (&$visit, &$count, &$truncated, $maxDepth, $maxNodes): array
+        {
+            ++$count;
+            $children = $node['children'] ?? [];
+            $node['children'] = [];
+            if ($depth < $maxDepth) {
+                foreach ($children as $child) {
+                    if ($count >= $maxNodes) {
+                        $truncated = true;
+                        break;
+                    }
+                    $node['children'][] = $visit($child, $depth + 1);
+                }
+            }
+            return $node;
+        };
+        $projected = $visit($root, 0);
+        return ['root' => $projected, 'count' => $count, 'truncated' => $truncated];
+    }
+
     /**
      * @param callable(int):array<string,mixed> $getObject
      * @param callable(int):list<int> $getChildren
@@ -194,33 +222,23 @@ final class TreeHierarchy
         };
 
         $candidate = $find($rootID, 0);
-        $count = 0;
-        $truncated = false;
+        $projection = self::Project($candidate, $maxDepth, $maxNodes);
         $variableIDs = [];
-        $limit = static function (array $node) use (&$limit, &$count, &$truncated, &$variableIDs, $maxNodes, $getValue): array
+        $values = static function (array $node) use (&$values, &$variableIDs, $getValue): array
         {
-            ++$count;
             if ($node['kind'] === 'variable') {
                 $id = (int) substr($node['id'], 7);
                 $variableIDs[] = $id;
                 $node['displayValue'] = mb_substr($getValue($id), 0, 100);
             }
-            $children = $node['children'];
-            $node['children'] = [];
-            foreach ($children as $child) {
-                if ($count >= $maxNodes) {
-                    $truncated = true;
-                    break;
-                }
-                $node['children'][] = $limit($child);
-            }
+            $node['children'] = array_map($values, $node['children']);
             return $node;
         };
 
         return [
-            'root'        => $limit($candidate),
-            'count'       => $count,
-            'truncated'   => $truncated,
+            'root'        => $values($projection['root']),
+            'count'       => $projection['count'],
+            'truncated'   => $projection['truncated'],
             'variableIDs' => $variableIDs
         ];
     }

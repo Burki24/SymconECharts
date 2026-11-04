@@ -1,7 +1,7 @@
 # EChartsTree
 
-`EChartsTree` zeigt einen ausgewählten Teil des IP-Symcon-Objektbaums als
-interaktiven Apache-ECharts-Baum in einer nativen Kachel oder einem optionalen
+`EChartsTree` zeigt einen ausgewählten Teil des IP-Symcon-Objektbaums oder
+eine eigene JSON-Hierarchie als interaktiven Apache-ECharts-Baum in einer nativen Kachel oder einem optionalen
 IPSView-HTML-Widget. Benötigt werden IP-Symcon 9.0/9.1 und ein verbundenes,
 aktives `EChartsGateway`. Ein Archiv ist nicht erforderlich.
 
@@ -12,6 +12,13 @@ Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
 [Konfigurationsreferenz](../docs/KONFIGURATION.md#echartstree).
 
 ## Einrichtung und Darstellung
+
+Die **Datenquelle des Baums** ist standardmäßig **Symcon-Objektbaum**.
+Bestehende Instanzen behalten damit ihre bisherige Konfiguration. Für eine
+eigene Netzwerk- oder Gerätehierarchie wählen Sie **Gespeichertes JSON** oder
+**JSON-Stringvariable**; die vorhandenen Designer gelten auch für diese Quellen.
+
+Für den Symcon-Objektbaum gilt:
 
 Wählen Sie als Wurzel eine Kategorie oder Instanz. Für den gesamten Objektbaum
 aktivieren Sie stattdessen „Symcon-Wurzel verwenden“; das Objekt-Auswahlfeld
@@ -65,8 +72,9 @@ Größenänderung erhalten; eine neue Wurzel, Anordnung oder Anfangstiefe setzt
 die Ansicht zurück. Lange Namen bleiben vollständig im Tooltip erreichbar.
 Der unabhängige IPSView-Designer besitzt dieselben Optionen; standardmäßig
 übernimmt er das Kacheldesign. Beide Designer zeigen eine unmittelbar auf
-Formularänderungen reagierende schematische Vorschau. Ohne gültige Wurzel
-verwendet diese ausdrücklich eine Beispielstruktur.
+Formularänderungen reagierende schematische Vorschau. Ohne gültige Objektbaum-Wurzel
+verwendet diese im Objektmodus ausdrücklich eine Beispielstruktur. Ungültige
+JSON-Entwürfe zeigen stattdessen eine Fehlermeldung.
 Die Vorschau zeigt echte Eltern-Kind-Verbindungen mit höchstens 80 Knoten
 und berücksichtigt die anfänglich geöffneten Ebenen. Sie ist eine begrenzte
 Struktur-/Designvorschau, keine vollständige Zustands- oder Objektübersicht.
@@ -77,6 +85,46 @@ Datenaktualisierungen nicht neu geladen. Der Baum und das Design werden im
 bestehenden Diagramm aktualisiert.
 
 ## Konfigurationsreferenz und Skriptzugriff
+
+### Eigene Hierarchie als JSON
+
+1. **Gespeichertes JSON (Datei, Text oder Skript)** als Datenquelle wählen.
+2. Das [Netzwerkbeispiel](../docs/examples/tree-network-1.0.json) in das Feld
+   **JSON-Dokument des Baums** kopieren oder unter **Baum-JSON prüfen oder
+   übernehmen** eine `.json`-Datei auswählen.
+3. **JSON-Text prüfen** beziehungsweise die Dateiprüfung ausführen. Bei Bedarf
+   lokale Objektbindungen ausdrücklich freigeben und die aufgelösten IDs/Namen prüfen.
+4. Eine gültige Datei mit **Geprüfte Datei in Entwurf übernehmen** kopieren.
+   Auswahl und Prüfung speichern noch nichts. Erst **Anwenden** speichert den Entwurf.
+
+Jeder Knoten erhält eine eindeutige stabile String-ID, einen Namen, die Rolle
+`category`, `instance` oder `variable` sowie die ID seines Elternknotens.
+Die einzige Wurzel hat `parentId: null`. Gleichnamige Geräte dürfen mehrfach
+vorkommen; sie müssen unterschiedliche IDs erhalten. Geschwister folgen ihrer
+Reihenfolge im JSON. Ein statischer `displayValue` kann beispielsweise die
+Verbindungsgeschwindigkeit beschreiben. Knoten und Werttexte sind Daten,
+keine ausführbaren ECharts-Einstellungen.
+
+Der [vollständige JSON-Vertrag 1.0](../docs/TREE_JSON_CONTRACT.md) beschreibt
+Felder, lokale `objectId`-Bindungen und Fehlermeldungen. Für eigene
+UniFi-Topologien erstellt ein eigenes Skript das Dokument; das Modul verbindet
+sich nicht selbst mit dem UniFi-Controller. Ein Gerät mit mehreren Eltern
+oder freien Querverbindungen benötigt das Graph-Modell.
+
+Für automatische Aktualisierungen wählen Sie **JSON-Stringvariable** und eine
+bestehende Stringvariable. Ein Producer schreibt jeweils das vollständige
+Dokument in diese eigene Variable. Änderungen aktualisieren den Baum ohne
+Anwenden seiner Konfiguration; schnelle Folgewerte werden zusammengefasst.
+Das Modul schreibt niemals in die Quellvariable.
+
+Ungültige Aktualisierungen zeigen während derselben Modul-Laufzeit den letzten
+gültigen Stand mit einem dauerhaften Veraltet-Hinweis und dessen ursprünglichem
+Zeitpunkt. Ohne gültigen Stand, insbesondere nach einem Neustart mit ungültiger
+Quelle, erscheint ein Fehler. Ein gültiger Folgeinhalt behebt ihn automatisch.
+JSON-Eingang, Konfiguration und Ausgaben haben zusätzlich Bytebudgets; die
+bisherigen zwölf Nachkommensebenen, maximal 3000 Knoten, Default 3/80 und
+Vorschaugrenze von 80 bleiben erhalten. Ansichtsbegrenzungen überspringen keine
+Eingangsprüfung. Objektbaumfilter bleiben im JSON-Modus gespeichert, aber inaktiv.
 
 Die [Feldreferenz](../docs/KONFIGURATION.md#echartstree) enthält
 Formularbeschriftungen, technische Namen, Typen, Standardwerte und Auswahllisten.
@@ -106,6 +154,24 @@ oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
 | `ECTR_GetTreeDiagnostic(int $InstanzID): string` | JSON-Momentaufnahme der Konfigurationsprüfung und letzten Fehlermeldung; kein Nachweis einer erfolgreichen Datenabfrage. |
 | `ECTR_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
 | `ECTR_RefreshTree(int $InstanzID): void` | Aktualisiert die Diagrammausgaben aus den konfigurierten Quellen. Kein Erfolgswert und keine Änderung von Quellen/Archiven. |
+| `ECTR_ValidateTreeJSON(int $InstanzID, string $JSON): string` | Prüft das rohe JSON lesend gegen Vertrag, Grenzen und Bindungsfreigabe. JSON-Bericht mit `valid`, Fehlern, geladenen/gesamten Knoten und Dokumenthash. |
+| `ECTR_SetTreeJSON(int $InstanzID, string $JSON): string` | Übernimmt ausschließlich im Modus `json` das geprüfte Dokument. JSON-Antwort mit `applied`, `unchanged` oder `rejected`. Ausstehende Konfigurationsänderungen verhindern die Übernahme. |
+
+Für Skriptübernahmen muss die Instanz bereits **Gespeichertes JSON** verwenden.
+`$JSON` ist der rohe Dokumenttext, nicht Base64. Ein identischer kanonischer
+Inhalt wird nicht erneut angewandt. Die Funktion verändert nur `JsonDocument`;
+Design, Quellenwahl und fremde Objekte bleiben erhalten. Der Prüfbericht
+benennt Fehlerklasse und JSON-Pointer. Nach einem nicht eindeutig bestätigten
+Speicherfehler wird eine `PERSISTENCE_FAILED`-Ausnahme gemeldet; dann vor einer
+Wiederholung aktive und geplante Konfiguration prüfen. Bei häufigen
+Aktualisierungen ist die Stringvariable der passendere Eingabeweg.
+
+Die Formularfunktionen `ECTR_TreeJSONFromForm(int $InstanzID, string $FileData,
+string $Document, string $Configuration, bool $TakeOver): string` und
+`ECTR_UpdateTreeJSONSourceAvailability(int $InstanzID, string $SourceMode,
+bool $UseSymconRoot): void` bedienen ausschließlich den Formularentwurf.
+`ECTR_RefreshTreeJSON(int $InstanzID): void` ist der begrenzte
+Aktualisierungs-Timercallback für JSON-Quellen.
 
 Beispiel mit synthetischer Instanz-ID (durch die eigene ID ersetzen):
 

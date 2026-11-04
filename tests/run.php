@@ -54,6 +54,7 @@ $tests = [
     __DIR__ . '/heatmap_window.php',
     __DIR__ . '/heatmap_comparison_plan.php',
     __DIR__ . '/tree_hierarchy.php',
+    __DIR__ . '/tree_json.php',
     __DIR__ . '/tree_preview.php',
     __DIR__ . '/tree_health.php',
     __DIR__ . '/graph_model.php',
@@ -74,6 +75,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test Tree JSON sources, public API and native form callbacks', 'php tests/gateway_gauges.php --tree-json'],
     ['Test native JSLive formatting', 'node tests/jslive_format.js'],
     ['Test all native JSLive renderers', 'node tests/jslive_renderers.js'],
     ['Test imported JSLive path and compass geometry', 'node tests/jslive_geometry.js'],

@@ -28,9 +28,10 @@ trait EChartsIPSViewTransport
     }
 
     /** @return array{statePath:string,socketPath:string} */
-    protected function EChartsIPSViewTransportOptions(): array
+    protected function EChartsIPSViewTransportOptions(bool $readOnly = false): array
     {
-        $channel = $this->EChartsIPSViewChannel();
+        // Pure candidate/output-budget checks must not create a persistent transport channel.
+        $channel = $readOnly ? str_repeat('0', 32) : $this->EChartsIPSViewChannel();
         $suffix = '/' . $this->InstanceID . '/' . $channel;
 
         return [

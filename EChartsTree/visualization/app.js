@@ -140,7 +140,7 @@
                     formatter: function (parameter) {
                         var data = parameter.data || {};
                         if (!labels.show(data, parameter.collapsed)) { return ''; }
-                        return String(data.name || '') + (style.showValues === true && data.kind === 'variable'
+                        return String(data.name || '') + (style.showValues === true
                             && data.displayValue ? '\n' + data.displayValue : '');
                     }
                 },
@@ -159,7 +159,12 @@
     }
 
     function render(state) {
-        if (retainOnTransientError(state, currentState, chart)) { return; }
+        var sameSource = (state && state.sourceContext) === (currentState && currentState.sourceContext);
+        if (sameSource && retainOnTransientError(state, currentState, chart)) {
+            var oldWarning = staleSourceWarning(currentState && currentState.chart && currentState.chart.tree);
+            if (oldWarning) { warningElement.textContent += ' ' + oldWarning; }
+            return;
+        }
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error);
@@ -171,8 +176,12 @@
         }
         errorElement.hidden = true;
         chartElement.hidden = false;
-        warningElement.textContent = translate('Only the first configured nodes are shown.');
-        warningElement.hidden = state.chart.tree.truncated !== true;
+        var source = state.chart.tree.source || {};
+        var warnings = [];
+        if (source.quality === 'stale') { warnings.push(staleSourceWarning(state.chart.tree)); }
+        if (state.chart.tree.truncated === true) { warnings.push(translate('Only the first configured nodes are shown.')); }
+        warningElement.textContent = warnings.join(' ');
+        warningElement.hidden = warnings.length === 0;
         var theme = normalizeTheme(state.chart.theme || 'auto');
         if (chart && currentTheme !== theme) {
             chart.dispose();
@@ -186,6 +195,12 @@
             });
         }
         treeSupport.updateChart(chart, buildOption(state.chart, theme));
+    }
+
+    function staleSourceWarning(tree) {
+        var source = tree && tree.source || {};
+        return source.quality === 'stale' ? translate('Tree JSON is invalid. Showing the last valid state from') + ' '
+            + new Date(source.acceptedAt * 1000).toLocaleString() + ' (' + String(source.diagnostic || '') + ').' : '';
     }
 
     window.handleMessage = function (message) {

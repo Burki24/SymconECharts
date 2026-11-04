@@ -1,6 +1,6 @@
 # Entwicklung von SymconECharts
 
-## Spezifiziert: JSON-Datenquelle für EChartsTree
+## JSON-Datenquelle für EChartsTree
 
 [ADR 0113](adr/0113-tree-json-data-source.md) und der kanonische
 [Tree-JSON-Vertrag 1.0](TREE_JSON_CONTRACT.md) legen eine zusätzliche Datenquelle
@@ -10,8 +10,31 @@ Schema und synthetisches Netzwerkbeispiel liegen beim Vertrag. `SourceMode`
 bleibt standardmäßig `objects`; Designer, zwölf Ebenen, 3000 Knoten, Vorschau-
 und Ausgabebudgets sowie die Objektbaum-/Health-Verträge bleiben erhalten.
 Gemeinsame Projektion, Renderer, Vorschau und vorhandene Helper werden genutzt.
-Dieser Stand enthält noch keine Laufzeitimplementierung. Die Pflichtmatrix im
-Vertrag hält Regressionen, Lebenszyklus-, Formular- und Live-Abnahme offen.
+Die Implementierung liegt librarylokal in `EChartsTreeJSON` und
+`EChartsTreeJSONSource`. Der gemeinsame `TreeHierarchy::Project` wird auch vom
+gefilterten Objektbaum verwendet; TreeSystemHealth behält seinen Quellenvertrag.
+Die Prüfung tatsächlicher HTML-Ausgabegrößen nutzt read-only Transportoptionen,
+ohne nebenbei einen IPSView-Kanal zu persistieren. JSON-Ausgabestände besitzen
+einen Quellenkontext, damit der Browser keine fremde alte Quelle als
+Transportfehler-Fallback erhält.
+
+`php tests/tree_json.php` prüft Format, ganze Hierarchien, Grenzen und Bindungen.
+`php tests/gateway_gauges.php --tree-json` verwendet das echte Modul und echte
+Callbackscripts mit vollständigen Symcon-Argumenten. Geplante und aktive
+Properties bleiben im Kernel-Doppel getrennt; Lesemodus, identischer Wiederaufruf,
+Sperren, konkurrierende Entwürfe, Speicherfehler, reine Vorschauen, VM_UPDATE,
+letzter Stand und Wiederanlauf werden geprüft. Die bisherigen Tiefen-/Health-
+Prüfungen sowie `node tests/tree_layout.js` bleiben grün.
+
+Der optionale Befehl `node tests/tree_json_browser.mjs <Chromium-Pfad>` startet
+nur eine anonyme lokale Fixture und ein isoliertes Browserprofil. Echte Browser-
+Mausradereignisse sind in beiden Ausgabe-Layouts als trusted empfangen;
+Zoom wechselt 1 → 1,1 → 1, ohne das äußere Dokument zu scrollen. Sichtbarer
+veralteter Stand, Quellenwechsel und fehlende JavaScript-Ausnahmen sind geprüft.
+Dies ist keine native Symcon-/IPSView-App-Abnahme. Die normale Browsersteuerung
+konnte wegen eines lokalen Kernel-Assetfehlers nicht starten; der Chromium-
+Nachweis ist eine getrennte CLI-Prüfung. Die MCP-/Host-Abnahme folgt nach dem
+Modulupdate mit temporärer Testinstanz; bestehende Bestände bleiben unberührt.
 
 ## Semantische JSLive-Quellenzuordnung
 
@@ -860,7 +883,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsPie | Aktuelle Anteile aus 1 bis 100 Quellen als Kreis, Donut oder Nightingale-Rose mit optionaler ID-stabiler Quellenauswahl und getrennten Auswahl-/Gesamtanteilen |
 | Gerät | EChartsScatter | Archivierte X/Y-Werte mit optionaler Bubble-Größe, ausschließlich zeitgleiche abgeschlossene Intervalle ohne Interpolation, in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsHeatmap | Eine Archivvariable als lokale Tages-/Wochentag-Stunden-Matrix mit separaten Kachel- und IPSView-Designern |
-| Gerät | EChartsTree | Begrenzte, lesende IP-Symcon-Objekthierarchie unter einer Kategorie oder Instanz in Kachel und optionalem IPSView-HTML |
+| Gerät | EChartsTree | Begrenzte, lesende IP-Symcon-Objekthierarchie oder eigene JSON-Hierarchie gemäß Vertrag 1.0 in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsTreeSystemHealth | Lesende Objekthierarchie mit expliziten Zustandsregeln, Schwellen und aggregiertem sichtbarem Anlagenzustand |
 | Gerät | EChartsGraph | Frei konfigurierte, ungerichtete Verbindungen zwischen ausgewählten Symcon-Objekten in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsGraphZ2M | Zuletzt exportierte Zigbee2MQTT-Netzwerkkarte mit gerichteten LQI-Verbindungen in Kachel und optionalem IPSView-HTML; ohne Scan-Auslösung |

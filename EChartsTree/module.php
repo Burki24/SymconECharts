@@ -20,6 +20,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsTransientRefresh;
+use SymconECharts\EChartsTreeJSONSource;
 use SymconECharts\EChartsTreePreview;
 use SymconECharts\TreeHierarchy;
 
@@ -42,6 +43,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsTreePreview.php';
 require_once __DIR__ . '/../libs/TreeHierarchy.php';
+require_once __DIR__ . '/../libs/EChartsTreeJSONSource.php';
 
 class EChartsTree extends IPSModuleStrict
 {
@@ -59,6 +61,7 @@ class EChartsTree extends IPSModuleStrict
     use ResponsiveVisualizationHelper;
     use VisualizationAssetHelper;
     use VisualizationThemeHelper;
+    use EChartsTreeJSONSource;
 
     private const GATEWAY_MODULE_ID = '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}';
     private const DATA_ID_FROM_PARENT = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
@@ -105,6 +108,7 @@ class EChartsTree extends IPSModuleStrict
             $this->RegisterPropertyInteger('MaxNodes', 80);
             $this->RegisterPropertyBoolean('IncludeHidden', false);
             $this->RegisterPropertyString('VariableNameFilter', '');
+            $this->RegisterTreeJSONSource();
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
                     match (gettype($default)) {
@@ -207,6 +211,8 @@ class EChartsTree extends IPSModuleStrict
                     $fields[] = $prefix . $name;
                 }
             }
+            $fields = array_merge($fields, ['SourceMode', 'JsonDocument', 'JsonVariableID', 'UseJsonObjectBindings']);
+            $form = $this->WithTreeJSONForm($form, $fields);
             return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECTR', $fields));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -311,7 +317,8 @@ class EChartsTree extends IPSModuleStrict
             $error = $this->GetConfigurationError();
             return $debugFlowResult = json_encode([
                 'valid'     => $error === null,
-                'lastError' => $error['Message'] ?? $this->ReadAttributeString('LastError')
+                'lastError' => $error['Message'] ?? $this->ReadAttributeString('LastError'),
+                ...($this->ReadPropertyString('SourceMode') === 'objects' ? [] : ['source' => $this->TreeJSONSourceDiagnostic()])
             ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -417,6 +424,9 @@ class EChartsTree extends IPSModuleStrict
                 $this->Initialize();
                 $this->PublishVisualizationState();
                 $this->PublishIPSViewHTML();
+            } elseif ($Message === VM_UPDATE && $this->ReadPropertyString('SourceMode') !== 'objects'
+                && in_array($SenderID, json_decode($this->ReadAttributeString('TreeJSONReferences'), true), true)) {
+                $this->SetTimerInterval('TreeJSONRefresh', max(1, 1000 - (int) (($this->TreeJSONNow() - (float) $this->GetBuffer('TreeJSONAttempt')) * 1000)));
             }
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -452,7 +462,43 @@ class EChartsTree extends IPSModuleStrict
         $useSymconRoot = (bool) ($values['UseSymconRoot'] ?? $this->ReadPropertyBoolean('UseSymconRoot'));
         $rootID = $useSymconRoot ? 0 : (int) ($values['RootObjectID'] ?? $this->ReadPropertyInteger('RootObjectID'));
         $variableNameFilter = trim((string) ($values['VariableNameFilter'] ?? $this->ReadPropertyString('VariableNameFilter')));
-        if ($useSymconRoot || ($rootID > 0 && IPS_ObjectExists($rootID))) {
+        if (($values['SourceMode'] ?? $this->ReadPropertyString('SourceMode')) !== 'objects') {
+            try {
+                $mode = $values['SourceMode'] ?? $this->ReadPropertyString('SourceMode');
+                if (!in_array($mode, ['json', 'variable'], true)) {
+                    throw new InvalidArgumentException('SOURCE_UNAVAILABLE:');
+                }
+                if ($mode === 'variable') {
+                    $id = (int) ($values['JsonVariableID'] ?? $this->ReadPropertyInteger('JsonVariableID'));
+                    if (!IPS_VariableExists($id) || IPS_GetVariable($id)['VariableType'] !== 3) {
+                        throw new InvalidArgumentException('SOURCE_UNAVAILABLE:');
+                    }
+                    $text = GetValue($id);
+                } else {
+                    $text = (string) ($values['JsonDocument'] ?? $this->ReadPropertyString('JsonDocument'));
+                }
+                $model = $this->ReadTreeJSONDocument($text, $values);
+                $tree = $this->ProjectTreeJSON($model, $values);
+                $this->CheckTreeJSONOutputs($tree, $values);
+                $this->CheckTreeJSONConfiguration($text, $values);
+                $previewRoot = $tree['root'];
+                $sample = false;
+            } catch (Throwable $exception) {
+                $problem = $this->TreeJSONProblem($exception);
+                $svg = EChartsBarPreview::Open(
+                    $palette,
+                    $title,
+                    false,
+                    $ipsView,
+                    $values,
+                    $this->Translate('Example structure'),
+                    $this->Translate('Tree preview'),
+                    $titleColor
+                );
+                return $svg . '<text x="30" y="160" fill="' . EChartsBarPreview::E($labelColor) . '">'
+                    . EChartsBarPreview::E($problem['code'] . ' ' . $problem['pointer'] . ': ' . $problem['message']) . '</text></svg>';
+            }
+        } elseif ($useSymconRoot || ($rootID > 0 && IPS_ObjectExists($rootID))) {
             try {
                 $tree = $this->ReadHierarchy(
                     $rootID,
@@ -504,21 +550,32 @@ class EChartsTree extends IPSModuleStrict
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         try {
-            $hierarchy = $this->ReadHierarchy(
+            $hierarchy = $this->ReadPropertyString('SourceMode') === 'objects' ? $this->ReadHierarchy(
                 $this->ReadPropertyBoolean('UseSymconRoot') ? 0 : $this->ReadPropertyInteger('RootObjectID'),
                 $this->ReadPropertyInteger('MaxDepth'),
                 $this->ReadPropertyInteger('MaxNodes'),
                 $this->ReadPropertyBoolean('IncludeHidden'),
                 $this->ReadPropertyString('VariableNameFilter')
-            );
+            ) : $this->ReadTreeJSONHierarchy();
         } catch (Throwable $exception) {
             $this->WriteAttributeString('LastError', $exception->getMessage());
             $this->DebugEChartsSetStatus(self::STATUS_READ_FAILED);
             throw $exception;
         }
-        $this->WriteAttributeString('LastError', '');
-        $this->DebugEChartsSetStatus(IS_ACTIVE);
-        return json_encode([
+        if (($hierarchy['source']['quality'] ?? 'ready') === 'ready') {
+            $this->WriteAttributeString('LastError', '');
+            $this->DebugEChartsSetStatus(IS_ACTIVE);
+        }
+        $json = json_encode($this->TreeChartData($hierarchy, $ipsView), JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if ($this->ReadPropertyString('SourceMode') !== 'objects' && strlen($json) > \SymconECharts\EChartsTreeJSON::MAXIMUM_BYTES - \SymconECharts\EChartsTreeJSON::TRANSPORT_RESERVE_BYTES) {
+            throw new RuntimeException('LIMIT_EXCEEDED:');
+        }
+        return $json;
+    }
+
+    private function TreeChartData(array $hierarchy, bool $ipsView): array
+    {
+        return [
             'schemaVersion' => 1,
             'family'        => 'tree',
             'theme'         => $this->EffectiveTheme($ipsView),
@@ -527,9 +584,10 @@ class EChartsTree extends IPSModuleStrict
                 'style'     => $this->ReadDesignStyle($ipsView),
                 'root'      => $hierarchy['root'],
                 'count'     => $hierarchy['count'],
-                'truncated' => $hierarchy['truncated']
+                'truncated' => $hierarchy['truncated'],
+                ...(isset($hierarchy['source']) ? ['source' => $hierarchy['source']] : [])
             ]
-        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        ];
     }
 
     /** @return array{root:array<string,mixed>,count:int,truncated:bool,variableIDs:list<int>} */
@@ -555,9 +613,9 @@ class EChartsTree extends IPSModuleStrict
         return $hierarchy;
     }
 
-    private function RenderTreeHTMLPage(bool $ipsView): string
+    private function RenderTreeHTMLPage(bool $ipsView, ?array $state = null, bool $readOnly = false): string
     {
-        $state = $this->BuildVisualizationState($ipsView);
+        $state ??= $this->BuildVisualizationState($ipsView);
         $compressedState = null;
         $stateJSON = json_encode($state, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         if (strlen($stateJSON) > TreeHierarchy::STARTUP_COMPRESSION_BYTES) {
@@ -582,6 +640,7 @@ class EChartsTree extends IPSModuleStrict
                 'Connect an active EChartsGateway.'                                 => $this->Translate('Connect an active EChartsGateway.'),
                 'The Tree could not be loaded.'                                     => $this->Translate('The Tree could not be loaded.'),
                 'Only the first configured nodes are shown.'                        => $this->Translate('Only the first configured nodes are shown.'),
+                'Tree JSON is invalid. Showing the last valid state from'           => $this->Translate('Tree JSON is invalid. Showing the last valid state from'),
                 'Data could not be refreshed. Showing the last available values.'   => $this->Translate(
                     'Data could not be refreshed. Showing the last available values.'
                 )
@@ -591,7 +650,7 @@ class EChartsTree extends IPSModuleStrict
                 'echartsThemes'             => EChartsAsset::ThemePalettes(),
                 ...$this->ResponsiveVisualizationLayoutOptions(!$ipsView),
                 'adaptToBackground'         => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
-                'ipsViewTransport'          => $ipsView ? $this->EChartsIPSViewTransportOptions() : null,
+                'ipsViewTransport'          => $ipsView ? $this->EChartsIPSViewTransportOptions($readOnly) : null,
                 'compressedStateGzipBase64' => $compressedState,
                 'treeMaxDepth'              => TreeHierarchy::MAXIMUM_DEPTH
             ],
@@ -609,6 +668,7 @@ class EChartsTree extends IPSModuleStrict
         $this->DebugEChartsSetStatus(IS_INACTIVE);
         $this->SetTimerInterval('TreeRefresh', 0);
         $this->SetTimerInterval('TransientRetry', 0);
+        $this->InitializeTreeJSONSource();
         if (IPS_GetKernelRunlevel() !== KR_READY) {
             return;
         }
@@ -632,12 +692,15 @@ class EChartsTree extends IPSModuleStrict
     private function GetConfigurationError(): ?array
     {
         $rootID = $this->ReadPropertyInteger('RootObjectID');
-        if ((!$this->ReadPropertyBoolean('UseSymconRoot')
+        $mode = $this->ReadPropertyString('SourceMode');
+        if (!in_array($mode, ['objects', 'json', 'variable'], true)
+            || ($mode === 'variable' && $this->ReadPropertyInteger('JsonVariableID') < 1)
+            || ($mode === 'objects' && ((!$this->ReadPropertyBoolean('UseSymconRoot')
             && ($rootID < 1 || !IPS_ObjectExists($rootID)
                 || !in_array(IPS_GetObject($rootID)['ObjectType'] ?? null, [0, 1], true)))
+                || mb_strlen(trim($this->ReadPropertyString('VariableNameFilter')), 'UTF-8') > 120))
             || $this->ReadPropertyInteger('MaxDepth') < 1 || $this->ReadPropertyInteger('MaxDepth') > TreeHierarchy::MAXIMUM_DEPTH
-            || $this->ReadPropertyInteger('MaxNodes') < 10 || $this->ReadPropertyInteger('MaxNodes') > TreeHierarchy::MAXIMUM_NODES
-            || mb_strlen(trim($this->ReadPropertyString('VariableNameFilter')), 'UTF-8') > 120) {
+            || $this->ReadPropertyInteger('MaxNodes') < 10 || $this->ReadPropertyInteger('MaxNodes') > TreeHierarchy::MAXIMUM_NODES) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Select a valid Tree root and limits.'];
         }
         if (!$this->IsValidDesign('')
@@ -723,13 +786,15 @@ class EChartsTree extends IPSModuleStrict
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
             return $this->ErrorState('The Tree could not be loaded.');
         }
-        return ['schemaVersion' => 1, 'family' => 'tree', 'status' => 'ready', 'chart' => $chart, 'error' => null];
+        return ['schemaVersion' => 1, 'family' => 'tree', 'status' => 'ready', 'chart' => $chart, 'error' => null,
+            ...($this->ReadPropertyString('SourceMode') === 'objects' ? [] : ['sourceContext' => $this->TreeJSONContext()])];
     }
 
     /** @return array<string,mixed> */
     private function ErrorState(string $message): array
     {
-        return ['schemaVersion' => 1, 'family' => 'tree', 'status' => 'error', 'chart' => null, 'error' => $message];
+        return ['schemaVersion' => 1, 'family' => 'tree', 'status' => 'error', 'chart' => null, 'error' => $message,
+            ...($this->ReadPropertyString('SourceMode') === 'objects' ? [] : ['sourceContext' => $this->TreeJSONContext()])];
     }
 
     private function PublishVisualizationState(): void

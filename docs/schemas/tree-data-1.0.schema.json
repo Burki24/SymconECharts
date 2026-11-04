@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "SymconECharts Tree data 1.0",
-    "description": "Specified contract; runtime support is not implemented yet. Cross-node semantics and byte budgets require additional validation.",
+    "description": "Tree JSON contract 1.0. Cross-node semantics, local object bindings, exact ID number types and byte budgets require additional runtime validation.",
     "type": "object",
     "additionalProperties": false,
     "required": [

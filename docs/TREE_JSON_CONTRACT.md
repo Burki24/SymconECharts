@@ -1,8 +1,8 @@
 # EChartsTree: JSON-Vertrag 1.0
 
-**Stand: spezifiziert, noch nicht implementiert.** Die folgenden Properties,
-Funktionen und Eingabewege sind der beschlossene Zielvertrag. Die aktuell
-verfügbare Objektbaumfunktion bleibt unverändert. Architekturentscheidung:
+**Stand: lokal implementiert und geprüft; MCP-/Host-Abnahme nach Modulupdate offen.**
+Die folgenden Properties, Funktionen und Eingabewege gelten für Tree-JSON 1.0.
+Die bisherige Objektbaumfunktion bleibt unverändert. Architekturentscheidung:
 [ADR 0113](adr/0113-tree-json-data-source.md).
 
 ## 1. Modul und Zweck
@@ -19,8 +19,8 @@ dieses Vertrags; das liefernde Skript übernimmt die Datenbeschaffung.
 
 ## 2. Datenquelle und Kompatibilität
 
-Die folgenden neuen Properties werden bei der späteren Implementierung additiv
-registriert; bestehende Properties werden weder umbenannt noch umgeschrieben.
+Die folgenden neuen Properties sind additiv registriert; bestehende Properties
+werden weder umbenannt noch umgeschrieben.
 
 | Property | Typ / Default | Vertrag |
 | --- | --- | --- |
@@ -181,7 +181,7 @@ oder fremde Objektzweige werden nicht durchsucht.
 
 ## 7. Öffentlicher Skriptzugriff
 
-**Geplante Signaturen; in diesem Spezifikationsstand noch nicht aufrufbar.**
+**Öffentliche Signaturen; verfügbar nach Installation dieses Modulstands.**
 Beide Funktionen verlangen alle genannten Argumente. `$InstanceID` bezeichnet
 die vorhandene EChartsTree-Instanz; `$JSON` ist der rohe Dokumenttext ohne
 Base64- oder zusätzliche String-JSON-Verpackung.
@@ -198,6 +198,10 @@ und einen lokalisierten Klartext `message`. Der Bericht ist auf 20 Meldungen
 begrenzt; `additionalMessages` zeigt weitere Befunde an. Er enthält kein
 vollständiges Dokument oder Variablenwertabbild. `documentHash` ist SHA-256
 der kanonischen Daten und dient der Wiederholungserkennung, nicht als Geheimnis.
+Die additive Bindungsübersicht enthält `bindingCount`, `bindingsTruncated`
+und `bindings` mit höchstens 100 aufgelösten lokalen Objektnamen und IDs.
+Größere Bindungsmengen erhalten einen deutlichen Berichtshinweis; ihre
+fachliche Prüfung bleibt vollständig, auch hinter dieser Berichtsgrenze.
 `visibleNodes` zählt die nach MaxDepth/MaxNodes geladenen Knoten vor dem
 Auf-/Zuklappen; es ist keine Zählung der gerade gezeichneten Beschriftungen.
 `tree.count` behält dieselbe Bedeutung wie bisher. Eine reine Tiefenauswahl
@@ -208,7 +212,7 @@ Beim Setter enthalten `applied` und `unchanged` denselben Dokumenthash;
 meldet er `SOURCE_MODE_MISMATCH`, ohne Quellenwahl oder Inhalt zu ändern.
 Ungültiger Inhalt wird vor jeder Konfigurationsänderung abgewiesen.
 Vor dem Speichern werden Modus, Grenzen und Bindungen unter einer
-instanzbezogenen Sperre erneut geprüft. Andere ausstehende Property-Änderungen
+instanzbezogenen Sperre erneut geprüft. Ausstehende Property-Änderungen
 führen zu `CONFIGURATION_PENDING`; der Setter darf sie nicht beiläufig
 anwenden. Die bereits angewandte Konfiguration und geplante Kernel-Properties
 werden dafür getrennt betrachtet; ein Entwurf ist keine aktive Quellenwahl.
@@ -220,6 +224,8 @@ kein zusätzliches `ApplyChanges()` aus.
 
 Nach einem erfolgreichen Speichern kann ein späterer Transportfehler auftreten:
 der Bericht unterscheidet deshalb `applied` von der aktuellen Anzeigeverfügbarkeit.
+`dataQuality` bezeichnet den Zustand der Datenbasis; `displayConfirmed=false`
+stellt klar, dass die Funktion keine Darstellung im Client bestätigt.
 Eine angewandte gültige Konfiguration wird nicht allein wegen einer unterbrochenen
 Visualisierung zurückgeschrieben. Ein nicht sicher bestätigter Speicherfehler
 wird als solcher gemeldet; die Funktion behauptet dann weder Erfolg noch
@@ -231,7 +237,7 @@ Ein Produzent für häufige Aktualisierungen verwendet stattdessen den
 Stringquellenmodus: dort ist ein `SetValue` der ausgewählten eigenen
 Datenvariable ausreichend und benötigt kein Anwenden der Tree-Konfiguration.
 
-Geplanter Skriptaufruf für die einmalige beziehungsweise seltene Übernahme
+Beispiel für die einmalige beziehungsweise seltene Übernahme
 eines gespeicherten Dokuments; die Instanz muss zuvor auf `json` gestellt sein.
 Die ID ist ein synthetischer Platzhalter:
 
@@ -265,6 +271,7 @@ if ($result['status'] === 'rejected') {
 | Datei-Aktionsargument | Höchstens 1398104 Base64-Zeichen; zusätzlich strikte Dekodierung und dekodiertes Bytebudget. |
 | JSON-Parser | Bestehender strikter Leser: UTF-8 ohne BOM, keine doppelten Schlüssel, höchstens 32 Verschachtelungen und 100000 JSON-Werte; keine stillen Typkonvertierungen. |
 | Gesamtes JSON-Modell | 1–3000 Knoten, höchstens zwölf Nachkommensebenen; keine Reparatur oder stille Kürzung ungültiger Eingaben. |
+| Flüchtiger Laufzeitsnapshot | Höchstens 1 MiB einschließlich vollständig aufgelöster Werttexte und Metadaten; Prüfung auch außerhalb des Ansichtsausschnitts. |
 | Konfigurierte Ansicht | `MaxDepth` 1–12 / Default 3; `MaxNodes` 10–3000 / Default 80, auch für kleine gültige JSON-Bäume. |
 | Vorschau | Bestehende Obergrenze 80 gezeichnete Knoten, zusätzlich konfigurierte Grenzen und Anfangstiefe. |
 | Ausgabe | Bestehende Kompressionsschwelle 200000 Bytes und 1-MiB-Symcon-Ausgabepuffer; komprimierte Ausgabe ist kein größeres Eingangslimit. |
@@ -317,6 +324,9 @@ hat weiterhin einen darstellbaren Baum und einen dauerhaften sichtbaren
 Warnhinweis. Die bisherigen Symcon-Statuscode-Bedeutungen werden nicht
 umnummeriert; Konfigurationsfehler und fehlgeschlagene Datenlesung bleiben
 unterscheidbar. Ein Fehler wird durch eine alte Anzeige nicht zu Erfolg.
+JSON-Transportzustände enthalten außerdem einen additiven `sourceContext`-
+Fingerabdruck. Beim Wechsel dieses Kontexts darf die Browseransicht keinen
+alten Baum durch ihre bisherige Transient-Fehlerbehandlung weiter anzeigen.
 Im Symcon-Objektmodus bleiben die bestehenden Fehlerpfade unverändert.
 Eine gültige Folgeänderung behebt den Fehler automatisch. Vorschauen zeigen
 ungültige JSON-Entwürfe als Fehler und verwenden keine unmarkierte Beispielstruktur.
@@ -324,8 +334,8 @@ ungültige JSON-Entwürfe als Fehler und verwenden keine unmarkierte Beispielstr
 Fehlerklassen umfassen `JSON_INVALID`, `FORMAT_UNSUPPORTED`, `LIMIT_EXCEEDED`,
 `DUPLICATE_ID`, `ROOT_INVALID`, `PARENT_MISSING`, `CYCLE_DETECTED`,
 `OBJECT_BINDING_INVALID`, `SOURCE_UNAVAILABLE` und `SOURCE_MODE_MISMATCH`.
-Der Skriptsetter meldet zusätzlich `CONFIGURATION_PENDING` bei anderen
-noch nicht angewandten Properties.
+Der Skriptsetter meldet zusätzlich `CONFIGURATION_PENDING` bei
+noch nicht angewandten Properties, einschließlich eines ausstehenden JSON-Entwurfs.
 Unbekannte Felder/Typen erhalten den betroffenen JSON-Pointer. Logs enthalten
 höchstens Fehlerklasse und bereinigten Pfad, keine Dokumente, Gerätekennungen,
 Werttexte oder Netzwerkdaten. Es gibt keinen automatischen Download externer
@@ -342,7 +352,7 @@ Designer, Titelabstände, HTML-SDK, IPSView-Transport, Frame-/Mausradbehandlung
 und Startzustandskompression werden wiederverwendet. Vorhandene Helper werden
 regulär eingebunden und nicht lokal verändert.
 
-| Bereich | Vor Umsetzung abzudeckende Abnahmefälle |
+| Bereich | Abnahmefälle für Implementierung und Live-Prüfung |
 | --- | --- |
 | Vertrag | Schema-/Beispielprüfung und semantische Prüfung; doppelte JSON-Schlüssel, UTF-8, unbekannte Version/Felder, falsche Typen, große Zahlen und Byte-/Parsergrenzen. |
 | Struktur | Ein-Knoten-Baum, Eltern nach Kindern, Namensgleichheit, verschiedene ID-Schreibweisen, Waisen, mehrere Wurzeln, Kreise außerhalb der Wurzel, Ebene 12/13 und 3000/3001 Knoten. |
@@ -354,6 +364,9 @@ regulär eingebunden und nicht lokal verändert.
 | Renderer | Kachel, IPSView und Vorschau; LR/RL/TB/BT/radial, sichere Werttexte, Aufklappen nach ID, neue Wurzel, Resize, Pan/Zoom und Mausrad/Scrollbedienung. |
 | Live | Temporäre Testinstanz mit anonymem Netzwerkbeispiel, Datei/Text, Skriptfunktion und Stringvariable; gültig/ungültig/gültig, Wiederanlauf und Nachweis unveränderter Bestände. |
 
-Schema und Beispiel sind noch kein Nachweis eines funktionierenden Imports.
-Implementierung, Regressionen und Live-Abnahme bleiben offen und werden im
-zugehörigen Umsetzungsschritt ergänzt.
+Die lokale Implementierung ist mit Modell-, Modul-, Callback-, Renderer- und
+Chromium-Prüfungen abgesichert. Befehle und die Trennung zwischen lokaler
+Einbettung und echter Host-Abnahme stehen in [ENTWICKLUNG](ENTWICKLUNG.md).
+Die MCP-Abnahme nach Modulupdate, die native Kachel und die tatsächliche
+IPSView-App mit JSON-Daten bleiben offen. Frühere Objektbaum-Abnahmen werden
+dadurch weder zurückgenommen noch als neue JSON-Abnahme ausgegeben.

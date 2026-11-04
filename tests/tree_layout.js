@@ -96,6 +96,27 @@ function render(style, data = root, width = 800, mode = 'symcon', height = 400, 
 const baseStyle = { treeLayout: 'orthogonal', orientation: 'LR', edgeShape: 'curve',
     initialDepth: 2, roamEnabled: true, showLabels: true, showValues: false, nodeSize: 10 };
 const tree = render(baseStyle);
+for (const mode of ['symcon', 'ipsview']) {
+    const json = render({ ...baseStyle, showValues: true }, { id: 'json:document:network', name: 'Network', kind: 'instance', displayValue: '1 Gbit/s', children: [] }, 800, mode);
+    assert.match(json.option.series[0].label.formatter({ data: json.option.series[0].data[0] }), /1 Gbit\/s/,
+        'JSON role instance must retain optional literal display values.');
+    const model = { family: 'tree', theme: 'dark', tree: { title: 'JSON', style: baseStyle, root,
+        count: 4, truncated: false, source: { mode: 'variable', quality: 'stale', acceptedAt: 1793771784, diagnostic: 'JSON_INVALID' } } };
+    json.refresh(model);
+    assert.equal(json.warningElement.hidden, false, 'A fresh client must see the server-side stale warning.');
+    assert.match(json.warningElement.textContent, /JSON_INVALID/);
+    assert.match(json.warningElement.textContent, /2026/);
+    json.message({ status: 'error', chart: null, error: 'The Tree could not be loaded.' });
+    assert.equal(json.chartElement.hidden, false);
+    assert.match(json.warningElement.textContent, /2026/, 'A transport failure must not erase stale-source timing.');
+    model.tree.source.quality = 'ready';
+    model.tree.source.diagnostic = null;
+    json.refresh(model);
+    assert.equal(json.warningElement.hidden, true, 'A valid next source update must clear the stale warning.');
+    json.message({ status: 'ready', chart: model, sourceContext: 'old-source' });
+    json.message({ status: 'error', chart: null, error: 'The Tree could not be loaded.', sourceContext: 'new-source' });
+    assert.equal(json.chartElement.hidden, true, 'A changed source must never retain the previous source chart as a transient fallback.');
+}
 assert.equal(render({ ...baseStyle, initialDepth: 12 }).option.series[0].initialTreeDepth, 12,
     'Tree must allow twelve initially open descendant levels.');
 assert.equal(tree.option.title.show, true);

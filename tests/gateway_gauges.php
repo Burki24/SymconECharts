@@ -190,7 +190,11 @@ function IPS_SetProperty(int $instanceID, string $name, mixed $value): bool
     if (!$target instanceof IPSModuleStrict || $target->InstanceID !== $instanceID) {
         throw new RuntimeException('Unknown test configuration target.');
     }
-    $target->SetTestProperty($name, $value);
+    if ($target instanceof TreeJSONKernelFixture) {
+        $target->PlanProperty($name, $value);
+    } else {
+        $target->SetTestProperty($name, $value);
+    }
 
     return true;
 }
@@ -200,6 +204,9 @@ function IPS_ApplyChanges(int $instanceID): bool
     $target = $GLOBALS['symconTestCopyTarget'] ?? null;
     if (!$target instanceof IPSModuleStrict || $target->InstanceID !== $instanceID) {
         throw new RuntimeException('Unknown test configuration target.');
+    }
+    if ($target instanceof TreeJSONKernelFixture) {
+        $target->CommitProperties();
     }
     $target->ApplyChanges();
 
@@ -384,6 +391,9 @@ function IPS_GetName(int $objectID): string
 /** @return array<string, bool> */
 function IPS_GetObject(int $objectID): array
 {
+    if (isset($GLOBALS['treeJSONObjectHook'])) {
+        ($GLOBALS['treeJSONObjectHook'])($objectID);
+    }
     if ($GLOBALS['symconTestLegacyObject'] ?? false) {
         return [];
     }
@@ -1187,6 +1197,11 @@ if (array_slice($argv, 1) === ['--graph-large']) {
 if (array_slice($argv, 1) === ['--tree-depth']) {
     require __DIR__ . '/tree_depth.php';
     echo "Twelve-level Tree integration verified.\n";
+    exit(0);
+}
+
+if (array_slice($argv, 1) === ['--tree-json']) {
+    require __DIR__ . '/tree_json_runtime.php';
     exit(0);
 }
 

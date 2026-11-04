@@ -2,6 +2,13 @@
 
 ## Neu
 
+- EChartsTree unterstützt eigene JSON-Hierarchien zusätzlich zum bisherigen
+  Symcon-Objektbaum: Datei-/Textübernahme, laufende Stringquelle und öffentliche
+  Prüf-/Übernahmefunktionen verwenden dieselbe vollständige Validierung.
+  Lokale Objektbindungen sind ausdrücklich freizugeben. Ungültige Folgewerte
+  bleiben als veralteter letzter Stand erkennbar. Bestehende Konfigurationen,
+  Designer und Schutzgrenzen bleiben erhalten.
+
 - Die Migrationsanleitung zeigt 14 bereitgestellte JSLive-/ECharts-
   Vergleichspaare und vier echte Formularausschnitte für Export, Paketprüfung,
   Planvorbereitung und Bestätigung. Die Haupt-README enthält ausgewählte
