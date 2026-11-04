@@ -1,5 +1,18 @@
 # Entwicklung von SymconECharts
 
+## Spezifiziert: JSON-Datenquelle für EChartsTree
+
+[ADR 0113](adr/0113-tree-json-data-source.md) und der kanonische
+[Tree-JSON-Vertrag 1.0](TREE_JSON_CONTRACT.md) legen eine zusätzliche Datenquelle
+im bestehenden Modul fest: Datei-/Textübernahme in ein gespeichertes Dokument,
+eine Stringvariable sowie lesende Prüfung und ausdrückliche Skriptübernahme.
+Schema und synthetisches Netzwerkbeispiel liegen beim Vertrag. `SourceMode`
+bleibt standardmäßig `objects`; Designer, zwölf Ebenen, 3000 Knoten, Vorschau-
+und Ausgabebudgets sowie die Objektbaum-/Health-Verträge bleiben erhalten.
+Gemeinsame Projektion, Renderer, Vorschau und vorhandene Helper werden genutzt.
+Dieser Stand enthält noch keine Laufzeitimplementierung. Die Pflichtmatrix im
+Vertrag hält Regressionen, Lebenszyklus-, Formular- und Live-Abnahme offen.
+
 ## Semantische JSLive-Quellenzuordnung
 
 ADR 0112 ergänzt die migrationsbezogene, zentrale Policy

@@ -1,0 +1,108 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "SymconECharts Tree data 1.0",
+    "description": "Specified contract; runtime support is not implemented yet. Cross-node semantics and byte budgets require additional validation.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "format",
+        "formatVersion",
+        "rootId",
+        "nodes"
+    ],
+    "properties": {
+        "format": {
+            "const": "de.burki24.symconecharts.tree"
+        },
+        "formatVersion": {
+            "const": "1.0"
+        },
+        "rootId": {
+            "$ref": "#/$defs/id"
+        },
+        "nodes": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3000,
+            "items": {
+                "$ref": "#/$defs/node"
+            }
+        }
+    },
+    "$defs": {
+        "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+            "not": {
+                "pattern": "[^A-Za-z0-9._:-]"
+            }
+        },
+        "node": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "parentId",
+                "name",
+                "kind"
+            ],
+            "not": {
+                "required": [
+                    "objectId",
+                    "displayValue"
+                ]
+            },
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "parentId": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/id"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "allOf": [
+                        {
+                            "pattern": "\\S"
+                        },
+                        {
+                            "not": {
+                                "pattern": "[\\u0000-\\u001f\\u007f-\\u009f]"
+                            }
+                        }
+                    ]
+                },
+                "kind": {
+                    "enum": [
+                        "category",
+                        "instance",
+                        "variable"
+                    ]
+                },
+                "displayValue": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "not": {
+                        "pattern": "[\\u0000-\\u001f\\u007f-\\u009f]"
+                    }
+                },
+                "objectId": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                }
+            }
+        }
+    }
+}

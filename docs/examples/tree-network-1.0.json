@@ -1,0 +1,46 @@
+{
+    "format": "de.burki24.symconecharts.tree",
+    "formatVersion": "1.0",
+    "rootId": "network",
+    "nodes": [
+        {
+            "id": "network",
+            "parentId": null,
+            "name": "Beispielnetzwerk",
+            "kind": "category"
+        },
+        {
+            "id": "gateway",
+            "parentId": "network",
+            "name": "Gateway",
+            "kind": "instance"
+        },
+        {
+            "id": "switch-office",
+            "parentId": "gateway",
+            "name": "Switch Büro",
+            "kind": "instance",
+            "displayValue": "1 Gbit/s"
+        },
+        {
+            "id": "access-point-office",
+            "parentId": "switch-office",
+            "name": "Access Point",
+            "kind": "instance",
+            "displayValue": "Verbunden"
+        },
+        {
+            "id": "switch-workshop",
+            "parentId": "gateway",
+            "name": "Switch Werkstatt",
+            "kind": "instance"
+        },
+        {
+            "id": "access-point-workshop",
+            "parentId": "switch-workshop",
+            "name": "Access Point",
+            "kind": "instance",
+            "displayValue": "Verbunden"
+        }
+    ]
+}
