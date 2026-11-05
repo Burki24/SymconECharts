@@ -82,7 +82,7 @@ Mitternacht, Wochen- oder Monatswechsel mit veralteten Grenzen weiterläuft.
 ## Nachweise
 
 - Wiederverwendungsentscheidung in [ADR 0017](0017-reuse-before-new-chart-development.md)
-- TimeSeries-Vertrag in [ADR 0018](0018-time-series-module.md)
+- TimeSeries-Vertrag in [ADR 0018](0018-first-time-series-family-and-archive-contract.md)
 - Formular und Modell in `EChartsTimeSeries/module.php`
 - gemeinsamer Renderer in `EChartsTimeSeries/visualization/app.js`
 - PHP-Vertrags- und Integrationstests sowie `tests/time_series_layout.js`

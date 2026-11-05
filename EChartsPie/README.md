@@ -36,9 +36,11 @@ verwenden, solange die optionale Normalisierung ausgeschaltet ist. Einheit und N
 übernommen oder je Quelle gesetzt werden; jede Quelle kann eine eigene Farbe
 erhalten.
 
-Negative Werte sind für Anteile nicht sinnvoll und werden nicht stillschweigend
-in positive Werte umgerechnet: Das Diagramm zeigt dann einen Fehler. Bei einer
-Summe von null zeigt es „Keine positiven Werte“ statt gleich großer
+Ohne Normalisierung werden negative Werte abgewiesen statt stillschweigend
+in positive Anteile umgerechnet. Die optionale Min/Max-Normalisierung erlaubt
+dagegen negative Originalwerte im festgelegten Vergleichsbereich. Bei einer
+Summe der dargestellten Werte beziehungsweise Gewichte von null zeigt das
+Diagramm „Keine positiven Werte“ statt gleich großer
 Scheibensegmente. Nullwerte bleiben als Quellen erhalten, besitzen aber keinen
 sichtbaren Sektor.
 

@@ -45,9 +45,12 @@ jeweils das JSLive-Original links und das übernommene ECharts-Diagramm rechts.
 
 ## 1. In JSLive exportieren
 
-1. JSLive einschließlich seiner regulären Helper aktualisieren. Benötigt wird
-   der getrennte Export nach Vertrag `de.burki24.jslive-echarts` in Version 1.0;
-   Standardvorlagen aus JSLive 0.111 und 0.113 werden anhand ihrer Prüfsummen erkannt.
+1. **JSLive Beta 0.113** oder einen neueren kompatiblen Stand einschließlich
+   seiner regulären Helper installieren; auch SymconECharts aktuell halten.
+   Benötigt wird **Export für SymconECharts** nach Vertrag
+   `de.burki24.jslive-echarts` in Version 1.0. Bereits vorhandene Pakete mit
+   geprüften Standardvorlagen aus 0.111 bleiben lesbar; deren technische
+   Erkennung ersetzt nicht den aktuellen JSLive-Exportbereich.
 2. In der JSLive-Chartinstanz **Export für SymconECharts** öffnen und das Paket
    mit der Endung `.jslive-echarts.json` herunterladen.
 3. Bereits gemeldete fehlende Quellen, nicht übersetzbare Darstellungen oder

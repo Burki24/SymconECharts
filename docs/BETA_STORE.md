@@ -1,39 +1,53 @@
-# Erste Beta: vorbereitete Store-Unterlagen
+# Öffentliche Beta: Store-Unterlagen und Veröffentlichungsstand
 
-**Technische Migrationsabnahme abgeschlossen:** Die zugesagte JSLive-Übernahme
-gemäß [Vertrag 1.0](JSLIVE_MIGRATION_CONTRACT.md) einschließlich J01 ist unter
-1.386 live bestanden. Alle 53 vorhandenen Testziele aus sechs Familien wurden
-mit aktuell bestätigten Plänen je zweimal erfolgreich wiederaufgerufen;
-Ziel-/Journal-IDs und geschützte Bestände blieben unverändert. Die frühere
-migrationsbedingte Freigabesperre ist damit technisch erledigt. Einzelheiten
-stehen in der [Migrationsabnahme](JSLIVE_MIGRATION_ABNAHME.md).
+Stand: 05.11.2026. **SymconECharts ist als Beta im Symcon-Modulstore
+veröffentlicht.** Der Eigentümer hat die Veröffentlichung bestätigt; die
+[öffentliche Ankündigung vom 03.11.2026](https://community.symcon.de/t/beta-modul-symconecharts-nachfolger-von-jslive-charts/144844)
+nennt die sofortige Verfügbarkeit. Die lesende Store-Abfrage bestätigt den
+Beta-Eintrag unter `de.burki24.symconecharts`. Eine Stable-Veröffentlichung
+wird damit nicht behauptet. Die frühere Terminplanung 31.10.2026 und die
+noch ausstehende Ersteinreichung sind keine aktuellen offenen Punkte mehr.
 
-Stand: 03.11.2026. Die folgenden Inhalte sind zur manuellen Übernahme in den
-Symcon-Entwicklerbereich vorbereitet. Durch diese Vorbereitung wurde keine
-Store-Vorlage gespeichert und keine Version eingereicht. Bundle-ID und Deutsch
-als erste Store-Sprache sind vom Eigentümer festgelegt; die Kontovorlage bleibt
-ungeprüft. Release-Commit samt CI/Metadaten, Store-Angaben und Termin sind vor
-Einreichung abschließend abzugleichen. Die bisherige Diagrammabnahme bleibt gültig.
-Die frühere Terminplanung 31.10.2026 ist überholt; ein neuer Veröffentlichungstermin
-wird hier nicht festgelegt. Die vorbereitete Changelog-Überschrift trägt noch
-das frühere Datum und ist nach der neuen Eigentümerfestlegung abzugleichen.
+Die Dokumentation auf `dev` beschreibt den Entwicklungsstand. Eine neu erzeugte
+Library-Version, erfolgreiche CI und die automatisch fortgeschriebene
+Changelog-Überschrift beweisen keine Veröffentlichung dieses Stands im Store.
+Die Versionsnummer des ersten Store-Stands wird nicht aus der heutigen
+Entwicklungsversion abgeleitet; die Ankündigung enthält keine Versionsnummer.
+Ein tatsächlich gewählter Store-Commit und dessen `library.json` sind dafür
+maßgeblich. Die damalige Kontokategorie und das vollständige Kontoformular
+wurden hier nicht unabhängig abgenommen; sie bleiben Grenzen des Nachweises,
+keine Behauptung einer noch ausstehenden Erstveröffentlichung.
 
-## Einreichungsdaten
+Die technische Migrationsabnahme gemäß
+[Vertrag 1.0](JSLIVE_MIGRATION_CONTRACT.md) einschließlich J01 ist unter 1.386
+live bestanden: 53 Ziele aus sechs Familien, je zwei Wiederaufrufe mit aktuell
+bestätigten Plänen und unveränderten Ziel-/Journal-IDs sowie geschützten
+Beständen. [Migrationsabnahme](JSLIVE_MIGRATION_ABNAHME.md).
+Die spätere Tree-JSON-Abnahme unter 1.403/1.404 und die Eigentümerbestätigung
+in Kachel/IPSView sind im [Tree-JSON-Vertrag](TREE_JSON_CONTRACT.md#abnahmestand-und-verbleibende-testlücken)
+gesondert dokumentiert. Diese späteren Nachweise werden nicht rückwirkend
+zum Umfang des ersten Store-Stands erklärt.
 
-| Feld | Vorbereiteter Inhalt |
+## Store-Angaben
+
+| Feld | Inhalt / Nachweis |
 | --- | --- |
 | Bundle-ID | `de.burki24.symconecharts` |
-| Kanal | Beta |
-| Versionsstand | Aus `library.json` genau des im Store ausgewählten Commits übernehmen. Technische Migrationsabnahme unter `1.386`; die unten belegte GitHub-CI zu `1.356` ist ein historischer Nachweis. |
-| Geplantes Veröffentlichungsdatum | Neu vom Eigentümer festzulegen. Frühere Planung: `31.10.2026`; keine Veröffentlichung erfolgt. |
-| Git-URL | `https://github.com/Burki24/SymconECharts` |
-| Sprache | Deutsch (`de`) |
-| Name | SymconECharts |
+| Kanal | Beta; im Store bestätigt. |
+| Versionsstand | `library.json` des tatsächlich im Store ausgewählten Commits; kann vom aktuellen `dev` abweichen. |
+| Erste öffentliche Ankündigung | `03.11.2026`; die frühere Planung `31.10.2026` ist überholt. |
+| Git-URL | `https://github.com/Burki24/SymconECharts` — Store-Quelle, keine Installationsanleitung über die Modulverwaltung. |
+| Sprache | Deutsch (`de`), vom Eigentümer festgelegt. |
+| Name / Installation | Im Symcon-Modulstore nach **SymconECharts** suchen und die Beta installieren. |
 | Dokumentation | `https://github.com/Burki24/SymconECharts/blob/dev/README.md` |
-| Kategorie | Visualisierung; die entsprechende angebotene Kategorie im Store-Dialog auswählen. Die konkrete Kategorien-ID wurde nicht im Konto geprüft. |
+| Kategorie | Visualisierung; die konkrete Konto-Kategorien-ID wurde hier nicht unabhängig geprüft. |
 | Mindestversion | Symcon 9.0 laut `library.json`; reale Abnahme auf Symcon 9.1/PHP 8.5. |
 | Lizenz | PolyForm Noncommercial 1.0.0; Fremdkomponenten gemäß `THIRD_PARTY_NOTICES.md`. |
-| Ausnahmen | Keine genehmigte Ausnahme beansprucht. Feste lesende Dateien für mitgelieferte Ressourcen, installierte Symcon-Icons und vorhandene Z2M-Netzwerkkarten sind dokumentiert. |
+| Ausnahmen | Keine genehmigte Ausnahme beansprucht. Lesende Ressourcenzugriffe, installierte Symcon-Icons und vorhandene Z2M-Netzwerkkarten sind dokumentiert. |
+
+Die folgenden deutschen Beschreibungstexte bleiben als Release-Unterlagen
+verfügbar. Ihre Existenz im Repository ist keine automatische Änderung am
+Store-Eintrag; weitere Einreichungen nimmt ausschließlich der Eigentümer vor.
 
 ## Beschreibung
 
@@ -83,24 +97,69 @@ es findet keine automatische Archivbereinigung statt.
 
 ## Einordnung der verbleibenden Hinweise
 
-| Hinweis | Stand für die Beta |
+| Hinweis | Stand |
 | --- | --- |
-| JSLive/J01 | Technisch abgeschlossen und unter 1.386 per MCP live bestanden: 53 vorhandene Ziele aus sechs Familien, je zwei Wiederaufrufe mit aktuell bestätigtem Plan. Aktuelle Plan- und Eigentumsprüfungen bleiben erhalten; alte Bestätigungen und ungültige Vorgänger werden abgewiesen. [Nachweis](JSLIVE_MIGRATION_ABNAHME.md). |
-| StateTimeline-Archivkonflikt | Am 29.10.2026 genauer untersucht und korrigiert: neun Gruppen schneller Wechsel besitzen jeweils genau einen positiven Dauereintrag. Die frühere pauschale Einordnung als Datenfehler war zu weitgehend. Die gemeinsame Gateway-Auswertung berücksichtigt diese eindeutige Information; alle neun Fälle sind auf der Testinstallation per MCP geprüft. Archive bleiben unverändert. Echte Mehrdeutigkeit bleibt ein Fehler. [Nachweis](STATE_TIMELINE_ARCHIVPRUEFUNG-2026-10-29.md). |
-| Weitere Testvarianten | Native Dateiauswahl-/Tabellen-/Download-Grenzbedienungen ohne separaten Nachweis, echte Touchgeräte, längere Last-/Speicherläufe, weitere Plattform-/Installationsvarianten und horizontale Mausradfälle ohne Wirkungsnachweis bleiben als Testlücken sichtbar. Daraus folgt keine neue Funktionsentwicklung und keine Behauptung, diese Varianten seien geprüft. Kachel, IPSView und die bereits bestätigte WoIst-/Helper-Mausradprüfung bleiben abgenommen. |
-| README-Badges | Alle fünf Pflicht-Badges sind bereits vorhanden: Symcon/PHPModul, Mindestversion 9.0, tatsächliche PolyForm-Lizenz sowie dynamische Style-/Test-Badges für dieses Repository und `dev`. |
-| Changelog | Die vorhandenen Beta-Einträge bleiben erhalten. Die markierte Versionsüberschrift folgt gemeinsam mit `library.json` dem Metadatenworkflow; das bisherige Datum ist vor Einreichung mit dem neu festgelegten Termin abzugleichen. Historische Releases bleiben unverändert. |
+| Veröffentlichung | Erste öffentliche Beta erfolgt und am 03.11.2026 angekündigt; keine offene Ersteinreichung. |
+| JSLive/J01 | Technisch abgeschlossen und unter 1.386 per MCP live bestanden. Aktuelle Plan- und Eigentumsprüfungen bleiben erforderlich. [Nachweis](JSLIVE_MIGRATION_ABNAHME.md). |
+| StateTimeline-Archivkonflikt | Eindeutige positive Archiv-Dauern werden seit der Korrektur vom 29.10.2026 ausgewertet; alle neun damaligen Fälle sind per MCP geprüft. Archive unverändert, echte Mehrdeutigkeit bleibt Fehler. [Nachweis](STATE_TIMELINE_ARCHIVPRUEFUNG-2026-10-29.md). |
+| Tree-JSON | Datei/Text, Stringquelle und öffentliche Funktionen funktional abgenommen. Weitere konkrete Testlücken bleiben im [Vertrag](TREE_JSON_CONTRACT.md#abnahmestand-und-verbleibende-testlücken). |
+| Weitere Testvarianten | Native Dateiauswahl-/Tabellen-/Download-Grenzbedienungen ohne separaten Nachweis, echte Touchgeräte, längere Last-/Speicherläufe, weitere Plattform-/Installationsvarianten und horizontale Mausradfälle ohne Wirkungsnachweis bleiben sichtbar. Die bestätigte WoIst-/Helper-Mausradprüfung wird nicht wieder geöffnet. |
+| README-Badges | Fünf Pflicht-Badges: Symcon/PHPModul, Mindestversion 9.0, PolyForm-Lizenz sowie dynamische Style-/Test-Badges für dieses Repository und `dev`. |
+| Changelog | Automatisch fortgeschriebene Beta-Übersicht bleibt auf ausdrücklichen Eigentümerwunsch aktiv. Datum = Beginn der öffentlichen Beta, Version = aktueller Entwicklungsstand, kein historischer Erstversions- oder Store-Verfügbarkeitsnachweis. |
 
 Die [gemeinsame Beta-Abnahme](BETA_ABNAHME-2026-10-28.md) und die
-[Systemprüfung](SYSTEMPRUEFUNG-2026-10-26.md) bleiben die Nachweise ihrer
-jeweiligen Testebenen. Die redaktionelle Release-Vorbereitung ist kein neuer
-Geräte-, Last- oder Produktivtest. Bekannte Grenzen bleiben erhalten.
+[Systemprüfung](SYSTEMPRUEFUNG-2026-10-26.md) bleiben Nachweise ihrer jeweiligen
+Testebenen. Die Veröffentlichung schließt diese tatsächlichen Testlücken nicht.
+Diese Dokumentationsbereinigung ist kein neuer Geräte-, Last- oder Produktivtest.
+
+## README-Prüfung auf dev am 05.11.2026
+
+Geprüft wurden alle 39 versionierten README-Dateien, darunter die Hauptanleitung
+und alle 32 Modul-READMEs. Die regulär gelieferte Helper-Dokumentation blieb
+unverändert. Der Abgleich umfasst Modulbestand, Installation, Voraussetzungen,
+Quellen-/Archivmodelle, Nutzungsgrenzen, Konfigurationsverweise, Ausgabevariablen,
+Skriptzugriff und Lizenzangaben. Die registrierten literalen Standardwerte
+stimmen mit den jeweiligen Modultabellen der Konfigurationsreferenz überein;
+gemeinsame IPSView-Entsprechungen sind dort zentral erklärt.
+
+156 dokumentierte API-Signaturen wurden gegen die vorhandenen Methoden geprüft.
+Alle drei JSON-Beispielblöcke sind syntaktisch gültig; alle 32 PHP-Beispielblöcke
+bestehen den Syntaxcheck, ohne ausgeführt zu werden. Relative Dateilinks und
+Sprungziele wurden geprüft. Ein alter ADR-Verweis auf den TimeSeries-Vertrag
+wurde korrigiert. Strukturprüfung und Metadaten-Regressionen bestehen.
+
+Die Benutzertexte nennen jetzt die veröffentlichte Beta, unterscheiden `dev`
+vom Store-Stand und erklären JSLive Beta 0.113 als Ausgangspunkt für neue
+Exporte. Die zuvor pauschalen Aussagen zu negativen Werten bei Pie und
+PictorialBar gelten nun ausdrücklich nur ohne Normalisierung. Keine Quellen-,
+Design-, Runtime- oder Schutzgrenzen wurden geändert. Für diese reine
+Dokumentationspflege wurde keine vollständige Qualitätssuite und kein neuer
+Live-Test ausgeführt; vorhandene Testlücken bleiben bestehen.
+
+## CI- und Metadatenprüfstand vom 05.11.2026
+
+Die letzte Prüfung vor dieser Dokumentationsbereinigung belegt den `dev`-Commit
+`9d371fc2f7a3a4c241cbb00ea658dc175e7920aa` mit Version `1.405`, Build
+`250185252` und `date=1793854899`. Build und Datum stammen korrekt aus dem
+Quellcommit `ee98624b7c9549c538d9aa57c9e7d6af1fd8ae42` vom 05.11.2026,
+06:01:39 Uhr Europe/Berlin. Auch dessen Style-/Testläufe sind erfolgreich.
+
+| Nachweis | Ergebnis |
+| --- | --- |
+| [Check Style auf 9d371fc](https://github.com/Burki24/SymconECharts/actions/runs/41971699540) | Erfolgreich. |
+| [Tests auf 9d371fc](https://github.com/Burki24/SymconECharts/actions/runs/41971699449) | Erfolgreich. |
+| [Metadatenlauf des Quellcommits ee98624](https://github.com/Burki24/SymconECharts/actions/runs/41971395217) | Erfolgreich; erzeugte Version 1.405. |
+| [Metadatenlauf auf 9d371fc](https://github.com/Burki24/SymconECharts/actions/runs/41971699436) | Absichtlich übersprungen; Bot-Commit erzeugt keine neue Version. |
+
+Dies ist kein Store-Veröffentlichungsnachweis für 1.405. Nach dem nächsten
+Eigentümer-Commit/Push sind dessen eigene abschließende CI- und Metadatenläufe
+zu prüfen; sie werden hier nicht vorweggenommen.
 
 ## Historischer CI- und Metadatenabgleich zu 1.356
 
 Die folgenden Nachweise gelten ausschließlich für den damaligen Commit.
 Die technische MCP-Migrationsabnahme unter 1.386 ersetzt keine Prüfung der
-GitHub-CI des künftig zur Einreichung ausgewählten Release-Commits.
+GitHub-CI eines später ausgewählten Release-Commits.
 
 Beim dokumentierten Abgleich am 31.10.2026 standen GitHub und der lokale Branch
 `dev` auf demselben HEAD: `8daade37edb98439b4c236ce8d72179285e851c3`. Der Metadatencommit enthält
@@ -127,56 +186,45 @@ CI-Nachweise gelten ausschließlich für den genannten Commit. Spätere
 Dokumentations-/Metadatencommits benötigen eigene erfolgreiche CI-Läufe;
 ihre Commit-IDs und Ergebnisse werden hier nicht vorweggenommen.
 
-## Automatischer Abgleich der vorbereiteten Beta
+## Automatische Fortschreibung während der Beta
 
-`<!-- symconecharts:prepared-beta -->` unmittelbar vor der datierten
-Beta-Überschrift aktiviert den Abgleich für genau diese Überschrift.
-Der vorhandene Metadatenworkflow übergibt `--prepared-beta-changelog CHANGELOG.md`
-an seinen Versionsplaner und nimmt `library.json` sowie `CHANGELOG.md` in
-denselben Bot-Commit auf. So erzeugt der Changelog-Abgleich keinen zusätzlichen
-Versionslauf. Das bestätigte Datum und alle Änderungseinträge bleiben erhalten.
-Fehlt die Markierung, wird keine Versionsüberschrift verändert. Mehrdeutige
-oder ungültige Markierungen stoppen den Lauf vor dem Schreiben beider Dateien.
+Die Markierung `<!-- symconecharts:prepared-beta -->` bleibt auf ausdrücklichen
+Eigentümerwunsch aktiv. Der vorhandene Metadatenworkflow übergibt
+`--prepared-beta-changelog CHANGELOG.md` an den Versionsplaner und schreibt
+`library.json` und die markierte Beta-Überschrift gemeinsam im Bot-Commit.
+Damit bleibt die Versionsnummer automatisch konsistent. Der folgende
+Bot-Commit erhöht die Version nicht erneut.
 
-Die freie Store-Versionsinformation oben wiederholt keine manuell gepflegte
-Library-Version. Maßgeblich sind die Metadaten des ausgewählten unveränderlichen
-Commits. Nach tatsächlich erfolgter Veröffentlichung die Vorbereitungsmarkierung
-und den Hinweis auf die noch ausstehende Veröffentlichung im folgenden
-Entwicklungsstand entfernen; die veröffentlichte Versionsüberschrift bleibt
-dadurch bei späteren Metadatenläufen unverändert. Ändert sich das geplante
-Veröffentlichungsdatum, muss der Eigentümer es vor der Einreichung berichtigen.
+Die Überschrift ist ausdrücklich eine fortgeschriebene Beta-Übersicht.
+Ihr Datum `03.11.2026` bezeichnet den Beginn der öffentlichen Beta, ihre
+Version den Entwicklungsstand. Sie darf nicht als historischer Nachweis
+verstanden werden, dass jede spätere Version an diesem Tag veröffentlicht
+wurde oder bereits im Store verfügbar ist. Andere datierte historische
+Überschriften werden nicht verändert. Einträge unter **Unveröffentlicht**
+bleiben dort, bis ihr tatsächlicher Veröffentlichungsstand belegt ist.
+Der Quellcommit-Zeitpunkt in `library.json` ist ebenfalls kein Store-Datum.
 
-`library.json` wurde für diesen Abgleich nicht manuell verändert. Es wird keine
-zukünftige Version oder noch nicht existierende Commit-ID vorweggenommen.
-Die neue Automatik ist lokal durch den erweiterten CLI-Regressionstest und
-`php tests/quality.php --fix` mit Exit 0 geprüft. Diese lokalen Nachweise ersetzen
-nicht die GitHub-CI des jeweils zur Einreichung gewählten Commits.
+Die bereits vor der öffentlichen Ankündigung vorhandenen Migrationsfunktionen
+und Dokumentationseinträge sind in der Beta-Übersicht zusammengeführt. Die
+späteren Radar-/Darstellungsmetadatenkorrekturen und Tree-JSON-Änderungen bleiben
+unter **Unveröffentlicht**, bis ihre jeweilige Store-Zuordnung feststeht.
+Bestehende Änderungseinträge wurden dabei erhalten; aus der Umordnung entsteht
+keine neue Versions- oder Veröffentlichungsbehauptung.
 
-Die ausstehenden Eigentümerschritte sind:
+## Weitere Beta-Veröffentlichungen
 
-1. Diese Release-Dokumentation selbst committen und auf `dev` pushen.
-   Die nächste Version wird regulär vom Metadatenworkflow bestimmt; sie wird
-   hier nicht vorweggenommen. Die Beta-Überschrift folgt automatisch derselben
-   Version. Vor der Einreichung den neuen Veröffentlichungstermin festlegen
-   und die vorbereitete Changelog-Überschrift sowie diese Unterlagen damit abgleichen.
-2. Den Metadatenlauf abwarten und für dessen abschließenden Commit erfolgreiche
-   Style-/Testläufe prüfen. Der übersprungene Metadatenlauf auf dem Bot-Commit
-   ist weiterhin beabsichtigt.
-3. Den freigegebenen Stand gemäß Projektworkflow per Pull Request nach `main`
-   übernehmen. Für genau den zur Einreichung gewählten Release-Commit ebenfalls
-   erfolgreiche Style-/Testläufe sowie gleiche Version in `library.json` und
-   Beta-Überschrift prüfen. Das Datum muss dem neu festgelegten Termin entsprechen.
-   Nicht einfach den früher geprüften SHA 8daade3 aus der Nachweistabelle übernehmen.
-4. Im Entwicklerbereich Bundle-ID, Beta-Kanal, diesen Commit, Deutsch, Name,
-   Beschreibung, Versionsinformation, Dokumentationslink und die tatsächlich
-   angebotene passende Kategorie abgleichen. Keine Stable-Freigabe behaupten.
-5. Die vollständige Vorlage kontrollieren. **Einreichen** veröffentlicht Beta
-   unmittelbar und bleibt eine ausdrückliche Eigentümeraktion.
+Die erste Einreichung ist erledigt. Für weitere Stände bleiben diese Schritte
+beim Eigentümer:
 
-H02 ist inhaltlich vorbereitet; die historische CI/Metadatenprüfung zu `1.356`
-und die technische Migrationsabnahme unter `1.386` sind belegt. Kontoabnahme,
-konkrete Kategorien-ID, neuer Veröffentlichungstermin sowie die abschließende CI
-nach Eigentümer-Commit/Push und Übernahme des Einreichungsstands bleiben offen.
+1. Gewünschte Änderungen committen und pushen; regulären Metadatenlauf und
+   erfolgreiche Style-/Testläufe des abschließenden Commits prüfen.
+2. Tatsächlich ausgewählten Store-Commit, dessen Version, Funktionsumfang und
+   Release-Texte abgleichen. Einen gepushten `dev`-Stand nicht allein deshalb
+   als veröffentlicht bezeichnen.
+3. Store-Angaben kontrollieren und eine weitere Beta nur ausdrücklich einreichen.
+   Bekannte Testlücken mitführen; eine Stable-Freigabe ist ein eigener Schritt.
+
+Diese Unterlagen ändern weder Store-Konto noch Version, Build oder Datum.
 Commit, Push, Merge und Einreichung führt ausschließlich der Eigentümer aus.
 
 Offizielle Grundlage: [Symcon: Einreichen](https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/store/einreichen/).

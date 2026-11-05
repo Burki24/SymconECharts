@@ -193,8 +193,10 @@ persistierte Einstellungen; die unabhängigen Quellreferenzen bleiben gleich.
 Die Observer-Meldung tritt auch an einer reinen Symcon-Zahlenkachel auf und ist
 weiterhin kein nachgewiesener Chartfehler.
 Die vereinbarte technische Migrationsabnahme einschließlich J01 ist unter 1.386
-abgeschlossen. Release-Commit, dessen CI/Metadaten, Termin und Store-Einreichung
-bleiben gesonderte Eigentümerschritte gemäß den [Beta-Unterlagen](BETA_STORE.md).
+abgeschlossen. Die erste öffentliche Beta ist seit 03.11.2026 im Modulstore
+verfügbar. Nachfolgende Beta-Stände und ihre CI-/Metadatennachweise sind von
+dieser Erstveröffentlichung getrennt zu betrachten; siehe
+[Beta-Unterlagen](BETA_STORE.md).
 Die bereits abgeschlossene
 Nutzungsgrenzen-Roadmap und die Eigentümerabnahmen bestehender Modelle bleiben gültig.
 
@@ -216,8 +218,9 @@ Der gemeinsame Gateway-Hook wird gemäß [ADR 0107](adr/0107-shared-gateway-hook
 koordiniert und routet zum tatsächlichen Datenflussparent. Peer-Aufrufe erfolgen
 nur bei aktiven Schnittstellen, damit ein Bibliotheksreload keine noch nicht
 verfügbaren Modulinterfaces anspricht. Die gemeinsame Beta-Abnahme steht im
-[Bericht vom 28.10.2026](BETA_ABNAHME-2026-10-28.md), die vorbereiteten deutschen
-Store-Texte und verbleibenden Eigentümerschritte unter [Beta-Store](BETA_STORE.md).
+[Bericht vom 28.10.2026](BETA_ABNAHME-2026-10-28.md), der aktuelle
+Veröffentlichungsstand, deutsche Store-Texte und verbleibende Testlücken unter
+[Beta-Store](BETA_STORE.md).
 
 Heatmap ergänzt gemäß [ADR 0106](adr/0106-heatmap-comparison-views.md) optionale
 1–4-Vergleichsansichten. Ein familienlokaler Plan kombiniert die bestehende
@@ -1325,10 +1328,15 @@ Veröffentlichungen bleiben manuelle, ausdrücklich freizugebende Schritte.
 Die ausdrücklich mit `<!-- symconecharts:prepared-beta -->` markierte
 Beta-Überschrift im Changelog folgt über `--prepared-beta-changelog` derselben
 berechneten Version. Der Bot committet beide Dateien gemeinsam; Datum und
-Inhalte bleiben erhalten. Ohne Markierung bleiben historische Überschriften
-unverändert. Nach erfolgter Veröffentlichung die Markierung im folgenden
-Entwicklungsstand entfernen. Die Store-Unterlagen wiederholen keine feste
-Versionsnummer im kopierbaren Freitext; der genaue Store-Commit bestimmt sie.
+Inhalte bleiben erhalten. Auf ausdrücklichen Eigentümerwunsch bleibt die
+Markierung nach der Erstveröffentlichung aktiv: Dieser Abschnitt ist eine
+fortgeschriebene Beta-Übersicht, kein unveränderlicher historischer
+Release-Eintrag. Sein Datum benennt den Beginn der öffentlichen Beta am
+03.11.2026; seine Version folgt dem aktuellen Entwicklungsstand. Aus der
+Überschrift folgt nicht, dass diese Version bereits im Store veröffentlicht
+ist. Andere historische Überschriften bleiben unverändert. Die Store-Unterlagen
+wiederholen keine feste Versionsnummer im kopierbaren Freitext; der genaue
+Store-Commit bestimmt sie.
 Aktuelle CI-Nachweise und der Freigabeablauf stehen unter [Beta-Store](BETA_STORE.md).
 
 Für die technische Projektbasis sind Struktur- und JSON-Prüfungen,

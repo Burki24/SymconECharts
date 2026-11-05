@@ -14,6 +14,12 @@ enthält **31 Diagrammmodule und ein gemeinsames Gateway**. Native Symcon-Kachel
 und optionale IPSView-WebContent-Widgets verwenden dieselben Quellen; ihr
 Design kann gemeinsam oder unabhängig eingestellt werden.
 
+Die Library ist als **Beta im Symcon-Modulstore** unter **SymconECharts**
+verfügbar. Rückmeldungen und Fragen können im
+[Ankündigungsthema der Community](https://community.symcon.de/t/beta-modul-symconecharts-nachfolger-von-jslive-charts/144844)
+gestellt werden. Diese Anleitung beschreibt den aktuellen `dev`-Stand;
+der installierte Store-Stand kann davon abweichen.
+
 ## Voraussetzungen
 
 - IP-Symcon 9.0 oder 9.1 mit PHP 8.5.
@@ -28,7 +34,7 @@ Design kann gemeinsam oder unabhängig eingestellt werden.
 ## Installation und erstes Diagramm
 
 1. Den **Symcon-Modulstore** öffnen, nach **SymconECharts** suchen und die
-   Library installieren. Sie enthält das Gateway und alle Diagrammmodule.
+   Beta installieren. Sie enthält das Gateway und alle Diagrammmodule.
 2. Eine Instanz der gewünschten Diagrammfamilie anlegen. Beim ersten Diagramm
    ein `EChartsGateway` als Parent erstellen; weitere Diagramme mit diesem
    vorhandenen Gateway verbinden. Zusätzliche Gateways sind zulässig, im
@@ -164,6 +170,11 @@ und Budgetregeln. Fehlende Archivwerte werden nicht pauschal durch null ersetzt.
 Ein größeres Zeitfenster erhöht kein Ladebudget automatisch.
 
 ## Migration von JSLive nach ECharts
+
+Für den Export wird **JSLive Beta 0.113** oder ein neuerer kompatibler Stand
+mit **Export für SymconECharts** benötigt. Beide Libraries einschließlich
+ihrer regulären Helper vor der Übernahme aktualisieren. Ein alter allgemeiner
+JSLive-Konfigurationsexport ist kein ECharts-Übernahmepaket.
 
 Das [Gateway](EChartsGateway/README.md#4-einrichten-der-instanzen-in-symcon)
 prüft JSLive-Exportpakete des Vertrags 1.0 zunächst lesend. Der anschließende

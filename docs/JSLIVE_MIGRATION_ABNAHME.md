@@ -166,8 +166,12 @@ und Speicherläufe sowie nicht erreichte Plattformvarianten. Die Observer-Meldun
 der Vergleichsumgebung ist auch ohne Chart reproduziert und kein nachgewiesener
 ECharts-Fehler; sie wird nicht als behoben ausgegeben.
 
-Eine Beta-Freigabe oder Store-Einreichung wird hier nicht erteilt. Vor Einreichung
-sind tatsächlicher Release-Commit, dessen CI und Metadaten sowie Store-Texte und
-Termin erneut abzugleichen. Frühere vorbereitete Angaben bleiben historisch
-nachvollziehbar; Version oder Datum werden nicht erfunden. Commit, Push, Merge
-und Einreichung verbleiben beim Eigentümer.
+Die erste öffentliche Beta wurde durch den Eigentümer veröffentlicht und am
+03.11.2026 in der
+[Community angekündigt](https://community.symcon.de/t/beta-modul-symconecharts-nachfolger-von-jslive-charts/144844).
+Die damalige Einreichung ist kein offener Arbeitsschritt mehr. Dieser Bericht
+belegt seine konkrete Migrationstestebene und ersetzt keine Abnahme späterer
+Änderungen. Aktueller Status: [Beta-Unterlagen](BETA_STORE.md). Tatsächliche
+Testlücken bleiben erhalten. Für weitere Releases sind der gewählte Commit,
+dessen CI/Metadaten und Store-Texte erneut abzugleichen. Commit, Push, Merge
+und weitere Einreichungen verbleiben beim Eigentümer.

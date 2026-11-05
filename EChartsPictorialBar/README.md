@@ -18,9 +18,11 @@ Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
 3. Titel sowie Symbolform, Ausrichtung und Sortierung festlegen.
 4. Optional die IPSView-Ausgabe einschalten und deren Design unabhängig gestalten.
 
-Es werden ausschließlich endliche, nichtnegative Werte unterstützt. Null ist
-gültig und bleibt als Kategorie mit Wert erhalten, zeichnet aber keinen
+Ohne Normalisierung werden ausschließlich endliche, nichtnegative Werte
+unterstützt. Null ist gültig und bleibt als Kategorie mit Wert erhalten, zeichnet aber keinen
 Symbolbalken. Negative Werte und ungeeignete Quellen werden sichtbar gemeldet.
+Mit der unten beschriebenen Min/Max-Normalisierung sind auch negative
+Originalwerte zulässig; der Symbolbalken zeigt dann ihr normalisiertes Gewicht.
 Gleiche Anzeigenamen sind erlaubt; jede Variable bleibt separat erhalten.
 Änderungen der Quellen aktualisieren die Anzeige automatisch.
 

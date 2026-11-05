@@ -571,9 +571,11 @@ Kantenglättung von verschobener Geometrie, fehlenden Reihen oder falschen Farbe
 
 Die vereinbarte technische Migrationsabnahme einschließlich J01 ist damit
 abgeschlossen. Tatsächliche Testlücken bleiben in der Migrationsabnahme benannt.
-Vor Einreichung sind tatsächlicher Umfang, Release-Commit samt CI/Metadaten,
-Store-Unterlagen und Termin erneut abzugleichen. Es gibt durch diese
-Spezifikation keine neue Library-Version, keinen Termin und keine Veröffentlichung.
+Die erste öffentliche Beta ist seit 03.11.2026 veröffentlicht; der Status und
+die Nachweise stehen in den [Beta-Unterlagen](BETA_STORE.md). Für weitere
+Einreichungen sind tatsächlicher Umfang, Release-Commit samt CI/Metadaten
+und Store-Unterlagen erneut abzugleichen. Diese Spezifikation veröffentlicht
+selbst keine neue Version und verändert keine Release-Metadaten.
 
 ### Grenzen der lesenden Vorschau
 

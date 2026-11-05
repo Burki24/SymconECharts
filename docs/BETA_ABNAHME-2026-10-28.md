@@ -1,5 +1,12 @@
 # Gemeinsame Beta-Abnahme am 28.10.2026
 
+Nachtrag 05.11.2026: Die erste Beta ist durch den Eigentümer veröffentlicht
+und seit der [Community-Ankündigung vom 03.11.2026](https://community.symcon.de/t/beta-modul-symconecharts-nachfolger-von-jslive-charts/144844)
+öffentlich verfügbar. Aussagen zu noch ausstehenden Einreichungsschritten
+beschreiben unten den damaligen Prüfstand, keine aktuellen Blocker. Den
+aktuellen Stand führt [BETA_STORE.md](BETA_STORE.md); die tatsächlichen
+Testgrenzen dieses historischen Berichts bleiben erhalten.
+
 Nachtrag 29.10.2026: Der unten historisch beschriebene StateTimeline-Archivfall
 ist inzwischen durch Auswertung eindeutiger nativer Archiv-Dauern korrigiert
 und per MCP nachgeprüft. Es wurden keine Archivdaten bereinigt. Die damalige
@@ -84,12 +91,15 @@ mit Zweck und Umfang anzukündigen; diese Regel ist in `AGENTS.md` festgehalten.
   Mausradfälle ohne bisherigen Wirkungsnachweis und mehrstündige Last-/
   Speichertests bleiben offen. Die bereits bestätigte WoIst-/Helper-Mausrad-
   Prüfung wird nicht erneut als Lücke geführt.
-- Der StateTimeline-Archivdatenkonflikt bleibt eine Datenfrage. Der Bericht
+- Der damalige StateTimeline-Archivfall wurde nach dieser Abnahme anhand
+  eindeutiger Archiv-Dauern korrigiert und per MCP bestätigt; siehe den Nachtrag
+  vom 29.10.2026 oben. Echte mehrdeutige Zustände bleiben Fehler. Der Bericht
   vom [26.10.2026](SYSTEMPRUEFUNG-2026-10-26.md) enthält die übrigen vorhandenen
   Last-, Fehler-, Wiederanlauf- und Debugnachweise samt deren Grenzen.
-- Die Store-Unterlagen sind inhaltlich vorbereitet. Einreichungs-Commit,
-  Kontokategorie und tatsächliche Vorlage müssen vor der Eigentümereinreichung
-  feststehen. Symcon-Store-Freigabe wird daraus nicht abgeleitet.
+- Zum damaligen Prüfstand waren die Store-Unterlagen inhaltlich vorbereitet.
+  Einreichungs-Commit, Kontokategorie und tatsächliche Vorlage mussten vor der Eigentümereinreichung
+  feststehen. Die inzwischen erfolgte Veröffentlichung ist im Nachtrag oben
+  dokumentiert; dieser technische Testbericht selbst erteilt keine Store-Freigabe.
 
 ## Abschließende Qualitätssuite
 

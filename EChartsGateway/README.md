@@ -78,6 +78,9 @@ Siehe auch die [Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsgateway)
 
 Die vollständige [Migrationsanleitung](../docs/JSLIVE_MIGRATION.md) erklärt
 Export, Zuordnung, Vorschauen, Bestätigung und sicheren Wiederanlauf.
+Für einen neuen Export **JSLive Beta 0.113** oder einen neueren kompatiblen
+Stand mit **Export für SymconECharts** verwenden. Beide Libraries samt
+regulären Helpern vor der Übernahme aktualisieren.
 
 **Konfigurationsseite:** Unter **JSLive-Export und Metadatenprüfung** die Datei
 `.jslive-echarts.json` auswählen. Die erste Ansicht prüft nur Paket und Metadaten;

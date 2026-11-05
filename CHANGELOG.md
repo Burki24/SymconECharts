@@ -9,6 +9,49 @@
   bleiben als veralteter letzter Stand erkennbar. Bestehende Konfigurationen,
   Designer und Schutzgrenzen bleiben erhalten.
 
+## Fixes
+
+- `ECTR_SetTreeJSON` behandelt Kernel-Getter korrekt als Abruf aktiver Werte.
+  Das neue Dokument wird vorgemerkt und angewandt; anschließend werden die
+  vollständige aktive Konfiguration und verbleibende Änderungen geprüft.
+  Bereits erkennbare fremde Entwürfe bleiben gesperrt. Abweichungen werden als
+  Speicherfehler gemeldet, ohne fremde Zustände automatisch zurückzuschreiben.
+
+- Die Tree-JSON-Datenquelle verwendet die vorhandene abgesicherte IPSView-
+  Variablenauflösung statt einer im echten Symcon-SDK fehlenden `VariableExists`-
+  Modulmethode. Datei/Text, Stringquelle und öffentliche Funktionen werden dadurch
+  nicht mehr vor der JSON-Prüfung mit `SOURCE_UNAVAILABLE` abgewiesen. Eigene
+  Ausgabevariablen bleiben als Wertquellen gesperrt; Designs und Budgets bleiben gleich.
+
+- Der JSLive-Import erkennt bei ausdrücklich zugeordneten numerischen Quellen
+  bekannte Standardfelder und exakt gleiche Integer-/Float-Grenzen als
+  gleichwertige Darstellungsmetadaten. Der vollständige Plan nennt die Regeln;
+  Originalformatierung, aktuelle Quell-Fingerabdrücke und strenge Prüfungen für
+  echte Format-, Aktions- und Archivänderungen bleiben erhalten. Bestehende
+  Instanzen und Quelldarstellungen werden nicht umgestellt.
+
+- Der JSLive-Radar-Import akzeptiert leere und gefüllte Strichmusterlisten
+  einschließlich ihrer Reihenfolge und Längen. Die vollständige Feldbilanz
+  berücksichtigt deren Einträge; ungültige Typen, unbekannte Felder und
+  überschrittene Listenbudgets bleiben gesperrt. Bestehende Textwerte bleiben
+  verwendbar; Quellen, Archivwerte und gespeicherte Designs werden nicht geändert.
+
+<!-- symconecharts:prepared-beta -->
+# 03.11.2026 - Version 1.405 (Beta)
+
+Fortgeschriebene Beta-Übersicht: Die erste öffentliche Beta ist seit
+03.11.2026 im Symcon-Modulstore verfügbar; siehe
+[Community-Ankündigung](https://community.symcon.de/t/beta-modul-symconecharts-nachfolger-von-jslive-charts/144844).
+Auf Wunsch des Eigentümers folgt die Versionsnummer dieser Überschrift
+weiterhin automatisch dem aktuellen `dev`-Stand. Das Datum bezeichnet den
+Beginn der öffentlichen Beta, nicht das Veröffentlichungsdatum jeder späteren
+Version. Die Überschrift ist kein Nachweis, dass der aktuelle Entwicklungsstand
+bereits im Store verfügbar ist. Die genaue Version des ersten Store-Stands
+wird daraus nicht rückwirkend abgeleitet. Änderungen oberhalb stehen weiterhin
+unter **Unveröffentlicht**, bis ihr jeweiliger Veröffentlichungsstand feststeht.
+
+## Neu
+
 - Die Migrationsanleitung zeigt 14 bereitgestellte JSLive-/ECharts-
   Vergleichspaare und vier echte Formularausschnitte für Export, Paketprüfung,
   Planvorbereitung und Bestätigung. Die Haupt-README enthält ausgewählte
@@ -29,7 +72,7 @@
   aus JSLive 0.113 mit ihren exakten LF-/CRLF-Prüfsummen. Bisherige Vorlagen
   bleiben verwendbar; unbekannte oder geänderte Templates bleiben gesperrt.
   Native Modelle und Schutzbudgets ändern sich nicht. Der Migrationsbericht
-  trennt bestätigte Abnahmen von der noch ausstehenden gezielten Live-Prüfung.
+  trennt bestätigte Abnahmen von tatsächlich verbleibenden Testlücken.
 
 - Der JSLive-Progressbar-Import übernimmt validierte Hex-Farben, begrenzte
   Verlaufsressourcen und eingebettete SVG-Füllbilder einschließlich statischer
@@ -61,112 +104,6 @@
   Bestehende Instanzen, Quellen, Actions, Designs und Archivwerte bleiben
   unverändert. Teilentwürfe und fehlende Zielregeln werden ausdrücklich
   gekennzeichnet. Der vollständige native Übernahmeplan ergänzt diese Prüfung.
-
-## Fixes
-
-- `ECTR_SetTreeJSON` behandelt Kernel-Getter korrekt als Abruf aktiver Werte.
-  Das neue Dokument wird vorgemerkt und angewandt; anschließend werden die
-  vollständige aktive Konfiguration und verbleibende Änderungen geprüft.
-  Bereits erkennbare fremde Entwürfe bleiben gesperrt. Abweichungen werden als
-  Speicherfehler gemeldet, ohne fremde Zustände automatisch zurückzuschreiben.
-
-- Die Tree-JSON-Datenquelle verwendet die vorhandene abgesicherte IPSView-
-  Variablenauflösung statt einer im echten Symcon-SDK fehlenden `VariableExists`-
-  Modulmethode. Datei/Text, Stringquelle und öffentliche Funktionen werden dadurch
-  nicht mehr vor der JSON-Prüfung mit `SOURCE_UNAVAILABLE` abgewiesen. Eigene
-  Ausgabevariablen bleiben als Wertquellen gesperrt; Designs und Budgets bleiben gleich.
-
-- Der JSLive-Import erkennt bei ausdrücklich zugeordneten numerischen Quellen
-  bekannte Standardfelder und exakt gleiche Integer-/Float-Grenzen als
-  gleichwertige Darstellungsmetadaten. Der vollständige Plan nennt die Regeln;
-  Originalformatierung, aktuelle Quell-Fingerabdrücke und strenge Prüfungen für
-  echte Format-, Aktions- und Archivänderungen bleiben erhalten. Bestehende
-  Instanzen und Quelldarstellungen werden nicht umgestellt.
-
-- Der JSLive-Radar-Import akzeptiert leere und gefüllte Strichmusterlisten
-  einschließlich ihrer Reihenfolge und Längen. Die vollständige Feldbilanz
-  berücksichtigt deren Einträge; ungültige Typen, unbekannte Felder und
-  überschrittene Listenbudgets bleiben gesperrt. Bestehende Textwerte bleiben
-  verwendbar; Quellen, Archivwerte und gespeicherte Designs werden nicht geändert.
-
-- Identische Bestätigungen getrennter JSLive-Neuanlagen mit `separateFrom`
-  verwenden das nachgewiesene neue Ziel wieder und setzen unterbrochene Anlagen
-  fort, statt mit `PLAN_CHANGED` abzubrechen. Nach Modulupdates genügt ein frisch
-  geprüfter und bestätigter Plan bei unveränderter Zielrevision; historische
-  Plan-Hashes bleiben erhalten. Alte Bestätigungen bleiben ungültig.
-  Bestehende Journale bleiben nutzbar;
-  geänderte Ziele, fremde Vorgänger und uneindeutige Erzeugungslücken bleiben
-  geschützt. Quellen, Archive und Designs werden nicht verändert.
-
-- Übernommene JSLive-Pfadfüllungen zeichnen Hintergrundränder mit der
-  ursprünglichen Maskenform. `line` und `rainbow` bleiben im Füllmodus wie im
-  Original leer, ohne zusätzlichen grauen Strich. Wertanzeigen, Quellen,
-  Archivwerte und gespeicherte Designs bleiben erhalten.
-
-- Übernommene JSLive-Fortschrittsanzeigen behalten Originalfarben, Verläufe und
-  Transparenzen eigener SVGs sowie die ursprünglichen Glyphen der Textvorlage.
-  Einpassung, natürliche SVG-Bildmaße, Ränder, tatsächlich wirksame Linienenden
-  und Wertanzeigen folgen der Quellvorlage. Originalinstanzen, Quellen,
-  Archivwerte und gespeicherte Designs bleiben unverändert.
-
-- Übernommene lineare JSLive-Gauges zeigen Fortschrittsbalken und Grundstrecke
-  in den konfigurierten Vollfarben samt Transparenz. Skalen zeigen die numerischen
-  Quellbeschriftungen ohne zusätzlich angehängte Nullen; die Präzision der Wertbox
-  bleibt erhalten. Innere und äußere Zeigernaben übernehmen den Quellschatten.
-
-- Übernommene JSLive-Gauges berücksichtigen die wirksamen Vorlagenmaße,
-  Schriftmaßstäbe und Textbereiche für radiale, horizontale, vertikale und
-  Kompass-Instrumente. Plattenverläufe, Skalen, Zeiger und Naben folgen der
-  Quellprojektion; gespeicherte Einstellungen und Originalwerte bleiben erhalten.
-- Automatische Hintergründe und Rahmen importierter Datenlabels übernehmen
-  wieder die jeweilige Serien- beziehungsweise Segmentfarbe samt Transparenz.
-  Pie- und Mehrfachring-Beschriftungen berücksichtigen ihre radialen Anker und
-  Ausrichtungen; Nullsegmente erzeugen keine leeren Beschriftungskästen.
-
-- Übernommene JSLive-Fortschrittsanzeigen zeichnen den angezeigten Anteil auch
-  auf Pfaden mit mehreren Bögen korrekt. Eigene Strichpfade, Strichmuster und
-  umgekehrte Richtung bleiben erhalten; Werte, Quellen und Designs ändern sich
-  nicht.
-- Historische JSLive-Radaranzeigen ordnen die Klassen wie das Original im
-  Uhrzeigersinn an. Bei Windrosen liegt Osten rechts und Westen links;
-  Klassen, Werte und Tooltip-Zuordnungen bleiben unverändert.
-
-- Übernommene Gauge- und Pie-Instanzen nehmen ihre Aktualisierung nach einem
-  Modulupdate automatisch wieder auf, sobald Gateway und Quellen bereit sind.
-  Der gemeinsame Import-Startpfad behält bei vorübergehend fehlgeschlagener
-  Initialisierung den begrenzten Aktualisierungstakt bei. Ein erneutes Speichern
-  ist nicht erforderlich; ungültige Modelle bleiben gesperrt. Quellen,
-  Archivwerte, Designs und bestehende Aktualisierungsintervalle bleiben erhalten.
-
-- JSLive-Erstellungsnachweise bleiben beim Modulupdate erhalten. Ein bereits
-  durch den früheren Create-Ablauf neu gesiegelter Nachweis lässt sich nach
-  erneuter Bestätigung mit derselben Zielinstanz fortsetzen, sofern Eigentum und
-  vollständiger Zielzustand weiterhin stimmen. Der ursprüngliche Nachweis bleibt
-  dokumentiert; geänderte Ziele werden weiterhin nicht überschrieben.
-- Das JSLive-Importjournal ist seitenweise abrufbar. Formular und Prüfungen
-  weiterer Gateways laden begrenzte Metadatenseiten statt großer Konfigurations-
-  Snapshots. Eine Änderung zwischen Seiten verlangt ein erneutes Laden. Der
-  bisherige Vollabruf bleibt für kleine Journale erhalten und verweist bei
-  größeren Journalen ausdrücklich auf die Seitenfunktion.
-
-- Das JSLive-Importjournal unterscheidet geplante und aktive Symcon-
-  Konfigurationen. Neue Übernahmen brechen nicht mehr vor dem Anwenden mit
-  einem fälschlichen `TARGET_CHANGED` ab. Bereits an dieser Stelle unterbrochene
-  Importe lassen sich nach erneuter Planprüfung mit derselben Zielinstanz und
-  Journal-ID fortsetzen. Bestehende Quellen, Archivwerte und Designs bleiben erhalten.
-
-- Dateiauswahl, erneutes Prüfen sowie Diagramm- und Seitenauswahl der
-  JSLive-Importvorschau übergeben alle von Symcon verlangten Argumente.
-  Dadurch brechen die Formularaktionen nicht mehr mit „Wrong parameter count“
-  ab. Bestehende Instanzen, Quellen und Archivwerte bleiben unverändert.
-
-<!-- symconecharts:prepared-beta -->
-# 31.10.2026 - Version 1.405 (Beta)
-
-Vorbereiteter Stand für die erste Beta; die Veröffentlichung im Module Store
-steht noch aus.
-
-## Neu
 
 - Heatmap bietet optional bis zu vier benannte Vergleichsansichten für mehrere
   Archivquellen oder Zeiträume, mit gemeinsamer Navigation und gemeinsamer oder
@@ -1019,6 +956,77 @@ steht noch aus.
   nach einem festgelegten maximalen Zeitabstand sichtbar unterbrechen.
 
 ## Fixes
+
+- Identische Bestätigungen getrennter JSLive-Neuanlagen mit `separateFrom`
+  verwenden das nachgewiesene neue Ziel wieder und setzen unterbrochene Anlagen
+  fort, statt mit `PLAN_CHANGED` abzubrechen. Nach Modulupdates genügt ein frisch
+  geprüfter und bestätigter Plan bei unveränderter Zielrevision; historische
+  Plan-Hashes bleiben erhalten. Alte Bestätigungen bleiben ungültig.
+  Bestehende Journale bleiben nutzbar;
+  geänderte Ziele, fremde Vorgänger und uneindeutige Erzeugungslücken bleiben
+  geschützt. Quellen, Archive und Designs werden nicht verändert.
+
+- Übernommene JSLive-Pfadfüllungen zeichnen Hintergrundränder mit der
+  ursprünglichen Maskenform. `line` und `rainbow` bleiben im Füllmodus wie im
+  Original leer, ohne zusätzlichen grauen Strich. Wertanzeigen, Quellen,
+  Archivwerte und gespeicherte Designs bleiben erhalten.
+
+- Übernommene JSLive-Fortschrittsanzeigen behalten Originalfarben, Verläufe und
+  Transparenzen eigener SVGs sowie die ursprünglichen Glyphen der Textvorlage.
+  Einpassung, natürliche SVG-Bildmaße, Ränder, tatsächlich wirksame Linienenden
+  und Wertanzeigen folgen der Quellvorlage. Originalinstanzen, Quellen,
+  Archivwerte und gespeicherte Designs bleiben unverändert.
+
+- Übernommene lineare JSLive-Gauges zeigen Fortschrittsbalken und Grundstrecke
+  in den konfigurierten Vollfarben samt Transparenz. Skalen zeigen die numerischen
+  Quellbeschriftungen ohne zusätzlich angehängte Nullen; die Präzision der Wertbox
+  bleibt erhalten. Innere und äußere Zeigernaben übernehmen den Quellschatten.
+
+- Übernommene JSLive-Gauges berücksichtigen die wirksamen Vorlagenmaße,
+  Schriftmaßstäbe und Textbereiche für radiale, horizontale, vertikale und
+  Kompass-Instrumente. Plattenverläufe, Skalen, Zeiger und Naben folgen der
+  Quellprojektion; gespeicherte Einstellungen und Originalwerte bleiben erhalten.
+- Automatische Hintergründe und Rahmen importierter Datenlabels übernehmen
+  wieder die jeweilige Serien- beziehungsweise Segmentfarbe samt Transparenz.
+  Pie- und Mehrfachring-Beschriftungen berücksichtigen ihre radialen Anker und
+  Ausrichtungen; Nullsegmente erzeugen keine leeren Beschriftungskästen.
+
+- Übernommene JSLive-Fortschrittsanzeigen zeichnen den angezeigten Anteil auch
+  auf Pfaden mit mehreren Bögen korrekt. Eigene Strichpfade, Strichmuster und
+  umgekehrte Richtung bleiben erhalten; Werte, Quellen und Designs ändern sich
+  nicht.
+- Historische JSLive-Radaranzeigen ordnen die Klassen wie das Original im
+  Uhrzeigersinn an. Bei Windrosen liegt Osten rechts und Westen links;
+  Klassen, Werte und Tooltip-Zuordnungen bleiben unverändert.
+
+- Übernommene Gauge- und Pie-Instanzen nehmen ihre Aktualisierung nach einem
+  Modulupdate automatisch wieder auf, sobald Gateway und Quellen bereit sind.
+  Der gemeinsame Import-Startpfad behält bei vorübergehend fehlgeschlagener
+  Initialisierung den begrenzten Aktualisierungstakt bei. Ein erneutes Speichern
+  ist nicht erforderlich; ungültige Modelle bleiben gesperrt. Quellen,
+  Archivwerte, Designs und bestehende Aktualisierungsintervalle bleiben erhalten.
+
+- JSLive-Erstellungsnachweise bleiben beim Modulupdate erhalten. Ein bereits
+  durch den früheren Create-Ablauf neu gesiegelter Nachweis lässt sich nach
+  erneuter Bestätigung mit derselben Zielinstanz fortsetzen, sofern Eigentum und
+  vollständiger Zielzustand weiterhin stimmen. Der ursprüngliche Nachweis bleibt
+  dokumentiert; geänderte Ziele werden weiterhin nicht überschrieben.
+- Das JSLive-Importjournal ist seitenweise abrufbar. Formular und Prüfungen
+  weiterer Gateways laden begrenzte Metadatenseiten statt großer Konfigurations-
+  Snapshots. Eine Änderung zwischen Seiten verlangt ein erneutes Laden. Der
+  bisherige Vollabruf bleibt für kleine Journale erhalten und verweist bei
+  größeren Journalen ausdrücklich auf die Seitenfunktion.
+
+- Das JSLive-Importjournal unterscheidet geplante und aktive Symcon-
+  Konfigurationen. Neue Übernahmen brechen nicht mehr vor dem Anwenden mit
+  einem fälschlichen `TARGET_CHANGED` ab. Bereits an dieser Stelle unterbrochene
+  Importe lassen sich nach erneuter Planprüfung mit derselben Zielinstanz und
+  Journal-ID fortsetzen. Bestehende Quellen, Archivwerte und Designs bleiben erhalten.
+
+- Dateiauswahl, erneutes Prüfen sowie Diagramm- und Seitenauswahl der
+  JSLive-Importvorschau übergeben alle von Symcon verlangten Argumente.
+  Dadurch brechen die Formularaktionen nicht mehr mit „Wrong parameter count“
+  ab. Bestehende Instanzen, Quellen und Archivwerte bleiben unverändert.
 
 - StateTimeline und die Zustandsdauer-Auswertung von CalendarPie berücksichtigen
   schnelle Zustandswechsel innerhalb derselben Sekunde, wenn genau ein Eintrag
