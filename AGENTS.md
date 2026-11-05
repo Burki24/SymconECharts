@@ -100,8 +100,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   unveränderten Defaults sowie Knoten-/Suchbudgets. Projektion, SVG-Geometrie
   und flüchtige Ansichtsverwaltung liegen zentral unter `libs`; Zustandsregeln
   und deren Bewertung verbleiben ausschließlich bei TreeSystemHealth.
-  ADR 0113 ergänzt eine lokal implementierte, noch live abzunehmende
-  zusätzliche JSON-Datenquelle ausschließlich für EChartsTree. Der kanonische
+  ADR 0113 ergänzt eine zusätzliche JSON-Datenquelle ausschließlich für
+  EChartsTree. Sie ist implementiert und per MCP sowie durch den Eigentümer
+  in Kachel und IPSView bestätigt. Der kanonische
   Vertrag steht in `docs/TREE_JSON_CONTRACT.md`: Datei/Text, Stringvariable und
   ausdrücklicher Skriptzugriff teilen Validierung und bestehende Darstellung.
   `SourceMode=objects` bleibt kompatibler Default; Modulidentität, Designs,

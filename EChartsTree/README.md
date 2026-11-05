@@ -97,13 +97,79 @@ bestehenden Diagramm aktualisiert.
 4. Eine gültige Datei mit **Geprüfte Datei in Entwurf übernehmen** kopieren.
    Auswahl und Prüfung speichern noch nichts. Erst **Anwenden** speichert den Entwurf.
 
-Jeder Knoten erhält eine eindeutige stabile String-ID, einen Namen, die Rolle
-`category`, `instance` oder `variable` sowie die ID seines Elternknotens.
-Die einzige Wurzel hat `parentId: null`. Gleichnamige Geräte dürfen mehrfach
-vorkommen; sie müssen unterschiedliche IDs erhalten. Geschwister folgen ihrer
-Reihenfolge im JSON. Ein statischer `displayValue` kann beispielsweise die
-Verbindungsgeschwindigkeit beschreiben. Knoten und Werttexte sind Daten,
-keine ausführbaren ECharts-Einstellungen.
+#### So muss die JSON-Datei aufgebaut sein
+
+Die Datei beschreibt einen Baum: oben steht genau ein Startpunkt (die
+**Wurzel**), darunter stehen Geräte, Gruppen oder Werte. Jeder Eintrag heißt
+**Knoten**. Alle Knoten stehen gemeinsam in der Liste `nodes`; ihre Verbindung
+entsteht durch `parentId`, nicht durch verschachtelte Listen.
+
+Dieses vollständige Beispiel können Sie als `mein-baum.json` speichern und
+direkt importieren. Es benötigt keine vorhandenen Symcon-Objekte:
+
+```json
+{
+  "format": "de.burki24.symconecharts.tree",
+  "formatVersion": "1.0",
+  "rootId": "netzwerk",
+  "nodes": [
+    { "id": "netzwerk", "parentId": null, "name": "Mein Netzwerk", "kind": "category" },
+    { "id": "router", "parentId": "netzwerk", "name": "Router", "kind": "instance" },
+    { "id": "switch-buero", "parentId": "router", "name": "Switch Büro", "kind": "instance" },
+    { "id": "verbindung", "parentId": "switch-buero", "name": "Verbindung", "kind": "variable", "displayValue": "1 Gbit/s" }
+  ]
+}
+```
+
+Damit entsteht die Folge **Mein Netzwerk → Router → Switch Büro → Verbindung**.
+Die Datei besteht aus vier Pflichtfeldern:
+
+| Feld | Einfach erklärt |
+| --- | --- |
+| `format` | Immer genau `"de.burki24.symconecharts.tree"` übernehmen. |
+| `formatVersion` | Immer den Text `"1.0"` einschließlich Anführungszeichen verwenden. |
+| `rootId` | Die `id` des obersten Knotens, hier `"netzwerk"`. |
+| `nodes` | Die Liste aller Knoten einschließlich der Wurzel. |
+
+Jeder Knoten benötigt diese vier Angaben:
+
+| Feld | Einfach erklärt |
+| --- | --- |
+| `id` | Selbst gewählte, eindeutige Textkennung, etwa `"switch-buero"`. Keine Symcon-Objekt-ID. Bei Aktualisierungen beibehalten. |
+| `parentId` | Die `id` des direkt übergeordneten Knotens. Nur die Wurzel erhält `null` ohne Anführungszeichen. |
+| `name` | Der sichtbare Name; Umlaute und Leerzeichen sind erlaubt. |
+| `kind` | Darstellungsrolle: `"category"` für Gruppen, `"instance"` für Geräte oder `"variable"` für Werte. Dadurch werden keine Symcon-Objekte angelegt. |
+
+Optional ergänzt `displayValue` einen festen Werttext wie `"1 Gbit/s"`.
+Er steht im Tooltip; **Werte anzeigen** blendet ihn auch an der Beschriftung ein.
+Statt eines festen Textes kann `objectId` ein vorhandenes lokales Symcon-Objekt
+binden. Dafür müssen lokale Objektbindungen ausdrücklich freigegeben sein;
+`objectId` und `displayValue` dürfen nie gemeinsam an einem Knoten stehen.
+Für den Einstieg genügt das Beispiel ohne Objektbindungen.
+
+Beim Erstellen eigener Dateien beachten:
+
+- Als **UTF-8 ohne BOM** mit der Endung `.json` speichern. JSON verwendet doppelte
+  Anführungszeichen; Kommentare und ein zusätzliches Komma nach dem letzten
+  Listeneintrag sind ungültig.
+- Jede `id` darf nur einmal vorkommen. Sie beginnt mit einem Buchstaben oder
+  einer Ziffer und enthält nur `A–Z`, `a–z`, `0–9`, Punkt, Unterstrich,
+  Doppelpunkt oder Bindestrich; maximal 128 Zeichen. Groß-/Kleinschreibung zählt.
+- Genau ein Knoten hat `parentId: null`; seine `id` muss zu `rootId` passen.
+  Jede andere `parentId` muss auf einen vorhandenen Knoten zeigen. Ein Knoten
+  darf weder sein eigener Elternknoten sein noch über andere Knoten zu sich
+  selbst zurückführen.
+- Gleiche sichtbare Namen sind erlaubt, gleiche IDs nicht. Geschwister werden
+  in ihrer Reihenfolge innerhalb von `nodes` dargestellt. Namen dürfen bis zu
+  120, feste Werttexte bis zu 100 Zeichen lang sein; Steuerzeichen sind unzulässig.
+- Nur die beschriebenen Felder verwenden. Die vollständige Datei darf höchstens
+  1 MiB, 3000 Knoten und zwölf Ebenen unterhalb der Wurzel enthalten. Die
+  eingestellten Ansichtsgrenzen können weniger Knoten laden.
+
+Für ein weiteres Gerät ergänzen Sie einen neuen Eintrag in `nodes`, vergeben
+eine neue `id` und tragen bei `parentId` beispielsweise `"router"` ein. So
+erscheint das Gerät neben dem Switch unter demselben Router. Knoten und
+Werttexte sind Daten, keine ausführbaren ECharts-Einstellungen.
 
 Der [vollständige JSON-Vertrag 1.0](../docs/TREE_JSON_CONTRACT.md) beschreibt
 Felder, lokale `objectId`-Bindungen und Fehlermeldungen. Für eigene

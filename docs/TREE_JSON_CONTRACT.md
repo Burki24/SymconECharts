@@ -1,6 +1,7 @@
 # EChartsTree: JSON-Vertrag 1.0
 
-**Stand: lokal implementiert und geprüft; MCP-/Host-Abnahme nach Modulupdate offen.**
+**Stand: implementiert; MCP-Abnahme unter 1.403/1.404 sowie funktionale
+Eigentümerabnahme in Kachel und IPSView abgeschlossen (05.11.2026).**
 Die folgenden Properties, Funktionen und Eingabewege gelten für Tree-JSON 1.0.
 Die bisherige Objektbaumfunktion bleibt unverändert. Architekturentscheidung:
 [ADR 0113](adr/0113-tree-json-data-source.md).
@@ -382,6 +383,25 @@ regulär eingebunden und nicht lokal verändert.
 Die lokale Implementierung ist mit Modell-, Modul-, Callback-, Renderer- und
 Chromium-Prüfungen abgesichert. Befehle und die Trennung zwischen lokaler
 Einbettung und echter Host-Abnahme stehen in [ENTWICKLUNG](ENTWICKLUNG.md).
-Die MCP-Abnahme nach Modulupdate, die native Kachel und die tatsächliche
-IPSView-App mit JSON-Daten bleiben offen. Frühere Objektbaum-Abnahmen werden
-dadurch weder zurückgenommen noch als neue JSON-Abnahme ausgegeben.
+Die funktionale MCP-Abnahme und die Eigentümerbestätigung für JSON-Daten in
+Kachel und IPSView sind abgeschlossen. Frühere Objektbaum-Abnahmen bleiben
+unabhängig davon erhalten.
+
+### Abnahmestand und verbleibende Testlücken
+
+| Nachweis | Ergebnis |
+| --- | --- |
+| MCP, Version 1.403, Symcon 9.1 / PHP 8.5.8 | Datei-/Text-Callbacks mit vollständigen Argumenten, Entwurfsübernahme ohne Speichern, Stringquelle mit automatischem VM_UPDATE, schnelle Folgewerte, ungültig/gültig, alter Stand samt unverändertem Zeitpunkt, Quellenwechsel und erneutes Anwenden geprüft. Bindungen, eigene Ausgabesperren und strukturelle Grenzen geprüft. |
+| MCP, Version 1.404, Symcon 9.1 / PHP 8.5.8 | `ECTR_SetTreeJSON`: Erstübernahme `applied`/`ready`, identische Wiederholung `unchanged`, ausstehende Änderungen bei gleichem und neuem Dokument `CONFIGURATION_PENDING`. Aktive Konfiguration und fremder Entwurf bleiben erhalten; der Entwurf lässt sich anschließend unverändert anwenden. Zweite Dokumentübernahme und Ablehnung ungültigen JSONs bestanden. |
+| Bestandsschutz | Temporäre Testobjekte entfernt. Alle 139 bestehenden ECharts-Instanzen bei der Setter-Abnahme hinsichtlich Konfiguration, Änderungsstatus, Verbindung, Name, Parent und Ident unverändert. Keine Quellen oder Archive geändert. |
+| Tatsächliche Ausgabe | Eigentümer bestätigt die JSON-Datenquelle in Kachel und IPSView. Lokale Renderer-/Chromium-Prüfungen bleiben davon getrennte Nachweise. |
+
+Nicht durch diese funktionale Abnahme belegt sind ein vollständiger
+Symcon-Prozessneustart mit gültiger beziehungsweise ungültiger JSON-Quelle,
+echte gleichzeitige Fremdschreibzugriffe während der Aktivierung und reale
+Speicher-/Transportausfälle; die zugehörigen Fehlerpfade sind lokal geprüft.
+Ein Langzeit-/Volllasttest mit 3000 Knoten, eine gesonderte Symcon-9.0-Prüfung
+und eine vollständige Geräte-/Touchmatrix bleiben offen. Die lokale
+Mausradprüfung ist belegt; ein eigener JSON-spezifischer Praxisnachweis der
+Mausrad-/Scrollbedienung in beiden tatsächlichen Clients ist nicht gesondert
+protokolliert. Diese Testlücken heben die bestätigte Funktionsabnahme nicht auf.

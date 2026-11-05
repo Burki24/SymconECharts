@@ -34,7 +34,12 @@ trusted Mausradereignisse in beiden Richtungen ändern den Zoom ohne
 äußeres Scrollen. Stale-Hinweis, neue Quelle und JavaScript-Ausnahmen werden
 geprüft; ein Screenshot bleibt im temporären Verzeichnis. Keine Installation
 wird angesprochen. Dieser Nachweis ersetzt keine native Kachel-/IPSView-App-
-Abnahme nach dem Modulupdate.
+Abnahme. Die nachfolgende MCP-Abnahme unter 1.403/1.404 sowie die
+Eigentümerbestätigung in Kachel und IPSView sind abgeschlossen. Erstübernahme,
+Wiederholung und die Sperre bei fremden Entwürfen wurden unter 1.404 direkt im
+Kernel geprüft; temporäre Testobjekte sind entfernt und bestehende Bestände
+unverändert. Konkrete Nachweise und verbleibende Testlücken stehen im
+[Tree-JSON-Vertrag](../docs/TREE_JSON_CONTRACT.md#abnahmestand-und-verbleibende-testlücken).
 
 ## Bestätigte JSLive-Übernahme (ADR 0111)
 

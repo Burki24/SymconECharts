@@ -43,8 +43,18 @@ allen Quellenlesungen, Vormerken bei unverändertem Aktivstand, Anwenden und
 vollständiger Nachvergleich einschließlich `IPS_HasChanges`. Regressionen
 prüfen Erstübernahme, Wiederholung, späte fremde Entwürfe, Aktivierungsfehler,
 abweichend aktivierte Designs und neue Entwürfe nach dem Anwenden. Abweichungen
-führen zu Fehlern ohne automatischen Rollback fremder Zustände. Die erneute
-Setter-MCP-Abnahme und die visuelle Host-Abnahme bleiben offen.
+führen zu Fehlern ohne automatischen Rollback fremder Zustände.
+Die erneute Setter-MCP-Abnahme unter 1.404 ist bestanden: Erstübernahme
+`applied`/`ready`, Wiederholung `unchanged`, ausstehende Änderungen bei gleichem
+und neuem Dokument `CONFIGURATION_PENDING`. Der fremde Entwurf blieb erhalten
+und ließ sich unverändert anwenden; eine zweite Dokumentübernahme sowie die
+Ablehnung ungültigen JSONs bestanden. Nur `JsonDocument` wurde bei gültigen
+Übernahmen geändert. Die temporären Testobjekte sind entfernt; alle 139
+bestehenden ECharts-Instanzen blieben hinsichtlich Konfiguration, Änderungsstatus,
+Verbindung und Objektidentität unverändert. Am 05.11.2026 bestätigt der Eigentümer
+die JSON-Datenquelle in Kachel und IPSView. Die funktionale Abnahme ist damit
+abgeschlossen; verbleibende Testlücken stehen im
+[Vertrag](TREE_JSON_CONTRACT.md#abnahmestand-und-verbleibende-testlücken).
 
 Der optionale Befehl `node tests/tree_json_browser.mjs <Chromium-Pfad>` startet
 nur eine anonyme lokale Fixture und ein isoliertes Browserprofil. Echte Browser-
@@ -53,8 +63,10 @@ Zoom wechselt 1 → 1,1 → 1, ohne das äußere Dokument zu scrollen. Sichtbare
 veralteter Stand, Quellenwechsel und fehlende JavaScript-Ausnahmen sind geprüft.
 Dies ist keine native Symcon-/IPSView-App-Abnahme. Die normale Browsersteuerung
 konnte wegen eines lokalen Kernel-Assetfehlers nicht starten; der Chromium-
-Nachweis ist eine getrennte CLI-Prüfung. Die MCP-/Host-Abnahme folgt nach dem
-Modulupdate mit temporärer Testinstanz; bestehende Bestände bleiben unberührt.
+Nachweis ist eine getrennte CLI-Prüfung. Die spätere MCP-Prüfung und die
+Eigentümerbestätigung der tatsächlichen Kachel-/IPSView-Ausgabe sind die oben
+gesondert dokumentierten Nachweise. Sie bestätigen keine vollständige
+Geräte-, Last- oder Fehlerszenarienmatrix.
 
 ## Semantische JSLive-Quellenzuordnung
 

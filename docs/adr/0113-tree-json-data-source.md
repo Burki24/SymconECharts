@@ -1,7 +1,8 @@
 # ADR 0113: JSON-Hierarchien als zusätzliche Datenquelle für EChartsTree
 
-- Status: lokal implementiert und geprüft; MCP-/Host-Abnahme offen
+- Status: implementiert; MCP-Abnahme und Eigentümerabnahme in Kachel/IPSView abgeschlossen
 - Datum: 2026-11-04
+- Abnahme aktualisiert: 2026-11-05 (MCP 1.403/1.404)
 - Ergänzt: ADR 0044, ADR 0046 und ADR 0065
 - Kanonischer Vertrag: [Tree-JSON 1.0](../TREE_JSON_CONTRACT.md)
 
@@ -77,6 +78,8 @@ geplanten/aktiven Kernel-Properties und tatsächlichen Formularscripts. Ein
 gemeinsamer read-only Transportoptionenpfad prüft Ausgabegrößen ohne Erzeugung
 eines dauerhaften IPSView-Kanals. Node- und Chromium-Prüfungen belegen JSON-
 Werte, Warnhinweise, Quellenwechsel und Mausradzoom in lokalen Einbettungen.
-Die Pflichtmatrix und die noch ausstehende echte MCP-/Kachel-/IPSView-Abnahme
-stehen im Vertrag. Entwicklungsprüfungen verändern keine installierten
-Instanzen, Quellen, Archive, Designs oder Versionsmetadaten.
+Die funktionale MCP-Abnahme unter 1.403/1.404 und die Eigentümerabnahme in
+Kachel und IPSView sind abgeschlossen. Die Pflichtmatrix, konkreten Nachweise
+und verbleibenden Testlücken stehen im Vertrag. Temporäre Live-Testobjekte
+wurden entfernt; bestehende Instanzen, Quellen, Archive und Designs blieben
+unverändert. Entwicklungsprüfungen ändern keine Versionsmetadaten.
