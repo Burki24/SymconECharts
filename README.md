@@ -6,6 +6,8 @@
 [![Check Style](https://github.com/Burki24/SymconECharts/actions/workflows/style.yml/badge.svg?branch=dev)](https://github.com/Burki24/SymconECharts/actions/workflows/style.yml?query=branch%3Adev)
 [![Tests](https://github.com/Burki24/SymconECharts/actions/workflows/tests.yml/badge.svg?branch=dev)](https://github.com/Burki24/SymconECharts/actions/workflows/tests.yml?query=branch%3Adev)
 
+[![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](#spenden)
+
 ![SymconECharts – Deine Daten. Dein Überblick. Diagramme für Symcon und IPSView.](docs/images/symconecharts-readme-hero.png)
 
 SymconECharts stellt aktuelle und archivierte Symcon-Werte sowie ausgewählte
@@ -208,3 +210,9 @@ Required Notice: Copyright 2026 Burkhard Kneiseler. SymconECharts.
 Fremdkomponenten behalten ihre Originallizenzen. Version, Herkunft, Integrität
 und Lizenz stehen in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 SymconECharts ist kein offizielles Projekt der Apache Software Foundation.
+
+## Spenden
+
+Mit einer freiwilligen Spende kannst du die Weiterentwicklung dieses Projekts unterstützen.
+
+[![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](https://www.paypal.me/BurkhardKneiseler)
