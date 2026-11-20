@@ -2,6 +2,10 @@
     "translations": {
         "de": {
             "Initially visible": "Anfangs sichtbar",
+            "Stack group (0 = separate)": "Stapelgruppe (0 = einzeln)",
+            "To stack bars, assign the same group number and unit to the sources and choose automatic or fixed aggregation. Intervals missing a contribution leave a gap in that stack.": "Zum Stapeln den Quellen dieselbe Gruppennummer und Einheit geben und eine automatische oder feste Verdichtung wählen. Fehlt ein Beitrag, bleibt im betreffenden Stapel eine Lücke.",
+            "Stack groups require automatic or fixed aggregation.": "Stapelgruppen benötigen eine automatische oder feste Verdichtung.",
+            "All sources in a stack group must use the same unit.": "Alle Quellen einer Stapelgruppe müssen dieselbe Einheit verwenden.",
             "The total point budget is shared by all configured sources, including initially hidden rows. Up to 16 effective unit groups are supported.": "Das Gesamtpunktbudget wird auf alle konfigurierten Quellen verteilt, auch anfangs ausgeblendete Reihen. Bis zu 16 effektive Einheitengruppen sind möglich.",
             "All": "Alle",
             "Invert": "Umkehren",

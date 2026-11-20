@@ -2,6 +2,9 @@
 
 ## Neu
 
+- EChartsBarHistory kann Archivquellen gleicher Einheit je Zeitintervall
+  stapeln, etwa die Leistungen mehrerer PV-Flächen. Unvollständige Intervalle
+  erscheinen im betroffenen Stapel als Lücke.
 - EChartsTree unterstützt eigene JSON-Hierarchien zusätzlich zum bisherigen
   Symcon-Objektbaum: Datei-/Textübernahme, laufende Stringquelle und öffentliche
   Prüf-/Übernahmefunktionen verwenden dieselbe vollständige Validierung.

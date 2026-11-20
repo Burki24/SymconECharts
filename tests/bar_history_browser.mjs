@@ -36,6 +36,7 @@ function page(mode) {
         VIEWPORT_CONTENT: 'width=device-width, initial-scale=1', DOCUMENT_TITLE: 'BarHistory synthetic browser fixture',
         VISUALIZATION_THEME: ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-border:#a5a9b0}',
         MODULE_STYLE: read(module + '/visualization/style.css'), IPSVIEW_STYLE: '',
+        INTERACTION_SCRIPT: '<script>' + read('libs/helper/visualization/interaction.min.js') + '</script>',
         ECHARTS_SCRIPT: read('libs/echarts/6.1.0/echarts.cartesian.min.js'), ECHARTS_THEME_SCRIPT: '',
         ECHARTS_DESIGN_SCRIPT: read('libs/echarts-design.js') + '\n' + read('libs/echarts-series-selection.js')
             + '\n' + read('libs/echarts-startup.js'),

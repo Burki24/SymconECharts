@@ -735,8 +735,10 @@ Original-Farbindizes und gekennzeichneten Gesamtzahlen ohne Archivzugriff.
 EChartsBarHistory erweitert gemäß
 [ADR 0068](adr/0068-historical-bar-series-selection.md) auf 32 Quellen und
 200–32000 Gesamtpunkte, behält aber Default 1000, 2000 je Abfrage/Reihe und
-bis zu 16 effektive Einheitengruppen. Archivzeitstempel werden nicht
-ausgerichtet oder ergänzt. Die gemeinsame ID-stabile Auswahllogik von
+bis zu 16 effektive Einheitengruppen. Das Modell erhält die Archivzeitstempel.
+Bei optionalen Stapelgruppen verwendet die Darstellung nur gemeinsame
+Intervallzeitstempel gemäß [ADR 0114](adr/0114-bar-history-stack-groups.md).
+Die gemeinsame ID-stabile Auswahllogik von
 TimeSeries und BarHistory liegt in `echarts-series-selection.js`, eingebettet
 über `EChartsAsset::SeriesSelectionJavaScript()`. Native Auswahl und
 Legendenanker bleiben flüchtig; Zeitzoom nutzt weiter `echarts-zoom.js`.

@@ -75,7 +75,7 @@ Archiv- und Ausgabegrenzen der verlinkten Modulanleitung.
 | [EChartsGaugeChronograph](EChartsGaugeChronograph/README.md) | 2–5 aktuelle Werte als Chronograph mit Hilfszifferblättern. |
 | [EChartsTimeSeries](EChartsTimeSeries/README.md) | 1–32 historische oder live fortgeschriebene Linien-/Flächenreihen; bis zu 32000 Gesamtpunkte. |
 | [EChartsBarCategory](EChartsBarCategory/README.md) | 1–100 aktuelle Quellen als einfache, gruppierte oder gestapelte Balken mit Kategoriennavigation. |
-| [EChartsBarHistory](EChartsBarHistory/README.md) | 1–32 Archivquellen als Zeitbalken mit Reihenauswahl; bis zu 32000 Gesamtpunkte. |
+| [EChartsBarHistory](EChartsBarHistory/README.md) | 1–32 Archivquellen als einzelne oder gestapelte Zeitbalken mit Reihenauswahl und bis zu 32000 Gesamtpunkten. |
 | [EChartsBarWaterfall](EChartsBarWaterfall/README.md) | 2–100 aktuelle Quellen als Bilanz mit optionalen Zwischensummen und Neustarts. |
 | [EChartsBarPolar](EChartsBarPolar/README.md) | 1–100 aktuelle Quellen als Polarbalken mit optionaler Auswahl und Seiten. |
 | [EChartsPie](EChartsPie/README.md) | 1–100 aktuelle Quellen als Kreis, Donut oder Rose mit optionaler Auswahl. |

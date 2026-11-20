@@ -522,6 +522,35 @@ assert.match(escapedText, /&lt;unit&gt;/);
 
 const echarts = require(path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts'));
 for (const mode of ['symcon', 'ipsview']) {
+    const native = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 640, height: 400 });
+    const points = values => values.map(([index, value]) => [1780000000 + index * 60, value]);
+    const sources = [
+        { id: 'east', stackGroup: 1, points: points([[1, 2], [2, 9], [3, -4], [4, 0]]) },
+        { id: 'west', stackGroup: 1, points: points([[0, 8], [1, 3], [3, -2], [4, 4]]) },
+        { id: 'other', stackGroup: 2, points: points([[2, 7]]) },
+        { id: 'single', points: points([[2, 10]]) }
+    ];
+    const test = render(false, mode, false, true, false, 640, 400, { status: 'ready', chart: {
+        ...ready.getState().chart, series: sources
+    } }, native);
+    const [east, west, other, single] = test.option.series;
+    assert.ok(east.stack && east.stack === west.stack);
+    assert.notEqual(other.stack, east.stack);
+    assert.equal(single.stack, undefined);
+    assert.deepEqual(Array.from(east.data, p => p[1]), [2, -4, 0]);
+    assert.deepEqual(Array.from(west.data, p => p[0]), Array.from(east.data, p => p[0]));
+    assert.equal(other.data[0][1], 7);
+    assert.equal(single.data[0][1], 10);
+    const totals = () => {
+        const data = native.getModel().getSeriesByIndex(1).getData();
+        return Array.from({ length: data.count() }, (_, i) => data.get(data.getCalculationInfo('stackResultDimension'), i));
+    };
+    assert.deepEqual(totals(), [5, -6, 4]);
+    native.dispatchAction({ type: 'legendToggleSelect', name: 'east' });
+    assert.deepEqual(totals(), [3, -2, 4]);
+    native.dispose();
+}
+for (const mode of ['symcon', 'ipsview']) {
     const native = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 420, height: 520 });
     const stressSources = manySources.map((item, row) => ({ ...item,
         points: Array.from({ length: 1000 }, (_, index) => [1780000000 + index * 60 + row,

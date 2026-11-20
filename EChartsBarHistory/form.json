@@ -80,6 +80,17 @@
                     }
                 },
                 {
+                    "caption": "Stack group (0 = separate)",
+                    "name": "StackGroup",
+                    "width": "155px",
+                    "add": 0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 32
+                    }
+                },
+                {
                     "caption": "Reducer",
                     "name": "Reducer",
                     "width": "120px",
@@ -183,6 +194,13 @@
                     "maximum": 6
                 },
                 {
+                    "type": "NumberSpinner",
+                    "name": "StackGroup",
+                    "caption": "Stack group (0 = separate)",
+                    "minimum": 0,
+                    "maximum": 32
+                },
+                {
                     "type": "Select",
                     "name": "Reducer",
                     "caption": "Reducer",
@@ -217,6 +235,10 @@
                     "transparentCaption": "Automatic (theme)"
                 }
             ]
+        },
+        {
+            "type": "Label",
+            "caption": "To stack bars, assign the same group number and unit to the sources and choose automatic or fixed aggregation. Intervals missing a contribution leave a gap in that stack."
         },
         {
             "type": "Label",

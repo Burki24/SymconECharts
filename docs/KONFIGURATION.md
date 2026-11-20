@@ -181,6 +181,10 @@ Die [gemeinsamen IPSView-Regeln](#gemeinsame-ipsview-einstellungen) und gegebene
 
 [Zur Modulanleitung](../EChartsBarHistory/README.md).
 
+In jeder Zeile von `Sources` legt das optionale Integerfeld `StackGroup` die
+Stapelgruppe fest. Fehlend oder 0 zeigt die Reihe einzeln. 1–32 gruppiert
+Quellen gleicher Einheit bei automatischer oder fester Verdichtung.
+
 | Formularfeld | Technischer Name | Typ | Standard | Auswahl / Bedienbereich |
 | --- | --- | --- | --- | --- |
 | Archivquellen (1 bis 32) | `Sources` | String | `"[]"` | Siehe Modulanleitung |

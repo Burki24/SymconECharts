@@ -695,16 +695,33 @@ class EChartsBarHistory extends IPSModuleStrict
             }
             $svg .= '</defs>';
         }
-        $count = count($items);
+        $slots = [];
+        $slotByItem = [];
+        foreach ($items as $index => $item) {
+            $group = $item['StackGroup'] ?? 0;
+            $key = is_int($group) && $group > 0 ? 'stack-' . $group : 'single-' . $index;
+            $slots[$key] ??= count($slots);
+            $slotByItem[$index] = $slots[$key];
+        }
+        $slot = 40 / max(1, count($slots));
+        $width = $slot * $barWidth / 100;
+        $scale = max([1, ...array_values(array_count_values($slotByItem))]);
+        $labelRects = [];
         for ($bucket = 0; $bucket < 15; ++$bucket) {
+            $bottoms = array_fill(0, count($slots), 265.0);
             foreach ($items as $index => $item) {
                 $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$item['previewPaletteIndex'] % count($palette['seriesColors'])];
-                $height = 50 + 65 * (1 + sin(($bucket + $index * 3) / 2.4));
-                $slot = 600 / 15 / $count;
-                $width = $slot * $barWidth / 100;
-                $x = 70 + $bucket * 40 + $index * $slot + ($slot - $width) / 2;
+                $sample = 50 + 65 * (1 + sin(($bucket + $index * 3) / 2.4));
+                $height = $sample / $scale;
+                $column = $slotByItem[$index];
+                $x = 70 + $bucket * 40 + $column * $slot + ($slot - $width) / 2;
+                $bottoms[$column] -= $height;
+                $y = $bottoms[$column];
+                if ($bucket === 10 + $index) {
+                    $labelRects[$index] = [$x, $y, $height, 5 + $sample / 10];
+                }
                 $fill = $fillMode === 'solid' ? $color : 'url(#bar-history-preview-' . $index . ')';
-                $svg .= '<rect x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N(265 - $height)
+                $svg .= '<rect x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($y)
                     . '" width="' . EChartsBarPreview::N($width) . '" height="' . EChartsBarPreview::N($height)
                     . '" rx="' . $rounded . '" fill="' . EChartsBarPreview::E($fill)
                     . '" fill-opacity="' . EChartsBarPreview::N($opacity) . '"/>';
@@ -719,18 +736,14 @@ class EChartsBarHistory extends IPSModuleStrict
             $svg .= '<text x="' . ($x + 19) . '" y="71" fill="' . EChartsBarPreview::E($legendColor)
                 . '" font-size="' . $legendSize . '">' . EChartsBarPreview::E($legend) . '</text>';
             if ($showValues) {
-                $bucket = 10 + $index;
-                $height = 50 + 65 * (1 + sin(($bucket + $index * 3) / 2.4));
-                $labelX = 70 + $bucket * 40 + ($index + 0.5) * 40 / $count;
-                $labelY = 258 - $height;
+                [$barX, $barY, $height, $sampleValue] = $labelRects[$index];
+                $labelX = $barX + $width / 2;
+                $labelY = $barY - 7;
                 $anchor = 'middle';
                 if ($valueLabelPosition !== 'auto' || $valueLabelDistance !== 5) {
-                    $slot = 40 / $count;
-                    $width = $slot * $barWidth / 100;
-                    $barX = 70 + $bucket * 40 + $index * $slot + ($slot - $width) / 2;
                     $placement = EChartsLabelDesign::PreviewRect(
                         $barX,
-                        265 - $height,
+                        $barY,
                         $width,
                         $height,
                         $valueLabelPosition === 'auto' ? 'top' : $valueLabelPosition,
@@ -743,7 +756,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 $svg .= '<text x="' . EChartsBarPreview::N($labelX) . '" y="' . EChartsBarPreview::N($labelY)
                     . '" text-anchor="' . $anchor . '" fill="' . EChartsBarPreview::E($valueColor)
                     . '" font-size="' . $valueSize . '">' . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
-                        5 + $height / 10,
+                        $sampleValue,
                         $item['decimals'],
                         $item['unit'],
                         $previewLanguage
@@ -818,6 +831,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 'variableID'             => $source['VariableID'],
                 'label'                  => $labels[$source['VariableID']],
                 'initiallyVisible'       => $source['InitiallyVisible'],
+                ...($source['StackGroup'] > 0 ? ['stackGroup' => $source['StackGroup']] : []),
                 'unit'                   => $source['Unit'],
                 'decimals'               => $source['Decimals'],
                 'axisIndex'              => $axisModel['Indexes'][$source['Unit']],
@@ -995,7 +1009,7 @@ class EChartsBarHistory extends IPSModuleStrict
         return null;
     }
 
-    /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int,Color:string,Reducer:string,AxisPosition:string}> */
+    /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int,Color:string,Reducer:string,AxisPosition:string,InitiallyVisible:bool,StackGroup:int}> */
     private function GetValidatedSources(): array
     {
         try {
@@ -1009,6 +1023,7 @@ class EChartsBarHistory extends IPSModuleStrict
         }
         $result = [];
         $seen = [];
+        $stackUnits = [];
         foreach ($sources as $source) {
             if (!is_array($source)) {
                 throw new InvalidArgumentException('The Historical Bar source settings are invalid.');
@@ -1022,10 +1037,12 @@ class EChartsBarHistory extends IPSModuleStrict
             $usePresentation = $source['UseVariablePresentation'] ?? true;
             $axisPosition = $source['AxisPosition'] ?? 'auto';
             $initiallyVisible = $source['InitiallyVisible'] ?? true;
+            $stackGroup = $source['StackGroup'] ?? 0;
             if (!is_int($variableID) || $variableID <= 0 || !IPS_VariableExists($variableID)
                 || isset($seen[$variableID])
                 || !in_array(IPS_GetVariable($variableID)['VariableType'] ?? null, [1, 2], true)
                 || !is_string($label) || !is_string($unit) || !is_bool($usePresentation) || !is_bool($initiallyVisible)
+                || !is_int($stackGroup) || $stackGroup < 0 || $stackGroup > self::MAXIMUM_SOURCE_COUNT
                 || !is_int($decimals) || $decimals < 0 || $decimals > 6
                 || !is_int($color) || $color < -1 || $color > 0xFFFFFF
                 || !is_string($reducer) || !in_array($reducer, self::REDUCERS, true)
@@ -1041,7 +1058,17 @@ class EChartsBarHistory extends IPSModuleStrict
                 $usePresentation
             );
             $seen[$variableID] = true;
+            if ($stackGroup > 0) {
+                if ($this->ReadPropertyString('DataMode') === 'raw') {
+                    throw new InvalidArgumentException('Stack groups require automatic or fixed aggregation.');
+                }
+                $stackUnits[$stackGroup] ??= $presentation['unit'];
+                if ($stackUnits[$stackGroup] !== $presentation['unit']) {
+                    throw new InvalidArgumentException('All sources in a stack group must use the same unit.');
+                }
+            }
             $result[] = [
+                'StackGroup'       => $stackGroup,
                 'VariableID'       => $variableID,
                 'InitiallyVisible' => $initiallyVisible,
                 'Label'            => trim($label),
@@ -1059,7 +1086,7 @@ class EChartsBarHistory extends IPSModuleStrict
         return $result;
     }
 
-    /** @param array{VariableID:int,Reducer:string} $source @param array<string,mixed> $query @return array<string,mixed> */
+    /** @param array{VariableID:int,Reducer:string,StackGroup:int} $source @param array<string,mixed> $query @return array<string,mixed> */
     private function ReadArchiveSource(array $source, array $query): array
     {
         $debugFlowResult = null;
@@ -1122,6 +1149,7 @@ class EChartsBarHistory extends IPSModuleStrict
             foreach ($archive['Points'] as $point) {
                 if (!is_array($point) || !array_is_list($point) || count($point) !== 2
                     || !is_int($point[0]) || $point[0] <= 0 || $point[0] < $previousTimestamp
+                    || ($source['StackGroup'] > 0 && $point[0] === $previousTimestamp)
                     || (!is_int($point[1]) && !is_float($point[1])) || !is_finite((float) $point[1])
                 ) {
                     throw new RuntimeException('The gateway returned invalid Historical Bar points.');

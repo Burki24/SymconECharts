@@ -92,6 +92,29 @@
         });
     }
 
+    // On a time axis ECharts stacks by row index. Project each stack onto
+    // its own common timestamps, keeping the original model and archive values.
+    function alignStackPoints(series) {
+        var groups = new Map();
+        series.forEach(function (item) {
+            if (!item.stackGroup) { return; }
+            if (!groups.has(item.stackGroup)) { groups.set(item.stackGroup, []); }
+            groups.get(item.stackGroup).push(item);
+        });
+        groups.forEach(function (members) {
+            if (members.length < 2) { return; }
+            var counts = new Map();
+            members.forEach(function (item) {
+                item.points.forEach(function (point) {
+                    counts.set(point[0], (counts.get(point[0]) || 0) + 1);
+                });
+            });
+            members.forEach(function (item) {
+                item.points = item.points.filter(function (point) { return counts.get(point[0]) === members.length; });
+            });
+        });
+    }
+
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
         var bar = model.bar || {};
@@ -100,12 +123,14 @@
             return Object.assign({}, item, { id: item.id || 'series-' + index,
                 axisIndex: Number.isInteger(item.axisIndex) ? item.axisIndex : 0 });
         });
+        alignStackPoints(series);
         var selected = seriesSelection.reconcile(series);
         var axes = Array.isArray(model.axes) && model.axes.length > 0
             ? model.axes : [{ unit: String(bar.unit || ''), position: 'left', positionIndex: 0 }];
         var multi = series.length > 1;
         var showLegend = multi || series.some(function (item) { return item.initiallyVisible === false; });
-        var visibleCount = series.filter(function (item) { return selected[item.id]; }).length;
+        var visibleCount = new Set(series.filter(function (item) { return selected[item.id]; })
+            .map(function (item) { return item.stackGroup || item.id; })).size;
         var activeAxes = axes.map(function (_, index) {
             return series.some(function (item) { return item.axisIndex === index && selected[item.id]; });
         });
@@ -294,6 +319,7 @@
                     id: item.id || 'series-' + index,
                     name: item.id || 'series-' + index,
                     type: 'bar',
+                    stack: item.stackGroup ? 'stack-' + item.stackGroup : undefined,
                     yAxisIndex: Number.isInteger(item.axisIndex) ? item.axisIndex : 0,
                     barGap: '20%',
                     barMaxWidth: visibleCount > 1

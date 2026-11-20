@@ -21,10 +21,28 @@ Für IPSView bei Bedarf die zusätzliche HTML-Ausgabe einschalten.
 Jede Variablen-ID darf nur einmal vorkommen. Eigene Beschriftung, Farbe,
 Formatierung und Reduzierer sind je Quelle wählbar. Ohne eigene Beschriftung
 erscheint der aktuelle Variablenname; gleiche Namen bleiben getrennte Reihen.
-Gleichzeitige Balken stehen nebeneinander. Jede wirksame Einheit erhält eine
+Standardmäßig stehen gleichzeitige Balken nebeneinander. Jede wirksame Einheit erhält eine
 eigene Wertachse. Quellen derselben Einheit teilen diese Achse; widersprüchliche
 explizite Seitenwahlen für dieselbe Einheit sind ungültig. Die Listenreihenfolge
 bestimmt die Reihen- und Achsenreihenfolge. Unterstützt sind bis zu 16 Einheiten.
+
+### PV-Leistungen als gestapelte Balken anzeigen
+
+1. Die archivierten Leistungsvariablen der PV-Flächen hinzufügen, etwa **Ostdach**
+   und **Westdach**, beide in kW.
+2. Für beide Quellen **Stapelgruppe (0 = einzeln)** auf **1** stellen und
+   **Mittelwert** wählen. Als Datenmodus zum Beispiel **1 Stunde** einstellen.
+3. Änderungen übernehmen. Liefert das Ostdach im Stundenmittel 2 kW und das
+   Westdach 3 kW, bilden die beiden Farbsegmente einen 5 kW hohen Balken.
+   Der Tooltip zeigt die einzelnen Beiträge. Die Legende blendet sie einzeln aus.
+
+Die Gruppen 1–32 bilden jeweils einen eigenen Stapel. Gruppe 0 behält einzelne
+Balken bei. Jede Gruppe benötigt dieselbe wirksame Einheit und eine automatische
+oder feste Verdichtung. Fehlt für ein Intervall der Archivwert einer konfigurierten
+Gruppenquelle, bleibt der gesamte Stapel dort leer, auch wenn die Quelle in der
+Legende ausgeblendet ist. Ein gemessener Nullwert zählt als vorhandener Beitrag.
+Positive und negative Beiträge stapeln sich getrennt oberhalb und unterhalb der
+Nulllinie. Die Legende bestimmt, welche Beiträge zur sichtbaren Höhe zählen.
 
 ## Zeiträume, Auswahl und Ladebudget
 

@@ -176,6 +176,39 @@ declare(strict_types=1);
         $cap = $configure(array_slice($rows, 0, 2));
         $cap->ApplyChanges();
         assertGatewayGauge($decode($cap)['range']['pointLimitPerSeries'] === 2000, 'The per-source archive cap must remain 2000.');
+        $stackRows = array_slice($rows, 0, 3);
+        $stackRows[0]['StackGroup'] = 32;
+        $stackRows[1]['StackGroup'] = 32;
+        $stacked = $configure($stackRows, 'hour', 300);
+        $stacked->ApplyChanges();
+        $stackModel = $decode($stacked);
+        assertGatewayGauge(
+            array_column($stackModel['series'], 'stackGroup') === [32, 32]
+            && $stackModel['range']['aggregationLevel'] === 0 && $stackModel['range']['pointLimitPerSeries'] === 100,
+            'Only grouped archive sources carry stack metadata; their query and shared limit stay unchanged.'
+        );
+        $stacked->UpdateBarPreviewFromForm('{}');
+        $stackImages = array_filter($stacked->GetTestFormUpdates(), static fn (array $update): bool => in_array($update['Field'], ['BarPreview', 'IPSViewBarPreview'], true) && $update['Parameter'] === 'image');
+        assertGatewayGauge(count($stackImages) >= 2, 'Both designers must supply stack previews.');
+        foreach ($stackImages as $image) {
+            $xml = new DOMDocument();
+            $xml->loadXML(base64_decode(substr($image['Value'], strlen('data:image/svg+xml;base64,'))));
+            $bars = (new DOMXPath($xml))->query('//*[local-name()="rect" and @x and @fill-opacity]');
+            [$first, $second, $third] = [$bars->item(0), $bars->item(1), $bars->item(2)];
+            assertGatewayGauge(
+                $first->getAttribute('x') === $second->getAttribute('x')
+                && $first->getAttribute('x') !== $third->getAttribute('x')
+                && abs((float) $first->getAttribute('y') - (float) $second->getAttribute('y') - (float) $second->getAttribute('height')) < 0.1,
+                'Stacked preview segments must touch and independent bars must stand beside them.'
+            );
+        }
+        $mixedUnits = $stackRows;
+        $mixedUnits[1]['Unit'] = 'kW';
+        foreach ([[$mixedUnits, 'auto'], [$stackRows, 'raw']] as [$invalidSources, $invalidMode]) {
+            $invalidStack = $configure($invalidSources, $invalidMode);
+            $invalidStack->ApplyChanges();
+            assertGatewayGauge($invalidStack->GetTestStatus() === 201, 'Raw stacks and incompatible stack units must be rejected.');
+        }
         foreach (['auto', 'minute', 'five-minutes', 'fifteen-minutes', 'hour', 'day'] as $mode) {
             $aggregate = $configure($rows, $mode);
             $aggregate->ApplyChanges();
