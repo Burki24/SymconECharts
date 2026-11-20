@@ -2,6 +2,10 @@
 
 ## Neu
 
+- EChartsTimeSeries kann die Leistungen mehrerer PV-Flächen und andere
+  Archivwerte gleicher Einheit als Flächen stapeln. Der Tooltip zeigt die
+  Einzelwerte und die sichtbare Gruppensumme. Fehlende Intervalle unterbrechen
+  den Stapel.
 - EChartsBarHistory kann Archivquellen gleicher Einheit je Zeitintervall
   stapeln, etwa die Leistungen mehrerer PV-Flächen. Unvollständige Intervalle
   erscheinen im betroffenen Stapel als Lücke.

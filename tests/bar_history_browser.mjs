@@ -39,7 +39,7 @@ function page(mode) {
         INTERACTION_SCRIPT: '<script>' + read('libs/helper/visualization/interaction.min.js') + '</script>',
         ECHARTS_SCRIPT: read('libs/echarts/6.1.0/echarts.cartesian.min.js'), ECHARTS_THEME_SCRIPT: '',
         ECHARTS_DESIGN_SCRIPT: read('libs/echarts-design.js') + '\n' + read('libs/echarts-series-selection.js')
-            + '\n' + read('libs/echarts-startup.js'),
+            + '\n' + read('libs/echarts-archive-stack.js') + '\n' + read('libs/echarts-startup.js'),
         ECHARTS_ZOOM_SCRIPT: read('libs/echarts-zoom.js'), ECHARTS_PATTERN_SCRIPT: read('libs/echarts-pattern.js'),
         BOOTSTRAP_JSON: JSON.stringify(bootstrap), MODULE_SCRIPT: read(module + '/visualization/app.js'),
         IPSVIEW_TRANSPORT_SCRIPT: '' };

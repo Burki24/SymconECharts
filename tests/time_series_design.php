@@ -153,6 +153,39 @@ assertTimeSeriesDesign(
     'Conflicting draft axis sides must leave the Time Series preview available.'
 );
 
+$roof = ['label' => 'East', 'color' => '#345678', 'style' => 'line', 'unit' => 'kW', 'stackGroup' => 1];
+$west = [...$roof, 'label' => 'West', 'color' => '#654321'];
+$stackPreview = EChartsTimeSeriesPreview::CreateSvg([
+    $roof,
+    [...$roof, 'label' => 'Hidden', 'initiallyVisible' => false],
+    $west
+], 'PV', 'dark', ['showValues' => true]);
+assertTimeSeriesDesign(
+    preg_match('/<path d="(M [^"]+) Z" fill="#345678"/', $stackPreview, $firstBand) === 1
+        && preg_match('/<path d="(M [^"]+) Z" fill="#654321"/', $stackPreview, $secondBand) === 1
+        && preg_match('/<path d="(M [^"]+)" fill="none" stroke="#345678"/', $stackPreview, $firstEdge) === 1,
+    'A positive stack group must fill both visible bands in the source colors.'
+);
+$firstCoordinates = preg_split('/ [ML] /', substr($firstEdge[1], 2));
+assertTimeSeriesDesign(
+    str_ends_with($secondBand[1], ' L ' . implode(' L ', array_reverse($firstCoordinates)))
+        && !str_contains($stackPreview, '>Hidden</text>'),
+    'The second visible band must close along the entire first boundary.'
+);
+$separateGroups = EChartsTimeSeriesPreview::CreateSvg([$roof, [...$west, 'stackGroup' => 2]], 'PV', 'dark', []);
+assertTimeSeriesDesign(
+    preg_match('/<path d="[^"]+ L 70 330 Z" fill="#654321"/', $separateGroups) === 1,
+    'Independent stacks must start at the common zero baseline.'
+);
+$unstacked = [...$roof, 'stackGroup' => 0];
+$legacy = $unstacked;
+unset($legacy['stackGroup']);
+assertTimeSeriesDesign(
+    EChartsTimeSeriesPreview::CreateSvg([$unstacked], 'PV', 'dark', []) ===
+        EChartsTimeSeriesPreview::CreateSvg([$legacy], 'PV', 'dark', []),
+    'A zero stack group must preserve the original preview.'
+);
+
 foreach ([
     ['SeriesLineType' => 'invalid'],
     ['SeriesPointSizePercent' => 201],

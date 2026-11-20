@@ -63,6 +63,20 @@ gleichlautenden Reihen behalten in Legende, Tooltip und Vorschau ihre Namen
 ohne ID-Zusatz; Live-Updates bleiben der richtigen ID zugeordnet.
 Objektpfade werden dafür nicht ausgewertet.
 
+## PV-Leistung als gestapelte Flächen anzeigen
+
+1. Unter **Zeitreihenquellen** die archivierten Leistungsvariablen der Dachflächen hinzufügen, zum Beispiel Ostdach und Westdach. Beide müssen dieselbe Einheit verwenden, etwa kW.
+2. Für beide Quellen die **Stapelgruppe** auf **1** setzen und **Durchschnitt** wählen. Die Gruppennummer macht jede zugehörige Reihe zu einer Fläche. Mit Gruppe **0** lassen sich weiterhin einzelne Linien oder Flächen darüberlegen.
+3. Im **Datenmodus** eine gemeinsame Verdichtung auswählen, zum Beispiel **15 Minuten**, und die Änderungen übernehmen.
+
+Liefert das Ostdach in einer Viertelstunde durchschnittlich 2 kW und das Westdach 3 kW, erreicht die Oberkante 5 kW. Der Tooltip zeigt beide Einzelwerte und die sichtbare Summe der Gruppe. Blendest du das Westdach in der Legende aus, zeigt der Stapel für diese Viertelstunde 2 kW. Verwende für die Gesamtleistung den Mittelwert jeder Fläche im selben Intervall. Einzelne Spitzenleistungen können zu unterschiedlichen Zeiten auftreten.
+
+Fehlt ein Archivwert einer Gruppenquelle, bleibt der gesamte Stapel an dieser Stelle unterbrochen. Das gilt auch für ausgeblendete Gruppenmitglieder und bei ausgeschalteter allgemeiner Lückenerkennung. Ein gemessener Wert von 0 kW zählt als vorhandener Beitrag. Andere Gruppen und Einzelreihen laufen unabhängig weiter.
+
+Positive Beiträge wachsen oberhalb, negative unterhalb der Nulllinie. Bei gemischten Vorzeichen zeigt die sichtbare Summe im Tooltip die Bilanz, etwa 3 kW bei Beiträgen von 5 kW und −2 kW.
+
+Die Gruppen **1–32** stehen bei automatischer und fester Verdichtung zur Verfügung. Für Rohwerte und Echtzeit mit unabhängigen Messzeitpunkten bleibt die Stapelgruppe auf **0**.
+
 ## Aktueller Funktionsumfang
 
 - rollende Zeiträume von 1 Stunde, 6 Stunden, 24 Stunden, 7 Tagen und 30 Tagen
@@ -88,8 +102,8 @@ Objektpfade werden dafür nicht ausgewertet.
   expliziter Anordnung links beziehungsweise rechts;
 - automatische Wertachsenbereiche sowie wahlweise die Übernahme von Minimum
   und Maximum aus der Variablendarstellung oder eine manuelle Vorgabe;
-- automatische Wertachsen folgen den dargestellten Daten mit etwas Randabstand,
-  ohne einen Nullpunkt zu erzwingen; auch beim Zeitzoom werden sie neu skaliert.
+- automatische Wertachsen folgen den dargestellten Daten mit etwas Randabstand
+  und schließen bei sichtbaren Stapeln den Nullpunkt ein. Auch beim Zeitzoom werden sie neu skaliert.
   Manuell oder aus der Variablendarstellung festgelegte Grenzen bleiben fest;
 - quellenbezogene Referenzlinien und Wertebereiche mit Beschriftung,
   Reihenfarbe oder eigener Farbe sowie konfigurierbarer Linienart,

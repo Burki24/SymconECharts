@@ -13,7 +13,7 @@ require_once __DIR__ . '/../libs/EChartsPreviewSymbol.php';
 final class EChartsTimeSeriesPreview
 {
     /**
-     * @param list<array{variableID?:int,label:string,color:string,style:string,unit?:string,axisPosition?:string,design?:array<string,mixed>}> $series
+     * @param list<array{variableID?:int,label:string,color:string,style:string,stackGroup?:int,unit?:string,axisPosition?:string,design?:array<string,mixed>}> $series
      * @param array<string,mixed> $design
      * @param list<array<string,mixed>> $annotations
      */
@@ -196,6 +196,7 @@ final class EChartsTimeSeriesPreview
         }
         $content .= $annotationAreas;
 
+        $stackBands = self::StackedSampleBands($series, $plotTop, $plotBottom, $smoothLines);
         foreach ($series as $index => $item) {
             $color = $effectiveColors[$index];
             $sourceDesign = is_array($item['design'] ?? null) ? $item['design'] : [];
@@ -215,19 +216,25 @@ final class EChartsTimeSeriesPreview
                 ? max(0, min(100, (int) ($sourceDesign['areaOpacityPercent'] ?? 22))) / 100
                 : $areaOpacity;
             $offset = $index * 24.0;
-            $path = $sourceSmooth
-                ? 'M 70 ' . self::N(250 - $offset)
+            $band = $stackBands[$index] ?? null;
+            $valueY = $band['valueY'] ?? (185 + $offset / 2);
+            if ($band !== null) {
+                $path = $band['edge'];
+            } elseif ($sourceSmooth) {
+                $path = 'M 70 ' . self::N(250 - $offset)
                     . ' C 155 ' . self::N(210 + $offset) . ', 225 ' . self::N(270 - $offset)
                     . ', 310 ' . self::N(185 + $offset / 2)
                     . ' S 470 ' . self::N(225 - $offset) . ', 540 ' . self::N(135 + $offset)
-                    . ' S 625 ' . self::N(170 + $offset / 2) . ', 680 ' . self::N(105 + $offset)
-                : 'M 70 ' . self::N(250 - $offset)
+                    . ' S 625 ' . self::N(170 + $offset / 2) . ', 680 ' . self::N(105 + $offset);
+            } else {
+                $path = 'M 70 ' . self::N(250 - $offset)
                     . ' L 190 ' . self::N(215 + $offset)
                     . ' L 310 ' . self::N(185 + $offset / 2)
                     . ' L 430 ' . self::N(225 - $offset)
                     . ' L 540 ' . self::N(135 + $offset)
                     . ' L 680 ' . self::N(105 + $offset);
-            if (($item['style'] ?? 'line') === 'area') {
+            }
+            if ($band !== null || ($item['style'] ?? 'line') === 'area') {
                 $fill = $color;
                 $fillMode = (string) ($sourceDesign['areaFillMode'] ?? 'color');
                 if ($fillMode === 'gradient') {
@@ -260,8 +267,8 @@ final class EChartsTimeSeriesPreview
                         $fill = 'url(#' . $patternID . ')';
                     }
                 }
-                $content .= '<path d="' . $path . ' L 680 ' . self::N($plotBottom) . ' L 70 '
-                    . self::N($plotBottom) . ' Z" fill="' . SVGPreviewHelper::escape($fill)
+                $returnPath = $band['returnPath'] ?? ('L 680 ' . self::N($plotBottom) . ' L 70 ' . self::N($plotBottom));
+                $content .= '<path d="' . $path . ' ' . $returnPath . ' Z" fill="' . SVGPreviewHelper::escape($fill)
                     . '" opacity="' . self::N($sourceAreaOpacity) . '"/>';
             }
             $dashArray = match ((string) ($sourceDesign['lineType'] ?? 'solid')) {
@@ -276,7 +283,7 @@ final class EChartsTimeSeriesPreview
                 $content .= self::Symbol(
                     $sourceSymbol,
                     310.0,
-                    185 + $offset / 2,
+                    $valueY,
                     $sourceSymbolRadius,
                     $color
                 );
@@ -285,7 +292,7 @@ final class EChartsTimeSeriesPreview
                 $unit = trim((string) ($item['unit'] ?? ''));
                 $placement = EChartsLabelDesign::PreviewRect(
                     310,
-                    185 + $offset / 2,
+                    $valueY,
                     0,
                     0,
                     $valueLabelPosition === 'auto' ? 'top' : $valueLabelPosition,
@@ -294,7 +301,7 @@ final class EChartsTimeSeriesPreview
                 $content .= '<text data-preview-value-label="true" x="' . self::N($placement['x'])
                     . '" y="' . self::N($placement['y']) . '" text-anchor="' . $placement['anchor']
                     . '" fill="' . SVGPreviewHelper::escape($valueColor) . '" font-size="' . $valueFontSize . '">'
-                    . SVGPreviewHelper::escape('42' . ($unit !== '' ? ' ' . $unit : '')) . '</text>';
+                    . SVGPreviewHelper::escape(($band['value'] ?? 42) . ($unit !== '' ? ' ' . $unit : '')) . '</text>';
             }
         }
         $content .= $annotationLines;
@@ -347,6 +354,66 @@ final class EChartsTimeSeriesPreview
             730,
             380
         );
+    }
+
+    /**
+     * @param list<array<string,mixed>> $series visible preview sources
+     * @return array<int,array{edge:string,returnPath:string,valueY:float,value:int}>
+     */
+    private static function StackedSampleBands(array $series, int $top, int $bottom, bool $smoothLines): array
+    {
+        $groups = [];
+        foreach ($series as $index => $item) {
+            $group = $item['stackGroup'] ?? 0;
+            if ($group > 0) {
+                $groups[$group][] = $index;
+            }
+        }
+        if ($groups === []) {
+            return [];
+        }
+        $positions = [70, 190, 310, 430, 540, 680];
+        $profile = [8, 28, 42, 34, 20, 5];
+        $scale = ($bottom - $top) / (50 * max(array_map('count', $groups)));
+        $bands = [];
+        foreach ($groups as $indices) {
+            $lower = array_fill_keys($positions, (float) $bottom);
+            $lowerSmooth = false;
+            foreach ($indices as $ordinal => $index) {
+                $sample = $ordinal % 2 === 0 ? $profile : array_reverse($profile);
+                $upper = [];
+                foreach ($positions as $point => $x) {
+                    $upper[$x] = $lower[$x] - $sample[$point] * $scale;
+                }
+                $smooth = $series[$index]['design']['smoothLine'] ?? $smoothLines;
+                $bands[$index] = [
+                    'edge'       => self::SamplePath($upper, $smooth, 'M'),
+                    'returnPath' => self::SamplePath(array_reverse($lower, true), $lowerSmooth, 'L'),
+                    'valueY'     => $upper[310],
+                    'value'      => $sample[2]
+                ];
+                $lower = $upper;
+                $lowerSmooth = $smooth;
+            }
+        }
+        return $bands;
+    }
+
+    /** @param array<int,float> $points ordered x => y coordinates of one edge */
+    private static function SamplePath(array $points, bool $smooth, string $firstCommand): string
+    {
+        $segments = [];
+        $previousX = null;
+        foreach ($points as $x => $y) {
+            $command = $previousX === null ? $firstCommand : 'L';
+            if ($smooth && $previousX !== null) {
+                $middle = self::N(($previousX + $x) / 2);
+                $command = 'C ' . $middle . ' ' . self::N($points[$previousX]) . ' ' . $middle . ' ' . self::N($y);
+            }
+            $segments[] = $command . ' ' . $x . ' ' . self::N($y);
+            $previousX = $x;
+        }
+        return implode(' ', $segments);
     }
 
     private static function DesignColor(mixed $value, string $fallback): string

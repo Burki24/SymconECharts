@@ -15,6 +15,7 @@ use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsArchiveQuery;
+use SymconECharts\EChartsArchiveStack;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsDesignerSections;
@@ -40,6 +41,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
+require_once __DIR__ . '/../libs/EChartsArchiveStack.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
@@ -499,7 +501,12 @@ class EChartsTimeSeries extends IPSModuleStrict
             } catch (JsonException) {
                 $values = [];
             }
-            $row = is_array($values) && is_array($values['Sources'] ?? null) ? $values['Sources'] : [];
+            $draft = $values['Sources'] ?? null;
+            if (is_array($draft) && array_is_list($draft)) {
+                $this->UpdateTimeSeriesPreviewFromForm($Configuration);
+                return;
+            }
+            $row = is_array($draft) ? $draft : [];
             $sources = json_decode($this->ReadPropertyString('Sources'), true);
             $sources = is_array($sources) && array_is_list($sources) ? $sources : [];
             $variableID = (int) ($row['VariableID'] ?? 0);
@@ -844,6 +851,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'variableID'             => $source['VariableID'],
                 'label'                  => $labels[$source['VariableID']],
                 'initiallyVisible'       => $source['InitiallyVisible'],
+                ...($source['StackGroup'] > 0 ? ['stackGroup' => $source['StackGroup']] : []),
                 'unit'                   => $source['Unit'],
                 'decimals'               => $source['Decimals'],
                 'color'                  => $source['Color'],
@@ -857,6 +865,9 @@ class EChartsTimeSeries extends IPSModuleStrict
             ];
         }
 
+        $stackGaps = $query['AggregationLevel'] !== null && array_column($series, 'stackGroup') !== []
+            ? EChartsArchiveStack::GapTimestamps($series, $query['AggregationLevel'], date_default_timezone_get())
+            : [];
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
 
@@ -879,6 +890,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'acceptLiveUpdates'   => $query['AcceptLiveUpdates'],
                 'dataMode'            => $this->ReadPropertyString('DataMode'),
                 'aggregationLevel'    => $query['AggregationLevel'],
+                ...($stackGaps !== [] ? ['stackGapTimestamps' => $stackGaps] : []),
                 'pointBudget'         => $this->ReadPropertyInteger('PointBudget'),
                 'pointLimitPerSeries' => $query['Limit'],
                 'gapDetectionMode'    => $this->ReadPropertyString('GapDetectionMode'),
@@ -916,6 +928,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             'translations'       => [
                 'All'                                                       => $this->Translate('All'),
                 'Invert'                                                    => $this->Translate('Invert'),
+                'Visible total'                                             => $this->Translate('Visible total'),
                 self::MODEL_TOO_LARGE_MESSAGE                               => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
                 'The selected raw range was truncated by the point budget.' => $this->Translate(
                     'The selected raw range was truncated by the point budget.'
@@ -939,7 +952,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::TimeSeriesJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
                 '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::StartupJavaScript()
-                    . "\n" . EChartsAsset::SeriesSelectionJavaScript(),
+                    . "\n" . EChartsAsset::SeriesSelectionJavaScript()
+                    . "\n" . EChartsAsset::ArchiveStackJavaScript(),
                 '{{ECHARTS_ZOOM_SCRIPT}}'      => EChartsAsset::ZoomJavaScript(),
                 '{{ECHARTS_PATTERN_SCRIPT}}'   => EChartsAsset::PatternJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
@@ -1081,7 +1095,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             );
     }
 
-    /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int,Color:string,Style:string,Reducer:string,AxisPosition:string,AxisRange:?array{minimum:float,maximum:float},Design:array<string,mixed>}> */
+    /** @return list<array{VariableID:int,InitiallyVisible:bool,StackGroup:int,Label:string,Unit:string,Decimals:int,Color:string,Style:string,Reducer:string,AxisPosition:string,AxisRange:?array{minimum:float,maximum:float},Design:array<string,mixed>}> */
     private function GetValidatedSources(): array
     {
         try {
@@ -1098,6 +1112,8 @@ class EChartsTimeSeries extends IPSModuleStrict
 
         $result = [];
         $variableIDs = [];
+        $stackUnits = [];
+        $mode = $this->ReadPropertyString('DataMode');
         foreach ($sources as $index => $source) {
             if (!is_array($source)) {
                 throw new UnexpectedValueException('Time series source ' . ($index + 1) . ' is invalid.', 201);
@@ -1177,6 +1193,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 }
             }
             try {
+                $stackGroup = EChartsArchiveStack::ValidateGroup($source['StackGroup'] ?? 0, $effectiveUnit, $mode, $stackUnits);
                 $sourceDesign = $useIndividualDesign
                     ? EChartsTimeSeriesDesign::StyleFromSource($source)
                     : [];
@@ -1187,11 +1204,12 @@ class EChartsTimeSeries extends IPSModuleStrict
             $result[] = [
                 'VariableID'       => $variableID,
                 'InitiallyVisible' => $initiallyVisible,
+                'StackGroup'       => $stackGroup,
                 'Label'            => trim($label),
                 'Unit'             => $effectiveUnit,
                 'Decimals'         => $presentation['decimals'],
                 'Color'            => $normalizedColor,
-                'Style'            => $style,
+                'Style'            => $stackGroup > 0 ? 'area' : $style,
                 'Reducer'          => $reducer,
                 'AxisPosition'     => $axisPosition,
                 'AxisRange'        => $axisRange,
@@ -1368,7 +1386,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         return $this->ReadPropertyInteger('CustomRangeValue') . $unit;
     }
 
-    /** @param array{VariableID:int,Reducer:string} $source @param array<string,mixed> $query @return array<string,mixed> */
+    /** @param array{VariableID:int,Reducer:string,StackGroup:int} $source @param array<string,mixed> $query @return array<string,mixed> */
     private function ReadArchiveSource(array $source, array $query): array
     {
         $debugFlowResult = null;
@@ -1434,6 +1452,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             foreach ($archive['Points'] as $point) {
                 if (!is_array($point) || !array_is_list($point) || count($point) !== 2
                     || !is_int($point[0]) || $point[0] <= 0 || $point[0] < $previousTimestamp
+                    || ($source['StackGroup'] > 0 && $point[0] === $previousTimestamp)
                     || (!is_int($point[1]) && !is_float($point[1])) || !is_finite((float) $point[1])
                 ) {
                     throw new RuntimeException('The gateway returned invalid time series points.');
@@ -1782,7 +1801,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         return $design;
     }
 
-    /** @return list<array{variableID:int,label:string,color:string,style:string,unit:string,axisPosition:string,design:array<string,mixed>}> */
+    /** @return list<array{variableID:int,initiallyVisible:bool,stackGroup:int,label:string,color:string,style:string,unit:string,axisPosition:string,design:array<string,mixed>}> */
     private function PreviewSeries(mixed $formSources = null): array
     {
         $sources = $formSources;
@@ -1808,6 +1827,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $label = IPS_GetName($variableID);
             }
             $color = self::NormalizeSourceColor($source['Color'] ?? '');
+            $stackGroup = $source['StackGroup'] ?? 0;
+            $stackGroup = is_int($stackGroup) && $stackGroup > 0 && $stackGroup <= 32 ? $stackGroup : 0;
             $style = is_string($source['Style'] ?? null) && in_array($source['Style'], self::STYLES, true)
                 ? $source['Style']
                 : 'line';
@@ -1837,7 +1858,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'initiallyVisible' => ($source['InitiallyVisible'] ?? true) !== false,
                 'label'            => $labels[$variableID] ?? ($label !== '' ? $label : 'Series ' . ($index + 1)),
                 'color'            => $color ?? '',
-                'style'            => $style,
+                'style'            => $stackGroup > 0 ? 'area' : $style,
+                'stackGroup'       => $stackGroup,
                 'unit'             => $presentation['unit'],
                 'axisPosition'     => $axisPosition,
                 'design'           => $sourceDesign
@@ -1958,8 +1980,10 @@ class EChartsTimeSeries extends IPSModuleStrict
 
     private function TimeSeriesPreviewFormAction(string $sourceAction = '', string $list = 'source'): string
     {
+        // Iterate the current form list so earlier unsaved row edits also participate in the stack.
+        $snapshot = '$previewSources = []; foreach ($Sources as $source) { $previewSources[] = $source; } ';
         $pairs = array_map(
-            static fn (string $name): string => "'" . $name . "' => $" . $name,
+            static fn (string $name): string => "'" . $name . "' => $" . ($name === 'Sources' ? 'previewSources' : $name),
             self::DESIGN_FORM_FIELDS
         );
 
@@ -1968,11 +1992,11 @@ class EChartsTimeSeries extends IPSModuleStrict
                 ? 'ECTS_UpdateTimeSeriesPreviewAnnotationFromForm'
                 : 'ECTS_UpdateTimeSeriesPreviewSourceFromForm';
 
-            return $function . '($id, json_encode([' . implode(', ', $pairs)
+            return $snapshot . $function . '($id, json_encode([' . implode(', ', $pairs)
                 . ']), ' . var_export($sourceAction, true) . ');';
         }
 
-        return 'ECTS_UpdateTimeSeriesPreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
+        return $snapshot . 'ECTS_UpdateTimeSeriesPreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
     }
 
     private function EffectiveIPSViewTheme(): string

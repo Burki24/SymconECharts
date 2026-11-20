@@ -752,6 +752,10 @@ EChartsTimeSeries unterstützt gemäß
 [ADR 0067](adr/0067-timeseries-more-series-and-selection.md) 32 Quellen und
 200–32000 Gesamtpunkte bei unverändertem Default 2000 und höchstens 2000 je
 Gateway-Anfrage/Reihe. Acht effektive Einheitengruppen bleiben die Grenze.
+Optionale Flächenstapel verwenden dieselben Gruppen- und Einheitenregeln wie
+BarHistory. Die Zeitreihe unterbricht auch die Verbindung über ein Intervall,
+für das sämtliche Gruppenquellen fehlen, siehe
+[ADR 0115](adr/0115-timeseries-stacked-areas.md).
 ID-stabile Reihenauswahl ist flüchtiger Rendererzustand, keine serverseitige
 Quellenfilterung. Versteckte Reihen bleiben abonniert und im Archivbudget.
 Das Modell ist auf 900000 JSON-Bytes begrenzt; ein zusätzlicher HTML-Guard

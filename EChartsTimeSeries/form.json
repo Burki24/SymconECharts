@@ -110,6 +110,17 @@
                     }
                 },
                 {
+                    "caption": "Stack group (0 = separate)",
+                    "name": "StackGroup",
+                    "width": "155px",
+                    "add": 0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 32
+                    }
+                },
+                {
                     "caption": "Reducer",
                     "name": "Reducer",
                     "width": "110px",
@@ -168,6 +179,10 @@
         {
             "type": "Label",
             "caption": "Configure 1–32 unique numeric sources. The total point budget is shared by all sources, including initially hidden rows."
+        },
+        {
+            "type": "Label",
+            "caption": "To stack areas, assign the same group and unit to the sources and choose automatic or fixed aggregation. A missing contribution leaves a gap in the entire stack."
         },
         {
             "type": "Label",

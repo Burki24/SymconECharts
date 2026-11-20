@@ -2154,6 +2154,12 @@ Die [gemeinsamen IPSView-Regeln](#gemeinsame-ipsview-einstellungen) und gegebene
 
 [Zur Modulanleitung](../EChartsTimeSeries/README.md).
 
+In `Sources` bestimmt das optionale Integer-Feld `StackGroup` die Darstellung
+je Quelle. Fehlend oder 0 verwendet den gewählten Einzelstil. 1–32 zeichnet
+Flächen derselben Gruppe übereinander. Jede Gruppe benötigt eine gemeinsame
+wirksame Einheit und automatische oder feste Verdichtung. Ein Beispiel für
+zwei Leistungsvariablen steht in der [Modulanleitung](../EChartsTimeSeries/README.md#pv-leistung-als-gestapelte-flächen-anzeigen).
+
 | Formularfeld | Technischer Name | Typ | Standard | Auswahl / Bedienbereich |
 | --- | --- | --- | --- | --- |
 | Zeitreihenquellen | `Sources` | String | `"[]"` | Siehe Modulanleitung |

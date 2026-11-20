@@ -109,6 +109,7 @@ final class EChartsTimeSeriesDesign
             ]],
             ['type' => 'RowLayout', 'items' => [
                 ['type' => 'Select', 'name' => 'Style', 'caption' => 'Style', 'options' => self::Options(['line', 'area'])],
+                ['type' => 'NumberSpinner', 'name' => 'StackGroup', 'caption' => 'Stack group (0 = separate)', 'minimum' => 0, 'maximum' => 32],
                 ['type' => 'Select', 'name' => 'Reducer', 'caption' => 'Reducer', 'options' => self::Options(['auto', 'average', 'sum', 'minimum', 'maximum'])],
                 ['type' => 'Select', 'name' => 'AxisPosition', 'caption' => 'Axis side', 'options' => self::Options(['auto', 'left', 'right'])]
             ]],

@@ -94,6 +94,59 @@ declare(strict_types=1);
         );
 
         $rows = array_slice($sources, 0, 32);
+        $stackRows = [];
+        foreach ([[6, 5, 2, 1], [6, 2, 1], [6, 5, 4, 3, 2, 1]] as $index => $minutes) {
+            $id = 97001 + $index;
+            $stackRows[] = array_merge($sources[$index], [
+                'VariableID'       => $id,
+                'Unit'             => 'kW',
+                'StackGroup'       => $index < 2 ? 32 : 1,
+                'InitiallyVisible' => $index !== 1
+            ]);
+            $GLOBALS['symconTestVariables'][$id] = $GLOBALS['symconTestVariables'][$sources[$index]['VariableID']];
+            $samples = [];
+            foreach (array_reverse($minutes) as $minute) {
+                $samples[] = ['TimeStamp' => $now - 60 * $minute, 'Avg' => (float) ($minute - 1)];
+            }
+            $GLOBALS['symconTestArchiveVariables'][$id] = ['AggregationType' => 0, 'LoggedValues' => [], 'AggregatedValues' => $samples];
+        }
+        $stacked = $configure($stackRows, 'minute', 300);
+        $stacked->SetTestProperty('EnableIPSView', true);
+        $stacked->ApplyChanges();
+        $stackModel = $decode($stacked);
+        assertGatewayGauge(
+            array_column($stackModel['series'], 'stackGroup') === [32, 32, 1]
+            && array_column($stackModel['series'], 'style') === ['area', 'area', 'area']
+            && $stackModel['range']['stackGapTimestamps'] === [32 => [$now - 240]]
+            && $stackModel['series'][0]['points'] === [[$now - 360, 5.0], [$now - 300, 4.0], [$now - 120, 1.0], [$now - 60, 0.0]]
+            && $stackModel['series'][1]['initiallyVisible'] === false
+            && $stackModel['range']['pointLimitPerSeries'] === 100
+            && $stacked->GetTestProperties()['Sources'] === json_encode($stackRows, JSON_THROW_ON_ERROR),
+            'Stacks preserve original archive points, zeros, hidden contributors, group bounds and configured styles; only a fully missing span gets a break marker.'
+        );
+        $mixedUnits = $stackRows;
+        $mixedUnits[1]['Unit'] = 'W';
+        foreach ([[$mixedUnits, 'auto'], [$stackRows, 'raw'], [$stackRows, 'realtime']] as [$invalidRows, $mode]) {
+            $invalidStack = $configure($invalidRows, $mode);
+            $invalidStack->ApplyChanges();
+            assertGatewayGauge($invalidStack->GetTestStatus() === 202, 'Mixed units and unsynchronized raw or realtime stacks must be rejected.');
+        }
+        foreach ([-1, 33, '1'] as $invalidGroup) {
+            $invalidRows = $stackRows;
+            $invalidRows[0]['StackGroup'] = $invalidGroup;
+            $invalidStack = $configure($invalidRows, 'auto');
+            $invalidStack->ApplyChanges();
+            assertGatewayGauge($invalidStack->GetTestStatus() === 202, 'Stack groups must be integers between 0 and 32.');
+        }
+        $berlin = new DateTimeZone('Europe/Berlin');
+        $localDay = static fn (string $date): int => (new DateTimeImmutable($date, $berlin))->getTimestamp();
+        foreach ([['2026-03-29', '2026-03-30', '2026-03-31', '2026-04-01'], ['2026-10-25', '2026-10-26', '2026-10-27', '2026-10-28']] as [$first, $second, $missing, $last]) {
+            $dailyStack = [['stackGroup' => 1, 'points' => [[$localDay($first), 2], [$localDay($second), 0], [$localDay($last), 3]]]];
+            assertGatewayGauge(
+                \SymconECharts\EChartsArchiveStack::GapTimestamps($dailyStack, 1, 'Europe/Berlin') === [1 => [$localDay($missing)]],
+                'Daily stack breaks must follow local calendar days across both DST boundaries.'
+            );
+        }
         foreach ($rows as $index => &$row) {
             $row['InitiallyVisible'] = $index < 4;
         }

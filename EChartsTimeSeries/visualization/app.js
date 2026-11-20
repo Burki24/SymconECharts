@@ -23,6 +23,13 @@
         });
     }
 
+    function tooltipValue(value, decimals, unit) {
+        var formatted = Number.isFinite(value) ? value.toLocaleString(undefined, {
+            minimumFractionDigits: decimals, maximumFractionDigits: decimals
+        }) : '–';
+        return escapeHTML(formatted) + (unit ? ' ' + escapeHTML(unit) : '');
+    }
+
     function translate(text) {
         return (bootstrap.translations || {})[text] || text;
     }
@@ -150,8 +157,14 @@
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
         var axes = Array.isArray(model.axes) ? model.axes : [];
-        var series = Array.isArray(model.series) ? model.series : [];
+        var series = window.SymconEChartsArchiveStack.project(model.series || [], model.range.stackGapTimestamps || {});
         var selectedSeries = seriesSelection.reconcile(series);
+        var visibleStackSizes = new Map();
+        series.forEach(function (item) {
+            if (item.stackGroup && selectedSeries[item.id]) {
+                visibleStackSizes.set(item.stackGroup, (visibleStackSizes.get(item.stackGroup) || 0) + 1);
+            }
+        });
         var activeAxes = axes.map(function (_, index) {
             return series.some(function (item) { return item.axisIndex === index && selectedSeries[item.id]; });
         });
@@ -285,21 +298,31 @@
                 axisPointer: { type: 'cross' },
                 formatter: function (parameters) {
                     if (!Array.isArray(parameters) || parameters.length === 0) { return ''; }
-                    var heading = escapeHTML(parameters[0].axisValueLabel || '');
-                    return [heading].concat(parameters.map(function (parameter) {
+                    var rows = [escapeHTML(parameters[0].axisValueLabel || '')];
+                    var totals = new Map();
+                    parameters.forEach(function (parameter) {
                         var item = series.find(function (entry) { return entry.id === parameter.seriesId; })
                             || series[parameter.seriesIndex] || {};
-                        var value = Array.isArray(parameter.value) ? Number(parameter.value[1]) : Number(parameter.value);
+                        if (selectedSeries[item.id] === false) { return; }
+                        var value = Array.isArray(parameter.value) ? parameter.value[1] : parameter.value;
                         var decimals = Math.max(0, Math.min(6, Number(item.decimals) || 0));
-                        var formatted = Number.isFinite(value)
-                            ? value.toLocaleString(undefined, {
-                                minimumFractionDigits: decimals,
-                                maximumFractionDigits: decimals
-                            })
-                            : '–';
-                        return (parameter.marker || '') + escapeHTML(item.label || parameter.seriesName || '') + ': '
-                            + escapeHTML(formatted) + (item.unit ? ' ' + escapeHTML(item.unit) : '');
-                    })).join('<br>');
+                        rows.push((parameter.marker || '') + escapeHTML(item.label || parameter.seriesName || '') + ': '
+                            + tooltipValue(value, decimals, item.unit));
+                        if (item.stackGroup && Number.isFinite(value)) {
+                            var total = totals.get(item.stackGroup) || { value: 0, count: 0, decimals: 0, unit: item.unit };
+                            total.value += value;
+                            total.count += 1;
+                            total.decimals = Math.max(total.decimals, decimals);
+                            totals.set(item.stackGroup, total);
+                        }
+                    });
+                    totals.forEach(function (total, group) {
+                        if (total.count === visibleStackSizes.get(group)) {
+                            rows.push(escapeHTML(translate('Visible total')) + ' (' + group + '): '
+                                + tooltipValue(total.value, total.decimals, total.unit));
+                        }
+                    });
+                    return rows.join('<br>');
                 }
             },
             dataZoom: zoomController.timeAxisOptions(zoom, bootstrap.mode, bottomLegend ? 38 : 12, compact),
@@ -324,7 +347,9 @@
                 var valueAxis = {
                     show: activeAxes[index],
                     type: 'value',
-                    scale: true,
+                    scale: !series.some(function (item) {
+                        return item.stackGroup && item.axisIndex === index && selectedSeries[item.id];
+                    }),
                     boundaryGap: ['5%', '5%'],
                     name: showAxis ? axis.unit || '' : '',
                     position: entry.position,
@@ -379,7 +404,8 @@
                     symbolSize: sourceSymbolSize,
                     smooth: sourceDesign ? sourceDesign.smoothLine === true : design.smoothLines === true,
                     connectNulls: false,
-                    sampling: 'lttb',
+                    // Independent LTTB samples can erase shared gaps or offset band edges.
+                    sampling: item.stackGroup ? 'none' : 'lttb',
                     lineStyle: {
                         width: sourceLineWidth,
                         type: sourceDesign ? String(sourceDesign.lineType || 'solid') : 'solid',
@@ -395,6 +421,7 @@
                         fontSize: echartsDesign.fontSizePercent(design.valueFontSizePercent, 12),
                         formatter: function (parameters) {
                             var value = Array.isArray(parameters.value) ? parameters.value[1] : parameters.value;
+                            if (value == null) { return ''; }
                             var decimals = Math.max(0, Math.min(6, Number(item.decimals) || 0));
                             return Number(value).toLocaleString(undefined, {
                                 minimumFractionDigits: decimals, maximumFractionDigits: decimals
@@ -403,11 +430,13 @@
                     },
                     data: buildSeriesData(item, model.range)
                 };
-                if (item.style === 'area') {
+                if (item.stackGroup) { result.stack = 'stack-' + item.stackGroup; }
+                if (item.style === 'area' || item.stackGroup) {
                     var sourceAreaOpacity = sourceDesign
                         ? echartsDesign.opacityFromPercent(sourceDesign.areaOpacityPercent, 22)
                         : areaOpacity;
                     result.areaStyle = { opacity: sourceAreaOpacity };
+                    if (item.stackGroup) { result.areaStyle.origin = 0; }
                     if (sourceDesign && sourceDesign.areaFillMode === 'gradient') {
                         result.areaStyle.color = {
                             type: 'linear', x: 0, y: 0, x2: 0, y2: 1,

@@ -590,6 +590,16 @@ final class EChartsAsset
         return self::NormalizeLineEndings($content);
     }
 
+    /** Loads time-axis stack alignment for historical bars and areas. */
+    public static function ArchiveStackJavaScript(): string
+    {
+        $content = @file_get_contents(__DIR__ . '/echarts-archive-stack.js');
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The archive stack utilities could not be loaded.');
+        }
+        return self::NormalizeLineEndings($content);
+    }
+
     /** Loads lossless startup decoding for families with compressed initial states. */
     public static function StartupJavaScript(): string
     {

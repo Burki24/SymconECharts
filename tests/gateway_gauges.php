@@ -5474,6 +5474,51 @@ assertGatewayGauge(
         && str_contains($timeSeriesPreviewSvg, 'Preview target'),
     'Time Series Tile and IPSView previews must react immediately to unpersisted source and design values.'
 );
+(static function (): void
+{
+    $preview = new EChartsTimeSeries();
+    $preview->Create();
+    $east = ['VariableID' => 4711, 'Label' => 'East', 'Unit' => 'kW', 'UseVariablePresentation' => false,
+        'Style'           => 'line', 'Color' => '#345678', 'StackGroup' => 1];
+    $west = [...$east, 'VariableID' => 4713, 'Label' => 'West', 'Color' => '#654321', 'StackGroup' => 0];
+    $preview->SetTestProperty('Sources', json_encode([$east, $west], JSON_THROW_ON_ERROR));
+    $stored = $preview->GetTestProperties();
+    $west['StackGroup'] = 1;
+    $preview->UpdateTimeSeriesPreviewSourceFromForm(json_encode(['Sources' => $west], JSON_THROW_ON_ERROR), 'edit');
+    $rowUpdates = array_slice($preview->GetTestFormUpdates(), -2);
+    $preview->UpdateTimeSeriesPreviewFromForm(json_encode(['Sources' => [$east, $west]], JSON_THROW_ON_ERROR));
+    assertGatewayGauge(
+        $rowUpdates === array_slice($preview->GetTestFormUpdates(), -2)
+        && array_column($rowUpdates, 'Field') === ['TimeSeriesPreview', 'IPSViewTimeSeriesPreview']
+        && $preview->GetTestProperties() === $stored,
+        'Editing a stack group must refresh both draft previews identically to a full source list without saving it.'
+    );
+    foreach ($rowUpdates as $update) {
+        $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+        assertGatewayGauge(
+            preg_match('/<path d="[^"]+ Z" fill="#345678"/', $svg) === 1
+            && preg_match('/<path d="[^"]+ Z" fill="#654321"/', $svg) === 1,
+            'Both previews must fill the two stack members even with their original line style.'
+        );
+    }
+    $form = json_decode($preview->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    $sourceList = findGaugeFormElement($form['elements'], 'Sources');
+    foreach ($stored as $name => $value) {
+        ${$name} = $value;
+    }
+    $east['Color'] = '#975321';
+    $Sources = new ArrayIterator([$east, $west]);
+    eval(str_replace('ECTS_UpdateTimeSeriesPreviewSourceFromForm($id, ', '$preview->UpdateTimeSeriesPreviewSourceFromForm(', $sourceList['onEdit']));
+    foreach (array_slice($preview->GetTestFormUpdates(), -2) as $update) {
+        $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+        assertGatewayGauge(
+            preg_match('/<path d="[^"]+ Z" fill="#975321"/', $svg) === 1
+            && preg_match('/<path d="[^"]+ Z" fill="#654321"/', $svg) === 1
+            && $stored === $preview->GetTestProperties(),
+            'The generated row callback must include all unsaved list changes in both stack previews.'
+        );
+    }
+})();
 $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
     'Sources' => array_map(
         static fn (int $variableID): array => ['VariableID' => $variableID, 'Label' => 'Source ' . $variableID],

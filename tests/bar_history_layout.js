@@ -14,6 +14,7 @@ const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts
 const zoomSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-zoom.js'), 'utf8');
 const patternSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-pattern.js'), 'utf8');
 const startupSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-startup.js'), 'utf8');
+const archiveStackSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-archive-stack.js'), 'utf8');
 const selectionSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-series-selection.js'), 'utf8');
 
 function render(truncated = false, mode = 'symcon', adaptToBackground = false, enableZoom = true, enableImages = false, width = 750, height = 420, initialState = null, actualChart = null, deferredStartup = false) {
@@ -136,6 +137,7 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
     vm.runInNewContext(zoomSource, context);
     vm.runInNewContext(patternSource, context);
     vm.runInNewContext(startupSource, context);
+    vm.runInNewContext(archiveStackSource, context);
     vm.runInNewContext(selectionSource, context);
     vm.runInNewContext(source, context);
     return {

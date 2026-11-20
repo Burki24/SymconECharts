@@ -14,6 +14,7 @@ use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsArchiveQuery;
+use SymconECharts\EChartsArchiveStack;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
@@ -38,6 +39,7 @@ require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
+require_once __DIR__ . '/../libs/EChartsArchiveStack.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
@@ -922,7 +924,8 @@ class EChartsBarHistory extends IPSModuleStrict
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::CartesianJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
                 '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::StartupJavaScript()
-                    . "\n" . EChartsAsset::SeriesSelectionJavaScript(),
+                    . "\n" . EChartsAsset::SeriesSelectionJavaScript()
+                    . "\n" . EChartsAsset::ArchiveStackJavaScript(),
                 '{{ECHARTS_ZOOM_SCRIPT}}'      => EChartsAsset::ZoomJavaScript(),
                 '{{ECHARTS_PATTERN_SCRIPT}}'   => EChartsAsset::PatternJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
@@ -1024,6 +1027,7 @@ class EChartsBarHistory extends IPSModuleStrict
         $result = [];
         $seen = [];
         $stackUnits = [];
+        $mode = $this->ReadPropertyString('DataMode');
         foreach ($sources as $source) {
             if (!is_array($source)) {
                 throw new InvalidArgumentException('The Historical Bar source settings are invalid.');
@@ -1037,12 +1041,10 @@ class EChartsBarHistory extends IPSModuleStrict
             $usePresentation = $source['UseVariablePresentation'] ?? true;
             $axisPosition = $source['AxisPosition'] ?? 'auto';
             $initiallyVisible = $source['InitiallyVisible'] ?? true;
-            $stackGroup = $source['StackGroup'] ?? 0;
             if (!is_int($variableID) || $variableID <= 0 || !IPS_VariableExists($variableID)
                 || isset($seen[$variableID])
                 || !in_array(IPS_GetVariable($variableID)['VariableType'] ?? null, [1, 2], true)
                 || !is_string($label) || !is_string($unit) || !is_bool($usePresentation) || !is_bool($initiallyVisible)
-                || !is_int($stackGroup) || $stackGroup < 0 || $stackGroup > self::MAXIMUM_SOURCE_COUNT
                 || !is_int($decimals) || $decimals < 0 || $decimals > 6
                 || !is_int($color) || $color < -1 || $color > 0xFFFFFF
                 || !is_string($reducer) || !in_array($reducer, self::REDUCERS, true)
@@ -1058,15 +1060,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 $usePresentation
             );
             $seen[$variableID] = true;
-            if ($stackGroup > 0) {
-                if ($this->ReadPropertyString('DataMode') === 'raw') {
-                    throw new InvalidArgumentException('Stack groups require automatic or fixed aggregation.');
-                }
-                $stackUnits[$stackGroup] ??= $presentation['unit'];
-                if ($stackUnits[$stackGroup] !== $presentation['unit']) {
-                    throw new InvalidArgumentException('All sources in a stack group must use the same unit.');
-                }
-            }
+            $stackGroup = EChartsArchiveStack::ValidateGroup($source['StackGroup'] ?? 0, $presentation['unit'], $mode, $stackUnits);
             $result[] = [
                 'StackGroup'       => $stackGroup,
                 'VariableID'       => $variableID,

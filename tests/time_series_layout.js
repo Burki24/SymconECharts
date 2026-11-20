@@ -14,6 +14,7 @@ const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts
 const zoomSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-zoom.js'), 'utf8');
 const patternSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-pattern.js'), 'utf8');
 const startupSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-startup.js'), 'utf8');
+const archiveStackSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-archive-stack.js'), 'utf8');
 const selectionSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-series-selection.js'), 'utf8');
 const palette = {
     background: '#202020', text: '#ffffff', muted: '#aaaaaa', border: '#cccccc', track: '#444444',
@@ -199,6 +200,7 @@ function render(
     vm.runInNewContext(zoomSource, context);
     vm.runInNewContext(patternSource, context);
     vm.runInNewContext(startupSource, context);
+    vm.runInNewContext(archiveStackSource, context);
     vm.runInNewContext(selectionSource, context);
     vm.runInNewContext(source, context);
     while (scheduled.length > 0) { scheduled.shift()(); }
@@ -713,6 +715,56 @@ assert.equal(largeSelection.getLatestOption().legend.selected['variable-10000'],
     'An explicit changed initial visibility must apply only to its own source.');
 
 const echarts = require(path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts'));
+for (const mode of ['symcon', 'ipsview']) {
+    const native = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 640, height: 420 });
+    const points = values => values.map(([hour, power]) => [3600 * hour, power]);
+    const sources = [
+        { id: 'east', label: 'East', axisIndex: 0, unit: 'kW', decimals: 1, stackGroup: 1, style: 'area',
+            points: points([[1, 2], [2, 7], [3, -4], [5, 0], [6, 10]]) },
+        { id: 'west', label: 'West', axisIndex: 0, unit: 'kW', stackGroup: 1, style: 'area',
+            points: points([[1, 3], [3, -2], [5, 4], [6, 1]]) },
+        { id: 'other', label: 'Other', axisIndex: 1, unit: 'W', stackGroup: 2, style: 'area',
+            points: points([[2, 12], [3, 12]]) },
+        { id: 'solo', label: 'Solo', axisIndex: 0, unit: 'kW', style: 'line', points: points([[2, 10]]) }
+    ];
+    const range = { startTimestamp: 3600, endTimestamp: 6 * 3600, stackGapTimestamps: { 1: [4 * 3600] } };
+    const test = render(undefined, [{ unit: 'kW' }, { unit: 'W', minimum: 10, maximum: 40 }], 640,
+        sources, 'dark', {}, mode, false, false, 'auto', range, false, 420, native);
+    const [east, west, other, solo] = test.series;
+    assert.ok(east.stack && east.stack === west.stack && east.stack !== other.stack);
+    assert.equal(solo.stack, undefined);
+    assert.equal(west.areaStyle.origin, 0);
+    assert.equal(east.sampling, 'none');
+    assert.equal(solo.sampling, 'lttb');
+    assert.equal(east.connectNulls, false);
+    assert.equal(test.yAxis[0].scale, false);
+    assert.equal(test.yAxis[1].min, 10);
+    assert.deepEqual(Array.from(east.data, p => p[1]), [2, null, -4, null, 0, 10]);
+    assert.deepEqual(Array.from(west.data, p => p[1]), [3, null, -2, null, 4, 1]);
+    assert.deepEqual(Array.from(other.data, p => p[1]), [12, 12]);
+    assert.equal(sources[0].points.length, 5);
+    const totals = () => {
+        const data = native.getModel().getSeriesByIndex(1).getData();
+        return Array.from({ length: data.count() }, (_, i) => data.get(data.getCalculationInfo('stackResultDimension'), i));
+    };
+    assert.deepEqual(totals(), [5, NaN, -6, NaN, 4, 11]);
+    const tooltip = (index, ids = [0, 1]) => test.getLatestOption().tooltip.formatter(ids.map(i => ({
+        seriesId: sources[i].id, value: test.series[i].data[index], axisValueLabel: '12 h'
+    })));
+    const decimal = value => value.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    assert.ok(tooltip(0).includes('East: ' + decimal(2) + ' kW'));
+    assert.ok(tooltip(0).includes('West: 3 kW'));
+    assert.ok(tooltip(0).includes('Visible total (1): ' + decimal(5) + ' kW'));
+    assert.doesNotMatch(tooltip(1), /Visible total|0 kW/);
+    assert.ok(tooltip(4).includes('East: ' + decimal(0) + ' kW'));
+    native.dispatchAction({ type: 'legendToggleSelect', name: 'east' });
+    assert.deepEqual(totals(), [3, NaN, -2, NaN, 4, 1]);
+    assert.doesNotMatch(tooltip(0), /East/);
+    assert.match(tooltip(0), /Visible total \(1\): 3 kW/);
+    assert.doesNotMatch(native.renderToSVGString(), /NaN/);
+    native.dispose();
+}
+
 for (const mode of ['symcon', 'ipsview']) {
     const native = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 420, height: 520 });
     const stressSources = manySources.map(item => ({ ...item,
