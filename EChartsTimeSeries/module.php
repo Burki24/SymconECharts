@@ -1309,7 +1309,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             $variableID = $annotation['VariableID'] ?? null;
             if (!is_int($variableID) || !array_key_exists($variableID, $seriesIndexes)) {
                 throw new UnexpectedValueException(
-                    sprintf($this->Translate('Select a configured source for annotation %d.'), $index + 1),
+                    sprintf($this->Translate('Reference lines and value ranges, row %d: select a variable listed under Time series sources or delete this marker.'), $index + 1),
                     self::STATUS_CONFIGURATION_INVALID
                 );
             }

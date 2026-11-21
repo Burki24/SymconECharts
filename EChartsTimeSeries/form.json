@@ -189,16 +189,20 @@
             "caption": "Sources with the same unit share one value axis and must use the same explicitly selected side. Automatic distributes unit axes between left and right."
         },
         {
+            "type": "Label",
+            "caption": "For ordinary measurement curves, leave the following list empty. To mark a threshold or target range, select one of your time series sources and enter fixed values in its unit."
+        },
+        {
             "type": "List",
             "name": "Annotations",
-            "caption": "Reference lines and value ranges",
+            "caption": "Reference lines and value ranges (optional)",
             "rowCount": 4,
             "add": true,
             "delete": true,
             "changeOrder": true,
             "columns": [
                 {
-                    "caption": "Source",
+                    "caption": "Assigned time series",
                     "name": "VariableID",
                     "width": "220px",
                     "add": 0,

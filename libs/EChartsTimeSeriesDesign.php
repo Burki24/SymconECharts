@@ -149,7 +149,7 @@ final class EChartsTimeSeriesDesign
     public static function AnnotationEditorForm(): array
     {
         return [
-            ['type' => 'SelectVariable', 'name' => 'VariableID', 'caption' => 'Source', 'validVariableTypes' => [1, 2]],
+            ['type' => 'SelectVariable', 'name' => 'VariableID', 'caption' => 'Assigned time series', 'validVariableTypes' => [1, 2]],
             ['type' => 'RowLayout', 'items' => [
                 ['type' => 'Select', 'name' => 'Type', 'caption' => 'Marker type', 'options' => [
                     ['caption' => 'Reference line', 'value' => 'line'],
@@ -167,7 +167,7 @@ final class EChartsTimeSeriesDesign
                 ['type' => 'Select', 'name' => 'LineType', 'caption' => 'Line type', 'options' => self::Options(self::ANNOTATION_LINE_TYPES)],
                 ['type' => 'NumberSpinner', 'name' => 'LineWidthPercent', 'caption' => 'Line width', 'minimum' => 50, 'maximum' => 200, 'suffix' => ' %']
             ]],
-            ['type' => 'Label', 'caption' => 'Reference lines use Value. Value ranges use Value as minimum and Maximum as upper boundary.']
+            ['type' => 'Label', 'caption' => 'For a line at 25 °C, select the temperature series and enter 25 under Value / minimum. For a humidity range of 40–60 %, select the humidity series and enter 40 under Value / minimum and 60 under Maximum.']
         ];
     }
 

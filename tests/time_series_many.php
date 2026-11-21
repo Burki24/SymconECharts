@@ -90,7 +90,8 @@ declare(strict_types=1);
             [[$temperature, array_replace($humidity, ['VariableID' => 0])], [], 'Für Quelle 2 eine vorhandene Variable auswählen.'],
             [[$temperature, array_replace($humidity, ['VariableID' => 96999])], [], 'Für Quelle 2 eine Variable vom Typ Integer oder Float auswählen.'],
             [[], [], 'Zwischen 1 und 32 Zeitreihenquellen konfigurieren.'],
-            [[$temperature], [['VariableID' => $temperature['VariableID'], 'Value' => 15], ['VariableID' => $humidity['VariableID'], 'Value' => 50]], 'Für Markierung 2 eine konfigurierte Quelle auswählen.'],
+            [[$temperature, $humidity], [['VariableID' => $temperature['VariableID'], 'Value' => 25], ['VariableID' => $humidity['VariableID'], 'Type' => 'area', 'Value' => 40, 'Maximum' => 60]], null],
+            [[$temperature], [['VariableID' => $temperature['VariableID'], 'Value' => 15], ['VariableID' => $humidity['VariableID'], 'Value' => 50]], 'Referenzlinien und Wertebereiche, Zeile 2: Eine Variable aus „Zeitreihenquellen“ auswählen oder diese Markierung löschen.'],
             [[$temperature], [], null]
         ] as [$rows, $annotations, $expectedError]) {
             $output->SetTestProperty('Sources', json_encode($rows, JSON_THROW_ON_ERROR));
@@ -105,6 +106,16 @@ declare(strict_types=1);
                         $state['status'] === 'ready' && count($state['chart']['series']) === count($rows),
                         'Both outputs must show the configured independent series after applying valid settings.'
                     );
+                    assertGatewayGauge(count($state['chart']['annotations']) === count($annotations), 'Markers must remain optional.');
+                    if ($annotations !== []) {
+                        [$line, $area] = $state['chart']['annotations'];
+                        assertGatewayGauge(
+                            $line['seriesIndex'] === 0 && $line['type'] === 'line' && $line['value'] == 25
+                                && $area['seriesIndex'] === 1 && $area['type'] === 'area'
+                                && $area['value'] == 40 && $area['maximum'] == 60,
+                            'Line and range must use the fixed thresholds on the assigned temperature and humidity series.'
+                        );
+                    }
                 } else {
                     assertGatewayGauge(
                         $state['status'] === 'error' && $state['chart'] === null && $state['error'] === $expectedError,

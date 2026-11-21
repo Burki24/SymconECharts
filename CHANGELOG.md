@@ -28,6 +28,10 @@
 
 ## Fixes
 
+- EChartsTimeSeries erklärt im Formular, wann die optionalen Referenzlinien
+  und Wertebereiche sinnvoll sind. Verweist eine Markierung auf eine fehlende
+  Zeitreihenquelle, nennen Kachel und IPSView die betroffene Zeile und die Abhilfe.
+
 - EChartsTimeSeries zeigt in Kachel und IPSView die konkrete Ursache eines
   Konfigurationsfehlers in der eingestellten Sprache. Doppelte Quellen,
   unterschiedliche Einheiten in einer Stapelgruppe und Markierungen mit

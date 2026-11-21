@@ -195,11 +195,15 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
    des Kachel- beziehungsweise IPSView-Designers. SVG-Flächenmuster werden nur
    für den Flächenstil verwendet und vor der Ausgabe sicher validiert.
 5. Optional den Kacheldesigner öffnen und Darstellung sowie Vorschau anpassen.
-6. Optional unter **Referenzlinien und Wertebereiche** bis zu 32 Markierungen
-   ergänzen. Jede Markierung ist einer konfigurierten Quelle zugeordnet und
-   verwendet damit deren Wertachse. Eine Referenzlinie benötigt einen Wert;
-   ein Wertebereich ein Minimum und ein größeres Maximum. Ohne eigene Farbe
-   übernimmt die Markierung die Reihenfarbe.
+6. Für normale Messkurven genügt der Eintrag unter **Zeitreihenquellen**.
+   **Referenzlinien und Wertebereiche (optional)** kann leer bleiben. Hier
+   lassen sich bis zu 32 feste Markierungen ergänzen. Die **zugehörige Zeitreihe**
+   bestimmt die Wertachse und Einheit. Für eine waagerechte Linie bei 25 °C
+   die Temperaturreihe wählen und **Wert / Minimum** auf 25 setzen. Für ein
+   farbiges Band von 40 bis 60 % die Feuchtereihe wählen und 40 sowie 60
+   als Grenzen eintragen. Ohne eigene Farbe übernimmt die Markierung die
+   Reihenfarbe. Beim Entfernen einer Quelle auch ihre Markierungen löschen
+   oder einer passenden verbleibenden Reihe zuordnen.
 7. Optional im Abschnitt **IPSView-Design** die WebContent-Ausgabe aktivieren.
    Standardmäßig übernimmt sie Kacheldesign und Zeiteinstellungen. Wird
    **Zeiteinstellungen der Kachel verwenden** deaktiviert, erhält IPSView
