@@ -59,7 +59,7 @@
   verwendbar; Quellen, Archivwerte und gespeicherte Designs werden nicht geändert.
 
 <!-- symconecharts:prepared-beta -->
-# 03.11.2026 - Version 1.413 (Beta)
+# 03.11.2026 - Version 1.415 (Beta)
 
 Fortgeschriebene Beta-Übersicht: Die erste öffentliche Beta ist seit
 03.11.2026 im Symcon-Modulstore verfügbar; siehe
