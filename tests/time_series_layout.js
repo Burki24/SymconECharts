@@ -590,10 +590,16 @@ retainedOnArchiveFailure.handleMessage(timeReadyState);
 assert.equal(retainedOnArchiveFailure.getRecoveryView().warningElement.hidden, true,
     'A successful TimeSeries refresh must clear the stale-data warning.');
 retainedOnArchiveFailure.handleMessage({
-    status: 'error', chart: null, error: 'Configure 1 to 8 unique numeric sources.'
+    status: 'error', chart: null, error: 'Alle Quellen einer Stapelgruppe müssen dieselbe Einheit verwenden.'
 });
 assert.equal(retainedOnArchiveFailure.getRecoveryView().chartElement.hidden, true,
     'A TimeSeries configuration error must not retain an obsolete chart.');
+assert.equal(retainedOnArchiveFailure.getRecoveryView().errorElement.hidden, false);
+assert.equal(retainedOnArchiveFailure.getRecoveryView().errorElement.textContent,
+    'Alle Quellen einer Stapelgruppe müssen dieselbe Einheit verwenden.');
+retainedOnArchiveFailure.handleMessage(timeReadyState);
+assert.equal(retainedOnArchiveFailure.getRecoveryView().errorElement.hidden, true);
+assert.equal(retainedOnArchiveFailure.getRecoveryView().chartElement.hidden, false);
 
 const adaptedIPSView = render(undefined, undefined, 750, undefined, 'dark', {}, 'ipsview', true);
 assert.equal(adaptedIPSView.backgroundColor, 'transparent');

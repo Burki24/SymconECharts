@@ -76,6 +76,45 @@ declare(strict_types=1);
     };
 
     try {
+        $temperature = array_replace($sources[0], ['Unit' => '°C', 'Label' => 'Temperatur']);
+        $humidity = array_replace($sources[1], ['Unit' => '%', 'Label' => 'Feuchtigkeit']);
+        $GLOBALS['symconTestVariables'][96999] = ['VariableType' => 3, 'VariableUpdated' => $now, 'Value' => '55 %', 'Name' => 'Feuchtigkeit als Text'];
+        $output = $configure([$temperature], 'hour', 200);
+        $output->SetTestLanguage('de');
+        $output->SetTestProperty('EnableIPSView', true);
+        foreach ([
+            [[$temperature, $humidity], [], null],
+            [[$temperature + ['StackGroup' => 1], $humidity + ['StackGroup' => 1]], [], 'Alle Quellen einer Stapelgruppe müssen dieselbe Einheit verwenden.'],
+            [[$temperature, $temperature], [], 'Eine Variable ist mehrfach in der Quellenliste eingetragen.'],
+            [[$temperature, false], [], 'Zeitreihenquelle 2 ist ungültig.'],
+            [[$temperature, array_replace($humidity, ['VariableID' => 0])], [], 'Für Quelle 2 eine vorhandene Variable auswählen.'],
+            [[$temperature, array_replace($humidity, ['VariableID' => 96999])], [], 'Für Quelle 2 eine Variable vom Typ Integer oder Float auswählen.'],
+            [[], [], 'Zwischen 1 und 32 Zeitreihenquellen konfigurieren.'],
+            [[$temperature], [['VariableID' => $temperature['VariableID'], 'Value' => 15], ['VariableID' => $humidity['VariableID'], 'Value' => 50]], 'Für Markierung 2 eine konfigurierte Quelle auswählen.'],
+            [[$temperature], [], null]
+        ] as [$rows, $annotations, $expectedError]) {
+            $output->SetTestProperty('Sources', json_encode($rows, JSON_THROW_ON_ERROR));
+            $output->SetTestProperty('Annotations', json_encode($annotations, JSON_THROW_ON_ERROR));
+            $before = $output->GetTestProperties();
+            $output->ApplyChanges();
+            assertGatewayGauge($output->GetTestProperties() === $before, 'Configuration errors and recovery must preserve the submitted properties.');
+            foreach ([$output->GetVisualizationTile(), $output->GetTestVariableValue('IPSViewTimeSeries')] as $html) {
+                $state = $startup($html);
+                if ($expectedError === null) {
+                    assertGatewayGauge(
+                        $state['status'] === 'ready' && count($state['chart']['series']) === count($rows),
+                        'Both outputs must show the configured independent series after applying valid settings.'
+                    );
+                } else {
+                    assertGatewayGauge(
+                        $state['status'] === 'error' && $state['chart'] === null && $state['error'] === $expectedError,
+                        'Both outputs must show the specific German configuration error: ' . $expectedError
+                    );
+                }
+            }
+        }
+        unset($output);
+
         $old = $configure(array_slice($sources, 0, 8), 'realtime', 2000);
         $defaults = (new TestableEChartsTimeSeries());
         $defaults->Create();

@@ -930,10 +930,22 @@ final class TestableEChartsGateway extends EChartsGateway
 final class TestableEChartsTimeSeries extends EChartsTimeSeries
 {
     private int $currentTimestamp = 1;
+    private array $translations = [];
+
+    public function SetTestLanguage(string $language): void
+    {
+        $catalog = json_decode(file_get_contents(dirname(__DIR__) . '/EChartsTimeSeries/locale.json'), true, 512, JSON_THROW_ON_ERROR);
+        $this->translations = $catalog['translations'][$language] ?? [];
+    }
 
     public function SetTestCurrentTimestamp(int $timestamp): void
     {
         $this->currentTimestamp = $timestamp;
+    }
+
+    protected function Translate(string $text): string
+    {
+        return $this->translations[$text] ?? parent::Translate($text);
     }
 
     protected function CurrentTimestamp(): int

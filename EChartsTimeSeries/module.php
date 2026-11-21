@@ -1116,14 +1116,17 @@ class EChartsTimeSeries extends IPSModuleStrict
         $mode = $this->ReadPropertyString('DataMode');
         foreach ($sources as $index => $source) {
             if (!is_array($source)) {
-                throw new UnexpectedValueException('Time series source ' . ($index + 1) . ' is invalid.', 201);
+                throw new UnexpectedValueException(sprintf($this->Translate('Time series source %d is invalid.'), $index + 1), 201);
             }
             $variableID = $source['VariableID'] ?? null;
-            if (!is_int($variableID) || $variableID <= 0 || !IPS_VariableExists($variableID)
-                || isset($variableIDs[$variableID])
-                || !in_array(IPS_GetVariable($variableID)['VariableType'] ?? null, [1, 2], true)
-            ) {
-                throw new UnexpectedValueException('Time series sources must be unique numeric variables.', 201);
+            if (!is_int($variableID) || $variableID <= 0 || !IPS_VariableExists($variableID)) {
+                throw new UnexpectedValueException(sprintf($this->Translate('Select an existing variable for source %d.'), $index + 1), 201);
+            }
+            if (isset($variableIDs[$variableID])) {
+                throw new UnexpectedValueException('A variable is listed more than once.', 201);
+            }
+            if (!in_array(IPS_GetVariable($variableID)['VariableType'] ?? null, [1, 2], true)) {
+                throw new UnexpectedValueException(sprintf($this->Translate('Source %d must be an integer or float variable.'), $index + 1), 201);
             }
             $label = $source['Label'] ?? '';
             $unit = $source['Unit'] ?? '';
@@ -1286,7 +1289,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         }
 
         $result = [];
-        foreach ($annotations as $annotation) {
+        foreach ($annotations as $index => $annotation) {
             if (!is_array($annotation)) {
                 throw new UnexpectedValueException(
                     'Time series annotation settings are invalid.',
@@ -1294,6 +1297,12 @@ class EChartsTimeSeries extends IPSModuleStrict
                 );
             }
             $variableID = $annotation['VariableID'] ?? null;
+            if (!is_int($variableID) || !array_key_exists($variableID, $seriesIndexes)) {
+                throw new UnexpectedValueException(
+                    sprintf($this->Translate('Select a configured source for annotation %d.'), $index + 1),
+                    self::STATUS_CONFIGURATION_INVALID
+                );
+            }
             $type = $annotation['Type'] ?? 'line';
             $label = $annotation['Label'] ?? '';
             $value = $annotation['Value'] ?? null;
@@ -1302,8 +1311,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             $lineType = $annotation['LineType'] ?? 'solid';
             $lineWidthPercent = $annotation['LineWidthPercent'] ?? 100;
             $opacityPercent = $annotation['OpacityPercent'] ?? 18;
-            if (!is_int($variableID) || !array_key_exists($variableID, $seriesIndexes)
-                || !is_string($type) || !in_array($type, EChartsTimeSeriesDesign::ANNOTATION_TYPES, true)
+            if (!is_string($type) || !in_array($type, EChartsTimeSeriesDesign::ANNOTATION_TYPES, true)
                 || !is_string($label) || strlen($label) > 120
                 || (!is_int($value) && !is_float($value)) || !is_finite((float) $value)
                 || $color === null
@@ -1527,7 +1535,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'family'        => 'time-series',
                 'status'        => 'error',
                 'chart'         => null,
-                'error'         => 'Configure 1 to 32 unique numeric sources.'
+                'error'         => $this->Translate($error['Message'])
             ];
         }
         if (!$this->HasActiveParent()) {

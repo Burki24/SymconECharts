@@ -18,6 +18,11 @@
 
 ## Fixes
 
+- EChartsTimeSeries zeigt in Kachel und IPSView die konkrete Ursache eines
+  Konfigurationsfehlers in der eingestellten Sprache. Doppelte Quellen,
+  unterschiedliche Einheiten in einer Stapelgruppe und Markierungen mit
+  entfernter Quelle sind dadurch unterscheidbar.
+
 - `ECTR_SetTreeJSON` behandelt Kernel-Getter korrekt als Abruf aktiver Werte.
   Das neue Dokument wird vorgemerkt und angewandt; anschließend werden die
   vollständige aktive Konfiguration und verbleibende Änderungen geprüft.

@@ -39,6 +39,12 @@ Hinweis; das Modul versucht nach 60 Sekunden erneut zu laden. Ohne zuvor
 geladene Daten oder bei ungültiger Konfiguration erscheint weiterhin eine
 Fehlermeldung.
 
+Bei einem Konfigurationsfehler zeigen Kachel und IPSView den Grund an.
+Temperatur (°C) und Luftfeuchtigkeit (%) lassen sich gemeinsam anzeigen,
+wenn beide Quellen die **Stapelgruppe 0** verwenden. Eine gemeinsame
+Stapelgruppe benötigt dieselbe Einheit. Nach dem Korrigieren der Quellen
+die Änderungen übernehmen, damit das Diagramm wieder angezeigt wird.
+
 ## Animation
 
 Für Start und Aktualisierung lassen sich außerdem die **Bewegungskurve** und
