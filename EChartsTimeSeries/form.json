@@ -186,7 +186,7 @@
         },
         {
             "type": "Label",
-            "caption": "Sources with the same unit share one value axis and must use the same explicitly selected side. Automatic distributes unit axes between left and right."
+            "caption": "Sources with the same unit share a value axis by default. Choose an own value axis in the source editor to set its side and range independently."
         },
         {
             "type": "Label",

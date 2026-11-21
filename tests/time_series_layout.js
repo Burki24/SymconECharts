@@ -734,6 +734,25 @@ assert.equal(largeSelection.getLatestOption().legend.selected['variable-10000'],
 
 const echarts = require(path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts'));
 for (const mode of ['symcon', 'ipsview']) {
+    const native = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 750, height: 420 });
+    const axes = [{ unit: '%', position: 'left', minimum: 0, maximum: 100 },
+        { unit: '°C', position: 'left', minimum: -20, maximum: 40 },
+        { unit: '°C', position: 'right', minimum: 20, maximum: 60 }];
+    const sources = axes.map((axis, index) => ({ id: 'sensor-' + index, label: ['Humidity', 'Outside', 'Water'][index],
+        unit: axis.unit, axisIndex: index, decimals: 1, style: 'line', points: [[1000, 30], [2000, 32]] }));
+    const chart = render(undefined, axes, 750, sources, 'dark', {}, mode, false, false, 'auto', undefined, false, 420, native);
+    assert.deepEqual(Array.from(chart.series, item => item.yAxisIndex), [0, 1, 2]);
+    assert.ok(chart.yAxis[1].offset > chart.yAxis[0].offset);
+    for (const [index, axis] of axes.entries()) {
+        const valueAxis = native.getModel().getSeriesByIndex(index).coordinateSystem.getAxis('y');
+        assert.equal(valueAxis.position, axis.position);
+        assert.deepEqual(valueAxis.scale.getExtent(), [axis.minimum, axis.maximum]);
+    }
+    native.dispatchAction({ type: 'legendToggleSelect', name: 'sensor-1' });
+    assert.deepEqual(native.getOption().yAxis.map(axis => axis.show), [true, false, true]);
+    native.dispose();
+}
+for (const mode of ['symcon', 'ipsview']) {
     const native = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 640, height: 420 });
     const points = values => values.map(([hour, power]) => [3600 * hour, power]);
     const sources = [

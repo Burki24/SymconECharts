@@ -283,7 +283,7 @@ require_once dirname(__DIR__) . '/EChartsFunnel/module.php';
             assertGatewayGauge($state['status'] === 'error' && $state['chart'] === null && $state['error'] === $sizeError, 'Oversized Funnel models must return bounded actionable errors in both adapters.');
         }
         foreach (range(98700, 98731) as $id) {
-            $GLOBALS['symconTestVariables'][$id]['Presentation']['SUFFIX'] = str_repeat('<', 2800);
+            $GLOBALS['symconTestVariables'][$id]['Presentation']['SUFFIX'] = str_repeat('<', 5400);
         }
         $escaped = $configure($rows);
         $escapedProperties = $escaped->GetTestProperties();

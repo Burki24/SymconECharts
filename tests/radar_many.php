@@ -526,7 +526,7 @@ require_once dirname(__DIR__) . '/EChartsRadar/module.php';
             assertGatewayGauge($state['status'] === 'error' && $state['chart'] === null && $state['error'] === $sizeError, 'Oversized Radar models must return bounded actionable errors in both adapters.');
         }
         $escaped = $configure($axes, $rows);
-        $escaped->SetTestProperty('Title', str_repeat('<', 100000));
+        $escaped->SetTestProperty('Title', str_repeat('<', 180000));
         $escapedProperties = $escaped->GetTestProperties();
         assertGatewayGauge(strlen($escaped->GetRadarData()) < 200000 && count($decode($escaped)['radar']['data']) === 16, 'The HTML escaping guard must be tested from a complete valid Radar model below its JSON budget.');
         foreach ([$escaped->GetVisualizationTile(), $escaped->GetIPSViewHTML()] as $html) {

@@ -6,40 +6,81 @@ namespace SymconECharts;
 
 use InvalidArgumentException;
 
-/** Builds one value axis per unit for charts with several numeric sources. */
+require_once __DIR__ . '/EChartsValueRange.php';
+require_once __DIR__ . '/EChartsVariablePresentation.php';
+
+/** Assigns numeric archive series to shared or individual value axes. */
 final class EChartsUnitAxes
 {
+    /** @return ?array{minimum:float,maximum:float} */
+    public static function ResolveRange(array $source): ?array
+    {
+        $mode = $source['AxisRangeMode'] ?? 'auto';
+        if ($mode === 'auto') {
+            return null;
+        }
+        if (!in_array($mode, ['manual', 'presentation'], true)) {
+            throw new InvalidArgumentException('The value axis range mode is invalid.');
+        }
+        $minimum = $source['AxisMinimum'] ?? 0.0;
+        $maximum = $source['AxisMaximum'] ?? 100.0;
+        if (!EChartsValueRange::IsValid($minimum, $maximum)) {
+            throw new InvalidArgumentException('The value axis minimum must be smaller than its maximum.');
+        }
+        if ($mode === 'presentation') {
+            $metadata = EChartsVariablePresentation::Resolve(
+                is_int($source['VariableID'] ?? null) ? $source['VariableID'] : 0,
+                (float) $minimum,
+                (float) $maximum,
+                '',
+                0,
+                true
+            );
+            return ['minimum' => $metadata['minimum'], 'maximum' => $metadata['maximum']];
+        }
+        return ['minimum' => (float) $minimum, 'maximum' => (float) $maximum];
+    }
+
     /**
-     * @param list<array{Unit:string,AxisPosition:string,AxisRange?:?array{minimum:float,maximum:float}}> $sources
-     * @return array{Axes:list<array{unit:string,position:string,positionIndex:int,minimum?:float,maximum?:float}>,Indexes:array<string,int>}
+     * @param list<array{Unit:string,AxisPosition:string,OwnAxis?:bool,AxisRange?:?array{minimum:float,maximum:float}}> $sources
+     * @return array{Axes:list<array{unit:string,position:string,positionIndex:int,minimum?:float,maximum?:float}>,Indexes:array<string,int>,SeriesIndexes:list<int>}
      */
     public static function Build(array $sources): array
     {
         $groups = [];
+        $sharedIndexes = [];
+        $seriesIndexes = [];
         foreach ($sources as $source) {
             $unit = $source['Unit'];
             $position = $source['AxisPosition'];
             if (!in_array($position, ['auto', 'left', 'right'], true)) {
                 throw new InvalidArgumentException('The value axis side is invalid.');
             }
-            if (!array_key_exists($unit, $groups)) {
-                $groups[$unit] = ['unit' => $unit, 'position' => 'auto', 'range' => null];
-            }
-            if ($position !== 'auto') {
-                if ($groups[$unit]['position'] !== 'auto' && $groups[$unit]['position'] !== $position) {
-                    throw new InvalidArgumentException('Sources with the same unit must use the same axis side.');
+            $ownAxis = $source['OwnAxis'] ?? false;
+            $index = $ownAxis ? null : ($sharedIndexes[$unit] ?? null);
+            if ($index === null) {
+                $index = count($groups);
+                $groups[] = ['unit' => $unit, 'position' => 'auto', 'range' => null];
+                if (!$ownAxis) {
+                    $sharedIndexes[$unit] = $index;
                 }
-                $groups[$unit]['position'] = $position;
+            }
+            $seriesIndexes[] = $index;
+            if ($position !== 'auto') {
+                if ($groups[$index]['position'] !== 'auto' && $groups[$index]['position'] !== $position) {
+                    throw new InvalidArgumentException('Series sharing a value axis must use the same axis side.');
+                }
+                $groups[$index]['position'] = $position;
             }
             $range = $source['AxisRange'] ?? null;
             if ($range !== null) {
-                $existing = $groups[$unit]['range'];
+                $existing = $groups[$index]['range'];
                 if ($existing !== null
                     && (!self::ValuesEqual($existing['minimum'], $range['minimum'])
                         || !self::ValuesEqual($existing['maximum'], $range['maximum']))) {
-                    throw new InvalidArgumentException('Sources with the same unit must use the same explicit axis range.');
+                    throw new InvalidArgumentException('Series sharing a value axis must use the same explicit axis range.');
                 }
-                $groups[$unit]['range'] = $range;
+                $groups[$index]['range'] = $range;
             }
         }
 
@@ -58,11 +99,9 @@ final class EChartsUnitAxes
         unset($group);
 
         $axes = [];
-        $indexes = [];
         $positionIndexes = ['left' => 0, 'right' => 0];
-        foreach ($groups as $unit => $group) {
+        foreach ($groups as $group) {
             $position = $group['position'];
-            $indexes[$unit] = count($axes);
             $axis = [
                 'unit'          => $group['unit'],
                 'position'      => $position,
@@ -75,7 +114,7 @@ final class EChartsUnitAxes
             $axes[] = $axis;
         }
 
-        return ['Axes' => $axes, 'Indexes' => $indexes];
+        return ['Axes' => $axes, 'Indexes' => $sharedIndexes, 'SeriesIndexes' => $seriesIndexes];
     }
 
     private static function ValuesEqual(float $left, float $right): bool

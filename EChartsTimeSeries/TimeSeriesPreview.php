@@ -40,6 +40,8 @@ final class EChartsTimeSeriesPreview
             $position = $item['axisPosition'] ?? 'auto';
             $axisSources[] = [
                 'Unit'         => (string) ($item['unit'] ?? ''),
+                'OwnAxis'      => ($item['ownAxis'] ?? false) === true,
+                'AxisRange'    => $item['axisRange'] ?? null,
                 'AxisPosition' => in_array($position, ['auto', 'left', 'right'], true) ? $position : 'auto'
             ];
         }
@@ -48,23 +50,25 @@ final class EChartsTimeSeriesPreview
         } catch (\InvalidArgumentException) {
             foreach ($axisSources as &$axisSource) {
                 $axisSource['AxisPosition'] = 'auto';
+                $axisSource['AxisRange'] = null;
             }
             unset($axisSource);
             $axisModel = EChartsUnitAxes::Build($axisSources);
         }
         foreach ($allSeries as $index => &$item) {
             $item['previewPaletteIndex'] = $index;
+            $item['previewAxisIndex'] = $axisModel['SeriesIndexes'][$index];
         }
         unset($item);
         $series = array_slice(array_values(array_filter(
             $allSeries,
             static fn (array $item): bool => ($item['initiallyVisible'] ?? true) !== false
         )), 0, 4);
-        $visibleUnits = [];
+        $visibleAxes = [];
         $previewPatternBytes = 0;
         $simplifiedPatterns = false;
         foreach ($series as $index => $item) {
-            $visibleUnits[(string) ($item['unit'] ?? '')] ??= $index;
+            $visibleAxes[$item['previewAxisIndex']] ??= $index;
         }
         $fallbackColors = $palette['seriesColors'];
         $effectiveColors = [];
@@ -140,19 +144,27 @@ final class EChartsTimeSeriesPreview
             }
         }
         if ($showYAxis) {
-            foreach ($axisModel['Axes'] as $axis) {
-                if (!array_key_exists($axis['unit'], $visibleUnits)) {
+            $visiblePositions = ['left' => 0, 'right' => 0];
+            foreach ($axisModel['Axes'] as $axisIndex => $axis) {
+                if (!array_key_exists($axisIndex, $visibleAxes)) {
                     continue;
                 }
-                $sourceIndex = $visibleUnits[$axis['unit']];
+                $sourceIndex = $visibleAxes[$axisIndex];
                 $color = $axisColor !== '' ? $axisColor : $effectiveColors[$sourceIndex];
                 $left = $axis['position'] === 'left';
-                $x = $left ? 70 - $axis['positionIndex'] * 12 : 680 + $axis['positionIndex'] * 12;
+                $visiblePosition = $visiblePositions[$axis['position']]++;
+                $x = $left ? 70 - $visiblePosition * 12 : 680 + $visiblePosition * 12;
                 $content .= '<line data-preview-axis="' . $axis['position'] . '" x1="' . $x
                     . '" y1="' . self::N($plotTop) . '" x2="' . $x . '" y2="'
                     . self::N($plotBottom) . '" stroke="' . SVGPreviewHelper::escape($color) . '"/>';
+                $captionX = $left ? 74 + $visiblePosition * 80 : 676 - $visiblePosition * 80;
+                if (isset($axis['minimum'], $axis['maximum'])) {
+                    $content .= '<text data-preview-axis-range="' . $axis['position'] . '" x="' . $captionX
+                        . '" y="' . self::N($plotTop + $axisFontSize + 3) . '" text-anchor="' . ($left ? 'start' : 'end')
+                        . '" fill="' . SVGPreviewHelper::escape($color) . '" font-size="' . $axisFontSize . '">'
+                        . SVGPreviewHelper::escape($axis['minimum'] . ' … ' . $axis['maximum']) . '</text>';
+                }
                 if ($axis['unit'] !== '') {
-                    $captionX = $left ? 74 + $axis['positionIndex'] * 80 : 676 - $axis['positionIndex'] * 80;
                     $content .= '<text data-preview-axis-unit="' . $axis['position'] . '" x="' . $captionX
                         . '" y="' . self::N($plotTop - 7) . '" text-anchor="' . ($left ? 'start' : 'end')
                         . '" fill="' . SVGPreviewHelper::escape($color) . '" font-size="' . $axisFontSize . '">'

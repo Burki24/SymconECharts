@@ -233,6 +233,25 @@
                     "caption": "Color",
                     "allowTransparent": true,
                     "transparentCaption": "Automatic (theme)"
+                },
+                {
+                    "type": "Select",
+                    "name": "AxisPosition",
+                    "caption": "Axis side",
+                    "options": [
+                        {
+                            "caption": "Automatic",
+                            "value": "auto"
+                        },
+                        {
+                            "caption": "Left / bottom",
+                            "value": "left"
+                        },
+                        {
+                            "caption": "Right / top",
+                            "value": "right"
+                        }
+                    ]
                 }
             ]
         },
@@ -242,7 +261,7 @@
         },
         {
             "type": "Label",
-            "caption": "The total point budget is shared by all configured sources, including initially hidden rows. Up to 16 effective unit groups are supported."
+            "caption": "The total point budget is shared by all configured sources, including initially hidden rows. Up to 16 value axes are supported."
         },
         {
             "type": "RowLayout",

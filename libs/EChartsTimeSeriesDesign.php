@@ -7,6 +7,7 @@ namespace SymconECharts;
 use InvalidArgumentException;
 
 require_once __DIR__ . '/EChartsSvgImage.php';
+require_once __DIR__ . '/EChartsValueAxisForm.php';
 
 /**
  * Source-specific design contract for ECharts time-series lines and areas.
@@ -67,32 +68,7 @@ final class EChartsTimeSeriesDesign
     /** @return list<array<string, mixed>> */
     public static function AxisRangeColumns(): array
     {
-        return [
-            [
-                'caption' => 'AxisRangeMode',
-                'name'    => 'AxisRangeMode',
-                'width'   => '1px',
-                'visible' => false,
-                'save'    => true,
-                'add'     => 'auto'
-            ],
-            [
-                'caption' => 'AxisMinimum',
-                'name'    => 'AxisMinimum',
-                'width'   => '1px',
-                'visible' => false,
-                'save'    => true,
-                'add'     => 0.0
-            ],
-            [
-                'caption' => 'AxisMaximum',
-                'name'    => 'AxisMaximum',
-                'width'   => '1px',
-                'visible' => false,
-                'save'    => true,
-                'add'     => 100.0
-            ]
-        ];
+        return EChartsValueAxisForm::Columns();
     }
 
     /** @return list<array<string, mixed>> */
@@ -113,14 +89,7 @@ final class EChartsTimeSeriesDesign
                 ['type' => 'Select', 'name' => 'Reducer', 'caption' => 'Reducer', 'options' => self::Options(['auto', 'average', 'sum', 'minimum', 'maximum'])],
                 ['type' => 'Select', 'name' => 'AxisPosition', 'caption' => 'Axis side', 'options' => self::Options(['auto', 'left', 'right'])]
             ]],
-            ['type' => 'ExpansionPanel', 'caption' => 'Value axis range', 'expanded' => false, 'items' => [
-                ['type' => 'RowLayout', 'items' => [
-                    ['type' => 'Select', 'name' => 'AxisRangeMode', 'caption' => 'Axis range', 'options' => self::Options(self::AXIS_RANGE_MODES)],
-                    ['type' => 'NumberSpinner', 'name' => 'AxisMinimum', 'caption' => 'Axis minimum', 'digits' => 3],
-                    ['type' => 'NumberSpinner', 'name' => 'AxisMaximum', 'caption' => 'Axis maximum', 'digits' => 3]
-                ]],
-                ['type' => 'Label', 'caption' => 'Automatic sources adopt an explicit range of their unit group. Conflicting explicit ranges for the same unit are invalid.']
-            ]],
+            EChartsValueAxisForm::Panel(),
             ['type' => 'CheckBox', 'name' => 'UseIndividualDesign', 'caption' => 'Use individual series design'],
             ['type' => 'ExpansionPanel', 'caption' => 'Line and data points', 'expanded' => false, 'items' => [
                 ['type' => 'RowLayout', 'items' => [

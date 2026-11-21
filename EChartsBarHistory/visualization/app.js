@@ -290,6 +290,8 @@
                         type: 'value',
                         splitNumber: valueTickCount,
                         name: String(axis.unit || ''),
+                        ...(Number.isFinite(axis.minimum) && Number.isFinite(axis.maximum)
+                            ? { min: axis.minimum, max: axis.maximum } : {}),
                         position: horizontal ? (entry.position === 'left' ? 'bottom' : 'top') : entry.position,
                         offset: entry.positionIndex * axisOffsetStep,
                         ...(horizontal ? { nameLocation: 'middle', nameGap: axisFontSize + 12 } : {}),

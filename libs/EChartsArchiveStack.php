@@ -11,13 +11,16 @@ use InvalidArgumentException;
 final class EChartsArchiveStack
 {
     /** @param array<int,string> $units */
-    public static function ValidateGroup(mixed $group, string $unit, string $mode, array &$units): int
+    public static function ValidateGroup(mixed $group, string $unit, string $mode, array &$units, bool $ownAxis = false): int
     {
         if (!is_int($group) || $group < 0 || $group > 32) {
             throw new InvalidArgumentException('The stack group must be a whole number between 0 and 32.');
         }
         if ($group === 0) {
             return 0;
+        }
+        if ($ownAxis) {
+            throw new InvalidArgumentException('A stacked series must use the shared value axis.');
         }
         if (in_array($mode, ['raw', 'realtime'], true)) {
             throw new InvalidArgumentException('Stack groups require automatic or fixed aggregation.');

@@ -73,9 +73,9 @@ Archiv- und Ausgabegrenzen der verlinkten Modulanleitung.
 | [EChartsGaugeMulti](EChartsGaugeMulti/README.md) | 2–32 aktuelle Werte mit eigenen Skalen, Quellenauswahl und Seiten. |
 | [EChartsGaugeTacho](EChartsGaugeTacho/README.md) | 2–5 aktuelle Werte als Tacho-Cockpit mit Haupt- und Nebeninstrumenten. |
 | [EChartsGaugeChronograph](EChartsGaugeChronograph/README.md) | 2–5 aktuelle Werte als Chronograph mit Hilfszifferblättern. |
-| [EChartsTimeSeries](EChartsTimeSeries/README.md) | 1–32 historische oder live fortgeschriebene Linien-/Flächenreihen, optional gestapelte Flächen für gemeinsame Archivintervalle, bis zu 32000 Gesamtpunkte. |
+| [EChartsTimeSeries](EChartsTimeSeries/README.md) | 1–32 historische oder live fortgeschriebene Linien-/Flächenreihen mit gemeinsamen oder eigenen Wertachsen, optional gestapelte Flächen für gemeinsame Archivintervalle, bis zu 32000 Gesamtpunkte. |
 | [EChartsBarCategory](EChartsBarCategory/README.md) | 1–100 aktuelle Quellen als einfache, gruppierte oder gestapelte Balken mit Kategoriennavigation. |
-| [EChartsBarHistory](EChartsBarHistory/README.md) | 1–32 Archivquellen als einzelne oder gestapelte Zeitbalken mit Reihenauswahl und bis zu 32000 Gesamtpunkten. |
+| [EChartsBarHistory](EChartsBarHistory/README.md) | 1–32 Archivquellen als einzelne oder gestapelte Zeitbalken mit Reihenauswahl und optional eigenen Wertachsen und bis zu 32000 Gesamtpunkten. |
 | [EChartsBarWaterfall](EChartsBarWaterfall/README.md) | 2–100 aktuelle Quellen als Bilanz mit optionalen Zwischensummen und Neustarts. |
 | [EChartsBarPolar](EChartsBarPolar/README.md) | 1–100 aktuelle Quellen als Polarbalken mit optionaler Auswahl und Seiten. |
 | [EChartsPie](EChartsPie/README.md) | 1–100 aktuelle Quellen als Kreis, Donut oder Rose mit optionaler Auswahl. |

@@ -277,9 +277,10 @@ foreach (array_slice($module->GetTestFormUpdates(), -2) as $update) {
     $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
     assertGatewayGauge(simplexml_load_string($svg) !== false && str_contains($svg, 'JSON_INVALID') && !str_contains($svg, 'sample-root'), 'Invalid JSON preview drafts must display an error, never an unmarked example.');
 }
-foreach ([$module->GetVisualizationTile(), $module->GetIPSViewHTML()] as $html) {
-    assertGatewayGauge(strlen($html) > 500000 && strlen($html) < SYMCON_OUTPUT_BUFFER_LIMIT
-        && str_contains($html, 'SYMC_ECHARTS_TREE') && str_contains($html, 'json:document:network'), 'Both real module outputs must include the shipped runtime and JSON tree under the original byte limit.');
+foreach ([[$module->GetVisualizationTile(), false], [$module->GetIPSViewHTML(), true]] as [$html, $ipsView]) {
+    assertGatewayGauge(strlen($html) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && str_contains($html, \SymconECharts\EChartsAsset::RendererScript('tree', $ipsView))
+        && str_contains($html, 'SYMC_ECHARTS_TREE') && str_contains($html, 'json:document:network'), 'Both module outputs must select the pinned runtime and include the JSON tree within the byte limit.');
 }
 
 $module->SetTestProperty('EnableIPSView', true);

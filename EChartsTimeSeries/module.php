@@ -845,10 +845,10 @@ class EChartsTimeSeries extends IPSModuleStrict
         $query = $this->ResolveArchiveQuery(count($sources), $ipsView);
         $axisModel = $this->BuildAxisModel($sources);
         $axes = $axisModel['Axes'];
-        $axisIndexes = $axisModel['Indexes'];
+        $axisIndexes = $axisModel['SeriesIndexes'];
         $series = [];
         $truncated = false;
-        foreach ($sources as $source) {
+        foreach ($sources as $index => $source) {
             $archive = $query['Mode'] === 'realtime'
                 ? $this->ReadRealtimeSource($source['VariableID'], $query['EndTimestamp'])
                 : $this->ReadArchiveSource($source, $query);
@@ -864,7 +864,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'color'                  => $source['Color'],
                 'style'                  => $source['Style'],
                 'design'                 => $source['Design'],
-                'axisIndex'              => $axisIndexes[$source['Unit']],
+                'axisIndex'              => $axisIndexes[$index],
                 'effectiveReducer'       => $archive['EffectiveReducer'],
                 'archiveAggregationType' => $archive['ArchiveAggregationType'],
                 'points'                 => $archive['Points'],
@@ -956,7 +956,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'compressedStateGzipBase64' => $startup['compressedStateGzipBase64']
             ],
             'replacements'       => [
-                '{{ECHARTS_SCRIPT}}'           => EChartsAsset::TimeSeriesJavaScript(),
+                '{{ECHARTS_SCRIPT}}'           => EChartsAsset::RendererScript('cartesian', $ipsView),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
                 '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::StartupJavaScript()
                     . "\n" . EChartsAsset::SeriesSelectionJavaScript()
@@ -1105,7 +1105,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             );
     }
 
-    /** @return list<array{VariableID:int,InitiallyVisible:bool,StackGroup:int,Label:string,Unit:string,Decimals:int,Color:string,Style:string,Reducer:string,AxisPosition:string,AxisRange:?array{minimum:float,maximum:float},Design:array<string,mixed>}> */
+    /** @return list<array{VariableID:int,InitiallyVisible:bool,StackGroup:int,Label:string,Unit:string,Decimals:int,Color:string,Style:string,Reducer:string,AxisPosition:string,OwnAxis:bool,AxisRange:?array{minimum:float,maximum:float},Design:array<string,mixed>}> */
     private function GetValidatedSources(): array
     {
         try {
@@ -1145,21 +1145,18 @@ class EChartsTimeSeries extends IPSModuleStrict
             $style = $source['Style'] ?? 'line';
             $reducer = $source['Reducer'] ?? 'auto';
             $axisPosition = $source['AxisPosition'] ?? 'auto';
-            $axisRangeMode = $source['AxisRangeMode'] ?? 'auto';
-            $axisMinimum = $source['AxisMinimum'] ?? 0.0;
-            $axisMaximum = $source['AxisMaximum'] ?? 100.0;
+            $ownAxis = array_key_exists('OwnAxis', $source) ? $source['OwnAxis'] : false;
             $usePresentation = $source['UseVariablePresentation'] ?? true;
             $useIndividualDesign = $source['UseIndividualDesign'] ?? false;
             $initiallyVisible = $source['InitiallyVisible'] ?? true;
             $normalizedColor = self::NormalizeSourceColor($color);
             if (!is_string($label) || !is_string($unit) || !is_int($decimals)
                 || $normalizedColor === null || !is_string($style) || !is_string($reducer) || !is_string($axisPosition)
-                || !is_string($axisRangeMode)
+                || !is_bool($ownAxis)
                 || !is_bool($usePresentation) || !is_bool($useIndividualDesign) || !is_bool($initiallyVisible)
                 || $decimals < 0 || $decimals > 6
                 || !in_array($style, self::STYLES, true) || !in_array($reducer, self::REDUCERS, true)
                 || !in_array($axisPosition, self::AXIS_POSITIONS, true)
-                || !in_array($axisRangeMode, EChartsTimeSeriesDesign::AXIS_RANGE_MODES, true)
             ) {
                 throw new UnexpectedValueException('Time series source settings are invalid.', 202);
             }
@@ -1172,41 +1169,9 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $usePresentation
             );
             $effectiveUnit = $presentation['unit'];
-            $axisRange = null;
-            if ($axisRangeMode !== 'auto') {
-                if ((!is_int($axisMinimum) && !is_float($axisMinimum))
-                    || (!is_int($axisMaximum) && !is_float($axisMaximum))
-                    || !is_finite((float) $axisMinimum)
-                    || !is_finite((float) $axisMaximum)
-                    || (float) $axisMinimum >= (float) $axisMaximum
-                ) {
-                    throw new UnexpectedValueException(
-                        'The value axis minimum must be smaller than its maximum.',
-                        self::STATUS_CONFIGURATION_INVALID
-                    );
-                }
-                if ($axisRangeMode === 'presentation') {
-                    $axisPresentation = EChartsVariablePresentation::Resolve(
-                        $variableID,
-                        (float) $axisMinimum,
-                        (float) $axisMaximum,
-                        '',
-                        0,
-                        true
-                    );
-                    $axisRange = [
-                        'minimum' => $axisPresentation['minimum'],
-                        'maximum' => $axisPresentation['maximum']
-                    ];
-                } else {
-                    $axisRange = [
-                        'minimum' => (float) $axisMinimum,
-                        'maximum' => (float) $axisMaximum
-                    ];
-                }
-            }
             try {
-                $stackGroup = EChartsArchiveStack::ValidateGroup($source['StackGroup'] ?? 0, $effectiveUnit, $mode, $stackUnits);
+                $axisRange = EChartsUnitAxes::ResolveRange($source);
+                $stackGroup = EChartsArchiveStack::ValidateGroup($source['StackGroup'] ?? 0, $effectiveUnit, $mode, $stackUnits, $ownAxis);
                 $sourceDesign = $useIndividualDesign
                     ? EChartsTimeSeriesDesign::StyleFromSource($source)
                     : [];
@@ -1226,6 +1191,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'Reducer'          => $reducer,
                 'AxisPosition'     => $axisPosition,
                 'AxisRange'        => $axisRange,
+                'OwnAxis'          => $ownAxis,
                 'Design'           => $sourceDesign
             ];
         }
@@ -1236,15 +1202,15 @@ class EChartsTimeSeries extends IPSModuleStrict
     }
 
     /**
-     * @param list<array{Unit:string,AxisPosition:string,AxisRange?:?array{minimum:float,maximum:float}}> $sources
-     * @return array{Axes:list<array{unit:string,position:string,positionIndex:int,minimum?:float,maximum?:float}>,Indexes:array<string,int>}
+     * @param list<array{Unit:string,AxisPosition:string,OwnAxis?:bool,AxisRange?:?array{minimum:float,maximum:float}}> $sources
+     * @return array{Axes:list<array{unit:string,position:string,positionIndex:int,minimum?:float,maximum?:float}>,SeriesIndexes:list<int>}
      */
     private function BuildAxisModel(array $sources): array
     {
         try {
             $model = EChartsUnitAxes::Build($sources);
             if (count($model['Axes']) > 8) {
-                throw new InvalidArgumentException('Configure no more than 8 time series unit groups.');
+                throw new InvalidArgumentException('Configure no more than 8 time series value axes.');
             }
             return $model;
         } catch (InvalidArgumentException $exception) {
@@ -1823,7 +1789,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         return $design;
     }
 
-    /** @return list<array{variableID:int,initiallyVisible:bool,stackGroup:int,label:string,color:string,style:string,unit:string,axisPosition:string,design:array<string,mixed>}> */
+    /** @return list<array{variableID:int,initiallyVisible:bool,stackGroup:int,label:string,color:string,style:string,unit:string,axisPosition:string,ownAxis:bool,axisRange:?array{minimum:float,maximum:float},design:array<string,mixed>}> */
     private function PreviewSeries(mixed $formSources = null): array
     {
         $sources = $formSources;
@@ -1867,6 +1833,13 @@ class EChartsTimeSeries extends IPSModuleStrict
             if (!is_string($axisPosition) || !in_array($axisPosition, self::AXIS_POSITIONS, true)) {
                 $axisPosition = 'auto';
             }
+            try {
+                $axisRange = EChartsUnitAxes::ResolveRange(array_replace($source, [
+                    'VariableID' => is_int($variableID) ? $variableID : 0
+                ]));
+            } catch (InvalidArgumentException) {
+                $axisRange = null;
+            }
             $sourceDesign = [];
             if (($source['UseIndividualDesign'] ?? false) === true) {
                 try {
@@ -1884,6 +1857,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'stackGroup'       => $stackGroup,
                 'unit'             => $presentation['unit'],
                 'axisPosition'     => $axisPosition,
+                'ownAxis'          => ($source['OwnAxis'] ?? false) === true,
+                'axisRange'        => $axisRange,
                 'design'           => $sourceDesign
             ];
         }

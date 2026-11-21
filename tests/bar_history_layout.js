@@ -471,6 +471,22 @@ const manyState = { status: 'ready', chart: {
     series: manySources, truncated: false
 } };
 const many = render(false, 'symcon', false, true, false, 420, 520, manyState);
+for (const orientation of ['vertical', 'horizontal']) {
+    const horizontal = orientation === 'horizontal';
+    const valueDim = horizontal ? 'x' : 'y';
+    const option = render(false, 'symcon', false, true, false, 620, 520, { status: 'ready', chart: {
+        ...manyState.chart, bar: { style: { orientation } },
+        axes: [{ unit: '°C', position: 'left', minimum: -20, maximum: 40 },
+            { unit: '°C', position: 'right', minimum: 20, maximum: 60 }],
+        series: manySources.slice(0, 2).map(item => ({ ...item, unit: '°C' }))
+    } }).option;
+    for (const [index, axis] of option[valueDim + 'Axis'].entries()) {
+        assert.equal(axis.position, horizontal ? ['bottom', 'top'][index] : ['left', 'right'][index]);
+        assert.equal(axis.min, [-20, 20][index]);
+        assert.equal(axis.max, [40, 60][index]);
+        assert.equal(option.series[index][valueDim + 'AxisIndex'], index);
+    }
+}
 assert.equal(many.option.legend.type, 'scroll');
 assert.equal(many.option.legend.selected['variable-10008'], false);
 assert.equal(many.option.series.length, 32);

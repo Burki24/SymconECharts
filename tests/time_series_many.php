@@ -126,6 +126,21 @@ declare(strict_types=1);
         }
         unset($output);
 
+        $outdoor = array_replace($temperature, ['AxisPosition' => 'left', 'AxisRangeMode' => 'manual',
+            'AxisMinimum'                                      => -20, 'AxisMaximum' => 40]);
+        $hotWater = array_replace($sources[1], ['Unit' => '°C', 'OwnAxis' => true,
+            'AxisPosition'                             => 'right', 'AxisRangeMode' => 'manual', 'AxisMinimum' => 30, 'AxisMaximum' => 70]);
+        $independent = $configure([$outdoor, $hotWater], 'realtime', 200);
+        $independent->ApplyChanges();
+        $axisModel = $decode($independent);
+        assertGatewayGauge(
+            array_column($axisModel['series'], 'axisIndex') === [0, 1]
+            && array_column($axisModel['axes'], 'position') === ['left', 'right']
+            && array_column($axisModel['axes'], 'minimum') === [-20.0, 30.0]
+            && array_column($axisModel['axes'], 'maximum') === [40.0, 70.0],
+            'Two temperature sources must retain distinct sides, explicit ranges and series assignments.'
+        );
+
         $old = $configure(array_slice($sources, 0, 8), 'realtime', 2000);
         $defaults = (new TestableEChartsTimeSeries());
         $defaults->Create();
@@ -139,6 +154,7 @@ declare(strict_types=1);
         $oldModel = $decode($old);
         assertGatewayGauge(
             $old->GetTestProperties() === $oldProperties && count($oldModel['series']) === 8
+            && count($oldModel['axes']) === 1 && array_unique(array_column($oldModel['series'], 'axisIndex')) === [0]
             && count(array_filter(array_column($oldModel['series'], 'initiallyVisible'))) === 8,
             'Old eight-source configurations must remain byte-identical and initially show every row.'
         );

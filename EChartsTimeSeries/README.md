@@ -2,7 +2,7 @@
 
 Gerätemodul für historische numerische Symcon-Werte als responsive Apache-
 ECharts-Zeitreihe. Eine Instanz verarbeitet eine bis 32 eindeutige Quellen,
-bis zu acht Einheitengruppen und rendert eine native Symcon-Kachel sowie
+bis zu acht Wertachsen und rendert eine native Symcon-Kachel sowie
 optional ein eigenständiges IPSView-WebContent-Widget.
 
 Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
@@ -24,8 +24,8 @@ folgt darunter.
 Die schematische Vorschau zeigt bis zu vier anfänglich sichtbare Reihen und deren effektive
 Einheitenachsen auf der konfigurierten Seite. Die Achsen übernehmen automatisch
 die Farbe der ersten zugeordneten Reihe oder die ausdrücklich gewählte
-Achsenfarbe. Archivwerte und numerische Skalen bleiben der echten Kachel
-beziehungsweise dem IPSView-Widget vorbehalten.
+Achsenfarbe. Bei festen Achsenbereichen zeigt die Vorschau Minimum und Maximum.
+Kachel und IPSView zeigen die Archivwerte mit der vollständigen Skala.
 Bei mehr als vier Quellen nennt die Vorschau die angezeigte und gesamte Anzahl;
 Kachel und Widget nutzen weiterhin alle konfigurierten Reihen. Große SVG-Muster
 werden nur in der Vorschau mit sichtbarem Hinweis durch einfache Farbflächen
@@ -104,8 +104,8 @@ Die Gruppen **1–32** stehen bei automatischer und fester Verdichtung zur Verf�
   größenverstellbare SVG-Flächenmuster;
 - automatische Übernahme von Einheit und Nachkommastellen aus der
   Variablendarstellung mit manuellen Rückfallwerten;
-- eine gemeinsame Y-Achse je effektiver Einheit mit automatischer oder
-  expliziter Anordnung links beziehungsweise rechts;
+- standardmäßig eine gemeinsame Y-Achse je effektiver Einheit, bei Bedarf eine
+  eigene Wertachse pro Reihe mit eigenem Bereich und eigener Achsenseite;
 - automatische Wertachsenbereiche sowie wahlweise die Übernahme von Minimum
   und Maximum aus der Variablendarstellung oder eine manuelle Vorgabe;
 - automatische Wertachsen folgen den dargestellten Daten mit etwas Randabstand
@@ -185,9 +185,18 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
    Achsenseite und Achsenbereich pro Quelle anpassen. Der Bereich bleibt
    standardmäßig automatisch, kann aber aus der Variablendarstellung oder aus
    manuell eingegebenem Minimum und Maximum stammen. Quellen mit derselben
-   effektiven Einheit teilen eine Achse und verwenden deshalb dieselbe
+   effektiven Einheit teilen standardmäßig eine Achse und verwenden deshalb dieselbe
    ausdrücklich gewählte Seite und denselben expliziten Bereich. Automatische
    Quellen übernehmen dabei den expliziten Bereich ihrer Einheitengruppe.
+   Für Feuchtigkeit (0 bis 100 %) und Außentemperatur (−20 bis 40 °C) kannst
+   Du bei beiden Quellen **Links** und einen **manuellen** Bereich wählen.
+   Die unterschiedlichen Einheiten ergeben bereits zwei getrennte Achsen.
+   Für eine weitere Temperatur öffnest Du das Zahnrad dieser Quelle und
+   aktivierst unter **Wertachsenbereich** die **Eigene Wertachse**. Wähle
+   als **Achsenseite** **Rechts** und als **Achsenbereich** **Manuell**.
+   Mit Minimum 20 und Maximum 60 erhältst Du rechts die zweite °C-Skala.
+   Gestapelte Reihen verwenden eine gemeinsame
+   Wertachse. Insgesamt stehen bis zu acht Wertachsen zur Verfügung.
    Der Farbwähler verwendet **Automatisch** für die Farbfolge des
    gewählten Themes; eine ausgewählte Farbe überschreibt sie für diese Reihe.
    Über das Zahnrad einer Quelle kann außerdem das **Einzeldesign** aktiviert

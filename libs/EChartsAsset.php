@@ -35,6 +35,7 @@ final class EChartsAsset
     public const CALENDAR_SHA256 = '9879dece9194b401d95d4e8061b43bf83bc3d6c08dacb320406f48de5b8d31a5';
     public const BOXPLOT_SHA256 = '485a64860d8f254bdfb18c230fc38ec996c96dea6af29ef0d7830d346fe0d9a6';
     public const TIME_SERIES_SHA256 = self::CARTESIAN_SHA256;
+    public const RENDERER_PATH = '/hook/SymconECharts/assets/echarts/';
     public const THEME_AUTO = 'auto';
     public const THEME_SHA256 = [
         'dark'        => 'ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458',
@@ -43,6 +44,32 @@ final class EChartsAsset
         'infographic' => '43f803926e8625a1f1cbf6b6189d1735c0526e3e9e7e12aa8531a8296550c1b4',
         'shine'       => '33f28aaec40952dbad84de2d8cb3d58f49ea131806fad9497f06ad4d46f2a8f3',
         'roma'        => '01303d34787f242664d5ad35bb1d535bb21d701ff60f6f1412e8c872008b5a05'
+    ];
+
+    /** @var array<string, array{0: string, 1: string}> */
+    private const RENDERERS = [
+        'gauge'          => ['JavaScript', self::SHA256],
+        'cartesian'      => ['CartesianJavaScript', self::CARTESIAN_SHA256],
+        'bar-category'   => ['BarCategoryJavaScript', self::BAR_CATEGORY_SHA256],
+        'polar'          => ['PolarJavaScript', self::POLAR_SHA256],
+        'boxplot'        => ['BoxplotJavaScript', self::BOXPLOT_SHA256],
+        'calendar'       => ['CalendarJavaScript', self::CALENDAR_SHA256],
+        'calendar-pie'   => ['CalendarPieJavaScript', self::CALENDAR_PIE_SHA256],
+        'candlestick'    => ['CandlestickJavaScript', self::CANDLESTICK_SHA256],
+        'funnel'         => ['FunnelJavaScript', self::FUNNEL_SHA256],
+        'graph'          => ['GraphJavaScript', self::GRAPH_SHA256],
+        'heatmap'        => ['HeatmapJavaScript', self::HEATMAP_SHA256],
+        'parallel'       => ['ParallelJavaScript', self::PARALLEL_SHA256],
+        'pictorial-bar'  => ['PictorialBarJavaScript', self::PICTORIAL_BAR_SHA256],
+        'pie'            => ['PieJavaScript', self::PIE_SHA256],
+        'radar'          => ['RadarJavaScript', self::RADAR_SHA256],
+        'sankey'         => ['SankeyJavaScript', self::SANKEY_SHA256],
+        'scatter'        => ['ScatterJavaScript', self::SCATTER_SHA256],
+        'state-timeline' => ['StateTimelineJavaScript', self::STATE_TIMELINE_SHA256],
+        'sunburst'       => ['SunburstJavaScript', self::SUNBURST_SHA256],
+        'theme-river'    => ['ThemeRiverJavaScript', self::THEME_RIVER_SHA256],
+        'tree'           => ['TreeJavaScript', self::TREE_SHA256],
+        'treemap'        => ['TreemapJavaScript', self::TREEMAP_SHA256],
     ];
 
     private const THEME_PALETTES = [
@@ -166,6 +193,27 @@ final class EChartsAsset
             ]
         ]
     ];
+
+    public static function RendererScript(string $renderer, bool $external): string
+    {
+        [$method, $hash] = self::RENDERERS[$renderer] ?? throw new RuntimeException('Unknown ECharts renderer.');
+        if ($external) {
+            return '<script src="' . self::RendererPath($renderer, $hash) . '"></script>';
+        }
+
+        return '<script>' . self::$method() . '</script>';
+    }
+
+    public static function ReadRendererAsset(string $path): ?string
+    {
+        foreach (self::RENDERERS as $renderer => [$method, $hash]) {
+            if ($path === self::RendererPath($renderer, $hash)) {
+                return self::$method();
+            }
+        }
+
+        return null;
+    }
 
     public static function JavaScript(): string
     {
@@ -727,6 +775,11 @@ final class EChartsAsset
         }
 
         return hash_equals(self::SHA256, hash('sha256', $canonicalContent));
+    }
+
+    private static function RendererPath(string $renderer, string $hash): string
+    {
+        return self::RENDERER_PATH . self::VERSION . '/' . $renderer . '-' . $hash . '.js';
     }
 
     private static function NormalizeLineEndings(string $content): string

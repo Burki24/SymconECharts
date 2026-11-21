@@ -51,7 +51,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Aktuelle Kategorienvergleiche liegen im
   eigenen Gerätemodul `EChartsBarCategory`; historische Balken liegen im
   eigenen Gerätemodul `EChartsBarHistory`, gemäß ADR 0068 mit bis zu 32 Quellen,
-  16 Einheitengruppen und bis zu 32000 Gesamtpunkten. Die ID-stabile flüchtige
+  16 Wertachsen und bis zu 32000 Gesamtpunkten. Gemäß ADR 0116 können
+  TimeSeries und BarHistory einzelnen ungestapelten Reihen eine eigene Achse
+  zuordnen. Die Standardgruppierung erfolgt nach Einheit. Die ID-stabile flüchtige
   Reihenauswahl wird mit TimeSeries geteilt; Fachmodelle bleiben getrennt.
   Waterfall-Balken mit aktuellem
   Startwert, signierten Änderungen und berechneter Endsumme liegen im eigenen

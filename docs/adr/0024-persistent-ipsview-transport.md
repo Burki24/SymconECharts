@@ -22,7 +22,11 @@ Messwertänderungen über einen WebSocket.
 ## Entscheidung
 
 - Die WebContent-Variable bleibt der stabile IPSView-Einstieg und enthält
-  weiterhin ein vollständiges, eigenständig startfähiges HTML-Dokument.
+  das HTML-Dokument mit dem Startzustand und einem Verweis auf die Apache-
+  ECharts-Laufzeit. Der Gateway liefert die zur Diagrammfamilie passende
+  Laufzeit über eine versionierte HTTP-Route mit Prüfsumme aus. Das gilt
+  auch für aus JSLive übernommene Diagramme. Native Kacheln und die
+  eigenständige JSLive-Importvorschau binden die Laufzeit direkt ein.
 - Konfigurationsänderungen, Aktivierung, manuelle Regeneration und ein
   Kernelstart dürfen dieses Dokument neu erzeugen. Normale Messwert- und
   Archivaktualisierungen schreiben die Variable nicht mehr neu.
@@ -41,8 +45,10 @@ Messwertänderungen über einen WebSocket.
   Gesamtzustand. Danach empfängt er vollständige Zustände oder – bei Time
   Series in `raw` und `realtime` – einzelne `append`-Nachrichten über den
   WebSocket und übergibt sie an den vorhandenen `handleMessage()`-Renderer.
-- Der eingebettete Bootstrap-Zustand bleibt als funktionsfähiger Rückfall
-  erhalten, falls der Transport vorübergehend nicht erreichbar ist.
+- Der eingebettete Bootstrap-Zustand steht als Rückfall bereit, wenn
+  die Laufzeit geladen ist und der Zustandstransport vorübergehend ausfällt.
+  Beim ersten Laden muss der Host die Gateway-Route relativ zur HTTP(S)-
+  Basisadresse des eingebetteten Dokuments auflösen können.
 - PHP-seitige Transportsemantik und Browser-Verbindungslogik liegen
   repositoryweit zentral in `libs/EChartsIPSViewTransport.php` und
   `libs/echarts/ipsview-transport.js`. Chartmodell und Rendering bleiben in
@@ -65,11 +71,10 @@ HTTP-Zustandsabfrage und WebSocket verwenden denselben ermittelten Ursprung,
 bei HTTPS mit WSS. Die bestehende Fetch-Credential-Policy `same-origin`,
 Kanalprüfung und serverseitige CORS-Antwort bleiben unverändert.
 
-Ohne brauchbare Serveradresse bleibt der Bootstrap sichtbar und die begrenzte
-Wiederverbindung aktiv. Es wird weder ein Host geraten noch ein Basis-Element
-eingefügt. Hosts ohne zugängliche Elternadresse, Basisadresse, Referrer und
-Ancestor-Ursprung können keine Live-Verbindung herstellen. Neue Properties,
-Konfigurationsmigrationen oder Änderungen an Quellen sind nicht erforderlich.
+Die Einbettung stellt die HTTP(S)-Basisadresse für den Renderer bereit. Nach
+erfolgreichem Laden können der Bootstrap und die begrenzte Wiederverbindung
+einen Ausfall des Zustandstransports überbrücken. Die vorhandenen Properties
+und Quellenkonfigurationen gelten auch für die ausgelagerten Renderer.
 
 ## Folgen
 

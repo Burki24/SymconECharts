@@ -29,6 +29,7 @@ use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsStartupState;
 use SymconECharts\EChartsSvgImage;
 use SymconECharts\EChartsUnitAxes;
+use SymconECharts\EChartsValueAxisForm;
 use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -55,6 +56,7 @@ require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsStartupState.php';
 require_once __DIR__ . '/../libs/EChartsSvgImage.php';
 require_once __DIR__ . '/../libs/EChartsUnitAxes.php';
+require_once __DIR__ . '/../libs/EChartsValueAxisForm.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 
 class EChartsBarHistory extends IPSModuleStrict
@@ -279,6 +281,13 @@ class EChartsBarHistory extends IPSModuleStrict
             }
             $form = $this->LoadConfigurationForm();
             if (isset($form['elements']) && is_array($form['elements'])) {
+                foreach ($form['elements'] as &$element) {
+                    if (($element['name'] ?? '') === 'Sources') {
+                        array_push($element['columns'], ...EChartsValueAxisForm::Columns());
+                        $element['form'][] = EChartsValueAxisForm::Panel();
+                    }
+                }
+                unset($element);
                 $form['elements'] = $this->WithAnimationFormControls($form['elements']);
                 EChartsLabelDesign::InsertAfterRowContaining($form['elements'], 'ShowValues', [
                     ['type' => 'RowLayout', 'items' => EChartsLabelDesign::CartesianControls()]
@@ -589,8 +598,16 @@ class EChartsBarHistory extends IPSModuleStrict
         $axisSources = [];
         foreach ($data['items'] as $item) {
             $position = $item['AxisPosition'] ?? 'auto';
+            try {
+                $range = EChartsUnitAxes::ResolveRange($item);
+            } catch (InvalidArgumentException) {
+                $range = null;
+            }
             $axisSources[] = [
                 'Unit'         => $item['unit'],
+                'OwnAxis'      => ($item['OwnAxis'] ?? false) === true,
+                'VariableID'   => $item['VariableID'] ?? 0,
+                'AxisRange'    => $range,
                 'AxisPosition' => is_string($position) && in_array($position, ['auto', 'left', 'right'], true)
                     ? $position : 'auto'
             ];
@@ -600,13 +617,14 @@ class EChartsBarHistory extends IPSModuleStrict
         } catch (\InvalidArgumentException) {
             foreach ($axisSources as &$axisSource) {
                 $axisSource['AxisPosition'] = 'auto';
+                $axisSource['AxisRange'] = null;
             }
             unset($axisSource);
             $axisModel = EChartsUnitAxes::Build($axisSources);
         }
-        $visibleUnits = [];
+        $visibleAxes = [];
         foreach ($items as $index => $item) {
-            $visibleUnits[$item['unit']] ??= $index;
+            $visibleAxes[$axisModel['SeriesIndexes'][$item['previewPaletteIndex']]] ??= $index;
         }
         $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
         $svg = EChartsBarPreview::Open(
@@ -646,11 +664,11 @@ class EChartsBarHistory extends IPSModuleStrict
         }
         $automaticAxisColor = $this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView) < 0;
         $visibleAxisCounts = ['left' => 0, 'right' => 0];
-        foreach ($axisModel['Axes'] as $axis) {
-            if (!array_key_exists($axis['unit'], $visibleUnits)) {
+        foreach ($axisModel['Axes'] as $axisIndex => $axis) {
+            if (!isset($visibleAxes[$axisIndex])) {
                 continue;
             }
-            $sourceIndex = $visibleUnits[$axis['unit']];
+            $sourceIndex = $visibleAxes[$axisIndex];
             $source = $items[$sourceIndex];
             $sourceColor = $source['color'] !== ''
                 ? $source['color'] : $palette['seriesColors'][$source['previewPaletteIndex'] % count($palette['seriesColors'])];
@@ -673,11 +691,15 @@ class EChartsBarHistory extends IPSModuleStrict
                 $anchor = $left ? 'start' : 'end';
             }
             $svg .= '<line data-preview-axis="' . $side . '" ' . $line . ' stroke="' . EChartsBarPreview::E($color) . '"/>';
-            if ($axis['unit'] !== '') {
+            $caption = mb_strimwidth($axis['unit'], 0, 8, '…');
+            if (isset($axis['minimum'], $axis['maximum'])) {
+                $caption = trim($caption . ' ' . $axis['minimum'] . ' … ' . $axis['maximum']);
+            }
+            if ($caption !== '') {
                 $svg .= '<text data-preview-axis-unit="' . $side . '" x="' . $captionX
                     . '" y="' . $captionY . '" text-anchor="' . $anchor . '" fill="'
                     . EChartsBarPreview::E($color) . '" font-size="' . $axisSize . '">'
-                    . EChartsBarPreview::E(mb_strimwidth($axis['unit'], 0, 8, '…')) . '</text>';
+                    . EChartsBarPreview::E($caption) . '</text>';
             }
         }
         $barWidth = max(20, min(100, $this->BarPreviewValue($values, 'BarWidthPercent', 'integer', $ipsView)));
@@ -729,30 +751,47 @@ class EChartsBarHistory extends IPSModuleStrict
         $bucketSpan = $horizontal ? 11 : 40;
         $slot = $bucketSpan / max(1, count($slots));
         $thickness = $slot * $barWidth / 100;
-        $scale = max([1, ...array_values(array_count_values($slotByItem))]);
+        $slotCounts = array_count_values($slotByItem);
+        $scale = max([1, ...array_values($slotCounts)]);
         $labelRects = [];
         for ($bucket = 0; $bucket < 15; ++$bucket) {
             $offsets = array_fill(0, count($slots), 0.0);
+            $totals = array_fill(0, count($slots), 0.0);
             foreach ($items as $index => $item) {
                 $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$item['previewPaletteIndex'] % count($palette['seriesColors'])];
                 $sample = 50 + 65 * (1 + sin(($bucket + $index * 3) / 2.4));
                 $column = $slotByItem[$index];
                 $timeOffset = $bucket * $bucketSpan + $column * $slot + ($slot - $thickness) / 2;
+                $sampleValue = 5 + $sample / 10;
                 $length = $sample / $scale * ($horizontal ? 3 : 1);
+                $offset = $offsets[$column];
+                $axis = $axisModel['Axes'][$axisModel['SeriesIndexes'][$item['previewPaletteIndex']]];
+                if (isset($axis['minimum'], $axis['maximum'])) {
+                    $minimum = $axis['minimum'];
+                    $maximum = $axis['maximum'];
+                    $sampleMinimum = $maximum > 0 ? max(0.0, $minimum) : $minimum;
+                    $sampleValue = ($sampleMinimum + ($maximum - $sampleMinimum) * ($sample / 200)) / $slotCounts[$column];
+                    $start = max($minimum, min($maximum, $totals[$column]));
+                    $end = max($minimum, min($maximum, $totals[$column] + $sampleValue));
+                    $span = $horizontal ? 552 : 165;
+                    $offset = (min($start, $end) - $minimum) / ($maximum - $minimum) * $span;
+                    $length = abs($end - $start) / ($maximum - $minimum) * $span;
+                }
                 if ($horizontal) {
-                    $x = 90 + $offsets[$column];
+                    $x = 90 + $offset;
                     $y = 110 + $timeOffset;
                     $width = $length;
                     $height = $thickness;
                 } else {
                     $x = 70 + $timeOffset;
-                    $y = 265 - $offsets[$column] - $length;
+                    $y = 265 - $offset - $length;
                     $width = $thickness;
                     $height = $length;
                 }
                 $offsets[$column] += $length;
+                $totals[$column] += $sampleValue;
                 if ($bucket === 10 + $index) {
-                    $labelRects[$index] = [$x, $y, $width, $height, 5 + $sample / 10];
+                    $labelRects[$index] = [$x, $y, $width, $height, $sampleValue];
                 }
                 $fill = $fillMode === 'solid' ? $color : 'url(#bar-history-preview-' . $index . ')';
                 $svg .= '<rect x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($y)
@@ -854,7 +893,7 @@ class EChartsBarHistory extends IPSModuleStrict
         }
         $series = [];
         $truncated = false;
-        foreach ($sources as $source) {
+        foreach ($sources as $index => $source) {
             $archive = $this->ReadArchiveSource($source, $query);
             $series[] = [
                 'id'                     => 'variable-' . $source['VariableID'],
@@ -864,7 +903,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 ...($source['StackGroup'] > 0 ? ['stackGroup' => $source['StackGroup']] : []),
                 'unit'                   => $source['Unit'],
                 'decimals'               => $source['Decimals'],
-                'axisIndex'              => $axisModel['Indexes'][$source['Unit']],
+                'axisIndex'              => $axisModel['SeriesIndexes'][$index],
                 'color'                  => $source['Color'],
                 'effectiveReducer'       => $archive['EffectiveReducer'],
                 'archiveAggregationType' => $archive['ArchiveAggregationType'],
@@ -949,7 +988,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 'compressedStateGzipBase64' => $startup['compressedStateGzipBase64']
             ],
             'replacements'       => [
-                '{{ECHARTS_SCRIPT}}'           => EChartsAsset::CartesianJavaScript(),
+                '{{ECHARTS_SCRIPT}}'           => EChartsAsset::RendererScript('cartesian', $ipsView),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
                 '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::StartupJavaScript()
                     . "\n" . EChartsAsset::SeriesSelectionJavaScript()
@@ -1043,7 +1082,7 @@ class EChartsBarHistory extends IPSModuleStrict
         return null;
     }
 
-    /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int,Color:string,Reducer:string,AxisPosition:string,InitiallyVisible:bool,StackGroup:int}> */
+    /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int,Color:string,Reducer:string,AxisPosition:string,OwnAxis:bool,AxisRange:?array{minimum:float,maximum:float},InitiallyVisible:bool,StackGroup:int}> */
     private function GetValidatedSources(): array
     {
         try {
@@ -1071,11 +1110,12 @@ class EChartsBarHistory extends IPSModuleStrict
             $unit = $source['Unit'] ?? '';
             $usePresentation = $source['UseVariablePresentation'] ?? true;
             $axisPosition = $source['AxisPosition'] ?? 'auto';
+            $ownAxis = array_key_exists('OwnAxis', $source) ? $source['OwnAxis'] : false;
             $initiallyVisible = $source['InitiallyVisible'] ?? true;
             if (!is_int($variableID) || $variableID <= 0 || !IPS_VariableExists($variableID)
                 || isset($seen[$variableID])
                 || !in_array(IPS_GetVariable($variableID)['VariableType'] ?? null, [1, 2], true)
-                || !is_string($label) || !is_string($unit) || !is_bool($usePresentation) || !is_bool($initiallyVisible)
+                || !is_string($label) || !is_string($unit) || !is_bool($usePresentation) || !is_bool($initiallyVisible) || !is_bool($ownAxis)
                 || !is_int($decimals) || $decimals < 0 || $decimals > 6
                 || !is_int($color) || $color < -1 || $color > 0xFFFFFF
                 || !is_string($reducer) || !in_array($reducer, self::REDUCERS, true)
@@ -1091,7 +1131,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 $usePresentation
             );
             $seen[$variableID] = true;
-            $stackGroup = EChartsArchiveStack::ValidateGroup($source['StackGroup'] ?? 0, $presentation['unit'], $mode, $stackUnits);
+            $stackGroup = EChartsArchiveStack::ValidateGroup($source['StackGroup'] ?? 0, $presentation['unit'], $mode, $stackUnits, $ownAxis);
             $result[] = [
                 'StackGroup'       => $stackGroup,
                 'VariableID'       => $variableID,
@@ -1101,11 +1141,13 @@ class EChartsBarHistory extends IPSModuleStrict
                 'Decimals'         => $presentation['decimals'],
                 'Color'            => $color < 0 ? '' : EChartsAsset::ColorToHex($color),
                 'Reducer'          => $reducer,
-                'AxisPosition'     => $axisPosition
+                'AxisPosition'     => $axisPosition,
+                'OwnAxis'          => $ownAxis,
+                'AxisRange'        => EChartsUnitAxes::ResolveRange($source)
             ];
         }
         if (count(EChartsUnitAxes::Build($result)['Axes']) > 16) {
-            throw new InvalidArgumentException('Configure no more than 16 Historical Bar unit groups.');
+            throw new InvalidArgumentException('Configure no more than 16 Historical Bar value axes.');
         }
 
         return $result;

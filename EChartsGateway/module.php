@@ -6,10 +6,12 @@ require_once __DIR__ . '/../libs/helper/DebugFlowHelper.php';
 require_once __DIR__ . '/../libs/EChartsDebugFlow.php';
 
 use Burki24\SymconModuleHelper\DataFlowHelper;
+use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
+require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsJSLiveImportForm.php';
 require_once __DIR__ . '/../libs/EChartsJSLiveArchive.php';
@@ -197,6 +199,16 @@ class EChartsGateway extends IPSModuleStrict
                 return;
             }
 
+            if (str_starts_with($path, EChartsAsset::RENDERER_PATH)) {
+                $renderer = ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' ? EChartsAsset::ReadRendererAsset($path) : null;
+                if ($renderer === null) {
+                    $this->SendHookResponse(404, '');
+                } else {
+                    $this->SendHookResponse(200, $renderer, 'application/javascript; charset=utf-8', true);
+                }
+                return;
+            }
+
             if (preg_match('#^/hook/SymconECharts/WS/[1-9][0-9]*/[a-f0-9]{32}$#D', $path) === 1) {
                 return;
             }
@@ -374,7 +386,7 @@ class EChartsGateway extends IPSModuleStrict
         }
     }
 
-    private function SendHookResponse(int $status, string $body, string $contentType = 'text/plain; charset=utf-8'): void
+    private function SendHookResponse(int $status, string $body, string $contentType = 'text/plain; charset=utf-8', bool $immutable = false): void
     {
         $debugFlowResult = null;
         $debugFlowFailed = false;
@@ -384,7 +396,7 @@ class EChartsGateway extends IPSModuleStrict
             http_response_code($status);
             header('Content-Type: ' . $contentType);
             header('Access-Control-Allow-Origin: *');
-            header('Cache-Control: no-store, max-age=0');
+            header($immutable ? 'Cache-Control: public, max-age=31536000, immutable' : 'Cache-Control: no-store, max-age=0');
             header('X-Content-Type-Options: nosniff');
             echo $body;
         } catch (\Throwable $debugFlowException) {

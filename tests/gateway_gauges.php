@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 
 const IPS_KERNELSTARTED = 10001;
@@ -1152,6 +1153,17 @@ foreach ([['POST', '/hook/SymconECharts/assets/interaction.js'], ['GET', '/hook/
     $_SERVER['SCRIPT_NAME'] = $assetPath;
     assertGatewayGauge($assetGateway->ProcessTestHook() === '' && http_response_code() === 404, 'The interaction endpoint must reject other methods and paths.');
 }
+$gaugeRendererTag = EChartsAsset::RendererScript('gauge', true);
+$gaugeRendererPath = EChartsAsset::RENDERER_PATH . EChartsAsset::VERSION . '/gauge-' . EChartsAsset::SHA256 . '.js';
+assertGatewayGauge($gaugeRendererTag === '<script src="' . $gaugeRendererPath . '"></script>', 'Stored charts must reference a versioned renderer with its full digest.');
+$_SERVER['REQUEST_METHOD'] = 'GET';
+$_SERVER['SCRIPT_NAME'] = $gaugeRendererPath;
+assertGatewayGauge($assetGateway->ProcessTestHook() === EChartsAsset::JavaScript() && http_response_code() === 200, 'The Gateway must serve the exact renderer chosen in the chart.');
+foreach ([['POST', $gaugeRendererPath], ['GET', $gaugeRendererPath . '/extra'], ['GET', str_replace(EChartsAsset::SHA256, str_repeat('0', 64), $gaugeRendererPath)]] as [$assetMethod, $assetPath]) {
+    $_SERVER['REQUEST_METHOD'] = $assetMethod;
+    $_SERVER['SCRIPT_NAME'] = $assetPath;
+    assertGatewayGauge($assetGateway->ProcessTestHook() === '' && http_response_code() === 404, 'The Gateway must restrict renderer requests to allowlisted immutable assets.');
+}
 $_SERVER = $assetServer;
 http_response_code(200);
 
@@ -1588,7 +1600,9 @@ assertGatewayGauge(
 );
 assertGatewayGauge(
     is_string($gauge->GetTestVariableValue('IPSViewGauge'))
-        && str_contains($gauge->GetTestVariableValue('IPSViewGauge'), '"mode":"ipsview"'),
+        && str_contains($gauge->GetTestVariableValue('IPSViewGauge'), '"mode":"ipsview"')
+        && str_contains($gauge->GetTestVariableValue('IPSViewGauge'), $gaugeRendererTag)
+        && !str_contains($gauge->GetTestVariableValue('IPSViewGauge'), EChartsAsset::JavaScript()),
     'Enabled IPSView output must maintain and populate its WebContent variable.'
 );
 
@@ -6335,7 +6349,7 @@ assertGatewayGauge(
     $conflictingAxesTimeSeries->GetTestStatus() === 202
         && $conflictingAxesDiagnostic['success'] === false
         && $conflictingAxesDiagnostic['status'] === 202
-        && str_contains($conflictingAxesDiagnostic['error'], 'same unit'),
+        && $conflictingAxesDiagnostic['error'] === 'Series sharing a value axis must use the same axis side.',
     'Time Series must reject conflicting sides for a shared unit and return the error diagnostically.'
 );
 

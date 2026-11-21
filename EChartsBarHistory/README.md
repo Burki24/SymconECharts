@@ -21,10 +21,20 @@ Für IPSView bei Bedarf die zusätzliche HTML-Ausgabe einschalten.
 Jede Variablen-ID darf nur einmal vorkommen. Eigene Beschriftung, Farbe,
 Formatierung und Reduzierer sind je Quelle wählbar. Ohne eigene Beschriftung
 erscheint der aktuelle Variablenname; gleiche Namen bleiben getrennte Reihen.
-Standardmäßig stehen gleichzeitige Balken nebeneinander. Jede wirksame Einheit erhält eine
-eigene Wertachse. Quellen derselben Einheit teilen diese Achse; widersprüchliche
-explizite Seitenwahlen für dieselbe Einheit sind ungültig. Die Listenreihenfolge
-bestimmt die Reihen- und Achsenreihenfolge. Unterstützt sind bis zu 16 Einheiten.
+Standardmäßig stehen gleichzeitige Balken nebeneinander. Quellen mit derselben
+Einheit teilen sich eine Wertachse. Für zwei Temperaturen mit unterschiedlichen
+Skalen öffnen Sie die zweite Quelle und aktivieren unter **Wertachsenbereich**
+die **Eigene Wertachse**. Wählen Sie die **Achsenseite** und stellen Sie den
+**Achsenbereich** auf **Manuell**, um Minimum und Maximum vorzugeben. So lassen
+sich etwa Außentemperatur links von −20 bis 40 °C und Warmwasser rechts von
+20 bis 60 °C ablesen. Bei horizontalen Balken entsprechen die beiden Seiten
+unten und oben. **Variablendarstellung** übernimmt den dort hinterlegten Bereich
+und verwendet die eingetragenen Grenzen als Rückfall.
+
+Bis zu 16 Wertachsen sind möglich. Die Quellenreihenfolge bestimmt die
+Achsenreihenfolge. Auf einer gemeinsamen Achse müssen alle ausdrücklich
+gewählten Seiten und Grenzen zusammenpassen. Gestapelte Quellen benötigen
+die gemeinsame Achse ihrer Einheit.
 
 ### PV-Leistungen als gestapelte Balken anzeigen
 

@@ -735,7 +735,7 @@ Original-Farbindizes und gekennzeichneten Gesamtzahlen ohne Archivzugriff.
 EChartsBarHistory erweitert gemäß
 [ADR 0068](adr/0068-historical-bar-series-selection.md) auf 32 Quellen und
 200–32000 Gesamtpunkte, behält aber Default 1000, 2000 je Abfrage/Reihe und
-bis zu 16 effektive Einheitengruppen. Das Modell erhält die Archivzeitstempel.
+bis zu 16 Wertachsen. Das Modell erhält die Archivzeitstempel.
 Bei optionalen Stapelgruppen verwendet die Darstellung nur gemeinsame
 Intervallzeitstempel gemäß [ADR 0114](adr/0114-bar-history-stack-groups.md).
 Die gemeinsame ID-stabile Auswahllogik von
@@ -751,7 +751,10 @@ werden nicht in den Auswahlbaustein verschoben.
 EChartsTimeSeries unterstützt gemäß
 [ADR 0067](adr/0067-timeseries-more-series-and-selection.md) 32 Quellen und
 200–32000 Gesamtpunkte bei unverändertem Default 2000 und höchstens 2000 je
-Gateway-Anfrage/Reihe. Acht effektive Einheitengruppen bleiben die Grenze.
+Gateway-Anfrage/Reihe. Acht Wertachsen bleiben die Grenze. Beide Familien
+verwenden die gemeinsame Achsenzuordnung aus
+[ADR 0116](adr/0116-individual-archive-value-axes.md). Einzelne Reihen können
+auch bei gleicher Einheit eine eigene Skala und Seite erhalten.
 Optionale Flächenstapel verwenden dieselben Gruppen- und Einheitenregeln wie
 BarHistory. Die Zeitreihe unterbricht auch die Verbindung über ein Intervall,
 für das sämtliche Gruppenquellen fehlen, siehe
@@ -923,9 +926,9 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsGaugeMulti | Zwei bis 32 individuell skalierte Quellen mit optionaler Quellenauswahl und responsiven Instrumentenseiten |
 | Gerät | EChartsGaugeTacho | Tacho-Cockpit mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsGaugeChronograph | Chronograph mit 2 bis 5 individuell gestaltbaren Instrumenten |
-| Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 32 Quellen, Reihenauswahl, bis zu acht links/rechts angeordnete Einheitengruppen sowie getrenntes Kachel- und IPSView-Design |
+| Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 32 Quellen, Reihenauswahl, bis zu acht gemeinsame oder eigene Wertachsen links/rechts sowie getrenntes Kachel- und IPSView-Design |
 | Gerät | EChartsBarCategory | Aktuelle einfache, gruppierte oder gestapelte Kategorienvergleiche für 1 bis 100 Quellen mit gemeinsamer Einheit, Kategoriennavigation, optionalem Min-/Max-Farbverlauf und getrenntem Kachel- und IPSView-Design |
-| Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken von 1 bis 32 Archivquellen, bis 16 Einheitengruppen und Reihenauswahl in nativer Kachel und optionalem IPSView-HTML |
+| Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken von 1 bis 32 Archivquellen, bis zu 16 gemeinsame oder eigene Wertachsen und Reihenauswahl in nativer Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsBarWaterfall | Aktueller Startwert mit 1 bis 99 signierten Änderungen, berechneter Gesamtbilanz und ID-stabiler Kategoriennavigation in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsBarPolar | Aktuelle Werte aus 1 bis 100 Quellen als radiale Balken oder konzentrische Bögen mit optionaler Quellenauswahl, Seiten und vollständiger Werteskala in Kachel und IPSView |
 | Gerät | EChartsPie | Aktuelle Anteile aus 1 bis 100 Quellen als Kreis, Donut oder Nightingale-Rose mit optionaler ID-stabiler Quellenauswahl und getrennten Auswahl-/Gesamtanteilen |

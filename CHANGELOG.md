@@ -1,7 +1,16 @@
 # Unveröffentlicht
 
+## Geändert
+
+- IPSView-Diagramme laden die Apache-ECharts-Laufzeit über den EChartsGateway.
+  Das verkleinert den Symcon-Snapshot, auch bei aus JSLive übernommenen
+  Diagrammen. Bestehende IPSView-Verknüpfungen bleiben erhalten.
+
 ## Neu
 
+- In EChartsTimeSeries und EChartsBarHistory kann jede ungestapelte Messreihe
+  eine eigene Wertachse mit eigener Seite und eigenen Skalenwerten erhalten.
+  Standardmäßig teilen sich Reihen gleicher Einheit weiterhin eine Achse.
 - Die regulären Diagrammdesigner bieten eine eigene Farbe für den
   Diagrammhintergrund in Kachel und IPSView. Eine beschriftete Farbzuordnung
   zeigt je Diagramm, welchen Bereich die Farbfelder steuern. CalendarPie und

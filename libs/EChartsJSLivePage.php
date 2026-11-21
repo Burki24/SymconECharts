@@ -20,24 +20,30 @@ final class EChartsJSLivePage
     public static function Render(array $state, bool $ipsView, array $layout, ?array $transport = null, string $language = 'de'): string
     {
         $family = $state['chart']['family'];
-        [$file, $runtime] = match ($family) {
-            'gauge'             => ['EChartsGaugeSingle/JSLiveRenderer.js', EChartsAsset::JavaScript()],
-            'progress'          => ['EChartsProgress/ProgressRenderer.js', EChartsAsset::JavaScript()],
-            'pie'               => ['EChartsPie/JSLiveRenderer.js', EChartsAsset::PieJavaScript()],
-            'cartesian-history' => ['EChartsTimeSeries/JSLiveRenderer.js', EChartsAsset::CartesianJavaScript()],
-            'radar-history'     => ['EChartsRadarHistory/RadarHistoryRenderer.js', EChartsAsset::RadarJavaScript()],
+        [$file, $bundle] = match ($family) {
+            'gauge'             => ['EChartsGaugeSingle/JSLiveRenderer.js', 'gauge'],
+            'progress'          => ['EChartsProgress/ProgressRenderer.js', 'gauge'],
+            'pie'               => ['EChartsPie/JSLiveRenderer.js', 'pie'],
+            'cartesian-history' => ['EChartsTimeSeries/JSLiveRenderer.js', 'cartesian'],
+            'radar-history'     => ['EChartsRadarHistory/RadarHistoryRenderer.js', 'radar'],
             default             => throw new RuntimeException('FORMAT_UNSUPPORTED: unknown rendering family.')
         };
         $options = ['ipsViewTransport' => $transport, 'locale' => $language] + $layout + EChartsStartupState::Startup($state);
         $page = new self();
-        $html = $page->RenderVisualizationHTMLPage($ipsView, ['language' => $language, 'title' => 'ECharts',
-            'translations'                                               => EChartsJSLiveLocale::Dictionary($language),
-            'state'                                                      => $options['state'], 'options' => $options,
-            'replacements'                                               => ['{{ECHARTS_SCRIPT}}' => $runtime, '{{ECHARTS_DESIGN_SCRIPT}}' => EChartsAsset::DesignJavaScript()
-                . "\n" . EChartsAsset::StartupJavaScript(),
+        $html = $page->RenderVisualizationHTMLPage($ipsView, [
+            'language'     => $language,
+            'title'        => 'ECharts',
+            'translations' => EChartsJSLiveLocale::Dictionary($language),
+            'state'        => $options['state'],
+            'options'      => $options,
+            'replacements' => [
+                '{{ECHARTS_SCRIPT}}'           => EChartsAsset::RendererScript($bundle, $ipsView && $transport !== null),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::StartupJavaScript(),
                 '{{FAMILY_SCRIPT}}'            => file_get_contents(dirname(__DIR__) . '/' . $file),
                 '{{FORMAT_SCRIPT}}'            => file_get_contents(__DIR__ . '/jslive/format.js'),
-                '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $transport === null ? '' : file_get_contents(__DIR__ . '/echarts/ipsview-transport.js')]]);
+                '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $transport === null ? '' : file_get_contents(__DIR__ . '/echarts/ipsview-transport.js')
+            ]
+        ]);
         if (strlen($html) > 1048576) {
             throw new RuntimeException('LIMIT_EXCEEDED: native HTML document exceeds 1 MiB.');
         }

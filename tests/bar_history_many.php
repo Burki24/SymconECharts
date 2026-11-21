@@ -102,6 +102,56 @@ declare(strict_types=1);
             'Old sixteen-source configurations must remain byte-identical and initially show every row.'
         );
         $rows = array_slice($sources, 0, 32);
+        $axisRows = array_slice($sources, 0, 4);
+        $axisRows[0] = array_merge($axisRows[0], ['AxisPosition' => 'left', 'AxisRangeMode' => 'manual',
+            'AxisMinimum'                                        => 0, 'AxisMaximum' => 100]);
+        $axisRows[1] = array_merge($axisRows[1], ['Unit' => '°C', 'AxisPosition' => 'left', 'AxisRangeMode' => 'manual',
+            'AxisMinimum'                                => -20, 'AxisMaximum' => 40]);
+        $axisRows[2] = array_merge($axisRows[2], ['Unit' => '°C', 'OwnAxis' => true, 'AxisPosition' => 'right',
+            'AxisRangeMode'                              => 'manual', 'AxisMinimum' => 20, 'AxisMaximum' => 60]);
+        $axisRows[3]['Unit'] = '°C';
+        $axisModule = $configure($axisRows, 'raw', 200);
+        $axisModule->ApplyChanges();
+        $axisData = $decode($axisModule);
+        $axisForm = json_decode($axisModule->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+        $sourceList = findGaugeFormElement($axisForm['elements'], 'Sources');
+        assertGatewayGauge(
+            findGaugeFormElement($sourceList['columns'], 'OwnAxis')['add'] === false
+            && findGaugeFormElement($sourceList['form'], 'OwnAxis')['type'] === 'CheckBox'
+            && findGaugeFormElement($sourceList['form'], 'AxisPosition')['type'] === 'Select'
+            && array_column(findGaugeFormElement($sourceList['form'], 'AxisRangeMode')['options'], 'value') === ['auto', 'presentation', 'manual'],
+            'The source editor must expose both axis sides and all axis range modes, with individual axes opt-in.'
+        );
+        assertGatewayGauge(
+            array_column($axisData['series'], 'axisIndex') === [0, 1, 2, 1]
+            && array_column($axisData['axes'], 'position') === ['left', 'left', 'right']
+            && array_column($axisData['axes'], 'minimum') === [0.0, -20.0, 20.0]
+            && array_column($axisData['axes'], 'maximum') === [100.0, 40.0, 60.0],
+            'Equal-unit shared and individual series must resolve their own scales and sides in source order.'
+        );
+        $axisModule->UpdateBarPreviewFromForm(json_encode(['Sources' => $axisRows, 'Orientation' => 'horizontal',
+            'IPSViewUseTileDesign'                                   => false, 'IPSViewOrientation' => 'vertical'], JSON_THROW_ON_ERROR));
+        foreach (array_slice($axisModule->GetTestFormUpdates(), -2) as $image) {
+            $svg = base64_decode(substr($image['Value'], strlen('data:image/svg+xml;base64,')), true);
+            assertGatewayGauge(
+                str_contains($svg, '°C -20 … 40') && str_contains($svg, '°C 20 … 60')
+                && substr_count($svg, 'data-preview-axis="' . ($image['Field'] === 'BarPreview' ? 'bottom' : 'left') . '"') === 2,
+                'Both previews must display the configured ranges of separate equal-unit axes.'
+            );
+        }
+        $ownStack = $axisRows;
+        $ownStack[2]['StackGroup'] = 1;
+        $invalidOwnStack = $configure($ownStack, 'hour');
+        $invalidOwnStack->ApplyChanges();
+        assertGatewayGauge($invalidOwnStack->GetTestStatus() === 201, 'A stack cannot have a separate per-series value axis.');
+        foreach ([['OwnAxis' => null], ['AxisRangeMode' => 'unknown'], ['AxisRangeMode' => 'manual', 'AxisMinimum' => 60]] as $invalid) {
+            $invalidRange = $configure([array_replace($axisRows[2], $invalid)], 'raw', 200);
+            $invalidRange->ApplyChanges();
+            assertGatewayGauge($invalidRange->GetTestStatus() === 201, 'Explicit invalid axis settings must be rejected.');
+        }
+        $axisLimit = $configure(array_map(static fn (array $row): array => $row + ['OwnAxis' => true], array_slice($rows, 0, 17)));
+        $axisLimit->ApplyChanges();
+        assertGatewayGauge($axisLimit->GetTestStatus() === 201, 'Individual axes must count towards the existing sixteen-axis limit.');
         foreach ($rows as $index => &$row) {
             $row['InitiallyVisible'] = $index < 4;
         }

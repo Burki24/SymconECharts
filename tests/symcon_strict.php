@@ -134,7 +134,7 @@ foreach ([
     'public function UpdateTimeSeriesPreviewFromForm(string $Configuration): void',
     'public function UpdateTimeSeriesPreviewSourceFromForm(string $Configuration, string $Action): void',
     'public function CopyTileDesignToIPSView(): void',
-    'EChartsAsset::TimeSeriesJavaScript()',
+    'EChartsAsset::RendererScript(\'cartesian\', $ipsView)',
     'EChartsTimeSeriesDesign::SourceEditorForm()',
     'EChartsTimeSeriesDesign::StyleFromSource($source)',
     'EChartsVariablePresentation::Resolve('
@@ -157,7 +157,7 @@ foreach ([
     "RegisterPropertyString(\$prefix . 'BarMode', 'simple')",
     "RegisterPropertyString(\$prefix . 'Orientation', 'vertical')",
     "RegisterPropertyString(\$prefix . 'SortOrder', 'configured')",
-    'EChartsAsset::BarCategoryJavaScript()',
+    'EChartsAsset::RendererScript(\'bar-category\', $ipsView)',
     'EChartsVariablePresentation::Resolve(',
     'use EChartsCurrentSources;'
 ] as $barCategoryContract) {
@@ -182,7 +182,7 @@ foreach ([
     'public function GetWaterfallData(): string',
     'use EChartsCurrentSources;',
     'EChartsSourceIdentity::LabelsForSources($sources)',
-    'EChartsAsset::CartesianJavaScript()',
+    'EChartsAsset::RendererScript(\'cartesian\', $ipsView)',
     'EChartsVariablePresentation::Resolve('
 ] as $waterfallContract) {
     requireStrictContract(
@@ -199,7 +199,7 @@ foreach ([
     'public function GetPolarData(): string',
     'use EChartsCurrentSources;',
     'EChartsSourceIdentity::LabelsForSources($sources)',
-    'EChartsAsset::PolarJavaScript()',
+    'EChartsAsset::RendererScript(\'polar\', $ipsView)',
     'EChartsVariablePresentation::Resolve('
 ] as $polarContract) {
     requireStrictContract(
@@ -216,7 +216,7 @@ foreach ([
     'public function GetPieData(): string',
     'use EChartsCurrentSources;',
     'EChartsSourceIdentity::LabelsForSources(',
-    'EChartsAsset::PieJavaScript()',
+    'EChartsAsset::RendererScript(\'pie\', $ipsView)',
     'EChartsVariablePresentation::Resolve('
 ] as $pieContract) {
     requireStrictContract(str_contains($pie, $pieContract), 'EChartsPie is missing contract: ' . $pieContract, $errors);
@@ -230,7 +230,7 @@ foreach ([
     "RegisterPropertyString('DataMode', 'auto')",
     "RegisterPropertyInteger('PointBudget', 1000)",
     'EChartsArchiveQuery::Resolve(',
-    'EChartsAsset::CartesianJavaScript()',
+    'EChartsAsset::RendererScript(\'cartesian\', $ipsView)',
     'EChartsVariablePresentation::Resolve('
 ] as $barHistoryContract) {
     requireStrictContract(

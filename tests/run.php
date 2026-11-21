@@ -14,6 +14,7 @@ $tests = [
     __DIR__ . '/symcon_strict.php',
     __DIR__ . '/data_protocol.php',
     __DIR__ . '/archive_windows.php',
+    __DIR__ . '/archive_value_axes.php',
     __DIR__ . '/archive_absolute_windows.php',
     __DIR__ . '/archive_states_gateway.php',
     __DIR__ . '/calendar_pie_data.php',
