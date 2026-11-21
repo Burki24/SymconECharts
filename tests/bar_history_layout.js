@@ -30,7 +30,7 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
         clientWidth: width,
         clientHeight: height,
         addEventListener: (name, listener) => { listeners[name] = listener; },
-        getBoundingClientRect: () => ({ left: 0, width })
+        getBoundingClientRect: () => ({ left: 0, top: 0, width, height })
     };
     const warningElement = { hidden: true, textContent: '' };
     const errorElement = { hidden: true, textContent: '' };
@@ -406,6 +406,16 @@ assert.equal(prevented, true);
 assert.equal(ipsViewZoom.dispatchedAction.type, 'dataZoom');
 assert.equal(ipsViewZoom.dispatchedAction.start, 10);
 assert.equal(ipsViewZoom.dispatchedAction.end, 90);
+const horizontalState = ipsViewZoom.getState();
+ipsViewZoom.window.handleMessage({ ...horizontalState, chart: { ...horizontalState.chart,
+    bar: { ...horizontalState.chart.bar, style: { enableZoom: true, orientation: 'horizontal' } }
+} });
+ipsViewZoom.listeners.wheel({
+    deltaY: -100, clientX: 600, clientY: 105,
+    preventDefault() {}, stopPropagation() {}
+});
+assert.equal(ipsViewZoom.dispatchedAction.start, 5, 'Horizontal bars must anchor wheel zoom at the pointer time on Y.');
+assert.equal(ipsViewZoom.dispatchedAction.end, 85);
 
 const multi = render();
 multi.window.handleMessage({
@@ -523,7 +533,7 @@ assert.doesNotMatch(escapedText, /<img/);
 assert.match(escapedText, /&lt;unit&gt;/);
 
 const echarts = require(path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts'));
-for (const mode of ['symcon', 'ipsview']) {
+function verifyStackedBars(mode, orientation) {
     const native = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 640, height: 400 });
     const points = values => values.map(([index, value]) => [1780000000 + index * 60, value]);
     const sources = [
@@ -533,7 +543,8 @@ for (const mode of ['symcon', 'ipsview']) {
         { id: 'single', points: points([[2, 10]]) }
     ];
     const test = render(false, mode, false, true, false, 640, 400, { status: 'ready', chart: {
-        ...ready.getState().chart, series: sources
+        ...ready.getState().chart, series: sources,
+        bar: { ...ready.getState().chart.bar, style: { ...ready.getState().chart.bar.style, orientation } }
     } }, native);
     const [east, west, other, single] = test.option.series;
     assert.ok(east.stack && east.stack === west.stack);
@@ -548,26 +559,55 @@ for (const mode of ['symcon', 'ipsview']) {
         return Array.from({ length: data.count() }, (_, i) => data.get(data.getCalculationInfo('stackResultDimension'), i));
     };
     assert.deepEqual(totals(), [5, -6, 4]);
+    const horizontal = orientation === 'horizontal';
+    const timeDim = horizontal ? 'y' : 'x';
+    const valueDim = horizontal ? 'x' : 'y';
+    assert.equal(native.getModel().getSeriesByIndex(0).coordinateSystem.getBaseAxis().dim, timeDim);
+    assert.equal(native.getOption()[timeDim + 'Axis'][0].type, 'time');
+    assert.equal(native.getOption()[valueDim + 'Axis'][0].type, 'value');
+    assert.equal(native.getOption()[timeDim + 'Axis'][0].inverse, horizontal);
+    for (const zoom of native.getOption().dataZoom) {
+        assert.deepEqual([].concat(zoom[timeDim + 'AxisIndex']), [0]);
+        assert.equal(zoom[valueDim + 'AxisIndex'], undefined);
+    }
+    const data = native.getModel().getSeriesByIndex(0).getData();
+    const early = data.getItemLayout(0);
+    const late = data.getItemLayout(1);
+    assert.ok(early[timeDim] < late[timeDim], 'Newer periods must appear farther right or lower down.');
+    const valueExtent = horizontal ? 'width' : 'height';
+    assert.ok(early[valueExtent] * late[valueExtent] < 0, 'Opposite signs must extend in opposite directions.');
+    assert.match(east.label.formatter({ value: east.data[0] }), /^2[.,]0 °C$/);
+    assert.match(test.option.tooltip.formatter([{ seriesIndex: 0, value: east.data[0] }]), /2[.,]0 °C/);
+    assert.equal(east.label.position, horizontal ? 'right' : 'top');
     native.dispatchAction({ type: 'legendToggleSelect', name: 'east' });
     assert.deepEqual(totals(), [3, -2, 4]);
     native.dispose();
 }
 for (const mode of ['symcon', 'ipsview']) {
+    for (const orientation of ['vertical', 'horizontal']) {
+        verifyStackedBars(mode, orientation);
+    }
+}
+function verifyLargeArchive(mode, orientation) {
     const native = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 420, height: 520 });
     const stressSources = manySources.map((item, row) => ({ ...item,
         points: Array.from({ length: 1000 }, (_, index) => [1780000000 + index * 60 + row,
             Number((20 + Math.sin(index)).toFixed(2))])
     }));
     const state = { status: 'ready', chart: { ...manyState.chart, series: stressSources,
+        bar: { ...manyState.chart.bar, style: { ...manyState.chart.bar.style, orientation } },
         range: { ...manyState.chart.range, endTimestamp: 1780060000 } } };
     const test = render(false, mode, false, true, false, 420, 520, state, native);
     function option() { return native.getOption(); }
+    const valueAxis = orientation === 'horizontal' ? 'xAxis' : 'yAxis';
     assert.equal(option().series.length, 32);
     assert.equal(option().series.reduce((sum, item) => sum + item.data.length, 0), 32000);
     assert.equal(option().legend[0].type, 'scroll');
     native.dispatchAction({ type: 'legendToggleSelect', name: 'variable-10000' });
     native.dispatchAction({ type: 'legendScroll', scrollDataIndex: 12 });
     native.dispatchAction({ type: 'dataZoom', dataZoomIndex: 0, start: 20, end: 80 });
+    const grid = native.getModel().getComponent('grid').coordinateSystem.getRect();
+    assert.ok(grid.height > 0 && grid.width > 0, 'Zoom with two visible units must leave a drawable plot.');
     test.window.handleMessage({ status: 'ready', chart: { ...state.chart,
         series: [...stressSources].reverse().filter(item => item.id !== 'variable-10002') } });
     assert.equal(option().legend[0].selected['variable-10000'], false);
@@ -581,17 +621,22 @@ for (const mode of ['symcon', 'ipsview']) {
     assert.ok(Object.values(option().legend[0].selected).every(Boolean));
     native.dispatchAction({ type: 'legendInverseSelect' });
     assert.ok(Object.values(option().legend[0].selected).every(value => value === false));
-    assert.ok(option().yAxis.every(axis => axis.show === false));
+    assert.ok(option()[valueAxis].every(axis => axis.show === false));
     assert.equal(option().series.length, 31, 'Selection must not filter or reallocate archived data.');
     assert.ok(option().series.every(item => item.data.length === 1000));
     native.dispatchAction({ type: 'legendToggleSelect', name: 'variable-10001' });
-    assert.equal(option().yAxis[0].show, false);
-    assert.equal(option().yAxis[1].show, true);
-    assert.equal(option().yAxis[1].splitLine.show, true);
+    assert.equal(option()[valueAxis][0].show, false);
+    assert.equal(option()[valueAxis][1].show, true);
+    assert.equal(option()[valueAxis][1].splitLine.show, true);
     assert.equal(option().dataZoom[0].start, 20);
     assert.match(native.renderToSVGString(), /<svg/);
     assert.doesNotMatch(native.renderToSVGString(), /NaN/);
     native.dispose();
+}
+for (const mode of ['symcon', 'ipsview']) {
+    for (const orientation of ['vertical', 'horizontal']) {
+        verifyLargeArchive(mode, orientation);
+    }
 }
 
 async function verifyCompressedStartup() {

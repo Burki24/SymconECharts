@@ -134,11 +134,11 @@
                                 "value": "auto"
                             },
                             {
-                                "caption": "Left",
+                                "caption": "Left / bottom",
                                 "value": "left"
                             },
                             {
-                                "caption": "Right",
+                                "caption": "Right / top",
                                 "value": "right"
                             }
                         ]
@@ -465,6 +465,21 @@
                                 {
                                     "caption": "Roma",
                                     "value": "roma"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "Orientation",
+                            "caption": "Orientation",
+                            "options": [
+                                {
+                                    "caption": "Vertical",
+                                    "value": "vertical"
+                                },
+                                {
+                                    "caption": "Horizontal",
+                                    "value": "horizontal"
                                 }
                             ]
                         },

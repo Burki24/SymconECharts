@@ -188,6 +188,8 @@ Quellen gleicher Einheit bei automatischer oder fester Verdichtung.
 | Formularfeld | Technischer Name | Typ | Standard | Auswahl / Bedienbereich |
 | --- | --- | --- | --- | --- |
 | Archivquellen (1 bis 32) | `Sources` | String | `"[]"` | Siehe Modulanleitung |
+| Ausrichtung | `Orientation` | String | `"vertical"` | `"vertical"` Vertikal oder `"horizontal"` Horizontal |
+| IPSView-Ausrichtung | `IPSViewOrientation` | String | `"vertical"` | Eigene Ausrichtung bei deaktiviertem Kacheldesign |
 | Titel | `Title` | String | `""` | Siehe Modulanleitung |
 | Zeitraum | `Range` | String | `"24h"` | `"1h"` 1 Stunde; `"6h"` 6 Stunden; `"24h"` 24 Stunden; `"7d"` 7 Tage; `"30d"` 30 Tage; `"today"` Heute; `"yesterday"` Gestern; `"current-week"` Diese Woche; `"current-month"` Dieser Monat; `"custom"` Benutzerdefiniert |
 | Zeitraumwert | `CustomRangeValue` | Integer | `7` | 1–1000 |
@@ -242,7 +244,7 @@ Quellen gleicher Einheit bei automatischer oder fester Verdichtung.
 | Einheit | `Unit` | String | `""` | Siehe Modulanleitung |
 | Nachkommastellen | `Decimals` | Integer | `1` | 0–6 |
 | Reduzierer | `Reducer` | String | `"auto"` | `"auto"` Automatisch; `"average"` Durchschnitt; `"sum"` Summe; `"minimum"` Minimum; `"maximum"` Maximum |
-| Achsenseite | `AxisPosition` | String | `"auto"` | `"auto"` Automatisch; `"left"` Links; `"right"` Rechts |
+| Achsenseite | `AxisPosition` | String | `"auto"` | `"auto"` Automatisch; `"left"` Links / unten; `"right"` Rechts / oben |
 | Farbe | `Color` | Integer | `-1` | `0xRRGGBB`; Automatik nach Feldvorgabe |
 
 Die [gemeinsamen IPSView-Regeln](#gemeinsame-ipsview-einstellungen) und gegebenenfalls

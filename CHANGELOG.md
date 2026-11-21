@@ -2,6 +2,9 @@
 
 ## Neu
 
+- EChartsBarHistory kann Archivwerte auch als horizontale Balken darstellen.
+  Kachel und IPSView erhalten eine eigene Ausrichtung mit passender Vorschau.
+  Der Zeitzoom folgt der Zeitachse. Vertikale Säulen bleiben der Standard.
 - EChartsTimeSeries kann die Leistungen mehrerer PV-Flächen und andere
   Archivwerte gleicher Einheit als Flächen stapeln. Der Tooltip zeigt die
   Einzelwerte und die sichtbare Gruppensumme. Fehlende Intervalle unterbrechen

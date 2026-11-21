@@ -83,6 +83,11 @@ declare(strict_types=1);
         $defaults = new TestableEChartsBarHistory();
         $defaults->Create();
         assertGatewayGauge(
+            $defaults->GetTestProperties()['Orientation'] === 'vertical'
+            && $defaults->GetTestProperties()['IPSViewOrientation'] === 'vertical',
+            'Both Historical Bar designers must default to vertical columns.'
+        );
+        assertGatewayGauge(
             $defaults->GetTestProperties()['PointBudget'] === 1000,
             'The established Historical Bar point-budget default must remain 1000.'
         );
@@ -103,6 +108,7 @@ declare(strict_types=1);
         unset($row);
         $module = $configure($rows);
         $module->SetTestProperty('EnableIPSView', true);
+        $module->SetTestProperty('Orientation', 'horizontal');
         $properties = $module->GetTestProperties();
         $module->ApplyChanges();
         assertGatewayGauge($module->GetTestStatus() === IS_ACTIVE, 'Historical Bar must accept 32 sources and 32000 points.');
@@ -133,8 +139,9 @@ declare(strict_types=1);
             $documentBytes[] = strlen($html);
             $restored = $startup($html)['chart'];
             assertGatewayGauge(
-                $restored['series'] === $model['series'] && $restored['range'] === $model['range'],
-                'Both output adapters must retain every hidden source and all 32000 points exactly.'
+                $restored['bar']['style']['orientation'] === 'horizontal'
+                && $restored['series'] === $model['series'] && $restored['range'] === $model['range'],
+                'Both outputs must use the inherited horizontal design and retain all hidden sources and all 32000 points.'
             );
         }
         $form = json_decode($module->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
@@ -142,8 +149,25 @@ declare(strict_types=1);
             findGaugeFormElement($form['elements'], 'PointBudget')['maximum'] === 32000,
             'The Historical Bar form must expose the expanded total budget.'
         );
+        foreach (['Orientation', 'IPSViewOrientation'] as $field) {
+            $selector = findGaugeFormElement($form['elements'], $field);
+            assertGatewayGauge(
+                array_column($selector['options'], 'value') === ['vertical', 'horizontal']
+                && str_contains($selector['onChange'], 'ECBH_UpdateBarPreviewFromForm'),
+                'Both orientation selectors must update draft previews.'
+            );
+        }
         $module->UpdateBarPreviewFromForm(json_encode(['Sources' => array_reverse($rows),
-            'Title'                                              => 'Unsaved synthetic draft', 'IPSViewUseTileDesign' => false], JSON_THROW_ON_ERROR));
+            'Title'                                              => 'Unsaved synthetic draft', 'IPSViewUseTileDesign' => false,
+            'Orientation'                                        => 'horizontal', 'IPSViewOrientation' => 'vertical'], JSON_THROW_ON_ERROR));
+        $images = array_column(array_slice($module->GetTestFormUpdates(), -2), 'Value', 'Field');
+        foreach (['BarPreview' => 'vertical', 'IPSViewBarPreview' => 'horizontal'] as $field => $sliderDirection) {
+            $svg = base64_decode(substr($images[$field], strlen('data:image/svg+xml;base64,')), true);
+            assertGatewayGauge(
+                str_contains($svg, 'data-preview-zoom="' . $sliderDirection . '"'),
+                'Each draft preview must place its slider along its own time axis.'
+            );
+        }
         assertGatewayGauge($module->GetTestProperties() === $properties, 'Preview drafts must not persist sources or designs.');
         $GLOBALS['symconTestVariables'][97031]['Name'] = 'Renamed synthetic sensor';
         $renamed = $decode($module);
@@ -187,7 +211,7 @@ declare(strict_types=1);
             && $stackModel['range']['aggregationLevel'] === 0 && $stackModel['range']['pointLimitPerSeries'] === 100,
             'Only grouped archive sources carry stack metadata; their query and shared limit stay unchanged.'
         );
-        $stacked->UpdateBarPreviewFromForm('{}');
+        $stacked->UpdateBarPreviewFromForm('{"Orientation":"horizontal","IPSViewOrientation":"vertical","IPSViewUseTileDesign":false}');
         $stackImages = array_filter($stacked->GetTestFormUpdates(), static fn (array $update): bool => in_array($update['Field'], ['BarPreview', 'IPSViewBarPreview'], true) && $update['Parameter'] === 'image');
         assertGatewayGauge(count($stackImages) >= 2, 'Both designers must supply stack previews.');
         foreach ($stackImages as $image) {
@@ -195,6 +219,15 @@ declare(strict_types=1);
             $xml->loadXML(base64_decode(substr($image['Value'], strlen('data:image/svg+xml;base64,'))));
             $bars = (new DOMXPath($xml))->query('//*[local-name()="rect" and @x and @fill-opacity]');
             [$first, $second, $third] = [$bars->item(0), $bars->item(1), $bars->item(2)];
+            if ($image['Field'] === 'BarPreview') {
+                assertGatewayGauge(
+                    $first->getAttribute('y') === $second->getAttribute('y')
+                    && $first->getAttribute('y') !== $third->getAttribute('y')
+                    && abs((float) $first->getAttribute('x') + (float) $first->getAttribute('width') - (float) $second->getAttribute('x')) < 0.1,
+                    'A horizontal preview stack must have adjoining segments in one row, with the independent series in a separate row.'
+                );
+                continue;
+            }
             assertGatewayGauge(
                 $first->getAttribute('x') === $second->getAttribute('x')
                 && $first->getAttribute('x') !== $third->getAttribute('x')

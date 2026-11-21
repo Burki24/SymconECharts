@@ -33,7 +33,7 @@ bestimmt die Reihen- und Achsenreihenfolge. Unterstützt sind bis zu 16 Einheite
 2. Für beide Quellen **Stapelgruppe (0 = einzeln)** auf **1** stellen und
    **Mittelwert** wählen. Als Datenmodus zum Beispiel **1 Stunde** einstellen.
 3. Änderungen übernehmen. Liefert das Ostdach im Stundenmittel 2 kW und das
-   Westdach 3 kW, bilden die beiden Farbsegmente einen 5 kW hohen Balken.
+   Westdach 3 kW, zeigen die beiden Farbsegmente zusammen 5 kW an.
    Der Tooltip zeigt die einzelnen Beiträge. Die Legende blendet sie einzeln aus.
 
 Die Gruppen 1–32 bilden jeweils einen eigenen Stapel. Gruppe 0 behält einzelne
@@ -41,8 +41,8 @@ Balken bei. Jede Gruppe benötigt dieselbe wirksame Einheit und eine automatisch
 oder feste Verdichtung. Fehlt für ein Intervall der Archivwert einer konfigurierten
 Gruppenquelle, bleibt der gesamte Stapel dort leer, auch wenn die Quelle in der
 Legende ausgeblendet ist. Ein gemessener Nullwert zählt als vorhandener Beitrag.
-Positive und negative Beiträge stapeln sich getrennt oberhalb und unterhalb der
-Nulllinie. Die Legende bestimmt, welche Beiträge zur sichtbaren Höhe zählen.
+Positive und negative Beiträge stapeln sich auf gegenüberliegenden Seiten der
+Nulllinie. Die Legende bestimmt, welche Beiträge im Stapel sichtbar sind.
 
 ## Zeiträume, Auswahl und Ladebudget
 
@@ -86,12 +86,19 @@ komprimiert und benötigen im Browser `DecompressionStream`.
 
 ## Gestaltung und IPSView
 
+Im **Kacheldesigner** unter **Achsen und Anzeige** wählen Sie die **Ausrichtung**.
+**Vertikal** ist der Standard. Bei **Horizontal** stehen die ältesten Intervalle
+oben und die neuesten unten. Die Balken verlaufen waagerecht, der Zeitzoom liegt
+rechts und folgt der Zeitachse. Die Vorschau zeigt die gewählte Ausrichtung.
+Für eine andere Ausrichtung in IPSView deaktivieren Sie dort **Kacheldesign verwenden**
+und wählen die Ausrichtung im IPSView-Designer.
+
 Einstellbar sind Theme, Balkenbreite, Deckkraft, Rundung samt Radius, Gitter,
 Wertbeschriftung und getrennte Schriftgrößen/-farben für Titel, Legende, Achsen
 und Werte. Die Achsenschrift gilt auch für die Einheitenüberschrift.
 Wertbeschriftungen bleiben standardmäßig ausgeblendet; ihre Standardposition
-liegt oberhalb der Balken. Alternativ sind andere Seiten oder Innenpositionen
-mit 0–100 px Abstand wählbar.
+liegt bei vertikalen Säulen oben und bei horizontalen Balken rechts. Andere
+Seiten oder Innenpositionen sind mit 0–100 px Abstand wählbar.
 
 **Balkenfüllung: Farbverlauf** aktiviert die Endfarbe. Bei automatischer Endfarbe
 läuft der Verlauf zum Theme-Hintergrund aus. **SVG-Muster** wiederholt eine

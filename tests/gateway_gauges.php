@@ -7005,6 +7005,7 @@ $barHistoryTile->SetTestProperty('IPSViewRange', 'yesterday');
 $barHistoryTile->SetTestProperty('IPSViewTimeAxisLabelFormat', 'date');
 $barHistoryTile->SetTestProperty('IPSViewUseTileDesign', false);
 $barHistoryTile->SetTestProperty('IPSViewEnableZoom', false);
+$barHistoryTile->SetTestProperty('IPSViewOrientation', 'horizontal');
 $barHistoryTile->SetTestProperty('IPSViewEChartsTheme', 'dark');
 $barHistoryTile->SetTestProperty('IPSViewBarWidthPercent', 45);
 $barHistoryTile->SetTestProperty('IPSViewBarFillMode', 'gradient');
@@ -7020,6 +7021,8 @@ assertGatewayGauge(
     $independentBarHistoryTile['range']['key'] === '1h'
         && $independentBarHistoryTile['theme'] === 'auto'
         && $independentBarHistoryTile['bar']['style']['enableZoom'] === true
+        && $independentBarHistoryTile['bar']['style']['orientation'] === 'vertical'
+        && str_contains($independentBarHistoryIPSView, '"orientation":"horizontal"')
         && str_contains($independentBarHistoryIPSView, '"key":"yesterday"')
         && str_contains($independentBarHistoryIPSView, '"timeAxisLabelFormat":"date"')
         && str_contains($independentBarHistoryIPSView, '"theme":"dark"')
