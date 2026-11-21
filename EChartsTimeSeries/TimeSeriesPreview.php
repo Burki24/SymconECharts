@@ -101,7 +101,8 @@ final class EChartsTimeSeriesPreview
             $palette,
             $adaptToBackground,
             $backgroundColor,
-            $backgroundOpacityPercent
+            $backgroundOpacityPercent,
+            (int) ($design['chartBackgroundColor'] ?? -1)
         );
         $backgroundOpacityPercent = (int) round($background['opacity'] * 100);
         $titleBaseline = max(31, $titleFontSize + 6);
@@ -116,6 +117,14 @@ final class EChartsTimeSeriesPreview
                 $y = $plotTop + ($plotBottom - $plotTop) * $index / 4;
                 $content .= '<line x1="70" y1="' . self::N($y) . '" x2="680" y2="' . self::N($y)
                     . '" stroke="' . SVGPreviewHelper::escape($gridColor) . '" stroke-width="1"/>';
+            }
+        }
+        if ($design['showVerticalGrid'] ?? false) {
+            $verticalGridColor = self::DesignColor($design['verticalGridColor'] ?? '', $palette['track']);
+            for ($index = 0; $index < 3; ++$index) {
+                $x = 70 + 305 * $index;
+                $content .= '<line x1="' . $x . '" y1="' . self::N($plotTop) . '" x2="' . $x . '" y2="' . self::N($plotBottom)
+                    . '" stroke="' . SVGPreviewHelper::escape($verticalGridColor) . '" stroke-width="1"/>';
             }
         }
         if ($showXAxis) {

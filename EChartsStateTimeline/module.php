@@ -116,6 +116,7 @@ class EChartsStateTimeline extends IPSModuleStrict
                 }
                 $this->RegisterAnimationProperties($prefix, true, 350, 500);
             }
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -216,7 +217,7 @@ class EChartsStateTimeline extends IPSModuleStrict
                     $fields[] = $prefix . $name;
                 }
             }
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECST', $fields));
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $this->WithBarPreviewForm($form, 'ECST', $fields));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -288,6 +289,7 @@ class EChartsStateTimeline extends IPSModuleStrict
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -525,7 +527,7 @@ class EChartsStateTimeline extends IPSModuleStrict
 
     private function RenderStateTimelineHTMLPage(bool $ipsView): string
     {
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        return $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts StateTimeline',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -577,6 +579,9 @@ class EChartsStateTimeline extends IPSModuleStrict
     /** @return array{Status:int,Message:string}|null */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         try {
             $this->GetValidatedSources();
         } catch (Throwable $exception) {
@@ -784,7 +789,7 @@ class EChartsStateTimeline extends IPSModuleStrict
                 default                 => 'The StateTimeline values could not be loaded.'
             });
         }
-        return ['schemaVersion' => 1, 'family' => 'stateTimeline', 'status' => 'ready', 'chart' => $chart, 'error' => null];
+        return ['schemaVersion' => 1, 'family' => 'stateTimeline', 'status' => 'ready', 'chart' => $this->WithChartBackground($chart, $ipsView), 'error' => null];
     }
 
     /** @return array<string,mixed> */

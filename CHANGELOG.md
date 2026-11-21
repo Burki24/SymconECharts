@@ -2,6 +2,13 @@
 
 ## Neu
 
+- Die regulären Diagrammdesigner bieten eine eigene Farbe für den
+  Diagrammhintergrund in Kachel und IPSView. Eine beschriftete Farbzuordnung
+  zeigt je Diagramm, welchen Bereich die Farbfelder steuern. CalendarPie und
+  Scatter bieten eine eigene Legendenfarbe.
+- EChartsTimeSeries kann waagerechte und senkrechte Gitterlinien getrennt
+  anzeigen und einfärben.
+
 - EChartsBarHistory kann Archivwerte auch als horizontale Balken darstellen.
   Kachel und IPSView erhalten eine eigene Ausrichtung mit passender Vorschau.
   Der Zeitzoom folgt der Zeitachse. Vertikale Säulen bleiben der Standard.

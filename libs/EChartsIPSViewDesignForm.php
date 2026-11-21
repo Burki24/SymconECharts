@@ -6,6 +6,8 @@ namespace SymconECharts;
 
 use RuntimeException;
 
+require_once __DIR__ . '/EChartsDesignerColorGuide.php';
+
 /** Shared form state for the chart-wide Tile/IPSView design inheritance contract. */
 trait EChartsIPSViewDesignForm
 {
@@ -43,6 +45,79 @@ trait EChartsIPSViewDesignForm
         }
     }
 
+    private function EncodeChartDesignerForm(string $moduleDirectory, array $form): string
+    {
+        $title = $this->TranslateHelperTextFromDirectory(__DIR__, 'DesignerColorGuide', 'title', 'Schematic color key');
+        $help = $this->TranslateHelperTextFromDirectory(
+            __DIR__,
+            'DesignerColorGuide',
+            'help',
+            'Orange marks the area controlled by each field. The examples include optional design modes and use fixed sample colors.'
+        );
+
+        return $this->EncodeConfigurationForm(EChartsDesignerColorGuide::WithGuides($form, $moduleDirectory, $this->Translate(...), $title, $help));
+    }
+
+    private function RegisterChartBackgroundProperties(): void
+    {
+        $this->RegisterPropertyInteger('ChartBackgroundColor', -1);
+        $this->RegisterPropertyInteger('IPSViewChartBackgroundColor', -1);
+    }
+
+    private function ChartBackgroundColorsAreValid(): bool
+    {
+        $tile = $this->ReadPropertyInteger('ChartBackgroundColor');
+        $ipsView = $this->ReadPropertyInteger('IPSViewChartBackgroundColor');
+
+        return $tile >= -1 && $tile <= 0xFFFFFF
+            && ($this->ReadPropertyBoolean('IPSViewUseTileDesign') || ($ipsView >= -1 && $ipsView <= 0xFFFFFF));
+    }
+
+    /** @param array<string, mixed> $draft */
+    private function EffectiveChartBackgroundColor(bool $ipsView, array $draft = []): int
+    {
+        $independent = $ipsView && !($draft['IPSViewUseTileDesign'] ?? $this->ReadPropertyBoolean('IPSViewUseTileDesign'));
+        $name = $independent ? 'IPSViewChartBackgroundColor' : 'ChartBackgroundColor';
+        $color = (int) ($draft[$name] ?? $this->ReadPropertyInteger($name));
+
+        return $color >= 0 && $color <= 0xFFFFFF ? $color : -1;
+    }
+
+    private static function ChartBackgroundField(string $prefix, string $onChange): array
+    {
+        $field = [
+            'type'               => 'SelectColor',
+            'name'               => $prefix . 'ChartBackgroundColor',
+            'caption'            => 'Chart background',
+            'allowTransparent'   => true,
+            'transparentCaption' => 'Automatic (theme)'
+        ];
+        if ($onChange !== '') {
+            $field['onChange'] = $onChange;
+        }
+
+        return $field;
+    }
+
+    /** Places the color alongside the theme in both flat and already grouped designers. */
+    private static function InsertChartBackground(array &$items, string $prefix, string $onChange): bool
+    {
+        $theme = $prefix . 'EChartsTheme';
+        foreach ($items as $index => &$item) {
+            if (($item['name'] ?? null) === $theme || (($item['type'] ?? null) === 'RowLayout'
+                && in_array($theme, array_column($item['items'], 'name'), true))) {
+                array_splice($items, $index + 1, 0, [self::ChartBackgroundField($prefix, $onChange)]);
+
+                return true;
+            }
+            if (isset($item['items']) && self::InsertChartBackground($item['items'], $prefix, $onChange)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** @param list<array<string, mixed>> $elements @param list<array<string, mixed>> $timeItems @return list<array<string, mixed>> */
     private function WithIPSViewTimeSettingsByRange(array $elements, array $timeItems): array
     {
@@ -67,13 +142,20 @@ trait EChartsIPSViewDesignForm
     }
 
     /** @param array<string, mixed> $form @return array<string, mixed> */
-    private function WithIPSViewDesignFormState(array $form, string $modulePrefix): array
-    {
+    private function WithIPSViewDesignFormState(
+        array $form,
+        string $modulePrefix,
+        string $tileBackgroundAction = '',
+        string $ipsViewBackgroundAction = ''
+    ): array {
         if (!isset($form['elements']) || !is_array($form['elements'])) {
             throw new RuntimeException('The IPSView design form section is missing.');
         }
 
         foreach ($form['elements'] as &$element) {
+            if (($element['type'] ?? null) === 'ExpansionPanel' && ($element['caption'] ?? null) === 'Tile designer') {
+                self::InsertChartBackground($element['items'], '', $tileBackgroundAction);
+            }
             if (($element['type'] ?? null) !== 'ExpansionPanel'
                 || ($element['caption'] ?? null) !== 'IPSView design') {
                 continue;
@@ -118,6 +200,7 @@ trait EChartsIPSViewDesignForm
             $copyButton = $element['items'][$buttonIndex];
             $copyButton['name'] = self::IPSVIEW_COPY_BUTTON;
             $designerItems = $element['items'][$independentIndex]['items'];
+            self::InsertChartBackground($designerItems, 'IPSView', $ipsViewBackgroundAction);
             array_unshift($designerItems, $copyButton);
 
             $enabled = !$this->ReadPropertyBoolean('IPSViewUseTileDesign');
@@ -135,6 +218,15 @@ trait EChartsIPSViewDesignForm
                     continue;
                 }
                 $flatItems[] = $item;
+                if (($item['type'] ?? '') === 'RowLayout'
+                    && in_array('IPSViewAdaptToBackground', array_column($item['items'], 'name'), true)) {
+                    $flatItems[] = ['type' => 'Label', 'caption' => $this->TranslateHelperTextFromDirectory(
+                        __DIR__,
+                        'DesignerColorGuide',
+                        'widgetBackground',
+                        'For a solid chart background, turn off IPSView background adaptation. When enabled, the widget uses its background color and opacity.'
+                    )];
+                }
             }
             array_push($flatItems, ...$designerItems);
             $element['items'] = $flatItems;
@@ -183,5 +275,32 @@ trait EChartsIPSViewDesignForm
             }
         }
         unset($item);
+    }
+
+    /** @param array<string, mixed> $configuration */
+    private function RenderChartPage(bool $ipsView, array $configuration): string
+    {
+        if (!($ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'))) {
+            $style = $ipsView ? 'ipsViewStyle' : 'visualizationTheme';
+            $color = $this->EffectiveChartBackgroundColor($ipsView);
+            if ($color !== -1) {
+                $configuration[$style] .= ' :root { --symc-chart-page-background:' . EChartsAsset::ColorToHex($color) . '; }';
+            }
+            // Include uncovered space around the canvas, navigation and empty states.
+            $configuration[$style] .= ' body > main { background-color:var(--symc-chart-page-background, transparent); }';
+        }
+
+        return $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+    }
+
+    /** @param array<string, mixed> $chart @return array<string, mixed> */
+    private function WithChartBackground(array $chart, bool $ipsView): array
+    {
+        $color = $this->EffectiveChartBackgroundColor($ipsView);
+        if ($color !== -1) {
+            $chart['chartBackgroundColor'] = EChartsAsset::ColorToHex($color);
+        }
+
+        return $chart;
     }
 }

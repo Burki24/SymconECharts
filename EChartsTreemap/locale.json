@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Normalize leaf weights using source Min/Max": "Blattgewichte anhand Quellen-Min/Max normalisieren",
             "Normalization changes areas or angles only. Original values keep their own unit and decimals; normalized group weights are not physical totals.": "Die Normalisierung verändert nur Flächen oder Winkel. Originalwerte behalten ihre eigene Einheit und Nachkommastellen; normalisierte Gruppengewichte sind keine physikalischen Summen.",
             "Minimum (normalization)": "Minimum (Normalisierung)",

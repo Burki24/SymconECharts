@@ -159,6 +159,7 @@ mit ausdrücklich unbekanntem Zeitanteil.
 ## Kachel, IPSView und Vorschau
 
 Beide Designer bieten Theme, Tooltip, Legende, Wochenbeginn und Tagesnummern.
+Die Legendenfarbe steuert Beschriftung und Seitennavigation unabhängig von den Kalenderachsen.
 Kreisradius (20–90 %), Donut-Innenradius (0–80 % des Außenradius), Startwinkel,
 Drehrichtung, Segment- und Zellrahmen sowie Zelldeckkraft sind einstellbar.
 Titel, Kalenderbeschriftung und Werte besitzen eigene Schriftgrößen und Farben.

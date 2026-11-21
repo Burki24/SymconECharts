@@ -206,7 +206,7 @@
                 offset: [-cellWidth / 2 + 4, -cellHeight / 2 + 3], fontSize: valueSize, color: style.axisColor || colors.text,
                 formatter: function (p) { return String(Number(p.value[0].slice(8))); }},
             data: days.map(function (day) { return {value: [day.date, 0], date: day.date}; })});
-        return {backgroundColor: bootstrap.mode === 'ipsview' && options.adaptToBackground ? 'transparent' : colors.background,
+        return {backgroundColor: design.chartBackground(bootstrap, model, colors.background),
             ...design.animationOptions(style, {enabled: true, initialDuration: 350, updateDuration: 500}),
             aria: {enabled: true, label: {description: calendar.title + ': ' + monthName(calendar.month) + ', ' + translate(modeText[calendar.mode])
                 + (calendar.normalized && calendar.mode !== 'states' ? ', ' + translate('Normalized comparison (0–100)') : '')
@@ -218,9 +218,9 @@
                     ? 'max-width:' + Math.max(80, width - 16) + 'px;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box;' : ''},
             legend: {show: style.showLegend !== false, type: 'scroll', bottom: 8, left: 10, right: 10,
                 selectedMode: false, itemWidth: 12, itemHeight: 9, itemGap: 10,
-                textStyle: {color: style.axisColor || colors.text, fontSize: axisSize,
+                textStyle: {color: style.legendColor || style.axisColor || colors.text, fontSize: axisSize,
                     width: Math.max(24, Math.min(220, width - 100)), overflow: 'truncate'},
-                pageTextStyle: {color: style.axisColor || colors.text}, pageIconColor: colors.text, pageIconInactiveColor: colors.muted,
+                pageTextStyle: {color: style.legendColor || style.axisColor || colors.text}, pageIconColor: style.legendColor || colors.text, pageIconInactiveColor: colors.muted,
                 data: categories.map(function (category) { return {name: category.id, itemStyle: {color: colorByID[category.id]}}; }),
                 formatter: function (name) { return labelByID[name] || ''; }},
             calendar: {range: calendar.month, orient: 'vertical', left: left, right: right, top: top, bottom: bottom,
@@ -260,7 +260,7 @@
         chartElement.hidden = false;
         error.hidden = true;
         warning.hidden = true;
-        root.style.backgroundColor = bootstrap.mode === 'ipsview' && options.adaptToBackground ? 'transparent' : colorsFor(nextTheme).background;
+        root.style.backgroundColor = design.chartBackground(bootstrap, state.chart, colorsFor(nextTheme).background, true);
         if (chart && theme !== nextTheme) { chart.dispose(); chart = null; }
         if (!chart) { chart = window.echarts.init(chartElement, nextTheme === 'auto' ? null : nextTheme, {renderer: 'canvas'}); theme = nextTheme; }
         else if (wasHidden) { chart.resize(); }

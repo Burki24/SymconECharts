@@ -439,6 +439,13 @@
                         },
                         {
                             "type": "SelectColor",
+                            "name": "LegendColor",
+                            "caption": "Legend color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
                             "name": "ValueColor",
                             "caption": "Value color",
                             "allowTransparent": true,

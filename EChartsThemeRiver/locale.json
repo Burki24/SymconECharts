@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Fixed historical period": "Fester historischer Zeitraum",
             "From (inclusive)": "Von (einschließlich)",
             "Until (exclusive)": "Bis (ausschließlich)",

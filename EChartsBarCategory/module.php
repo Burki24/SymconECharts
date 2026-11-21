@@ -110,6 +110,7 @@ class EChartsBarCategory extends IPSModuleStrict
             $this->RegisterPropertyBoolean('NormalizeValues', false);
             $this->RegisterPropertyString('Title', '');
             $this->RegisterDesignProperties();
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -230,7 +231,7 @@ class EChartsBarCategory extends IPSModuleStrict
                 array_map(static fn (string $name): string => 'IPSView' . $name, array_keys($this->DesignPropertyNames()))
             );
 
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECBC', $fields));
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $this->WithBarPreviewForm($form, 'ECBC', $fields));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -296,6 +297,7 @@ class EChartsBarCategory extends IPSModuleStrict
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -802,7 +804,7 @@ class EChartsBarCategory extends IPSModuleStrict
 
     private function RenderBarHTMLPage(bool $ipsView): string
     {
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        return $this->RenderChartPage($ipsView, [
             'scriptAsset'        => 'app.min.js',
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Category Bar',
@@ -871,6 +873,9 @@ class EChartsBarCategory extends IPSModuleStrict
     /** @return array{Status: int, Message: string}|null */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_DESIGN_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         try {
             $this->GetValidatedSources();
         } catch (Throwable $exception) {
@@ -1016,7 +1021,7 @@ class EChartsBarCategory extends IPSModuleStrict
             'family'        => 'bar',
             'variant'       => 'category',
             'status'        => 'ready',
-            'chart'         => $chart,
+            'chart'         => $this->WithChartBackground($chart, $ipsView),
             'error'         => null
         ];
     }

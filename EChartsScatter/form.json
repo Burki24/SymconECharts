@@ -738,6 +738,13 @@
                         },
                         {
                             "type": "SelectColor",
+                            "name": "LegendColor",
+                            "caption": "Legend color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
                             "name": "GridColor",
                             "caption": "Grid color",
                             "allowTransparent": true,

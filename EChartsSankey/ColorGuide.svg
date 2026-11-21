@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="164" height="68" viewBox="0 0 200 85">
+<rect x="1" y="1" width="198" height="83" rx="3" fill="var(--BackgroundColor,var(--ChartBackgroundColor,#f7f9fa))" stroke="#a3aeb6"/>
+<text x="85" y="12" font-family="sans-serif" font-size="10" fill="var(--TitleColor,#43535e)">A · B</text>
+<path d="M42 42C84 42 91 31 132 31" fill="none" stroke="var(--EdgeColor,#c3ccd2)" stroke-width="13"/>
+<path d="M42 48C84 48 91 58 132 58" fill="none" stroke="var(--EdgeColor,#c3ccd2)" stroke-width="7"/>
+<rect x="37" y="29" width="12" height="31" fill="var(--NodeShadowColor,#81909c)" stroke="#81909c" stroke-width="0"/>
+<rect x="34" y="26" width="12" height="31" fill="var(--NodeColor,#81909c)" stroke="var(--NodeBorderColor,#81909c)" stroke-width="1"/>
+<rect x="132" y="22" width="13" height="22" fill="var(--NodeColors-Color,#81909c)" stroke="var(--NodeBorderColor,#81909c)" stroke-width="1"/>
+<rect x="132" y="51" width="13" height="15" fill="var(--NodeColor,#81909c)" stroke="var(--NodeBorderColor,#81909c)" stroke-width="1"/>
+<text x="149" y="38" font-family="sans-serif" font-size="10" fill="var(--LabelColor,#43535e)">B</text>
+<text x="75" y="30" font-family="sans-serif" font-size="9" fill="var(--EdgeLabelColor,#43535e)">12</text>
+</svg>

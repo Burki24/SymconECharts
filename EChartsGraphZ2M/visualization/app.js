@@ -126,8 +126,7 @@
             };
         });
         return {
-            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-                ? 'transparent' : colors.background,
+            backgroundColor: design.chartBackground(bootstrap, model, colors.background),
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false }, description: nodes.length + ' Zigbee devices' },
             title: {
@@ -216,8 +215,7 @@
         metaElement.title = metaElement.textContent;
         metaElement.hidden = false;
         var colors = colorsFor(normalizeTheme(state.chart.theme || 'auto'));
-        rootElement.style.backgroundColor = bootstrap.mode === 'ipsview'
-            && bootstrap.options.adaptToBackground === true ? 'transparent' : colors.background;
+        rootElement.style.backgroundColor = design.chartBackground(bootstrap, state.chart, colors.background, true);
         var style = graph.style || {};
         var roleColors = nodeColors(style, colors);
         var legend = [

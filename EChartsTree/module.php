@@ -119,6 +119,7 @@ class EChartsTree extends IPSModuleStrict
                 }
                 $this->RegisterAnimationProperties($prefix, true, 350, 500);
             }
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -213,7 +214,7 @@ class EChartsTree extends IPSModuleStrict
             }
             $fields = array_merge($fields, ['SourceMode', 'JsonDocument', 'JsonVariableID', 'UseJsonObjectBindings']);
             $form = $this->WithTreeJSONForm($form, $fields);
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECTR', $fields));
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $this->WithBarPreviewForm($form, 'ECTR', $fields));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -281,6 +282,7 @@ class EChartsTree extends IPSModuleStrict
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -626,7 +628,7 @@ class EChartsTree extends IPSModuleStrict
             $compressedState = base64_encode($gzip);
             $state = null;
         }
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        return $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Tree',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -691,6 +693,9 @@ class EChartsTree extends IPSModuleStrict
     /** @return array{Status:int,Message:string}|null */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_DESIGN_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         $rootID = $this->ReadPropertyInteger('RootObjectID');
         $mode = $this->ReadPropertyString('SourceMode');
         if (!in_array($mode, ['objects', 'json', 'variable'], true)
@@ -786,7 +791,7 @@ class EChartsTree extends IPSModuleStrict
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
             return $this->ErrorState('The Tree could not be loaded.');
         }
-        return ['schemaVersion' => 1, 'family' => 'tree', 'status' => 'ready', 'chart' => $chart, 'error' => null,
+        return ['schemaVersion' => 1, 'family' => 'tree', 'status' => 'ready', 'chart' => $this->WithChartBackground($chart, $ipsView), 'error' => null,
             ...($this->ReadPropertyString('SourceMode') === 'objects' ? [] : ['sourceContext' => $this->TreeJSONContext()])];
     }
 

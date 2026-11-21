@@ -312,6 +312,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
             foreach (self::DESIGN_SCALE_PROPERTIES as $propertyName) {
                 $this->RegisterPropertyInteger($propertyName, self::DESIGN_SCALE_DEFAULT);
             }
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -444,7 +445,15 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $this->BuildIPSViewGaugePreviewSvg()
             );
 
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithIPSViewDesignFormState($form, 'ECGS'));
+            $ipsViewAction = $this->IPSViewGaugePreviewFormAction();
+            $form = $this->WithIPSViewDesignFormState(
+                $form,
+                'ECGS',
+                $this->GaugePreviewFormAction() . ' ' . $ipsViewAction,
+                $ipsViewAction
+            );
+
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $form);
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -493,6 +502,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
                     IPS_SetProperty($this->InstanceID, $targetName, $this->ReadPropertyInteger($sourceName));
                 }
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -554,7 +564,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                         (int) ($values['IPSViewBackgroundColor']
                             ?? $this->ReadPropertyInteger('IPSViewBackgroundColor')),
                         (int) ($values['IPSViewBackgroundOpacityPercent']
-                            ?? $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'))
+                            ?? $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')),
+                        $this->EffectiveChartBackgroundColor(true, $values)
                     )
                 ))
             );
@@ -608,6 +619,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
                     (string) ($values['GaugePreset'] ?? self::PRESET_SIMPLE),
                     (string) ($values['EChartsTheme'] ?? EChartsAsset::THEME_AUTO),
                     $this->GaugeStyleFromFormValues($values, $minimum, $maximum)
+                        + ['chartBackgroundColor' => $this->EffectiveChartBackgroundColor(false, $values)]
                 ))
             );
         } catch (\Throwable $debugFlowException) {
@@ -969,7 +981,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
         if ($this->HasJSLiveImport()) {
             return $this->RenderJSLiveImportPage($ipsView);
         }
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        return $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage(
                 $this->ResolveHelperTranslationLanguage()
             ),
@@ -1102,7 +1114,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     {
         $fieldNames = [
             'SourceVariableID', 'UseVariablePresentation', 'Minimum', 'Maximum', 'Title', 'TitlePosition',
-            'Unit', 'Decimals',
+            'Unit', 'Decimals', 'ChartBackgroundColor',
             'GaugePreset', 'EChartsTheme', 'PointerShape', 'CustomPointerSVG',
             'CustomPointerPivotMode', 'CustomPointerPivotXPercent', 'CustomPointerPivotYPercent',
             'AnchorShape', 'CustomAnchorSVG', 'AnchorColorMode', 'AnchorColor', 'AnchorBorderColor',
@@ -1256,7 +1268,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     {
         $fieldNames = [
             'SourceVariableID', 'UseVariablePresentation', 'Minimum', 'Maximum', 'Title', 'Unit', 'Decimals',
-            'IPSViewUseTileDesign',
+            'IPSViewUseTileDesign', 'ChartBackgroundColor', 'IPSViewChartBackgroundColor',
             'IPSViewAdaptToBackground', 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
             ...self::GaugeDesignPropertyNames(),
             ...array_map(
@@ -1452,7 +1464,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
             $language,
             $preset,
             $theme,
-            $style
+            $style + ['chartBackgroundColor' => $this->EffectiveChartBackgroundColor(false)]
         );
     }
 
@@ -1514,6 +1526,9 @@ class EChartsGaugeSingle extends IPSModuleStrict
      */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_DESIGN_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         if (!$this->AnimationIsValid()
             || ($this->IsIPSViewHTMLPageEnabled()
                 && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')
@@ -2027,7 +2042,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $this->GaugeStyleFromFormValues($values, $configuration['minimum'], $configuration['maximum']),
                 $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                 $this->ReadPropertyInteger('IPSViewBackgroundColor'),
-                $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
+                $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'),
+                $this->EffectiveChartBackgroundColor(true)
             )
         );
     }
@@ -2408,7 +2424,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
             'family'        => 'gauge',
             'variant'       => 'single',
             'status'        => 'ready',
-            'chart'         => $chart,
+            'chart'         => $this->WithChartBackground($chart, $ipsView),
             'error'         => null
         ];
     }

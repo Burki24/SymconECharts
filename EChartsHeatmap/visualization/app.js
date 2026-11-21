@@ -142,9 +142,10 @@
         todayElement.disabled = navigating || currentOffset === 0;
     }
 
-    function buildOption(model, themeId, surface, panel) {
+    function buildOption(model, themeId, surface, panel, chartModel) {
         surface = surface || chartElement;
         var colors = colorsFor(themeId);
+        var background = design.chartBackground(bootstrap, chartModel || model, colors.background);
         var heatmap = model.heatmap || {};
         var style = heatmap.style || {};
         var cells = Array.isArray(model.cells) ? model.cells : [];
@@ -236,8 +237,7 @@
         }
 
         return {
-            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-                ? 'transparent' : colors.background,
+            backgroundColor: background,
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, description: String(heatmap.title || translate('Heatmap'))
                 + ': ' + periodText(heatmap)
@@ -273,14 +273,14 @@
                 axisLabel: { color: style.axisColor || colors.text, fontSize: axisSize,
                     interval: compact ? 5 : 2 },
                 axisLine: { lineStyle: { color: style.axisColor || colors.border } },
-                splitArea: { show: true, areaStyle: { color: [colors.background] } },
+                splitArea: { show: true, areaStyle: { color: [background] } },
                 splitLine: { show: true, lineStyle: { color: style.gridColor || colors.border, opacity: 0.25 } }
             },
             yAxis: {
                 type: 'category', data: days, inverse: true,
                 axisLabel: { color: style.axisColor || colors.text, fontSize: axisSize },
                 axisLine: { lineStyle: { color: style.axisColor || colors.border } },
-                splitArea: { show: true, areaStyle: { color: [colors.background] } },
+                splitArea: { show: true, areaStyle: { color: [background] } },
                 splitLine: { show: true, lineStyle: { color: style.gridColor || colors.border, opacity: 0.25 } }
             },
             visualMap: visualMap,
@@ -387,8 +387,7 @@
         theme = nextTheme;
         var colors = colorsFor(nextTheme);
         var style = model.heatmap.style || {};
-        comparisonElement.style.background = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-            ? 'transparent' : colors.background;
+        comparisonElement.style.background = design.chartBackground(bootstrap, model, colors.background);
         comparisonTitleElement.textContent = model.heatmap.title || '';
         comparisonTitleElement.hidden = !model.heatmap.title;
         comparisonTitleElement.style.color = style.titleColor || colors.text;
@@ -408,7 +407,7 @@
             item.empty.textContent = translate('No completed archive hours in the selected range.');
             item.empty.style.color = colors.text;
             item.empty.hidden = panel.cells.length > 0;
-            var option = buildOption(panel, nextTheme, item.surface, true);
+            var option = buildOption(panel, nextTheme, item.surface, true, model);
             item.surface.setAttribute('aria-label', option.aria.description);
             item.chart.resize();
             item.chart.setOption(option, true);

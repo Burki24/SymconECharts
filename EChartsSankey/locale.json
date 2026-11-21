@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Add calculated balance flow": "Berechneten Bilanzfluss ergänzen",
             "Balance is optional per node: measured inflow minus measured outflow after reversal. Differences are calculated, not measurements or proven losses. Additional terminals count toward the 100-node and 200-connection limits.": "Bilanzierung ist je Knoten optional: gemessener Zufluss minus gemessener Abfluss nach einer Umkehr. Differenzen sind berechnet, keine Messwerte oder nachgewiesenen Verluste. Zusätzliche Endknoten zählen zu den Grenzen von 100 Knoten und 200 Verbindungen.",
             "Node %d: balance must be enabled or disabled.": "Knoten %d: Die Bilanzierung muss ein- oder ausgeschaltet sein.",

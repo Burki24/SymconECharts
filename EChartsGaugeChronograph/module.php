@@ -179,6 +179,7 @@ class EChartsGaugeChronograph extends IPSModuleStrict
             foreach (self::DESIGN_ASSET_INTEGER_DEFAULTS as $name => $default) {
                 $this->RegisterPropertyInteger($name, $default);
             }
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -302,7 +303,7 @@ class EChartsGaugeChronograph extends IPSModuleStrict
                     $this->ReadPropertyString('Title'),
                     $this->ReadPropertyString('EChartsTheme'),
                     self::FIXED_PRESET,
-                    $this->ReadGaugeStyle()
+                    $this->ReadGaugeStyle() + ['chartBackgroundColor' => $this->EffectiveChartBackgroundColor(false)]
                 )
             );
             $form = SVGPreviewHelper::withImage(
@@ -321,18 +322,20 @@ class EChartsGaugeChronograph extends IPSModuleStrict
                             : $this->ReadGaugeStyle('IPSView'),
                         $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                         $this->ReadPropertyInteger('IPSViewBackgroundColor'),
-                        $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
+                        $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'),
+                        $this->EffectiveChartBackgroundColor(true)
                     )
                 )
             );
 
-            $form = $this->WithIPSViewDesignFormState($form, 'ECGC');
+            $previewAction = $this->GaugePreviewFormAction();
+            $form = $this->WithIPSViewDesignFormState($form, 'ECGC', $previewAction, $previewAction);
             $form = EChartsDesignerSections::Group($form, [
                 ['caption' => 'Chart title', 'start' => 'ChartTitleFontSizePercent'],
                 ['caption' => 'Fine tuning', 'start' => 'Fine tuning values range from 50% to 150%. 100% restores the preset default.']
             ]);
 
-            return $debugFlowResult = $this->EncodeConfigurationForm($form);
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $form);
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -393,6 +396,7 @@ class EChartsGaugeChronograph extends IPSModuleStrict
             foreach (self::DESIGN_ASSET_INTEGER_DEFAULTS as $name => $_default) {
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -422,7 +426,8 @@ class EChartsGaugeChronograph extends IPSModuleStrict
 
             $items = $this->PreviewItemsFromForm($values['Sources'] ?? null);
             $title = (string) ($values['Title'] ?? $this->ReadPropertyString('Title'));
-            $tileStyle = $this->GaugeStyleFromFormValues($values);
+            $tileStyle = $this->GaugeStyleFromFormValues($values)
+                + ['chartBackgroundColor' => $this->EffectiveChartBackgroundColor(false, $values)];
             $this->UpdateFormField('GaugePreview', 'image', SVGPreviewHelper::dataUri(
                 EChartsGaugeChronographPreview::CreateSvg(
                     $items,
@@ -452,7 +457,8 @@ class EChartsGaugeChronograph extends IPSModuleStrict
                         (int) ($values['IPSViewBackgroundColor']
                             ?? $this->ReadPropertyInteger('IPSViewBackgroundColor')),
                         (int) ($values['IPSViewBackgroundOpacityPercent']
-                            ?? $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'))
+                            ?? $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')),
+                        $this->EffectiveChartBackgroundColor(true, $values)
                     )
                 )
             ));
@@ -672,7 +678,7 @@ class EChartsGaugeChronograph extends IPSModuleStrict
 
     private function RenderGaugeHTMLPage(bool $ipsView): string
     {
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        return $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage(
                 $this->ResolveHelperTranslationLanguage()
             ),
@@ -751,6 +757,9 @@ class EChartsGaugeChronograph extends IPSModuleStrict
      */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_DESIGN_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         try {
             $sources = $this->GetValidatedSources();
         } catch (UnexpectedValueException $exception) {
@@ -1349,7 +1358,7 @@ class EChartsGaugeChronograph extends IPSModuleStrict
             'family'        => 'gauge',
             'variant'       => 'chronograph',
             'status'        => 'ready',
-            'chart'         => $chart,
+            'chart'         => $this->WithChartBackground($chart, $ipsView),
             'error'         => null
         ];
     }
@@ -1611,6 +1620,7 @@ class EChartsGaugeChronograph extends IPSModuleStrict
     {
         return EChartsGaugeDesign::PreviewFieldNames([
             'Sources', 'Title', 'EChartsTheme', 'IPSViewUseTileDesign',
+            'ChartBackgroundColor', 'IPSViewChartBackgroundColor',
             'IPSViewAdaptToBackground', 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
             'IPSViewEChartsTheme'
         ], $this->GaugeDesignFieldNames());

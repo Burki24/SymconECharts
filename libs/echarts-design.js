@@ -143,6 +143,25 @@
         return true;
     }
 
+    // The IPSView root supplies color and opacity through its stylesheet. A child canvas must stay clear.
+    function chartBackground(bootstrap, model, themeColor, isRoot) {
+        if (bootstrap.mode === 'ipsview' && bootstrap.options && bootstrap.options.adaptToBackground === true) {
+            return isRoot ? '' : 'transparent';
+        }
+        var override = model.chartBackgroundColor;
+        if (typeof override !== 'string' || !/^#[0-9a-f]{6}$/i.test(override)) { override = ''; }
+        // A live design update can arrive without rebuilding the enclosing HTML page.
+        var page = global.document && global.document.documentElement;
+        if (page) {
+            var property = '--symc-chart-page-background';
+            var color = override || 'initial';
+            if (page.style.getPropertyValue(property) !== color) {
+                page.style.setProperty(property, color);
+            }
+        }
+        return override || themeColor;
+    }
+
     function parseVisualizationState(message) {
         var state = message;
         if (typeof message === 'string') {
@@ -281,6 +300,7 @@
         valueLabel: valueLabel,
         gaugeLabelOffsets: gaugeLabelOffsets,
         resizeChartIfNeeded: resizeChartIfNeeded,
+        chartBackground: chartBackground,
         parseVisualizationState: parseVisualizationState,
         createTransientFailureRetainer: createTransientFailureRetainer
     });

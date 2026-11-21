@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Scale label distance offset": "Zusätzlicher Skalenbeschriftungsabstand",
             "Title offset X": "Titelverschiebung X",
             "Title offset Y": "Titelverschiebung Y",

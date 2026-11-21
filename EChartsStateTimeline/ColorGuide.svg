@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="164" height="68" viewBox="0 0 200 85">
+<rect x="1" y="1" width="198" height="83" rx="3" fill="var(--BackgroundColor,var(--ChartBackgroundColor,#f7f9fa))" stroke="#a3aeb6"/>
+<text x="85" y="12" font-family="sans-serif" font-size="10" fill="var(--TitleColor,#43535e)">A · B</text>
+<path d="M23 20V66H179" fill="none" stroke="#81909c" stroke-width="1"/>
+<text x="7" y="48" font-family="sans-serif" font-size="9" fill="var(--AxisColor,#43535e)">10</text>
+<text x="24" y="76" font-family="sans-serif" font-size="9" fill="var(--AxisColor,#43535e)">0</text>
+<text x="159" y="76" font-family="sans-serif" font-size="9" fill="var(--AxisColor,#43535e)">10</text>
+<path d="M24 35H179M24 51H179" fill="none" stroke="var(--GridColor,#c3ccd2)" stroke-width="1"/>
+<rect x="39" y="27" width="45" height="13" fill="#81909c" stroke="var(--BorderColor,#81909c)" stroke-width="1"/>
+<rect x="84" y="27" width="51" height="13" fill="var(--UnknownColor,#c3ccd2)" stroke="var(--BorderColor,#81909c)" stroke-width="1"/>
+<rect x="59" y="47" width="55" height="12" fill="#81909c" stroke="var(--BorderColor,#81909c)" stroke-width="1"/>
+<rect x="114" y="47" width="42" height="12" fill="#c3ccd2" stroke="var(--BorderColor,#81909c)" stroke-width="1"/>
+<text x="47" y="37" font-family="sans-serif" font-size="9" fill="var(--LabelColor,#43535e)">A</text>
+</svg>

@@ -879,9 +879,7 @@
         });
 
         return {
-            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-                ? 'transparent'
-                : colors.background,
+            backgroundColor: echartsDesign.chartBackground(bootstrap, model, colors.background),
             animation: animation.animation,
             animationDuration: animation.animationDuration,
             animationDurationUpdate: animation.animationDurationUpdate,

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="164" height="68" viewBox="0 0 200 85">
+<rect x="1" y="1" width="198" height="83" rx="3" fill="var(--BackgroundColor,var(--ChartBackgroundColor,#f7f9fa))" stroke="#a3aeb6"/>
+<text x="85" y="12" font-family="sans-serif" font-size="10" fill="var(--TitleColor,#43535e)">A · B</text>
+<circle cx="102" cy="43" r="30" fill="var(--GroupColors-Color,#c3ccd2)" stroke="var(--BorderColor,#81909c)" stroke-width="2"/>
+<path d="M102 43V13A30 30 0 0 1 132 44Z" fill="#81909c" stroke="var(--BorderColor,#81909c)" stroke-width="1"/>
+<circle cx="102" cy="43" r="16" fill="var(--GroupColors-Color,#81909c)" stroke="var(--BorderColor,#81909c)" stroke-width="2"/>
+<circle cx="102" cy="43" r="5" fill="#f7f9fa" stroke="#81909c" stroke-width="0"/>
+<text x="108" y="33" font-family="sans-serif" font-size="9" fill="var(--LabelColor,#43535e)">A</text>
+</svg>

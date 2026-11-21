@@ -294,6 +294,17 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
     $form = json_decode($device->GetConfigurationForm(), true, 64, JSON_THROW_ON_ERROR);
     $properties = $device->GetTestProperties();
     $flat = flattenDesignerSections($form['elements']);
+    foreach (['' => 'Tile designer', 'IPSView' => 'IPSView designer'] as $prefix => $panel) {
+        $items = array_column($form['elements'], 'items', 'caption')[$panel];
+        $selector = findGaugeFormElement($items, $prefix . 'JSLiveBackgroundColor');
+        $key = findGaugeFormElement($items, $prefix . 'JSLiveColorKey');
+        $svg = base64_decode(substr($key['image'], strlen('data:image/svg+xml;base64,')), true);
+        jsliveTargetAssert(
+            str_contains($svg, '>' . $selector['caption'] . '</text>')
+            && in_array($selector['caption'] . ' sets the background behind the imported chart.', array_column($items, 'caption'), true),
+            'The imported ' . $name . ' must label its ' . $panel . ' color key with the editable field name.'
+        );
+    }
     $onChange = array_values(array_filter($flat, static fn (array $f): bool => ($f['name'] ?? '') === 'JSLiveBackgroundColor'))[0]['onChange'];
     extract($properties, EXTR_OVERWRITE);
     eval($onChange);

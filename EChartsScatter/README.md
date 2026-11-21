@@ -86,6 +86,7 @@ ein gröberes Archivintervall ermöglichen längere vollständige Ausschnitte.
 ## Design und Ausgabe
 
 Benannte Vergleiche erhalten eine scrollbare Legende zum Ein-/Ausblenden.
+Die Legendenfarbe im jeweiligen Designer gilt für die Gruppennamen, die Seitennavigation und die Beschriftung der Farbskala.
 Auswahl und Legendenposition bleiben bei Aktualisierung und Umordnung erhalten;
 Umbenennen ändert die interne Zuordnung nicht. Ohne ausdrückliche Punktfarbe
 unterscheiden Theme-Farben die Gruppen. Eine gesetzte Punktfarbe bleibt für alle

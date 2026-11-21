@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Stack group (0 = separate)": "Stapelgruppe (0 = einzeln)",
             "To stack areas, assign the same group and unit to the sources and choose automatic or fixed aggregation. A missing contribution leaves a gap in the entire stack.": "Für gestapelte Flächen den Quellen dieselbe Stapelgruppe und Einheit geben und eine automatische oder feste Verdichtung wählen. Fehlt ein Beitrag, bleibt im gesamten Stapel eine Lücke.",
             "Stack groups require automatic or fixed aggregation.": "Stapelgruppen benötigen eine automatische oder feste Verdichtung.",
@@ -157,7 +159,8 @@
             "Show data points": "Datenpunkte anzeigen",
             "Point size": "Punktgröße",
             "Area opacity": "Flächendeckkraft",
-            "Show grid": "Raster anzeigen",
+            "Show horizontal grid lines": "Waagerechte Gitterlinien anzeigen",
+            "Show vertical grid lines": "Senkrechte Gitterlinien anzeigen",
             "Show time axis": "Zeitachse anzeigen",
             "Show value axes": "Wertachsen anzeigen",
             "Title size": "Titelgröße",
@@ -166,7 +169,8 @@
             "Title color": "Titelfarbe",
             "Legend color": "Legendenfarbe",
             "Axis color": "Achsenfarbe",
-            "Grid color": "Rasterfarbe",
+            "Horizontal grid line color": "Farbe der waagerechten Gitterlinien",
+            "Vertical grid line color": "Farbe der senkrechten Gitterlinien",
             "Automatic (series/theme)": "Automatisch (Datenreihe/Theme)",
             "IPSView design": "IPSView-Design",
             "Time series for IPSView": "Zeitreihe für IPSView",

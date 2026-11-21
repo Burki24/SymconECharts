@@ -133,6 +133,7 @@ class EChartsHeatmap extends IPSModuleStrict
                 }
                 $this->RegisterAnimationProperties($prefix, true, 350, 500);
             }
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -229,7 +230,7 @@ class EChartsHeatmap extends IPSModuleStrict
                 }
             }
 
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECHM', $fields));
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $this->WithBarPreviewForm($form, 'ECHM', $fields));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -302,6 +303,7 @@ class EChartsHeatmap extends IPSModuleStrict
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -973,7 +975,7 @@ class EChartsHeatmap extends IPSModuleStrict
 
     private function RenderHeatmapHTMLPage(bool $ipsView): string
     {
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        return $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Heatmap',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -1076,6 +1078,9 @@ class EChartsHeatmap extends IPSModuleStrict
     /** @return array{Status:int,Message:string}|null */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         try {
             $sources = $this->ActiveHeatmapSources();
             foreach ($sources as $source) {
@@ -1179,7 +1184,7 @@ class EChartsHeatmap extends IPSModuleStrict
         }
 
         return ['schemaVersion' => 1, 'family' => 'heatmap', 'status' => 'ready',
-            'chart'             => $chart, 'error' => null];
+            'chart'             => $this->WithChartBackground($chart, $ipsView), 'error' => null];
     }
 
     private function PublishVisualizationState(): void

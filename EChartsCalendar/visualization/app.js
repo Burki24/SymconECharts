@@ -157,7 +157,7 @@
             && cellWidth >= valueSize * 1.8 && cellHeight >= valueSize + 4;
         var border = style.cellBorderColor || colors.background;
         return {
-            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground ? 'transparent' : colors.background,
+            backgroundColor: design.chartBackground(bootstrap, model, colors.background),
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, description: calendar.sourceLabel + ': ' + (calendar.periodLabel || calendar.year) + ', ' + metricLabel(calendar.metric) },
             title: { show: title.show, text: calendar.title, left: 'center', top: title.top,
@@ -239,8 +239,7 @@
         warning.hidden = true;
         empty.textContent = emptyLabel(state.chart.calendar.metric, state.chart.calendar.period);
         empty.hidden = state.chart.calendar.data.length > 0;
-        root.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground
-            ? 'transparent' : colorsFor(nextTheme).background;
+        root.style.backgroundColor = design.chartBackground(bootstrap, state.chart, colorsFor(nextTheme).background, true);
         if (chart && theme !== nextTheme) { chart.dispose(); chart = null; }
         if (!chart) {
             chart = window.echarts.init(chartElement, nextTheme === 'auto' ? null : nextTheme, { renderer: 'canvas' });

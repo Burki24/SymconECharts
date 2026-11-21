@@ -52,7 +52,7 @@
         }
         current = state;
         error.hidden = true; warning.hidden = true;
-        element.style.backgroundColor = state.chart.background;
+        root.style.backgroundColor = state.chart.background;
         loadFonts(state.chart.resources);
         redraw();
     }

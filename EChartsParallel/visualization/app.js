@@ -174,8 +174,7 @@
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var titleLayout = design.chartTitleLayout(bootstrap, parallel.title, titleSize);
         var showTitle = titleLayout.show;
-        var backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-            ? 'transparent' : colors.background;
+        var backgroundColor = design.chartBackground(bootstrap, model, colors.background);
         var lineColor = style.lineColor || colors.accent;
         var axisColor = style.axisColor || colors.text;
         var axisTitleSize = design.fontSizePercent(style.axisFontSizePercent, compact ? 10 : 12);

@@ -119,8 +119,7 @@
         function legendName(item) { return selectable ? item.id : item.name; }
         var option = {
             color: seriesColors,
-            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-                ? 'transparent' : colors.background,
+            backgroundColor: design.chartBackground(bootstrap, model, colors.background),
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, ...(incomplete || selectable || axes.some(function (axis) { return axis.Inverse === true; }) ? { label: { description: String(radar.title || 'Radar') + '. '
                 + (groups.some(function (item) { return !selectable || selected[item.id] !== false; })
@@ -325,8 +324,7 @@
             warningElement.textContent = warnings.join(' ');
             warningElement.hidden = false;
         }
-        rootElement.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-            ? 'transparent' : colorsFor(normalizeTheme(model.theme || 'auto')).background;
+        rootElement.style.backgroundColor = design.chartBackground(bootstrap, state.chart, colorsFor(normalizeTheme(model.theme || 'auto')).background, true);
         var theme = normalizeTheme(model.theme || 'auto');
         if (chart && currentTheme !== theme) { chart.dispose(); chart = null; }
         if (!chart) {

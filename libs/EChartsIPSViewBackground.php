@@ -27,8 +27,10 @@ final class EChartsIPSViewBackground
         array $style,
         bool $adaptToBackground,
         int $configuredColor,
-        int $opacityPercent
+        int $opacityPercent,
+        int $chartBackgroundColor = self::DEFAULT_COLOR
     ): array {
+        $style['chartBackgroundColor'] = $chartBackgroundColor;
         $style['ipsViewAdaptToBackground'] = $adaptToBackground;
         $style['ipsViewBackgroundColor'] = $configuredColor;
         $style['ipsViewBackgroundOpacityPercent'] = $opacityPercent;
@@ -43,7 +45,8 @@ final class EChartsIPSViewBackground
             $palette,
             (bool) ($style['ipsViewAdaptToBackground'] ?? false),
             self::Color((int) ($style['ipsViewBackgroundColor'] ?? self::DEFAULT_COLOR)),
-            (int) ($style['ipsViewBackgroundOpacityPercent'] ?? self::DEFAULT_OPACITY_PERCENT)
+            (int) ($style['ipsViewBackgroundOpacityPercent'] ?? self::DEFAULT_OPACITY_PERCENT),
+            (int) ($style['chartBackgroundColor'] ?? self::DEFAULT_COLOR)
         );
     }
 
@@ -52,14 +55,17 @@ final class EChartsIPSViewBackground
         array $palette,
         bool $adaptToBackground,
         string $configuredColor,
-        int $opacityPercent
+        int $opacityPercent,
+        int $chartBackgroundColor = self::DEFAULT_COLOR
     ): array {
         $configuredColor = preg_match('/^#[0-9A-F]{6}$/i', $configuredColor) === 1
             ? strtoupper($configuredColor)
             : '';
 
+        $override = $adaptToBackground ? $configuredColor : self::Color($chartBackgroundColor);
+
         return [
-            'color'   => $adaptToBackground && $configuredColor !== '' ? $configuredColor : $palette['background'],
+            'color'   => $override !== '' ? $override : $palette['background'],
             'opacity' => $adaptToBackground
                 ? max(0, min(100, $opacityPercent)) / 100
                 : 1.0
@@ -80,7 +86,7 @@ final class EChartsIPSViewBackground
             : $palette['background'];
         $background = $adaptToBackground
             ? 'color-mix(in srgb, ' . $backgroundColor . ' ' . $opacityPercent . '%, transparent)'
-            : $backgroundColor;
+            : 'var(--symc-chart-page-background, ' . $backgroundColor . ')';
 
         return ':root {'
             . '--symc-background:' . $palette['background'] . ';'

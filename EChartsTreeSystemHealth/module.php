@@ -125,6 +125,7 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
                 }
                 $this->RegisterAnimationProperties($prefix, true, 350, 500);
             }
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -219,7 +220,7 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
                     $fields[] = $prefix . $name;
                 }
             }
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithStatusRuleForm(
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $this->WithStatusRuleForm(
                 $this->WithBarPreviewForm($form, 'ECTH', $fields),
                 $fields
             ));
@@ -550,6 +551,7 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -932,7 +934,7 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
             $compressedState = base64_encode($gzip);
             $state = null;
         }
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        return $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Tree System Health',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -1001,6 +1003,9 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
     /** @return array{Status:int,Message:string}|null */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_DESIGN_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         $rootID = $this->ReadPropertyInteger('RootObjectID');
         if ((!$this->ReadPropertyBoolean('UseSymconRoot')
             && ($rootID < 1 || !IPS_ObjectExists($rootID)
@@ -1105,7 +1110,7 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
             return $this->ErrorState('The Tree could not be loaded.');
         }
-        return ['schemaVersion' => 1, 'family' => 'tree', 'status' => 'ready', 'chart' => $chart, 'error' => null];
+        return ['schemaVersion' => 1, 'family' => 'tree', 'status' => 'ready', 'chart' => $this->WithChartBackground($chart, $ipsView), 'error' => null];
     }
 
     /** @return array<string,mixed> */

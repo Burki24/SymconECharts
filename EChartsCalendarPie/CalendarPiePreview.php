@@ -224,15 +224,16 @@ trait CalendarPiePreview
             $svg .= '</g>';
         }
         if ($this->BarPreviewValue($values, 'ShowLegend', 'boolean', $ipsView)) {
+            $legendColor = $color('LegendColor', $axisColor);
             foreach (array_slice($categories, 0, 8) as $index => $category) {
                 $x = 18 + ($index % 4) * 174;
                 $y = 328 + intdiv($index, 4) * 16;
                 $svg .= '<rect x="' . $x . '" y="' . ($y - 8) . '" width="10" height="8" fill="' . $e($category['color']) . '"/>'
-                    . '<text x="' . ($x + 14) . '" y="' . $y . '" font-size="10" fill="' . $e($axisColor) . '">'
+                    . '<text x="' . ($x + 14) . '" y="' . $y . '" font-size="10" fill="' . $e($legendColor) . '">'
                     . $e(mb_strimwidth($category['label'], 0, 23, '…')) . '</text>';
             }
             if (count($categories) > 8) {
-                $svg .= '<text x="696" y="356" text-anchor="end" font-size="10" fill="' . $e($axisColor) . '">+' . (count($categories) - 8) . '</text>';
+                $svg .= '<text x="696" y="356" text-anchor="end" font-size="10" fill="' . $e($legendColor) . '">+' . (count($categories) - 8) . '</text>';
             }
         }
         return $svg . '</svg>';

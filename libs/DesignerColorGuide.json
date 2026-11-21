@@ -1,0 +1,16 @@
+{
+    "translations": {
+        "widgetBackground": {
+            "en": "For a solid chart background, turn off IPSView background adaptation. When enabled, the widget uses its background color and opacity.",
+            "de": "Für einen deckenden Diagrammhintergrund „An IPSView-Hintergrund anpassen“ ausschalten. Bei eingeschalteter Anpassung gelten die Hintergrundfarbe und Hintergrunddeckkraft des Widgets."
+        },
+        "title": {
+            "en": "Schematic color key",
+            "de": "Schematische Farbzuordnung"
+        },
+        "help": {
+            "en": "Orange marks the area controlled by each field. The examples include optional design modes and use fixed sample colors.",
+            "de": "Orange markiert den Bereich, dessen Farbe das jeweilige Feld bestimmt. Die Beispiele zeigen auch optionale Designmodi und verwenden feste Beispielfarben."
+        }
+    }
+}

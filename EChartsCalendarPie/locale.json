@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Show available sources on incomplete days": "Vorhandene Quellen an unvollständigen Tagen anzeigen",
             "Optional for numeric sources only: missing sources remain marked and are never replaced by zero. Circle shares refer only to available sources.": "Optional nur für numerische Quellen: Fehlende Quellen bleiben gekennzeichnet und werden niemals durch Null ersetzt. Kreisanteile beziehen sich nur auf vorhandene Quellen.",
             "Shares refer only to available sources.": "Anteile beziehen sich nur auf vorhandene Quellen.",
@@ -86,6 +88,7 @@
             "Axis font size": "Achsenschriftgröße",
             "Value font size": "Werteschriftgröße",
             "Title color": "Titelfarbe",
+            "Legend color": "Legendenfarbe",
             "Axis color": "Achsenfarbe",
             "Value color": "Wertefarbe",
             "Cell border color": "Zellrahmenfarbe",

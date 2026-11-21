@@ -163,6 +163,7 @@ class EChartsPictorialBar extends IPSModuleStrict
                 }
                 $this->RegisterAnimationProperties($prefix, true, 350, 500);
             }
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -252,7 +253,7 @@ class EChartsPictorialBar extends IPSModuleStrict
                 }
             }
             $form = $this->WithSourceImportForm($form, 'ECPB', $fields);
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECPB', $fields));
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $this->WithBarPreviewForm($form, 'ECPB', $fields));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -304,6 +305,7 @@ class EChartsPictorialBar extends IPSModuleStrict
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -506,7 +508,7 @@ class EChartsPictorialBar extends IPSModuleStrict
 
     private function RenderPictorialBarHTMLPage(bool $ipsView): string
     {
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        return $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts PictorialBar',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -570,6 +572,9 @@ class EChartsPictorialBar extends IPSModuleStrict
     /** @return array{Status:int,Message:string}|null */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         try {
             $this->GetValidatedSources();
         } catch (Throwable $exception) {
@@ -630,7 +635,7 @@ class EChartsPictorialBar extends IPSModuleStrict
             return $this->ErrorState($this->ReadAttributeString('LastError') === 'PictorialBar requires non-negative values.'
                 ? 'PictorialBar requires non-negative values.' : 'The PictorialBar values could not be loaded.');
         }
-        return ['schemaVersion' => 1, 'family' => 'pictorialBar', 'status' => 'ready', 'chart' => $chart, 'error' => null];
+        return ['schemaVersion' => 1, 'family' => 'pictorialBar', 'status' => 'ready', 'chart' => $this->WithChartBackground($chart, $ipsView), 'error' => null];
     }
 
     /** @return array<string,mixed> */

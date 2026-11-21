@@ -30,7 +30,7 @@
             "Minute": "Minute",
             "The imported source/archive model could not be loaded. Check source types, archive rules and budgets.": "Das übernommene Quellen-/Archivmodell konnte nicht geladen werden. Bitte Quelltypen, Archivregeln und Budgets prüfen.",
             "The original JSLive chart remains available as a comparison and fallback. No source or archive setting is changed here.": "Das ursprüngliche JSLive-Diagramm bleibt für Vergleich und Rückfall erhalten. Quellen und Archivkonfiguration werden hier nicht verändert.",
-            "Schematic color key: Chart background": "Schematische Farbzuordnung: Diagrammhintergrund",
+            "%s sets the background behind the imported chart.": "„%s“ bestimmt die Fläche hinter dem importierten Diagramm.",
             "Schematic color key; compare the real chart in the native HTML download. Source colors and fonts remain in the frozen import model.": "Schematische Farbzuordnung; das tatsächliche Diagramm lässt sich als natives HTML vergleichen. Quellenfarben und Schriften bleiben im gespeicherten Importmodell.",
             "Download native IPSView draft preview": "Native IPSView-Entwurfsvorschau herunterladen",
             "Download native tile draft preview": "Native Kachel-Entwurfsvorschau herunterladen",

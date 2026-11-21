@@ -81,7 +81,7 @@ class EChartsCalendarPie extends IPSModuleStrict
         'SliceBorderWidth'     => 1, 'SliceBorderColor' => -1, 'CellBorderWidth' => 1, 'CellBorderColor' => -1,
         'CellOpacityPercent'   => 100, 'EmptyCellColor' => -1, 'UnknownColor' => 0x777B83,
         'TitleFontSizePercent' => 100, 'AxisFontSizePercent' => 100, 'ValueFontSizePercent' => 100,
-        'TitleColor'           => -1, 'AxisColor' => -1, 'ValueColor' => -1
+        'TitleColor'           => -1, 'AxisColor' => -1, 'LegendColor' => -1, 'ValueColor' => -1
     ];
 
     public function Create(): void
@@ -116,6 +116,7 @@ class EChartsCalendarPie extends IPSModuleStrict
                 }
                 $this->RegisterAnimationProperties($prefix, true, 350, 500);
             }
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -200,7 +201,7 @@ class EChartsCalendarPie extends IPSModuleStrict
                     $fields[] = $prefix . $name;
                 }
             }
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECCP', $fields));
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $this->WithBarPreviewForm($form, 'ECCP', $fields));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -251,6 +252,7 @@ class EChartsCalendarPie extends IPSModuleStrict
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -553,7 +555,7 @@ class EChartsCalendarPie extends IPSModuleStrict
 
     private function RenderCalendarPieHTMLPage(bool $ipsView): string
     {
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        return $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'EChartsCalendarPie',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -605,6 +607,9 @@ class EChartsCalendarPie extends IPSModuleStrict
     /** @return array{Status:int,Message:string}|null */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         if (!in_array($this->ReadPropertyString('DataMode'), ['average', 'counter', 'states'], true)) {
             return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'The CalendarPie settings are invalid.'];
         }
@@ -824,7 +829,7 @@ class EChartsCalendarPie extends IPSModuleStrict
                 default                 => 'The CalendarPie values could not be loaded.'
             });
         }
-        return ['schemaVersion' => 1, 'family' => 'calendarPie', 'status' => 'ready', 'chart' => $chart, 'error' => null];
+        return ['schemaVersion' => 1, 'family' => 'calendarPie', 'status' => 'ready', 'chart' => $this->WithChartBackground($chart, $ipsView), 'error' => null];
     }
 
     /** @return array<string,mixed> */
@@ -905,7 +910,7 @@ class EChartsCalendarPie extends IPSModuleStrict
                 return false;
             }
         }
-        foreach (['TitleColor', 'AxisColor', 'ValueColor', 'SliceBorderColor', 'CellBorderColor', 'EmptyCellColor', 'UnknownColor'] as $name) {
+        foreach (['TitleColor', 'AxisColor', 'LegendColor', 'ValueColor', 'SliceBorderColor', 'CellBorderColor', 'EmptyCellColor', 'UnknownColor'] as $name) {
             $color = $this->ReadPropertyInteger($prefix . $name);
             if ($color < -1 || $color > 0xFFFFFF) {
                 return false;

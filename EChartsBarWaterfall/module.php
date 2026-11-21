@@ -106,6 +106,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('TotalLabel', '');
             $this->RegisterDesignProperties();
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -208,7 +209,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
                 array_map(static fn (string $name): string => 'IPSView' . $name, array_keys($this->DesignPropertyNames()))
             );
 
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECBW', $fields));
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $this->WithBarPreviewForm($form, 'ECBW', $fields));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -252,6 +253,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -610,12 +612,12 @@ class EChartsBarWaterfall extends IPSModuleStrict
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ];
-        $html = $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        $html = $this->RenderChartPage($ipsView, $configuration);
         if (strlen($html) > 1048576) {
             $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
             $this->DebugEChartsSetStatus(self::STATUS_DESIGN_INVALID);
             $configuration['state'] = $this->ErrorState(self::MODEL_TOO_LARGE_MESSAGE);
-            return $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+            return $this->RenderChartPage($ipsView, $configuration);
         }
         return $html;
     }
@@ -648,6 +650,9 @@ class EChartsBarWaterfall extends IPSModuleStrict
     /** @return array{Status:int, Message:string}|null */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_DESIGN_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         try {
             $this->GetValidatedSources();
         } catch (Throwable $exception) {
@@ -755,7 +760,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
             'family'        => 'bar',
             'variant'       => 'waterfall',
             'status'        => 'ready',
-            'chart'         => $chart,
+            'chart'         => $this->WithChartBackground($chart, $ipsView),
             'error'         => null
         ];
     }

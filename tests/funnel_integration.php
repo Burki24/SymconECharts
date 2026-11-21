@@ -89,14 +89,7 @@ foreach (array_keys($funnelDefaults) as $name) {
     );
 }
 $funnelLocale = json_decode((string) file_get_contents(dirname(__DIR__) . '/EChartsFunnel/locale.json'), true)['translations']['de'];
-foreach (glob(dirname(__DIR__) . '/libs/helper/translations/*.json') as $file) {
-    $catalog = json_decode((string) file_get_contents($file), true);
-    foreach ($catalog['translations'] ?? [] as $entry) {
-        if (is_array($entry) && isset($entry['en'], $entry['de'])) {
-            $funnelLocale[$entry['en']] = $entry['de'];
-        }
-    }
-}
+$funnelLocale += designerGermanCaptions();
 $funnelCaptionCheck = function (array $items) use (&$funnelCaptionCheck, $funnelLocale): void
 {
     foreach ($items as $key => $item) {

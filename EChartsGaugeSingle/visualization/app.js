@@ -1069,9 +1069,7 @@
             graphic: buildPlateGraphic(style, layout, series, colors),
             series: [series]
         };
-        option.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-            ? 'transparent'
-            : colors.background;
+        option.backgroundColor = echartsDesign.chartBackground(bootstrap, payload, colors.background);
 
         return option;
     }

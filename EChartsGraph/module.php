@@ -119,6 +119,7 @@ class EChartsGraph extends IPSModuleStrict
                 }
                 $this->RegisterAnimationProperties($prefix, true, 350, 500);
             }
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -224,7 +225,7 @@ class EChartsGraph extends IPSModuleStrict
                     $fields[] = $prefix . $name;
                 }
             }
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECGR', $fields));
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $this->WithBarPreviewForm($form, 'ECGR', $fields));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -276,6 +277,7 @@ class EChartsGraph extends IPSModuleStrict
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -664,7 +666,7 @@ class EChartsGraph extends IPSModuleStrict
     private function RenderGraphHTMLPage(bool $ipsView): string
     {
         $startup = EChartsGraphOutput::Startup($this->BuildVisualizationState($ipsView));
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        return $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Graph',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -728,6 +730,9 @@ class EChartsGraph extends IPSModuleStrict
     /** @return array{Status:int,Message:string}|null */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_DESIGN_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         try {
             GraphModel::ValidateRows(
                 $this->DecodeRows($this->ReadPropertyString('Nodes')),
@@ -849,7 +854,7 @@ class EChartsGraph extends IPSModuleStrict
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
             return $this->ErrorState('The Graph could not be loaded.');
         }
-        return ['schemaVersion' => 1, 'family' => 'graph', 'status' => 'ready', 'chart' => $chart, 'error' => null];
+        return ['schemaVersion' => 1, 'family' => 'graph', 'status' => 'ready', 'chart' => $this->WithChartBackground($chart, $ipsView), 'error' => null];
     }
 
     /** @return array<string,mixed> */

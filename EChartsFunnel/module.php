@@ -116,6 +116,7 @@ class EChartsFunnel extends IPSModuleStrict
                 }
                 $this->RegisterAnimationProperties($prefix, true, 350, 500);
             }
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -202,7 +203,7 @@ class EChartsFunnel extends IPSModuleStrict
                     $fields[] = $prefix . $name;
                 }
             }
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECFU', $fields));
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $this->WithBarPreviewForm($form, 'ECFU', $fields));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -253,6 +254,7 @@ class EChartsFunnel extends IPSModuleStrict
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -486,12 +488,12 @@ class EChartsFunnel extends IPSModuleStrict
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ];
-        $html = $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        $html = $this->RenderChartPage($ipsView, $configuration);
         if (strlen($html) > 1048576) {
             $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
             $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
             $configuration['state'] = $this->ErrorState(self::MODEL_TOO_LARGE_MESSAGE);
-            return $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+            return $this->RenderChartPage($ipsView, $configuration);
         }
         return $html;
     }
@@ -522,6 +524,9 @@ class EChartsFunnel extends IPSModuleStrict
     /** @return array{Status:int,Message:string}|null */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         try {
             $this->GetValidatedSources();
         } catch (Throwable $exception) {
@@ -564,7 +569,7 @@ class EChartsFunnel extends IPSModuleStrict
             return $this->ErrorState($this->ReadAttributeString('LastError') === 'Funnel requires non-negative values.'
                 ? 'Funnel requires non-negative values.' : 'The Funnel values could not be loaded.');
         }
-        return ['schemaVersion' => 1, 'family' => 'funnel', 'status' => 'ready', 'chart' => $chart, 'error' => null];
+        return ['schemaVersion' => 1, 'family' => 'funnel', 'status' => 'ready', 'chart' => $this->WithChartBackground($chart, $ipsView), 'error' => null];
     }
 
     /** @return array<string,mixed> */

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="164" height="68" viewBox="0 0 200 85">
+<rect x="1" y="1" width="198" height="83" rx="3" fill="var(--BackgroundColor,var(--ChartBackgroundColor,#f7f9fa))" stroke="#a3aeb6"/>
+<text x="85" y="12" font-family="sans-serif" font-size="10" fill="var(--TitleColor,#43535e)">A · B</text>
+<rect x="31" y="17" width="136" height="50" fill="var(--FrameColor,#43535e)" stroke="#81909c" stroke-width="0"/>
+<rect x="35" y="21" width="63" height="42" fill="var(--GroupColors-Color,#c3ccd2)" stroke="#81909c" stroke-width="0"/>
+<rect x="102" y="21" width="61" height="18" fill="#81909c" stroke="#81909c" stroke-width="0"/>
+<rect x="102" y="43" width="61" height="20" fill="#c3ccd2" stroke="#81909c" stroke-width="0"/>
+<text x="40" y="31" font-family="sans-serif" font-size="9" fill="var(--GroupLabelColor,#43535e)">A</text>
+<text x="39" y="45" font-family="sans-serif" font-size="9" fill="var(--SubgroupLabelColor,#43535e)">A1</text>
+<text x="67" y="59" font-family="sans-serif" font-size="10" fill="var(--LabelColor,#43535e)">12</text>
+</svg>

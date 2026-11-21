@@ -122,6 +122,10 @@ Die Gruppen **1–32** stehen bei automatischer und fester Verdichtung zur Verf�
   und unabhängigen IPSView-Designer. **Automatisch** behält Theme-Farben und
   die farbliche Kopplung der Wertachsen an ihre Datenreihe bei; eine explizite
   Achsenfarbe gilt für alle Zeit- und Wertachsen;
+- waagerechte Gitterlinien an den Werten und optionale **senkrechte Gitterlinien**
+  an der Zeitachse. Beide Richtungen lassen sich unabhängig einblenden und
+  einfärben. Für ein abweichendes Raster in IPSView deaktivieren Sie
+  **Kacheldesign verwenden** im IPSView-Designer;
 - gemeinsames Punktbudget von 200 bis 32.000 Punkten (Standard weiterhin
   2.000), maximal 2.000 je Reihe;
 - scrollbare Legende mit einzelner Reihenauswahl sowie **Alle** und
@@ -145,8 +149,12 @@ Die Gruppen **1–32** stehen bei automatischer und fester Verdichtung zur Verf�
 
 Das Theme **Automatisch (Symcon-Design)** übernimmt in der nativen Kachel
 Hintergrund, Text- und Oberflächenfarben aus dem aktiven hellen oder dunklen
-Symcon-Design. Fest gewählte ECharts-Themes verwenden weiterhin ihre eigenen
-Farben.
+Symcon-Design. Für eine feste Farbe neben dem Theme **Diagrammhintergrund**
+wählen. Für ein deckend schwarzes Diagramm in beiden Ausgaben Schwarz
+(`#000000`) wählen, **Kacheldesign verwenden** eingeschaltet lassen und
+**An IPSView-Hintergrund anpassen** ausschalten. Senkrechte Linien lassen sich
+mit **Senkrechte Gitterlinien anzeigen** und **Farbe der senkrechten Gitterlinien**
+direkt auf diesem Hintergrund einstellen.
 
 Archivmodi lesen das Symcon-Archiv ausschließlich über die gemeinsame
 `EChartsGateway`-Operation `archive.read`. Der getrennte Echtzeitmodus beginnt
@@ -205,7 +213,7 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
    einmalig und überschreibt bisherige unabhängige IPSView-Designwerte; diese
    können anschließend separat
    bearbeitet werden. Änderungen am Kacheldesigner vor dem Kopieren speichern.
-   **An Hintergrundfarbe anpassen** lässt den tatsächlichen
+   **An IPSView-Hintergrund anpassen** lässt den tatsächlichen
    IPSView-Hintergrund durchscheinen. Die **Hintergrundfarbe**
    verwendet automatisch die Theme-Farbe oder eine frei gewählte Tönung; die
    **Hintergrunddeckkraft** dosiert den darüberliegenden Theme-Hintergrund von

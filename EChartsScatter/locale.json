@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Für weitere Diagramme das vorhandene Gateway auswählen.",
             "Title": "Titel",
             "Scatter plot (optional bubble size)": "Streudiagramm (optional mit Blasengröße)",
@@ -108,6 +110,7 @@
             "Value font size": "Wertschriftgröße",
             "Point color": "Punktfarbe",
             "Title color": "Titelfarbe",
+            "Legend color": "Legendenfarbe",
             "Axis color": "Achsenfarbe",
             "Grid color": "Rasterfarbe",
             "Value color": "Wertfarbe",

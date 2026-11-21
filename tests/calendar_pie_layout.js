@@ -102,6 +102,15 @@ const styled = harness({...model, calendarPie: {...model.calendarPie, style: {..
     cellOpacityPercent: 25, cellBorderColor: '#234567', emptyCellColor: '#345678', titleColor: '#456789', axisColor: '#56789A', valueColor: '#6789AB'}}}, 'ipsview', 1600, 1000);
 assert.equal(styled.option.backgroundColor, 'transparent');
 assert.equal(styled.option.legend.show, false);
+assert.equal(styled.option.legend.textStyle.color, '#56789A', 'Automatic legend text follows the existing axis color.');
+for (const mode of ['symcon', 'ipsview']) {
+    const chart = harness({...model, calendarPie: {...model.calendarPie, style: {...model.calendarPie.style,
+        axisColor: '#AA2200', legendColor: '#000000'}}}, mode);
+    assert.equal(chart.option.legend.textStyle.color, '#000000');
+    assert.equal(chart.option.legend.pageTextStyle.color, '#000000');
+    assert.equal(chart.option.legend.pageIconColor, '#000000');
+    assert.equal(chart.option.calendar.dayLabel.color, '#AA2200');
+}
 assert.equal(styled.option.tooltip.show, false);
 assert.equal(styled.option.calendar.dayLabel.firstDay, 0);
 assert.equal(styled.option.calendar.itemStyle.color, '#345678');

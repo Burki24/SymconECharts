@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Initially visible": "Anfangs sichtbar",
             "Stack group (0 = separate)": "Stapelgruppe (0 = einzeln)",
             "The stack group must be a whole number between 0 and 32.": "Die Stapelgruppe muss eine ganze Zahl zwischen 0 und 32 sein.",

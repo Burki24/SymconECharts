@@ -208,8 +208,7 @@
             : visibleWeight === 0 && fullWeight > 0 ? 'No positive values in the selected sources.' : 'No positive values');
         emptyElement.hidden = visibleWeight > 0;
         return {
-            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-                ? 'transparent' : colors.background,
+            backgroundColor: design.chartBackground(bootstrap, model, colors.background),
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false }, description: items.map(function (item) {
                 return item.name + ': ' + formatValue(item);

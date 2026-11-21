@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Enable extended source selection": "Erweiterte Quellenauswahl aktivieren",
             "Extended selection adds All/Inverse and initial source visibility. Percentages refer to the visible selection; tooltips also show the share of all configured sources. Hidden sources are still read.": "Die erweiterte Auswahl ergänzt Alle/Umkehren und die anfängliche Quellensichtbarkeit. Prozentanteile beziehen sich auf die sichtbare Auswahl; der Tooltip nennt zusätzlich den Anteil aller konfigurierten Quellen. Versteckte Quellen werden weiterhin gelesen.",
             "Initially visible": "Anfangs sichtbar",

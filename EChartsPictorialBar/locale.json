@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Normalize values using source Min/Max": "Werte anhand Quellen-Min/Max normalisieren",
             "Minimum (normalization)": "Minimum (Normalisierung)",
             "Maximum (normalization)": "Maximum (Normalisierung)",

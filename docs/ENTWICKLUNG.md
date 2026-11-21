@@ -884,8 +884,15 @@ das Grunddesign einschließlich SVG-Zeiger, SVG-Nabe und SVG-Zifferblatt
 Alle Gauge-Module erzeugen optional
 eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem Design auf
 demselben Renderer. Die gemeinsame ECharts-Hintergrundlogik unter
-`libs/EChartsIPSViewBackground.php` steuert für Gauge und TimeSeries das
-Durchscheinen des IPSView-Hintergrunds sowie optionale Farbe und Deckkraft.
+`libs/EChartsIPSViewBackground.php` steuert das Durchscheinen des
+IPSView-Hintergrunds sowie die Tönung und Deckkraft. Alle 29 regulären
+Designer verwenden `ChartBackgroundColor` und `IPSViewChartBackgroundColor`
+für den deckenden Diagrammhintergrund. `-1` übernimmt die Theme-Farbe,
+`0` ist Schwarz. Die Designvererbung gilt auch für dieses Feld. Bei aktiver
+IPSView-Hintergrundanpassung bestimmt das Widget die sichtbare Hintergrundfläche.
+JSLive-Importe verwenden ihre vorhandenen Hintergrundfelder.
+Die schematischen Farbzuordnungen beziehen ihre Feldnamen aus dem
+fertigen Formular und verwenden ein SVG-Motiv je Diagrammfamilie.
 Weitere klassische Multi-Instrumentenpanel-Vorlagen fehlen noch. Das
 Time-Series-Modul
 nutzt den Gateway-Vertrag `archive.read` für rohe oder aggregierte Werte und

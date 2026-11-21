@@ -294,8 +294,7 @@
             : (chartElement.clientHeight || 500) - top - bottom - axisSize * 1.5);
 
         return {
-            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-                ? 'transparent' : colors.background,
+            backgroundColor: echartsDesign.chartBackground(bootstrap, model, colors.background),
             ...echartsDesign.animationOptions(style, {
                 enabled: true, initialDuration: 350, updateDuration: 500
             }),

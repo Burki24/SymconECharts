@@ -144,7 +144,7 @@
                 showDataShadow: false, showDetail: false});
         }
         return {
-            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options && bootstrap.options.adaptToBackground === true ? 'transparent' : colors.background,
+            backgroundColor: design.chartBackground(bootstrap, model, colors.background),
             textStyle: {fontFamily: fontFamily},
             ...design.animationOptions(style, {enabled: true, initialDuration: 350, updateDuration: 500}),
             aria: {enabled: true, label: {description: String(timeline.title || 'StateTimeline') + '. ' + rows.map(function (row) {return row.label;}).join(', ')}},
@@ -252,7 +252,7 @@
         var savedZoom = previousState && previousState.chart ? captureTimeWindow(previousState.chart.range, model.range) : null;
         var wasHidden = chartElement.hidden;
         chartElement.hidden = false; errorElement.hidden = true; emptyElement.hidden = true; warningElement.hidden = true;
-        rootElement.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options && bootstrap.options.adaptToBackground === true ? 'transparent' : colorsFor(theme).background;
+        rootElement.style.backgroundColor = design.chartBackground(bootstrap, state.chart, colorsFor(theme).background, true);
         if (chart && currentTheme !== theme) {chart.dispose(); chart = null;}
         if (!chart) {chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, {renderer: 'canvas'}); currentTheme = theme;}
         else if (wasHidden) {chart.resize();}

@@ -136,6 +136,16 @@ const globalColors = render({ ...globalSizes, scatter: { ...globalSizes.scatter,
 assert.deepEqual(Array.from(globalColors.option.visualMap.seriesIndex), [0, 1]);
 assert.equal(globalColors.option.visualMap.min, 1);
 assert.equal(globalColors.option.visualMap.max, 7);
+for (const mode of ['symcon', 'ipsview']) {
+    const chart = render({ ...globalSizes, scatter: { ...globalSizes.scatter, style: {
+        ...globalSizes.scatter.style, axisColor: '#AA2200', legendColor: '#000000',
+        colorMapEnabled: true, colorMapShowLegend: true } } }, mode);
+    assert.equal(chart.option.legend.textStyle.color, '#000000');
+    assert.equal(chart.option.legend.pageTextStyle.color, '#000000');
+    assert.equal(chart.option.legend.pageIconColor, '#000000');
+    assert.equal(chart.option.visualMap.textStyle.color, '#000000');
+    assert.equal(chart.option.xAxis.axisLabel.color, '#AA2200');
+}
 const extremes = render({ ...globalSizes, groups: globalSizes.groups.map((g, i) => ({ ...g,
     points: [[100, 10, 50, i === 0 ? -1e308 : 1e308]] })) });
 assert.equal(extremes.option.series[0].symbolSize([10, 50, 0, 100]), 25,

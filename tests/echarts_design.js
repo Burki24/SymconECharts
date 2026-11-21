@@ -33,6 +33,29 @@ for (const [seriesId, actionName] of [['treemap', 'treemapRootToNode'], ['sunbur
     assert.deepEqual(calls, [['set', true]], 'Disabling navigation must not restore a previous root.');
 }
 
+const chartBackground = window.SYMC_ECHARTS_DESIGN.chartBackground;
+const black = {chartBackgroundColor: '#000000'};
+const adaptive = {mode: 'ipsview', options: {adaptToBackground: true}};
+assert.equal(chartBackground({mode: 'symcon'}, {}, '#FFE000'), '#FFE000');
+assert.equal(chartBackground({mode: 'symcon'}, black, '#FFE000'), '#000000');
+assert.equal(chartBackground({mode: 'ipsview', options: {}}, black, '#FFE000'), '#000000');
+assert.equal(chartBackground(adaptive, black, '#FFE000'), 'transparent');
+assert.equal(chartBackground(adaptive, black, '#FFE000', true), '',
+    'A clear inline root style lets the IPSView stylesheet paint its chosen color and opacity.');
+
+const pageStyles = new Map();
+window.document = {documentElement: {style: {
+    getPropertyValue: key => pageStyles.get(key),
+    setProperty: (key, value) => pageStyles.set(key, value)
+}}};
+chartBackground({mode: 'symcon'}, black, '#FFE000');
+assert.equal(pageStyles.get('--symc-chart-page-background'), '#000000');
+assert.equal(chartBackground({mode: 'symcon'}, {chartBackgroundColor: 'currentColor'}, '#FFE000'), '#FFE000');
+chartBackground({mode: 'symcon'}, {}, '#FFE000');
+assert.equal(pageStyles.get('--symc-chart-page-background'), 'initial',
+    'Returning to automatic clears the startup page color as well as the canvas.');
+delete window.document;
+
 const parseVisualizationState = window.SYMC_ECHARTS_DESIGN.parseVisualizationState;
 const validMessage = { schemaVersion: 1, family: 'scatter', status: 'ready', chart: {} };
 assert.deepEqual(parseVisualizationState(validMessage), validMessage,

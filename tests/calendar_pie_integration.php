@@ -216,13 +216,10 @@ foreach ($defaults as $name => $default) {
     }
 }
 $translations = json_decode((string) file_get_contents(dirname(__DIR__) . '/EChartsCalendarPie/locale.json'), true, 512, JSON_THROW_ON_ERROR)['translations']['de'];
-$helperTranslations = json_decode((string) file_get_contents(dirname(__DIR__) . '/libs/helper/translations/IPSViewHTMLPageHelper.json'), true, 512, JSON_THROW_ON_ERROR);
 foreach (array_keys((new ReflectionMethod(EChartsCalendarPie::class, 'RendererTranslations'))->invoke($calendarPie)) as $key) {
     assertGatewayGauge(isset($translations[$key]), 'Missing German CalendarPie renderer text: ' . $key);
 }
-foreach ($helperTranslations['translations'] as $translation) {
-    $translations[$translation['en']] = $translation['de'];
-}
+$translations += designerGermanCaptions();
 $verifyCaptions = static function (array $entries) use (&$verifyCaptions, $translations): void
 {
     foreach ($entries as $key => $entry) {

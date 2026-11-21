@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Calculated subtotal after this source": "Berechnete Zwischensumme danach",
             "Restart with this absolute value": "Neustart mit diesem absoluten Wert",
             "Subtotals do not change the balance. A restart begins a separate section with the selected variable as its absolute start; the final total belongs to the last section, not the sum of sections. The first row is already the initial start.": "Zwischensummen verändern die Bilanz nicht. Ein Neustart beginnt einen eigenen Abschnitt mit der ausgewählten Variable als absolutem Startwert; die Endsumme gehört zum letzten Abschnitt, nicht zur Summe aller Abschnitte. Die erste Zeile ist bereits der Anfangsstart.",

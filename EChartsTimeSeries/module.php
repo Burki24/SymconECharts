@@ -110,20 +110,21 @@ class EChartsTimeSeries extends IPSModuleStrict
         'GapDetectionMode', 'GapThresholdMinutes',
         'LineWidthPercent', 'SmoothLines', 'ShowSymbols', 'SymbolSizePercent',
         'ShowValues', 'ValueLabelPosition', 'ValueLabelDistance',
-        'AreaOpacityPercent', 'ShowGrid', 'ShowXAxis', 'ShowYAxis',
+        'AreaOpacityPercent', 'ShowGrid', 'ShowVerticalGrid', 'ShowXAxis', 'ShowYAxis',
         'TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent',
-        'TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'ValueColor',
+        'TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'VerticalGridColor', 'ValueColor',
         'IPSViewUseTileDesign', 'IPSViewEChartsTheme', 'IPSViewLegendPosition', 'IPSViewEnableZoom',
         'IPSViewAnimationEnabled', 'IPSViewAnimationDuration', 'IPSViewAnimationDurationUpdate',
         'IPSViewAnimationEasing', 'IPSViewAnimationEasingUpdate',
         'IPSViewAnimationDelay', 'IPSViewAnimationDelayUpdate',
         'IPSViewLineWidthPercent', 'IPSViewSmoothLines', 'IPSViewShowSymbols', 'IPSViewSymbolSizePercent',
         'IPSViewShowValues', 'IPSViewValueLabelPosition', 'IPSViewValueLabelDistance',
-        'IPSViewAreaOpacityPercent', 'IPSViewShowGrid', 'IPSViewShowXAxis', 'IPSViewShowYAxis',
+        'IPSViewAreaOpacityPercent', 'IPSViewShowGrid', 'IPSViewShowVerticalGrid', 'IPSViewShowXAxis', 'IPSViewShowYAxis',
         'IPSViewTitleFontSizePercent', 'IPSViewLegendFontSizePercent', 'IPSViewAxisFontSizePercent', 'IPSViewValueFontSizePercent',
-        'IPSViewTitleColor', 'IPSViewLegendColor', 'IPSViewAxisColor', 'IPSViewGridColor', 'IPSViewValueColor',
+        'IPSViewTitleColor', 'IPSViewLegendColor', 'IPSViewAxisColor', 'IPSViewGridColor', 'IPSViewVerticalGridColor', 'IPSViewValueColor',
         'IPSViewUseTileTimeSettings', 'IPSViewRange', 'IPSViewCustomRangeValue', 'IPSViewCustomRangeUnit',
         'IPSViewTimeAxisLabelFormat',
+        'ChartBackgroundColor', 'IPSViewChartBackgroundColor',
         'IPSViewAdaptToBackground', 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'
     ];
     private const DESIGN_PROPERTY_TYPES = [
@@ -145,6 +146,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         'ValueLabelDistance'      => 'integer',
         'AreaOpacityPercent'      => 'integer',
         'ShowGrid'                => 'boolean',
+        'ShowVerticalGrid'        => 'boolean',
         'ShowXAxis'               => 'boolean',
         'ShowYAxis'               => 'boolean',
         'TitleFontSizePercent'    => 'integer',
@@ -155,6 +157,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         'LegendColor'             => 'integer',
         'AxisColor'               => 'integer',
         'GridColor'               => 'integer',
+        'VerticalGridColor'       => 'integer',
         'ValueColor'              => 'integer'
     ];
 
@@ -195,14 +198,16 @@ class EChartsTimeSeries extends IPSModuleStrict
             $this->RegisterPropertyInteger('ValueLabelDistance', 5);
             $this->RegisterPropertyInteger('AreaOpacityPercent', 22);
             $this->RegisterPropertyBoolean('ShowGrid', true);
+            $this->RegisterPropertyBoolean('ShowVerticalGrid', false);
             $this->RegisterPropertyBoolean('ShowXAxis', true);
             $this->RegisterPropertyBoolean('ShowYAxis', true);
             foreach (['TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'] as $name) {
                 $this->RegisterPropertyInteger($name, 100);
             }
-            foreach (['TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'ValueColor'] as $name) {
+            foreach (['TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'VerticalGridColor', 'ValueColor'] as $name) {
                 $this->RegisterPropertyInteger($name, -1);
             }
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -226,9 +231,9 @@ class EChartsTimeSeries extends IPSModuleStrict
                     'ValueLabelPosition'                                                                           => 'top',
                     'ValueLabelDistance'                                                                           => 5,
                     'TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent' => 100,
-                    'TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'ValueColor'                            => -1,
+                    'TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'VerticalGridColor', 'ValueColor'       => -1,
                     'AreaOpacityPercent'                                                                           => 22,
-                    'SmoothLines', 'ShowSymbols', 'AnimationEnabled'                                               => false,
+                    'SmoothLines', 'ShowSymbols', 'AnimationEnabled', 'ShowVerticalGrid'                           => false,
                     'AnimationDuration'                                                                            => 350,
                     'AnimationDurationUpdate'                                                                      => 500,
                     'AnimationEasing', 'AnimationEasingUpdate'                                                     => 'cubicInOut',
@@ -352,7 +357,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                     $this->PreviewSeries(),
                     $this->ReadPropertyString('Title'),
                     $this->ReadPropertyString('EChartsTheme'),
-                    $this->ReadTimeSeriesDesign(),
+                    $this->ReadTimeSeriesDesign() + ['chartBackgroundColor' => $this->EffectiveChartBackgroundColor(false)],
                     annotations: $this->PreviewAnnotations(),
                     timeAxisLabelFormat: $this->ReadPropertyString('TimeAxisLabelFormat'),
                     sourceCountCaption: $this->Translate('Preview shows %d of %d sources'),
@@ -366,7 +371,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                     $this->PreviewSeries(),
                     $this->ReadPropertyString('Title'),
                     $this->EffectiveIPSViewTheme(),
-                    $this->EffectiveIPSViewDesign(),
+                    $this->EffectiveIPSViewDesign() + ['chartBackgroundColor' => $this->EffectiveChartBackgroundColor(true)],
                     $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                     EChartsIPSViewBackground::Color($this->ReadPropertyInteger('IPSViewBackgroundColor')),
                     $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'),
@@ -377,14 +382,15 @@ class EChartsTimeSeries extends IPSModuleStrict
                 )
             );
 
-            $form = $this->WithIPSViewDesignFormState($form, 'ECTS');
+            $previewAction = $this->TimeSeriesPreviewFormAction();
+            $form = $this->WithIPSViewDesignFormState($form, 'ECTS', $previewAction, $previewAction);
             $form = EChartsDesignerSections::Group($form, [
                 ['caption' => 'Lines and symbols', 'start' => 'LineWidthPercent'],
                 ['caption' => 'Area and axes', 'start' => 'AreaOpacityPercent'],
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
 
-            return $debugFlowResult = $this->EncodeConfigurationForm($form);
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $form);
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -438,7 +444,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                     $this->PreviewSeries($values['Sources'] ?? null),
                     (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
                     (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme')),
-                    $this->TimeSeriesDesignFromFormValues($values),
+                    $this->TimeSeriesDesignFromFormValues($values)
+                        + ['chartBackgroundColor' => $this->EffectiveChartBackgroundColor(false, $values)],
                     annotations: $this->PreviewAnnotations(
                         $values['Annotations'] ?? null,
                         $values['Sources'] ?? null
@@ -458,9 +465,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                     $useTileDesign
                         ? (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme'))
                         : (string) ($values['IPSViewEChartsTheme'] ?? $this->ReadPropertyString('IPSViewEChartsTheme')),
-                    $useTileDesign
-                        ? $this->TimeSeriesDesignFromFormValues($values)
-                        : $this->TimeSeriesDesignFromFormValues($values, 'IPSView'),
+                    $this->TimeSeriesDesignFromFormValues($values, $useTileDesign ? '' : 'IPSView')
+                        + ['chartBackgroundColor' => $this->EffectiveChartBackgroundColor(true, $values)],
                     (bool) ($values['IPSViewAdaptToBackground']
                         ?? $this->ReadPropertyBoolean('IPSViewAdaptToBackground')),
                     EChartsIPSViewBackground::Color((int) ($values['IPSViewBackgroundColor']
@@ -620,6 +626,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -959,14 +966,14 @@ class EChartsTimeSeries extends IPSModuleStrict
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ];
-        $html = $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        $html = $this->RenderChartPage($ipsView, $configuration);
         if (strlen($html) > 1048576) {
             $this->WriteAttributeString('LastError', self::MODEL_TOO_LARGE_MESSAGE);
             $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
             $configuration['state'] = ['schemaVersion' => 1, 'family' => 'time-series',
                 'status'                               => 'error', 'chart' => null, 'error' => self::MODEL_TOO_LARGE_MESSAGE];
             $configuration['options']['compressedStateGzipBase64'] = null;
-            return $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+            return $this->RenderChartPage($ipsView, $configuration);
         }
         return $html;
     }
@@ -1007,6 +1014,9 @@ class EChartsTimeSeries extends IPSModuleStrict
     /** @return array{Status:int,Message:string}|null */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         try {
             $sources = $this->GetValidatedSources();
             $this->GetValidatedAnnotations($sources);
@@ -1570,7 +1580,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             'schemaVersion' => 1,
             'family'        => 'time-series',
             'status'        => 'ready',
-            'chart'         => $chart,
+            'chart'         => $this->WithChartBackground($chart, $ipsView),
             'error'         => null
         ];
     }
@@ -1751,6 +1761,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             'valueLabelDistance'    => $this->ReadPropertyInteger($prefix . 'ValueLabelDistance'),
             'areaOpacityPercent'    => $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent'),
             'showGrid'              => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
+            'showVerticalGrid'      => $this->ReadPropertyBoolean($prefix . 'ShowVerticalGrid'),
             'showXAxis'             => $this->ReadPropertyBoolean($prefix . 'ShowXAxis'),
             'showYAxis'             => $this->ReadPropertyBoolean($prefix . 'ShowYAxis'),
             'titleFontSizePercent'  => $this->ReadPropertyInteger($prefix . 'TitleFontSizePercent'),
@@ -1761,6 +1772,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             'legendColor'           => $this->OptionalDesignColor($prefix . 'LegendColor'),
             'axisColor'             => $this->OptionalDesignColor($prefix . 'AxisColor'),
             'gridColor'             => $this->OptionalDesignColor($prefix . 'GridColor'),
+            'verticalGridColor'     => $this->OptionalDesignColor($prefix . 'VerticalGridColor'),
             'valueColor'            => $this->OptionalDesignColor($prefix . 'ValueColor')
         ];
     }
@@ -1780,6 +1792,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             'ValueLabelDistance'      => 'valueLabelDistance',
             'AreaOpacityPercent'      => 'areaOpacityPercent',
             'ShowGrid'                => 'showGrid',
+            'ShowVerticalGrid'        => 'showVerticalGrid',
             'ShowXAxis'               => 'showXAxis',
             'ShowYAxis'               => 'showYAxis',
             'TitleFontSizePercent'    => 'titleFontSizePercent',
@@ -1790,6 +1803,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             'LegendColor'             => 'legendColor',
             'AxisColor'               => 'axisColor',
             'GridColor'               => 'gridColor',
+            'VerticalGridColor'       => 'verticalGridColor',
             'ValueColor'              => 'valueColor',
             'AnimationEnabled'        => 'animationEnabled',
             'AnimationDuration'       => 'animationDuration',
@@ -2080,7 +2094,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 return false;
             }
         }
-        foreach (['TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'ValueColor'] as $name) {
+        foreach (['TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'VerticalGridColor', 'ValueColor'] as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < -1 || $value > 0xFFFFFF) {
                 return false;

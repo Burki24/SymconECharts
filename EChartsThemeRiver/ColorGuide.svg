@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="164" height="68" viewBox="0 0 200 85">
+<rect x="1" y="1" width="198" height="83" rx="3" fill="var(--BackgroundColor,var(--ChartBackgroundColor,#f7f9fa))" stroke="#a3aeb6"/>
+<text x="85" y="12" font-family="sans-serif" font-size="10" fill="var(--TitleColor,#43535e)">A · B</text>
+<path d="M25 42Q53 39 78 28T145 31Q165 38 178 39V52Q163 50 145 55T78 64Q52 51 25 51Z" fill="var(--ShadowColor,#c3ccd2)" stroke="none" stroke-width="0"/>
+<path d="M25 39Q53 36 78 25T145 28Q165 35 178 36V42Q153 41 132 42T78 47Q53 44 25 44Z" fill="#81909c" stroke="var(--BorderColor,#81909c)" stroke-width="1"/>
+<path d="M25 44Q53 44 78 47T132 42Q153 41 178 42V49Q163 47 145 52T78 61Q52 48 25 48Z" fill="#c3ccd2" stroke="var(--BorderColor,#81909c)" stroke-width="1"/>
+<text x="75" y="43" font-family="sans-serif" font-size="10" fill="var(--LabelColor,#43535e)">A</text>
+<text x="35" y="75" font-family="sans-serif" font-size="9" fill="var(--AxisColor,#43535e)">01</text>
+<path d="M24 65H179" fill="none" stroke="var(--AxisColor,#81909c)" stroke-width="1"/>
+<path d="M42 18V62M92 18V62M150 18V62" fill="none" stroke="var(--GridColor,#c3ccd2)" stroke-width="1"/>
+<rect x="68" y="73" width="8" height="4" fill="#81909c" stroke="#81909c" stroke-width="0"/>
+<text x="78" y="79" font-family="sans-serif" font-size="9" fill="var(--LegendColor,#43535e)">A</text>
+<rect x="103" y="73" width="8" height="4" fill="#c3ccd2" stroke="#81909c" stroke-width="0"/>
+<text x="113" y="79" font-family="sans-serif" font-size="9" fill="var(--LegendColor,#43535e)">B</text>
+</svg>

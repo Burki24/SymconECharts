@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Configure 1 to 16 groups with at most one numeric variable per axis. Every axis needs a source unless incomplete groups are allowed. Values outside the range are visually limited; tooltips retain originals.": "1 bis 16 Gruppen mit höchstens einer numerischen Variable je Achse anlegen. Ohne Freigabe unvollständiger Gruppen benötigt jede Achse eine Quelle. Werte außerhalb des Bereichs werden nur optisch begrenzt; Tooltips behalten die Originalwerte.",
             "Allow incomplete comparison groups": "Unvollständige Vergleichsgruppen zulassen",
             "Optional: omit unneeded group-axis assignments. Missing axes are marked with ?, without zero values or filled areas. Every configured source must remain valid.": "Optional: Nicht benötigte Gruppe-Achse-Zuordnungen weglassen. Fehlende Achsen werden mit ? gekennzeichnet, ohne Nullwerte oder gefüllte Flächen. Jede konfigurierte Quelle muss weiterhin gültig sein.",

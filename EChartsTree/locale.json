@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Tree data source": "Datenquelle des Baums",
             "All bindings were checked. Only the first 100 local object names are included in this report.": "Alle Bindungen wurden geprüft. Dieser Bericht enthält nur die ersten 100 lokalen Objektnamen.",
             "Symcon object tree": "Symcon-Objektbaum",

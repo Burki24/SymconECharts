@@ -47,6 +47,8 @@ trait EChartsBarPreviewForm
     private function WithBarPreviewForm(array $form, string $prefix, array $fields, bool $compactScalars = false): array
     {
         $found = ['Tile designer' => false, 'IPSView design' => false];
+        $fields[] = 'ChartBackgroundColor';
+        $fields[] = 'IPSViewChartBackgroundColor';
         foreach ($form['elements'] as &$element) {
             $caption = $element['caption'] ?? null;
             if (!isset($found[$caption]) || ($element['type'] ?? null) !== 'ExpansionPanel') {
@@ -156,6 +158,8 @@ trait EChartsBarPreviewForm
     private function BarPreviewStoredValues(): array
     {
         return [
+            'ChartBackgroundColor'             => $this->ReadPropertyInteger('ChartBackgroundColor'),
+            'IPSViewChartBackgroundColor'      => $this->ReadPropertyInteger('IPSViewChartBackgroundColor'),
             'IPSViewUseTileDesign'             => $this->ReadPropertyBoolean('IPSViewUseTileDesign'),
             'IPSViewAdaptToBackground'         => $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
             'IPSViewBackgroundColor'           => $this->ReadPropertyInteger('IPSViewBackgroundColor'),

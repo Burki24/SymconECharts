@@ -65,7 +65,7 @@ function harness(mode, initial, fetchImpl) {
 async function verify() {
     for (const mode of ['symcon', 'ipsview']) {
         const urls = [];
-        const view = harness(mode, model(), url => {
+        const view = harness(mode, {...model(), chartBackgroundColor: '#000000'}, url => {
             urls.push(url);
             const offset = Number(new URL(url).searchParams.get('offset'));
             return Promise.resolve({ ok: true, json: () => Promise.resolve({ status: 'ready', chart: model(true, offset) }) });
@@ -75,7 +75,12 @@ async function verify() {
         assert.equal(view.nodes['echarts-heatmap-comparisons'].hidden, false);
         assert.equal(view.nodes['echarts-heatmap-comparisons'].style.top, mode === 'symcon' ? '88px' : '38px');
         assert.equal(view.nodes['echarts-heatmap-comparison-title'].textContent, 'Comparison');
+        assert.equal(view.nodes['echarts-heatmap-comparisons'].style.background, '#000000');
         for (const [index, chart] of view.charts.entries()) {
+            assert.equal(chart.option.backgroundColor, '#000000');
+            for (const axis of [chart.option.xAxis, chart.option.yAxis]) {
+                assert.deepEqual(Array.from(axis.splitArea.areaStyle.color), ['#000000'], 'Empty cells use the panel background.');
+            }
             assert.equal(chart.option.visualMap.min, 0);
             assert.equal(chart.option.visualMap.max, 100);
             assert.equal(chart.option.grid.top, 68, 'Panel-local title spacing must not repeat the tile header inset.');

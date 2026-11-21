@@ -76,7 +76,7 @@ trait EChartsJSLiveTarget
                 $this->UpdateFormField($prefix . 'JSLiveColorKey', 'image', EChartsJSLivePreview::ColorKey(
                     $model,
                     $this->JSLiveDraftDesign($configuration, $effective),
-                    $this->JSLiveText('Schematic color key: Chart background')
+                    $this->JSLiveText('Chart background')
                 ));
             }
             foreach (['BackgroundColor', 'FontSizePercent', 'ShowTitle', 'ShowLegend', 'ShowTooltip', 'AnimationEnabled'] as $key) {
@@ -295,7 +295,8 @@ trait EChartsJSLiveTarget
                 'image'        => EChartsJSLivePreview::ColorKey($model, $this->JSLiveDraftDesign(
                     $this->JSLiveDraftValues(),
                     $prefix === 'IPSView' && $this->ReadPropertyBoolean('IPSViewUseTileDesign') ? '' : $prefix
-                ), $this->JSLiveText('Schematic color key: Chart background'))];
+                ), $this->JSLiveText('Chart background'))];
+            $items[] = ['type' => 'Label', 'caption' => sprintf($this->JSLiveText('%s sets the background behind the imported chart.'), $this->JSLiveText('Chart background'))];
             if ($prefix === 'IPSView' && $this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
                 foreach ($items as &$item) {
                     if (str_starts_with($item['name'] ?? '', 'IPSViewJSLive')) {

@@ -109,8 +109,7 @@
         var showTitle = titleLayout.show;
         var labelSize = design.fontSizePercent(style.labelFontSizePercent, 12);
         var textColor = style.labelColor || colors.text;
-        var backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-            ? 'transparent' : colors.background;
+        var backgroundColor = design.chartBackground(bootstrap, model, colors.background);
         return {
             backgroundColor: backgroundColor,
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),

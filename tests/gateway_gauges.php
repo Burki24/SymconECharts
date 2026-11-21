@@ -1064,6 +1064,20 @@ final class TestableEChartsHeatmap extends EChartsHeatmap
     }
 }
 
+/** @return array<string, string> Project and helper captions shared by generated designers. */
+function designerGermanCaptions(): array
+{
+    $translations = [];
+    foreach ([dirname(__DIR__) . '/libs/DesignerColorGuide.json', ...glob(dirname(__DIR__) . '/libs/helper/translations/*.json')] as $file) {
+        $catalog = json_decode((string) file_get_contents($file), true, 32, JSON_THROW_ON_ERROR);
+        foreach ($catalog['translations'] as $entry) {
+            $translations[$entry['en']] = $entry['de'];
+        }
+    }
+
+    return $translations;
+}
+
 function assertGatewayGauge(bool $condition, string $message): void
 {
     if (!$condition) {
@@ -1601,12 +1615,9 @@ assertGatewayGauge(
 unset($GLOBALS['symconTestHiddenTitles'][$gauge->InstanceID]);
 assertGatewayGauge(str_contains($visualizationTile, "registerTheme('vintage'"), 'Gauge Single tile must register official ECharts themes.');
 assertGatewayGauge(
-    str_contains(
-        $visualizationTile,
-        "bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true"
-    )
-        && str_contains($visualizationTile, "? 'transparent'")
-        && str_contains($visualizationTile, ': colors.background'),
+    str_contains($visualizationTile, 'echartsDesign.chartBackground(bootstrap, payload, colors.background)')
+        && str_contains($visualizationTile, "return isRoot ? '' : 'transparent'")
+        && str_contains($visualizationTile, 'return override || themeColor'),
     'Gauges must keep a readable theme background unless IPSView background adaptation is enabled.'
 );
 assertGatewayGauge(
@@ -1630,7 +1641,23 @@ assertGatewayGauge(
     strlen($inheritedIPSViewHTML) < SYMCON_OUTPUT_BUFFER_LIMIT,
     'Gauge Single IPSView HTML must remain below the Symcon output-buffer limit.'
 );
+$gauge->SetTestProperty('ChartBackgroundColor', 0);
+foreach ([$gauge->GetVisualizationTile(), $gauge->GetIPSViewHTML()] as $page) {
+    assertGatewayGauge(
+        str_contains($page, '"chartBackgroundColor":"#000000"')
+            && str_contains($page, '--symc-chart-page-background:#000000;'),
+        'The tile and an inheriting IPSView must paint black behind the canvas and its surrounding controls.'
+    );
+}
 $gauge->SetTestProperty('IPSViewUseTileDesign', false);
+$gauge->SetTestProperty('IPSViewChartBackgroundColor', 0xCCDD00);
+assertGatewayGauge(
+    str_contains($gauge->GetIPSViewHTML(), '"chartBackgroundColor":"#CCDD00"')
+        && str_contains($gauge->GetVisualizationTile(), '"chartBackgroundColor":"#000000"'),
+    'An independent IPSView background must follow its own selection.'
+);
+$gauge->SetTestProperty('ChartBackgroundColor', -1);
+$gauge->SetTestProperty('IPSViewChartBackgroundColor', -1);
 $gauge->SetTestProperty('IPSViewGaugePreset', 'speed');
 $gauge->SetTestProperty('IPSViewEChartsTheme', 'roma');
 $gauge->SetTestProperty('IPSViewPointerColor', 0xA04020);
@@ -5258,6 +5285,7 @@ $timeSeries->SetTestProperty('ShowSymbols', true);
 $timeSeries->SetTestProperty('SymbolSizePercent', 125);
 $timeSeries->SetTestProperty('AreaOpacityPercent', 40);
 $timeSeries->SetTestProperty('ShowGrid', false);
+$timeSeries->SetTestProperty('ShowVerticalGrid', true);
 $timeSeries->SetTestProperty('ShowXAxis', false);
 $timeSeries->SetTestProperty('ShowYAxis', true);
 $timeSeries->SetTestProperty('TitleFontSizePercent', 125);
@@ -5267,6 +5295,7 @@ $timeSeries->SetTestProperty('TitleColor', 0x123456);
 $timeSeries->SetTestProperty('LegendColor', 0x234567);
 $timeSeries->SetTestProperty('AxisColor', 0x345678);
 $timeSeries->SetTestProperty('GridColor', 0x456789);
+$timeSeries->SetTestProperty('VerticalGridColor', 0x234123);
 $timeSeries->SetTestProperty('EnableIPSView', true);
 $timeSeries->ApplyChanges();
 $timeSeriesData = json_decode($timeSeries->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
@@ -5333,6 +5362,7 @@ assertGatewayGauge(
             'valueLabelDistance'      => 5,
             'areaOpacityPercent'      => 40,
             'showGrid'                => false,
+            'showVerticalGrid'        => true,
             'showXAxis'               => false,
             'showYAxis'               => true,
             'titleFontSizePercent'    => 125,
@@ -5343,6 +5373,7 @@ assertGatewayGauge(
             'legendColor'             => '#234567',
             'axisColor'               => '#345678',
             'gridColor'               => '#456789',
+            'verticalGridColor'       => '#234123',
             'valueColor'              => ''
         ],
     'Time Series must build the accepted positioned-axis aggregated chart model.'
@@ -5457,6 +5488,8 @@ $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
     'LegendColor'           => 0x123456,
     'AxisColor'             => 0x234567,
     'GridColor'             => 0x345678,
+    'ShowVerticalGrid'      => true,
+    'VerticalGridColor'     => 0x112233,
     'TimeAxisLabelFormat'   => 'date'
 ], JSON_THROW_ON_ERROR));
 $timeSeriesPreviewUpdates = $timeSeries->GetTestFormUpdates();
@@ -5483,6 +5516,7 @@ assertGatewayGauge(
         && str_contains($timeSeriesPreviewSvg, 'data-annotation-type="line"')
         && str_contains($timeSeriesPreviewSvg, 'fill="#ABCDEF" font-size="30"')
         && str_contains($timeSeriesPreviewSvg, 'stroke="#345678"')
+        && preg_match('/<line x1="(\d+)" y1="[^"]+" x2="\1" y2="[^"]+" stroke="#112233"/', $timeSeriesPreviewSvg) === 1
         && str_contains($timeSeriesPreviewSvg, 'Preview target'),
     'Time Series Tile and IPSView previews must react immediately to unpersisted source and design values.'
 );
@@ -5726,6 +5760,8 @@ assertGatewayGauge(
         && str_contains($independentTimeSeriesIPSView, '"legendPosition":"hidden"')
         && str_contains($independentTimeSeriesIPSView, '"lineWidthPercent":80')
         && str_contains($independentTimeSeriesIPSView, '"showYAxis":false')
+        && str_contains($independentTimeSeriesIPSView, '"showVerticalGrid":false')
+        && str_contains($timeSeries->GetVisualizationTile(), '"showVerticalGrid":true')
         && str_contains($timeSeries->GetVisualizationTile(), '"key":"1h"')
         && str_contains($timeSeries->GetVisualizationTile(), '"timeAxisLabelFormat":"date-time"')
         && str_contains($timeSeries->GetVisualizationTile(), '"legendPosition":"bottom"')
@@ -8582,7 +8618,7 @@ foreach ([
                 static fn (array $item): bool => ($item['type'] ?? null) === 'ExpansionPanel'
             ));
             assertGatewayGauge(
-                array_column($sectionPanels, 'caption') === $expectedDesignerSections[$moduleClass]
+                array_column($sectionPanels, 'caption') === [...$expectedDesignerSections[$moduleClass], 'Schematic color key']
                     && count(array_filter(
                         $sectionPanels,
                         static fn (array $item): bool => ($item['expanded'] ?? null) !== false
@@ -10148,6 +10184,12 @@ foreach ([
 ] as $chartClass => $previewFields) {
     $chart = new $chartClass();
     $chart->Create();
+    $hasGaugeOrTimePreview = $previewFields[0] !== 'BarPreview';
+    if ($hasGaugeOrTimePreview) {
+        $chart->SetTestProperty('ChartBackgroundColor', 0x3F1257);
+        $chart->SetTestProperty('IPSViewUseTileDesign', false);
+        $chart->SetTestProperty('IPSViewChartBackgroundColor', 0x083522);
+    }
     $form = json_decode($chart->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
     foreach ($previewFields as $field) {
         $image = findGaugeFormElement($form['elements'], $field);
@@ -10156,6 +10198,49 @@ foreach ([
                 && str_starts_with((string) ($image['image'] ?? ''), 'data:image/svg+xml;base64,'),
             $chartClass . ' must expose an initialized ' . $field . ' preview.'
         );
+        if ($hasGaugeOrTimePreview) {
+            $svg = base64_decode(substr($image['image'], strlen('data:image/svg+xml;base64,')), true);
+            assertGatewayGauge(
+                is_string($svg) && str_contains($svg, $field === $previewFields[0] ? '#3F1257' : '#083522'),
+                $chartClass . ' must initialize ' . $field . ' with the saved chart background.'
+            );
+        }
+    }
+    if ($hasGaugeOrTimePreview) {
+        foreach (['ChartBackgroundColor', 'IPSViewChartBackgroundColor'] as $field) {
+            $action = findGaugeFormElement($form['elements'], $field)['onChange'] ?? '';
+            assertGatewayGauge(
+                str_contains($action, 'PreviewFromForm(') && str_contains($action, '$' . $field),
+                $chartClass . ' must refresh the preview using the draft ' . $field . '.'
+            );
+        }
+        foreach ([
+            [true, false, '#170319'], [false, false, '#202305'], [false, true, '#191207']
+        ] as [$inherit, $adapt, $expectedIPSViewColor]) {
+            $draft = json_encode([
+                'ChartBackgroundColor'        => 0x170319,
+                'IPSViewUseTileDesign'        => $inherit,
+                'IPSViewChartBackgroundColor' => 0x202305,
+                'IPSViewAdaptToBackground'    => $adapt,
+                'IPSViewBackgroundColor'      => 0x191207
+            ], JSON_THROW_ON_ERROR);
+            if ($chart instanceof EChartsTimeSeries) {
+                $chart->UpdateTimeSeriesPreviewFromForm($draft);
+            } else {
+                $chart->UpdateGaugePreviewFromForm($draft);
+                if ($chart instanceof EChartsGaugeSingle) {
+                    $chart->UpdateIPSViewGaugePreviewFromForm($draft);
+                }
+            }
+            foreach (array_slice($chart->GetTestFormUpdates(), -2) as $update) {
+                $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+                $expectedColor = $update['Field'] === $previewFields[0] ? '#170319' : $expectedIPSViewColor;
+                assertGatewayGauge(
+                    is_string($svg) && str_contains($svg, $expectedColor),
+                    $chartClass . ' ' . $update['Field'] . ' must show the effective draft chart background ' . $expectedColor . '.'
+                );
+            }
+        }
     }
     $labelFields = match ($chartClass) {
         EChartsPie::class => ['OutsideLabelAlignment', 'LeaderLineLength', 'LeaderLineLength2',
@@ -10887,6 +10972,9 @@ foreach (['calendar', 'radar', 'boxplot', 'candlestick', 'funnel', 'pictorial_ba
     })(__DIR__ . '/' . $family . '_integration.php');
     gc_collect_cycles();
 }
+
+require __DIR__ . '/designer_color_parity.php';
+require __DIR__ . '/designer_color_guides.php';
 
 echo "Gateway and Gauge module integration verified.\n";
 

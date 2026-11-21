@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="164" height="68" viewBox="0 0 200 85">
+<rect x="1" y="1" width="198" height="83" rx="3" fill="var(--BackgroundColor,var(--ChartBackgroundColor,#f7f9fa))" stroke="#a3aeb6"/>
+<text x="85" y="12" font-family="sans-serif" font-size="10" fill="var(--TitleColor,#43535e)">A · B</text>
+<path d="M44 44L95 26" fill="none" stroke="var(--LqiLowColor,#81909c)" stroke-width="3"/>
+<path d="M44 44L101 61" fill="none" stroke="var(--LqiMidColor,#81909c)" stroke-width="3"/>
+<path d="M95 26L152 43" fill="none" stroke="var(--LqiHighColor,#81909c)" stroke-width="3"/>
+<circle cx="44" cy="44" r="9" fill="var(--NodeColor,#81909c)" stroke="#81909c" stroke-width="0"/>
+<circle cx="95" cy="26" r="7" fill="var(--RouterColor,#81909c)" stroke="#81909c" stroke-width="0"/>
+<circle cx="101" cy="61" r="5" fill="var(--EndDeviceColor,#81909c)" stroke="#81909c" stroke-width="0"/>
+<circle cx="152" cy="43" r="5" fill="var(--EndDeviceColor,#81909c)" stroke="#81909c" stroke-width="0"/>
+<text x="157" y="47" font-family="sans-serif" font-size="10" fill="var(--LabelColor,#43535e)">A</text>
+</svg>

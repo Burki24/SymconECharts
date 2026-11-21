@@ -115,6 +115,7 @@ class EChartsScatter extends IPSModuleStrict
         'PointColor'              => 'integer',
         'TitleColor'              => 'integer',
         'AxisColor'               => 'integer',
+        'LegendColor'             => 'integer',
         'GridColor'               => 'integer',
         'ValueColor'              => 'integer',
         'TitleFontSizePercent'    => 'integer',
@@ -174,13 +175,14 @@ class EChartsScatter extends IPSModuleStrict
                 $this->RegisterPropertyFloat($axis . 'AxisMinimum', 0.0);
                 $this->RegisterPropertyFloat($axis . 'AxisMaximum', 100.0);
             }
-            foreach (['PointColor', 'TitleColor', 'AxisColor', 'GridColor', 'ValueColor'] as $name) {
+            foreach (['PointColor', 'TitleColor', 'AxisColor', 'LegendColor', 'GridColor', 'ValueColor'] as $name) {
                 $this->RegisterPropertyInteger($name, -1);
             }
             foreach (['TitleFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'] as $name) {
                 $this->RegisterPropertyInteger($name, 100);
             }
             $this->RegisterAnimationProperties('', true, 350, 500);
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -336,7 +338,7 @@ class EChartsScatter extends IPSModuleStrict
                 array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_PROPERTY_TYPES))
             );
 
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECSC', $fields));
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $this->WithBarPreviewForm($form, 'ECSC', $fields));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -475,6 +477,7 @@ class EChartsScatter extends IPSModuleStrict
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -700,6 +703,7 @@ class EChartsScatter extends IPSModuleStrict
             }
         }
         $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['muted']);
+        $legendColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LegendColor', 'integer', $ipsView), '');
         $gridColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GridColor', 'integer', $ipsView), $palette['track']);
         $titleColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']);
         $svg = EChartsBarPreview::Open(
@@ -736,7 +740,7 @@ class EChartsScatter extends IPSModuleStrict
                 . EChartsBarPreview::E($colorMapLow) . '"/><stop offset="100%" stop-color="'
                 . EChartsBarPreview::E($colorMapHigh) . '"/></linearGradient></defs>';
             $svg .= '<text x="242" y="54" text-anchor="end" font-size="10" fill="'
-                . EChartsBarPreview::E($palette['muted']) . '">'
+                . EChartsBarPreview::E($legendColor ?: $axisColor) . '">'
                 . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
                     $colorMapMinimum,
                     $colorMapDecimals,
@@ -745,7 +749,7 @@ class EChartsScatter extends IPSModuleStrict
                 )) . '</text>';
             $svg .= '<rect x="250" y="44" width="220" height="8" fill="url(#scatter-preview-color-map)"/>';
             $svg .= '<text x="478" y="54" font-size="10" fill="'
-                . EChartsBarPreview::E($palette['muted']) . '">'
+                . EChartsBarPreview::E($legendColor ?: $axisColor) . '">'
                 . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
                     $colorMapMaximum,
                     $colorMapDecimals,
@@ -883,8 +887,10 @@ class EChartsScatter extends IPSModuleStrict
                 }
             }
             if ($named) {
-                $svg .= '</g><text x="' . (24 + $groupIndex * 114) . '" y="375" font-size="11" fill="'
-                    . EChartsBarPreview::E($groupColor) . '">' . EChartsBarPreview::E(mb_strimwidth(
+                $legendX = 24 + $groupIndex * 114;
+                $svg .= '</g><circle cx="' . $legendX . '" cy="371" r="4" fill="' . EChartsBarPreview::E($groupColor) . '"/>'
+                    . '<text x="' . ($legendX + 8) . '" y="375" font-size="11" fill="'
+                    . EChartsBarPreview::E($legendColor ?: $axisColor) . '">' . EChartsBarPreview::E(mb_strimwidth(
                         $previewGroup['label'] !== '' ? $previewGroup['label'] : $this->Translate('Comparison'),
                         0,
                         16,
@@ -893,7 +899,7 @@ class EChartsScatter extends IPSModuleStrict
             }
         }
         if ($named) {
-            $svg .= '<text x="24" y="400" font-size="11" fill="' . EChartsBarPreview::E($palette['text']) . '">'
+            $svg .= '<text x="24" y="400" font-size="11" fill="' . EChartsBarPreview::E($legendColor ?: $palette['text']) . '">'
                 . EChartsBarPreview::E(sprintf(
                     $this->Translate('Groups shown: %d of %d. Example points, not archive values.'),
                     count($previewGroups),
@@ -1023,7 +1029,7 @@ class EChartsScatter extends IPSModuleStrict
     private function RenderScatterHTMLPage(bool $ipsView): string
     {
 
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        return $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Scatter',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -1091,6 +1097,9 @@ class EChartsScatter extends IPSModuleStrict
     /** @return array{Status:int,Message:string}|null */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         try {
             $groups = $this->GetValidatedGroups();
         } catch (Throwable $exception) {
@@ -1325,7 +1334,7 @@ class EChartsScatter extends IPSModuleStrict
         }
 
         return ['schemaVersion' => 1, 'family' => 'scatter', 'status' => 'ready',
-            'chart'             => $chart, 'error' => null];
+            'chart'             => $this->WithChartBackground($chart, $ipsView), 'error' => null];
     }
 
     private function PublishVisualizationState(): void
@@ -1437,7 +1446,7 @@ class EChartsScatter extends IPSModuleStrict
                 return false;
             }
         }
-        foreach (['PointColor', 'TitleColor', 'AxisColor', 'GridColor', 'ValueColor',
+        foreach (['PointColor', 'TitleColor', 'AxisColor', 'LegendColor', 'GridColor', 'ValueColor',
             'ColorMapLowColor', 'ColorMapHighColor'] as $name) {
             if ($this->ReadPropertyInteger($prefix . $name) < -1
                 || $this->ReadPropertyInteger($prefix . $name) > 0xFFFFFF) {
@@ -1500,7 +1509,7 @@ class EChartsScatter extends IPSModuleStrict
             'AxisFontSizePercent', 'ValueFontSizePercent'] as $name) {
             $style[lcfirst($name)] = $this->ReadPropertyInteger($prefix . $name);
         }
-        foreach (['PointColor', 'TitleColor', 'AxisColor', 'GridColor', 'ValueColor',
+        foreach (['PointColor', 'TitleColor', 'AxisColor', 'LegendColor', 'GridColor', 'ValueColor',
             'ColorMapLowColor', 'ColorMapHighColor'] as $name) {
             $color = $this->ReadPropertyInteger($prefix . $name);
             $style[lcfirst($name)] = $color < 0 ? '' : EChartsAsset::ColorToHex($color);

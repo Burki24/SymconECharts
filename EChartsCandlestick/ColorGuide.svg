@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="164" height="68" viewBox="0 0 200 85">
+<rect x="1" y="1" width="198" height="83" rx="3" fill="var(--BackgroundColor,var(--ChartBackgroundColor,#f7f9fa))" stroke="#a3aeb6"/>
+<text x="85" y="12" font-family="sans-serif" font-size="10" fill="var(--TitleColor,#43535e)">A · B</text>
+<path d="M23 20V66H179" fill="none" stroke="#81909c" stroke-width="1"/>
+<text x="7" y="48" font-family="sans-serif" font-size="9" fill="var(--AxisColor,#43535e)">10</text>
+<text x="24" y="76" font-family="sans-serif" font-size="9" fill="var(--AxisColor,#43535e)">0</text>
+<text x="159" y="76" font-family="sans-serif" font-size="9" fill="var(--AxisColor,#43535e)">10</text>
+<path d="M24 35H179M24 51H179" fill="none" stroke="var(--GridColor,#c3ccd2)" stroke-width="1"/>
+<rect x="39" y="35" width="20" height="21" fill="var(--ShadowColor,#c3ccd2)" stroke="#81909c" stroke-width="0"/>
+<rect x="37" y="33" width="20" height="21" fill="var(--RiseColor,#c3ccd2)" stroke="var(--RiseBorderColor,var(--BorderColor,#81909c))" stroke-width="2"/>
+<path d="M47 23V32M47 54V62" fill="none" stroke="var(--RiseBorderColor,var(--BorderColor,#81909c))" stroke-width="2"/>
+<rect x="79" y="28" width="20" height="16" fill="var(--FallColor,#81909c)" stroke="var(--FallBorderColor,var(--BorderColor,#81909c))" stroke-width="2"/>
+<path d="M89 18V28M89 44V51" fill="none" stroke="var(--FallBorderColor,var(--BorderColor,#81909c))" stroke-width="2"/>
+<path d="M122 37H141M131 22V51" fill="none" stroke="var(--DojiColor,#81909c)" stroke-width="3"/>
+<path d="M151 47V27H168V47Z" fill="none" stroke="var(--HoverBorderColor,#81909c)" stroke-width="2"/>
+<path d="M27 66H178" fill="none" stroke="var(--AxisLineColor,#81909c)" stroke-width="2"/>
+</svg>

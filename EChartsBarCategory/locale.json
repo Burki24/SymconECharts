@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Value label position": "Position der Wertbeschriftung",
             "Value label distance": "Abstand der Wertbeschriftung",
             "Automatic": "Automatisch",

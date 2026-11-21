@@ -126,8 +126,17 @@ IPSView-Design diesen Schalter ausschalten. In den regulären Designern übernim
 der Knopf **Kacheldesign nach IPSView kopieren und unabhängig bearbeiten** das zuletzt gespeicherte
 Kacheldesign einmalig und überschreibt dabei bisherige unabhängige Designwerte.
 Änderungen am Kacheldesign deshalb vor dem Kopieren speichern. Quellen bleiben
-gemeinsam; gesonderte IPSView-Zeiträume und Hintergründe werden unabhängig von
-der Designvererbung gesteuert, soweit das Modul sie anbietet.
+gemeinsam. Ein eigener IPSView-Zeitraum und die Anpassung an den Hintergrund
+des IPSView-Widgets lassen sich separat einstellen.
+
+Die **schematische Farbzuordnung** in jedem Designer zeigt, welchen Teil des
+Diagramms ein Farbfeld verändert. Die **Vorschau** zeigt die gewählten Farben.
+Für einen durchgehend schwarzen Diagrammhintergrund im regulären Designer
+neben der Theme-Auswahl **Diagrammhintergrund** auf Schwarz (`#000000`)
+stellen. Bei aktivem **Kacheldesign verwenden** übernimmt IPSView die Farbe.
+**An IPSView-Hintergrund anpassen** dafür ausschalten. Wer das Widget
+durchscheinen lassen möchte, kann die Anpassung einschalten und seine Tönung
+und Deckkraft wählen. **Automatisch (Theme)** setzt die Diagrammfarbe zurück.
 
 Animationen berücksichtigen die Systemeinstellung für reduzierte Bewegung.
 Reguläre Designer bieten getrennte Zeiten, Bewegungskurven und Verzögerungen

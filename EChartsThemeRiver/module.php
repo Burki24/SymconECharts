@@ -130,6 +130,7 @@ class EChartsThemeRiver extends IPSModuleStrict
                 }
                 $this->RegisterAnimationProperties($prefix, true, 350, 500);
             }
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -231,7 +232,7 @@ class EChartsThemeRiver extends IPSModuleStrict
                     $fields[] = $prefix . $name;
                 }
             }
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECRV', $fields));
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $this->WithBarPreviewForm($form, 'ECRV', $fields));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -303,6 +304,7 @@ class EChartsThemeRiver extends IPSModuleStrict
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -585,13 +587,13 @@ class EChartsThemeRiver extends IPSModuleStrict
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ];
-        $html = $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        $html = $this->RenderChartPage($ipsView, $configuration);
         if (strlen($html) > 1048576) {
             $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
             $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
             $configuration['state'] = $this->ErrorState(self::MODEL_TOO_LARGE_MESSAGE);
             $configuration['options']['compressedStateGzipBase64'] = null;
-            return $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+            return $this->RenderChartPage($ipsView, $configuration);
         }
         return $html;
     }
@@ -624,6 +626,9 @@ class EChartsThemeRiver extends IPSModuleStrict
     /** @return array{Status:int,Message:string}|null */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         try {
             ThemeRiverData::ArchiveContract($this->ReadPropertyString('Metric'));
         } catch (InvalidArgumentException $exception) {
@@ -863,7 +868,7 @@ class EChartsThemeRiver extends IPSModuleStrict
                 default                   => 'The ThemeRiver values could not be loaded.'
             });
         }
-        return ['schemaVersion' => 1, 'family' => 'themeRiver', 'status' => 'ready', 'chart' => $chart, 'error' => null];
+        return ['schemaVersion' => 1, 'family' => 'themeRiver', 'status' => 'ready', 'chart' => $this->WithChartBackground($chart, $ipsView), 'error' => null];
     }
 
     /** @return array<string,mixed> */

@@ -109,8 +109,7 @@
                     ? design.fontSizePercent(ringSizes[index], 12) : labelSize
             } };
         }));
-        var backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-            ? 'transparent' : colors.background;
+        var backgroundColor = design.chartBackground(bootstrap, model, colors.background);
         return {
             backgroundColor: backgroundColor,
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),

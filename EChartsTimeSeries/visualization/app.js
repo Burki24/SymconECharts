@@ -203,7 +203,8 @@
         var legendColor = designColor(design.legendColor, colors.text);
         var configuredAxisColor = designColor(design.axisColor, '');
         var configuredGridColor = designColor(design.gridColor, '');
-        var gridColor = configuredGridColor || colors.track || colors.border;
+        var configuredVerticalGridColor = designColor(design.verticalGridColor, '');
+        var themeGridColor = colors.track || colors.border;
         var titleFontSize = fontSize(design.titleFontSizePercent, 18);
         var legendFontSize = fontSize(design.legendFontSizePercent, 12);
         var axisFontSize = fontSize(design.axisFontSizePercent, 12);
@@ -241,8 +242,7 @@
         }
 
         return {
-            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-                ? 'transparent' : colors.background,
+            backgroundColor: echartsDesign.chartBackground(bootstrap, model, colors.background),
             color: seriesPalette,
             ...echartsDesign.animationOptions(design, {
                 enabled: false, initialDuration: 350, updateDuration: 500
@@ -338,7 +338,10 @@
                     ...(axisFontOverride ? { fontSize: axisFontSize } : {}),
                     formatter: buildTimeAxisFormatter(model.chart && model.chart.timeAxisLabelFormat)
                 },
-                splitLine: { show: false }
+                splitLine: {
+                    show: design.showVerticalGrid === true,
+                    lineStyle: { color: configuredVerticalGridColor || themeGridColor, opacity: configuredVerticalGridColor ? 1 : 0.35 }
+                }
             },
             yAxis: normalizedAxes.map(function (entry, index) {
                 var axis = entry.axis;
@@ -367,7 +370,7 @@
                     },
                     splitLine: {
                         show: index === firstActiveAxis && design.showGrid !== false,
-                        lineStyle: { color: gridColor, opacity: configuredGridColor ? 1 : 0.35 }
+                        lineStyle: { color: configuredGridColor || themeGridColor, opacity: configuredGridColor ? 1 : 0.35 }
                     },
                     nameTextStyle: { color: axisColor, ...(axisFontOverride ? { fontSize: axisFontSize } : {}) }
                 };

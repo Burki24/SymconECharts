@@ -241,9 +241,9 @@ assert.equal(timeSeriesResize.optionUpdates, 2, 'A changed TimeSeries width must
 const custom = render({
     legendPosition: 'bottom', lineWidthPercent: 150, smoothLines: true,
     showSymbols: true, symbolSizePercent: 125, areaOpacityPercent: 40,
-    showGrid: false, showXAxis: false, showYAxis: true,
+    showGrid: false, showVerticalGrid: true, showXAxis: false, showYAxis: true,
     titleFontSizePercent: 150, legendFontSizePercent: 125, axisFontSizePercent: 150,
-    titleColor: '#123456', legendColor: '#234567', axisColor: '#345678', gridColor: '#456789',
+    titleColor: '#123456', legendColor: '#234567', axisColor: '#345678', gridColor: '#456789', verticalGridColor: '#000000',
     animationEnabled: true, animationEasing: 'bounceOut',
     animationEasingUpdate: 'linear', animationDelay: 120,
     animationDelayUpdate: 240
@@ -332,7 +332,9 @@ assert.equal(custom.series[1].markArea.data[0][1].yAxis, 80);
 assert.equal(custom.series[1].markArea.data[0][0].itemStyle.color, '#123456');
 assert.equal(custom.series[1].markArea.data[0][0].itemStyle.opacity, 0.25);
 assert.equal(custom.xAxis.axisLine.show, false);
-assert.equal(custom.xAxis.splitLine.show, false);
+assert.equal(custom.xAxis.splitLine.show, true, 'Vertical grid lines are independent of horizontal grid lines and time axis labels.');
+assert.equal(custom.xAxis.splitLine.lineStyle.color, '#000000');
+assert.equal(custom.xAxis.splitLine.lineStyle.opacity, 1);
 assert.equal(custom.yAxis[0].axisLine.show, true);
 assert.equal(custom.yAxis[0].axisLine.lineStyle.color, '#345678');
 assert.equal(custom.yAxis[0].axisTick.lineStyle.color, '#345678');
@@ -600,6 +602,16 @@ assert.equal(retainedOnArchiveFailure.getRecoveryView().errorElement.textContent
 retainedOnArchiveFailure.handleMessage(timeReadyState);
 assert.equal(retainedOnArchiveFailure.getRecoveryView().errorElement.hidden, true);
 assert.equal(retainedOnArchiveFailure.getRecoveryView().chartElement.hidden, false);
+
+// A designer update must replace the active theme's yellow on the actual drawing surface.
+for (const mode of ['symcon', 'ipsview']) {
+    const view = render(undefined, undefined, 750, undefined, 'auto', {'--symc-background': 'rgb(255, 255, 0)'}, mode);
+    const state = view.getState();
+    view.handleMessage({...state, chart: {...state.chart, chartBackgroundColor: '#000000'}});
+    assert.equal(view.getLatestOption().backgroundColor, '#000000');
+    view.handleMessage(state);
+    assert.equal(view.getLatestOption().backgroundColor, 'rgb(255, 255, 0)');
+}
 
 const adaptedIPSView = render(undefined, undefined, 750, undefined, 'dark', {}, 'ipsview', true);
 assert.equal(adaptedIPSView.backgroundColor, 'transparent');

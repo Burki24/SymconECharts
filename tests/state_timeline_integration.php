@@ -179,10 +179,7 @@ foreach ($extendedDesign as $name => $value) {
     $timeline->SetTestProperty($name, $defaults[$name]);
 }
 $translations = json_decode((string) file_get_contents(dirname(__DIR__) . '/EChartsStateTimeline/locale.json'), true)['translations']['de'];
-$helperTranslations = json_decode((string) file_get_contents(dirname(__DIR__) . '/libs/helper/translations/IPSViewHTMLPageHelper.json'), true);
-foreach ($helperTranslations['translations'] as $translation) {
-    $translations[$translation['en']] = $translation['de'];
-}
+$translations += designerGermanCaptions();
 $verifyCaptions = static function (array $entries) use (&$verifyCaptions, $translations): void
 {
     foreach ($entries as $key => $entry) {

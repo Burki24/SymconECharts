@@ -116,6 +116,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
                 }
                 $this->RegisterAnimationProperties($prefix, true, 350, 500);
             }
+            $this->RegisterChartBackgroundProperties();
             $this->RegisterIPSViewHTMLPageProperties();
             $this->RegisterEChartsIPSViewTransport();
             $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -206,7 +207,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
                     $fields[] = $prefix . $name;
                 }
             }
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECGZ', $fields));
+            return $debugFlowResult = $this->EncodeChartDesignerForm(__DIR__, $this->WithBarPreviewForm($form, 'ECGZ', $fields));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -274,6 +275,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
             IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
             IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
@@ -581,7 +583,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
     private function RenderGraphHTMLPage(bool $ipsView): string
     {
         $startup = EChartsGraphOutput::Startup($this->BuildVisualizationState($ipsView));
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        return $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Zigbee Graph',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -655,6 +657,9 @@ class EChartsGraphZ2M extends IPSModuleStrict
     /** @return array{Status:int,Message:string}|null */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->ChartBackgroundColorsAreValid()) {
+            return ['Status' => self::STATUS_DESIGN_INVALID, 'Message' => 'Select a valid chart background color.'];
+        }
         $sourceID = $this->ReadPropertyInteger('NetworkMapInstanceID');
         $minimumLQI = $this->ReadPropertyInteger('MinimumLQI');
         $maximumLinks = $this->ReadPropertyInteger('MaximumLinks');
@@ -758,7 +763,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
             return $this->ErrorState($exception->getMessage() === 'No exported Zigbee network map is available.'
                 ? 'No exported Zigbee network map is available.' : 'The Graph could not be loaded.');
         }
-        return ['schemaVersion' => 1, 'family' => 'zigbee-graph', 'status' => 'ready', 'chart' => $chart, 'error' => null];
+        return ['schemaVersion' => 1, 'family' => 'zigbee-graph', 'status' => 'ready', 'chart' => $this->WithChartBackground($chart, $ipsView), 'error' => null];
     }
 
     /** @return array<string,mixed> */

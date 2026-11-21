@@ -121,14 +121,14 @@ final class EChartsBarPreview
         ?string $titleColor = null,
         int $titleFontSizePercent = 100
     ): string {
-        $background = $ipsView
-            ? EChartsIPSViewBackground::ResolvedPreviewBackground(
-                $palette,
-                (bool) ($values['IPSViewAdaptToBackground'] ?? false),
-                EChartsIPSViewBackground::Color((int) ($values['IPSViewBackgroundColor'] ?? -1)),
-                (int) ($values['IPSViewBackgroundOpacityPercent'] ?? 35)
-            )
-            : ['color' => $palette['background'], 'opacity' => 1.0];
+        $independent = $ipsView && !($values['IPSViewUseTileDesign'] ?? true);
+        $background = EChartsIPSViewBackground::ResolvedPreviewBackground(
+            $palette,
+            $ipsView && ($values['IPSViewAdaptToBackground'] ?? false),
+            EChartsIPSViewBackground::Color((int) ($values['IPSViewBackgroundColor'] ?? -1)),
+            (int) ($values['IPSViewBackgroundOpacityPercent'] ?? 35),
+            (int) ($values[$independent ? 'IPSViewChartBackgroundColor' : 'ChartBackgroundColor'] ?? -1)
+        );
         $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="360" viewBox="0 0 720 360" role="img" aria-label="Chart preview">';
         $svg .= '<rect width="720" height="360" fill="' . self::E($background['color'])
             . '" fill-opacity="' . self::N($background['opacity']) . '"/>';

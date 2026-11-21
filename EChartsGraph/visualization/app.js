@@ -104,8 +104,7 @@
                 emphasis: { lineStyle: { width: weighted ? width : 2 } } };
         });
         return {
-            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-                ? 'transparent' : colors.background,
+            backgroundColor: design.chartBackground(bootstrap, model, colors.background),
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false }, description: nodes.length + ' Graph nodes'
                 + (directed ? '. ' + translate('Directed connections') : '') },
@@ -183,8 +182,7 @@
         var theme = normalizeTheme(state.chart.theme || 'auto');
         var option = buildOption(state.chart, theme);
         var colors = colorsFor(theme);
-        rootElement.style.backgroundColor = bootstrap.mode === 'ipsview'
-            && bootstrap.options.adaptToBackground === true ? 'transparent' : colors.background;
+        rootElement.style.backgroundColor = design.chartBackground(bootstrap, state.chart, colors.background, true);
         if (chart && currentTheme !== theme) {
             chart.dispose();
             chart = null;

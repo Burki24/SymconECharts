@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="164" height="68" viewBox="0 0 200 85">
+<rect x="1" y="1" width="198" height="83" rx="3" fill="var(--BackgroundColor,var(--ChartBackgroundColor,#f7f9fa))" stroke="#a3aeb6"/>
+<text x="85" y="12" font-family="sans-serif" font-size="10" fill="var(--TitleColor,#43535e)">A · B</text>
+<path d="M100 18L134 33L124 57L100 68L70 57L61 33Z" fill="var(--SplitAreaColor1,#c3ccd2)" stroke="var(--GridColor,#81909c)" stroke-width="2"/>
+<path d="M100 28L123 36L113 51L100 58L82 51L75 36Z" fill="var(--SplitAreaColor2,#f7f9fa)" stroke="var(--GridColor,#81909c)" stroke-width="1"/>
+<path d="M100 18V68M61 33L124 57M70 57L134 33" fill="none" stroke="var(--GridColor,#81909c)" stroke-width="1"/>
+<path d="M83 37L103 28L125 40L107 54L84 48Z" fill="var(--AreaShadowColor,#81909c)" stroke="none" stroke-width="0"/>
+<path d="M81 35L101 26L123 38L105 52L82 46Z" fill="var(--GroupColors-Color,#c3ccd2)" stroke="var(--GroupColors-Color,#81909c)" stroke-width="2"/>
+<circle cx="123" cy="38" r="2" fill="var(--GroupColors-Color,#81909c)" stroke="var(--SymbolBorderColor,#81909c)" stroke-width="1"/>
+<text x="138" y="34" font-family="sans-serif" font-size="10" fill="var(--AxisColor,#43535e)">B</text>
+<text x="122" y="50" font-family="sans-serif" font-size="8" fill="var(--ValueColor,#43535e)">8</text>
+<rect x="68" y="73" width="8" height="4" fill="#81909c" stroke="#81909c" stroke-width="0"/>
+<text x="78" y="79" font-family="sans-serif" font-size="9" fill="var(--LegendColor,#43535e)">A</text>
+<rect x="103" y="73" width="8" height="4" fill="#c3ccd2" stroke="#81909c" stroke-width="0"/>
+<text x="113" y="79" font-family="sans-serif" font-size="9" fill="var(--LegendColor,#43535e)">B</text>
+</svg>

@@ -230,8 +230,7 @@
         var wasHidden = chartElement.hidden;
         chartElement.hidden = false;
         var option = buildOption(model, theme);
-        rootElement.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-            ? 'transparent' : colorsFor(theme).background;
+        rootElement.style.backgroundColor = design.chartBackground(bootstrap, state.chart, colorsFor(theme).background, true);
         if (!selectedItems.some(function (item) { return item.value > 0; })) {
             if (chart) { chart.clear(); }
             chartElement.hidden = true;

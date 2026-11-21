@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="164" height="68" viewBox="0 0 200 85">
+<rect x="1" y="1" width="198" height="83" rx="3" fill="var(--BackgroundColor,var(--ChartBackgroundColor,#f7f9fa))" stroke="#a3aeb6"/>
+<text x="85" y="12" font-family="sans-serif" font-size="10" fill="var(--TitleColor,#43535e)">A · B</text>
+<rect x="35" y="24" width="20" height="20" fill="var(--EmptyCellColor,#f7f9fa)" stroke="var(--CellBorderColor,#81909c)" stroke-width="1"/>
+<rect x="56" y="24" width="20" height="20" fill="var(--EmptyCellColor,#f7f9fa)" stroke="var(--CellBorderColor,#81909c)" stroke-width="1"/>
+<rect x="77" y="24" width="20" height="20" fill="var(--EmptyCellColor,#f7f9fa)" stroke="var(--CellBorderColor,#81909c)" stroke-width="1"/>
+<circle cx="87" cy="35" r="7" fill="#81909c" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<path d="M87 35v-7a7 7 0 0 1 7 7Z" fill="#c3ccd2" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<text x="84" y="37" font-family="sans-serif" font-size="6" fill="var(--ValueColor,#43535e)">8</text>
+<rect x="98" y="24" width="20" height="20" fill="var(--EmptyCellColor,#f7f9fa)" stroke="var(--CellBorderColor,#81909c)" stroke-width="1"/>
+<circle cx="108" cy="35" r="7" fill="#81909c" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<path d="M108 35v-7a7 7 0 0 1 7 7Z" fill="var(--UnknownColor,#c3ccd2)" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<text x="105" y="37" font-family="sans-serif" font-size="6" fill="var(--ValueColor,#43535e)">8</text>
+<rect x="119" y="24" width="20" height="20" fill="var(--EmptyCellColor,#f7f9fa)" stroke="var(--CellBorderColor,#81909c)" stroke-width="1"/>
+<circle cx="129" cy="35" r="7" fill="#81909c" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<path d="M129 35v-7a7 7 0 0 1 7 7Z" fill="#c3ccd2" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<text x="126" y="37" font-family="sans-serif" font-size="6" fill="var(--ValueColor,#43535e)">8</text>
+<rect x="140" y="24" width="20" height="20" fill="var(--EmptyCellColor,#f7f9fa)" stroke="var(--CellBorderColor,#81909c)" stroke-width="1"/>
+<circle cx="150" cy="35" r="7" fill="#81909c" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<path d="M150 35v-7a7 7 0 0 1 7 7Z" fill="#c3ccd2" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<text x="147" y="37" font-family="sans-serif" font-size="6" fill="var(--ValueColor,#43535e)">8</text>
+<rect x="35" y="45" width="20" height="20" fill="var(--EmptyCellColor,#f7f9fa)" stroke="var(--CellBorderColor,#81909c)" stroke-width="1"/>
+<circle cx="45" cy="56" r="7" fill="#81909c" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<path d="M45 56v-7a7 7 0 0 1 7 7Z" fill="#c3ccd2" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<text x="42" y="58" font-family="sans-serif" font-size="6" fill="var(--ValueColor,#43535e)">8</text>
+<rect x="56" y="45" width="20" height="20" fill="var(--EmptyCellColor,#f7f9fa)" stroke="var(--CellBorderColor,#81909c)" stroke-width="1"/>
+<circle cx="66" cy="56" r="7" fill="#81909c" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<path d="M66 56v-7a7 7 0 0 1 7 7Z" fill="#c3ccd2" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<text x="63" y="58" font-family="sans-serif" font-size="6" fill="var(--ValueColor,#43535e)">8</text>
+<rect x="77" y="45" width="20" height="20" fill="var(--EmptyCellColor,#f7f9fa)" stroke="var(--CellBorderColor,#81909c)" stroke-width="1"/>
+<circle cx="87" cy="56" r="7" fill="#81909c" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<path d="M87 56v-7a7 7 0 0 1 7 7Z" fill="#c3ccd2" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<text x="84" y="58" font-family="sans-serif" font-size="6" fill="var(--ValueColor,#43535e)">8</text>
+<rect x="98" y="45" width="20" height="20" fill="var(--EmptyCellColor,#f7f9fa)" stroke="var(--CellBorderColor,#81909c)" stroke-width="1"/>
+<circle cx="108" cy="56" r="7" fill="#81909c" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<path d="M108 56v-7a7 7 0 0 1 7 7Z" fill="var(--UnknownColor,#c3ccd2)" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<text x="105" y="58" font-family="sans-serif" font-size="6" fill="var(--ValueColor,#43535e)">8</text>
+<rect x="119" y="45" width="20" height="20" fill="var(--EmptyCellColor,#f7f9fa)" stroke="var(--CellBorderColor,#81909c)" stroke-width="1"/>
+<circle cx="129" cy="56" r="7" fill="#81909c" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<path d="M129 56v-7a7 7 0 0 1 7 7Z" fill="#c3ccd2" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<text x="126" y="58" font-family="sans-serif" font-size="6" fill="var(--ValueColor,#43535e)">8</text>
+<rect x="140" y="45" width="20" height="20" fill="var(--EmptyCellColor,#f7f9fa)" stroke="var(--CellBorderColor,#81909c)" stroke-width="1"/>
+<circle cx="150" cy="56" r="7" fill="#81909c" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<path d="M150 56v-7a7 7 0 0 1 7 7Z" fill="#c3ccd2" stroke="var(--SliceBorderColor,#81909c)" stroke-width="1"/>
+<text x="147" y="58" font-family="sans-serif" font-size="6" fill="var(--ValueColor,#43535e)">8</text>
+<text x="10" y="35" font-family="sans-serif" font-size="8" fill="var(--AxisColor,#43535e)">Mo</text>
+<rect x="68" y="73" width="8" height="4" fill="#81909c" stroke="#81909c" stroke-width="0"/>
+<text x="78" y="79" font-family="sans-serif" font-size="9" fill="var(--LegendColor,#43535e)">A</text>
+<rect x="103" y="73" width="8" height="4" fill="#c3ccd2" stroke="#81909c" stroke-width="0"/>
+<text x="113" y="79" font-family="sans-serif" font-size="9" fill="var(--LegendColor,#43535e)">B</text>
+</svg>

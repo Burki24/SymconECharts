@@ -642,7 +642,12 @@
                         {
                             "type": "CheckBox",
                             "name": "ShowGrid",
-                            "caption": "Show grid"
+                            "caption": "Show horizontal grid lines"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowVerticalGrid",
+                            "caption": "Show vertical grid lines"
                         },
                         {
                             "type": "CheckBox",
@@ -715,7 +720,14 @@
                         {
                             "type": "SelectColor",
                             "name": "GridColor",
-                            "caption": "Grid color",
+                            "caption": "Horizontal grid line color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "VerticalGridColor",
+                            "caption": "Vertical grid line color",
                             "allowTransparent": true,
                             "transparentCaption": "Automatic (theme)"
                         }

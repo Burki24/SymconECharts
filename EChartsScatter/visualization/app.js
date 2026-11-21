@@ -99,7 +99,7 @@
             top: top + (hasTitle ? 32 : 4), itemWidth: compact ? 8 : 12,
             itemHeight: Math.round(Math.min(420, Math.max(160, chartElement.clientWidth * 0.32))),
             text: [formatValue(maximum, role), formatValue(minimum, role)],
-            textStyle: { color: style.axisColor || colors.muted,
+            textStyle: { color: style.legendColor || style.axisColor || colors.muted,
                 fontSize: compact ? 9 : 11 },
             inRange: { color: [style.colorMapLowColor || colors.seriesColors[0] || colors.accent,
                 style.colorMapHighColor || colors.seriesColors[3] || colors.accent] }
@@ -233,8 +233,7 @@
             ? adaptiveLabelVisibility(points, style, xRole, yRole, grid, valueLabel, valueFontSize, base) : null;
 
         return {
-            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-                ? 'transparent' : colors.background,
+            backgroundColor: design.chartBackground(bootstrap, model, colors.background),
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false }, description: [xRole.label, yRole.label,
                 sizeRole && sizeRole.label].filter(Boolean).join(', ') },
@@ -384,9 +383,10 @@
                 var group = groups.find(function (g) { return g.id === id; });
                 return group ? group.label || translate('Comparison') : '';
             },
-            textStyle: { color: style.axisColor || colors.text, fontSize: fontSize,
+            textStyle: { color: style.legendColor || style.axisColor || colors.text, fontSize: fontSize,
                 width: Math.max(50, Math.min(180, chartElement.clientWidth / 3)), overflow: 'truncate' },
-            pageTextStyle: { color: colors.text, fontSize: fontSize }
+            pageTextStyle: { color: style.legendColor || colors.text, fontSize: fontSize },
+            ...(style.legendColor ? { pageIconColor: style.legendColor } : {})
         };
         return common;
     }

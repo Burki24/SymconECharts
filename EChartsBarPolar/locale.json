@@ -1,6 +1,8 @@
 {
     "translations": {
         "de": {
+            "Chart background": "Diagrammhintergrund",
+            "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Enable source selection": "Quellenauswahl aktivieren",
             "Initially visible": "Anfangs sichtbar",
             "Selection and pages only change the view. All configured sources continue to determine the complete value scale.": "Auswahl und Seiten ändern nur die Ansicht. Alle konfigurierten Quellen bestimmen weiterhin die vollständige Werteskala.",

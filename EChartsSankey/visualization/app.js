@@ -97,8 +97,7 @@
                 + '<br>' + escapeHTML(translate('Measured outflow')) + ': ' + escapeHTML(formatValue(data.balanceOutgoing));
         }
         return {
-            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-                ? 'transparent' : colors.background,
+            backgroundColor: design.chartBackground(bootstrap, model, colors.background),
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false } },
             title: { show: titleLayout.show, text: String(flow.title || ''),
@@ -237,8 +236,7 @@
         warningElement.hidden = true;
         balanceNote.textContent = translate('Calculated flows · not measured');
         balanceNote.hidden = !sankey.links.some(function (link) { return link.calculated === true; });
-        rootElement.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-            ? 'transparent' : colorsFor(normalizeTheme(model.theme || 'auto')).background;
+        rootElement.style.backgroundColor = design.chartBackground(bootstrap, state.chart, colorsFor(normalizeTheme(model.theme || 'auto')).background, true);
         var theme = normalizeTheme(model.theme || 'auto');
         if (chart && currentTheme !== theme) { chart.dispose(); chart = null; }
         if (!chart) {

@@ -276,8 +276,7 @@
         errorElement.hidden = true;
         emptyElement.hidden = true;
         warningElement.hidden = true;
-        rootElement.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-            ? 'transparent' : colorsFor(normalizeTheme(model.theme || 'auto')).background;
+        rootElement.style.backgroundColor = design.chartBackground(bootstrap, state.chart, colorsFor(normalizeTheme(model.theme || 'auto')).background, true);
         var theme = normalizeTheme(model.theme || 'auto');
         rememberCategoryWindow();
         if (chart && currentTheme !== theme) { chart.dispose(); chart = null; }
