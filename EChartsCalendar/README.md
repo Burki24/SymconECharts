@@ -103,6 +103,16 @@ oder selbst festgelegt werden. IPSView erbt standardmäßig das Kacheldesign;
 alternativ kann es unabhängig gestaltet werden. Die Formularvorschau verwendet
 gekennzeichnete Beispieldaten und löst beim Bearbeiten keine Archivabfrage aus.
 
+### Zeitraum im Diagramm wechseln
+
+Aktiviere **Zeitraumauswahl anzeigen** im Kacheldesigner oder im eigenständigen IPSView-Designer.
+Im Diagramm kannst Du dann direkt zum aktuellen Monat, Quartal oder Jahr wechseln. Diese
+Auswahl richtet sich nach dem heutigen Datum in der Symcon-Zeitzone. Mit den vorhandenen
+Pfeilen blätterst Du im gewählten Zeitraum. Über **Standard** kehrst Du zur konfigurierten
+Ansicht zurück, auch bei einem festen historischen Zeitraum.
+
+Die Auswahl gilt für die geöffnete Ansicht. Beim erneuten Öffnen gilt wieder der konfigurierte Zeitraum.
+
 ## Konfigurationsreferenz und Skriptzugriff
 
 Die [Feldreferenz](../docs/KONFIGURATION.md#echartscalendar) enthält

@@ -167,6 +167,21 @@ IPSView-App sind unterschiedliche Clients.
 
 ### Messwerte und Archivzeiträume
 
+Wenn Du zum Beispiel die Temperatur der letzten sechs Stunden und der letzten
+sieben Tage im selben Diagramm sehen möchtest, aktiviere im **Kacheldesigner**
+die Option **Zeitraumauswahl anzeigen**. Unten im Diagramm erscheint ein einzelnes Auswahlfeld.
+Ein Wechsel lädt die Archivdaten des gewählten Zeitraums. Mit der Zoomleiste
+kannst Du anschließend einen Ausschnitt davon vergrößern. **Heute** beginnt um
+Mitternacht in der Symcon-Zeitzone, **24 Stunden** reichen vom aktuellen
+Zeitpunkt einen Tag zurück.
+
+Die Auswahl gilt für die gerade geöffnete Ansicht. Beim nächsten Öffnen startet
+sie wieder mit dem konfigurierten Zeitraum. IPSView übernimmt die Einstellung
+aus dem Kacheldesign oder verwendet die Auswahl im eigenen Designer. Welche
+Zeiträume angeboten werden, hängt vom Diagramm, dem Datenmodus und den
+Archivgrenzen ab. Die Auswahl gibt es in TimeSeries, BarHistory, Scatter,
+Boxplot, Parallel, Candlestick, ThemeRiver, StateTimeline, Calendar und Heatmap.
+
 Pie, BarCategory, BarPolar, PictorialBar, Treemap und Sunburst erlauben eine
 optionale Min/Max-Normalisierung je Quelle. Damit lassen sich unterschiedliche
 Messgrößen relativ vergleichen. Originalwerte und Einheiten bleiben erhalten;

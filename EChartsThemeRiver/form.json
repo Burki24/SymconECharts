@@ -309,6 +309,11 @@
                     "items": [
                         {
                             "type": "CheckBox",
+                            "name": "EnablePeriodSelection",
+                            "caption": "Show period selection"
+                        },
+                        {
+                            "type": "CheckBox",
                             "name": "ShowTooltip",
                             "caption": "Show tooltip"
                         },

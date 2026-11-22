@@ -310,6 +310,10 @@
                             "value": "current-month"
                         },
                         {
+                            "caption": "This year",
+                            "value": "current-year"
+                        },
+                        {
                             "caption": "Custom",
                             "value": "custom"
                         }
@@ -511,6 +515,11 @@
                             "type": "CheckBox",
                             "name": "ShowGrid",
                             "caption": "Show grid"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "EnablePeriodSelection",
+                            "caption": "Show period selection"
                         },
                         {
                             "type": "CheckBox",

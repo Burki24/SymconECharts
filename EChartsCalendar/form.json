@@ -235,6 +235,11 @@
                             "type": "CheckBox",
                             "name": "ShowTooltip",
                             "caption": "Show tooltip"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "EnablePeriodSelection",
+                            "caption": "Show period selection"
                         }
                     ]
                 },

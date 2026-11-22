@@ -43,6 +43,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
+require_once __DIR__ . '/../libs/EChartsCartesianPeriodSelection.php';
 require_once __DIR__ . '/../libs/EChartsArchiveStack.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
@@ -71,6 +72,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     use IPSViewHTMLPageHelper;
     use EChartsIPSViewDesignForm;
     use EChartsIPSViewTransport;
+    use \SymconECharts\EChartsCartesianPeriodSelection;
     use EChartsTransientRefresh;
     use ResponsiveVisualizationHelper;
     use VisualizationAssetHelper;
@@ -90,7 +92,6 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const STATUS_CONFIGURATION_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
-    private const CALENDAR_RANGES = ['today', 'yesterday', 'current-week', 'current-month'];
     private const TIME_AXIS_LABEL_FORMATS = ['auto', 'time', 'date', 'date-time'];
     private const GAP_DETECTION_MODES = ['off', 'automatic', 'custom'];
     private const AGGREGATION_LEVELS = [
@@ -107,6 +108,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const LEGEND_POSITIONS = ['top', 'bottom', 'hidden'];
     private const DESIGN_FORM_FIELDS = [
         'Title', 'Sources', 'Annotations', 'Range', 'CustomRangeValue', 'CustomRangeUnit',
+        'DataMode', 'EnablePeriodSelection', 'IPSViewEnablePeriodSelection',
         'TimeAxisLabelFormat', 'EChartsTheme', 'LegendPosition', 'EnableZoom', 'ZoomSliderSize',
         'AnimationEnabled', 'AnimationDuration', 'AnimationDurationUpdate',
         'AnimationEasing', 'AnimationEasingUpdate', 'AnimationDelay', 'AnimationDelayUpdate',
@@ -133,6 +135,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const DESIGN_PROPERTY_TYPES = [
         'LegendPosition'          => 'string',
         'EnableZoom'              => 'boolean',
+        'EnablePeriodSelection'   => 'boolean',
         'ZoomSliderSize'          => 'integer',
         'AnimationEnabled'        => 'boolean',
         'AnimationDuration'       => 'integer',
@@ -193,6 +196,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
             $this->RegisterPropertyString('LegendPosition', 'top');
             $this->RegisterPropertyBoolean('EnableZoom', true);
+            $this->RegisterPropertyBoolean('EnablePeriodSelection', false);
             $this->RegisterPropertyInteger('ZoomSliderSize', 0);
             $this->RegisterAnimationProperties('', false, 350, 500);
             $this->RegisterPropertyInteger('LineWidthPercent', 100);
@@ -232,20 +236,20 @@ class EChartsTimeSeries extends IPSModuleStrict
             $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
             foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
                 $default = match ($name) {
-                    'LegendPosition'                                                                               => 'top',
-                    'LineWidthPercent', 'SymbolSizePercent'                                                        => 100,
-                    'ShowValues'                                                                                   => false,
-                    'ValueLabelPosition'                                                                           => 'top',
-                    'ValueLabelDistance'                                                                           => 5,
-                    'TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent' => 100,
-                    'TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'VerticalGridColor', 'ValueColor'       => -1,
-                    'AreaOpacityPercent'                                                                           => 22,
-                    'SmoothLines', 'ShowSymbols', 'AnimationEnabled', 'ShowVerticalGrid'                           => false,
-                    'AnimationDuration'                                                                            => 350,
-                    'AnimationDurationUpdate'                                                                      => 500,
-                    'AnimationEasing', 'AnimationEasingUpdate'                                                     => 'cubicInOut',
-                    'AnimationDelay', 'AnimationDelayUpdate', 'ValueAxisSpacing', 'ZoomSliderSize'                 => 0,
-                    default                                                                                        => true
+                    'LegendPosition'                                                                                                        => 'top',
+                    'LineWidthPercent', 'SymbolSizePercent'                                                                                 => 100,
+                    'ShowValues'                                                                                                            => false,
+                    'ValueLabelPosition'                                                                                                    => 'top',
+                    'ValueLabelDistance'                                                                                                    => 5,
+                    'TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'                          => 100,
+                    'TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'VerticalGridColor', 'ValueColor'                                => -1,
+                    'AreaOpacityPercent'                                                                                                    => 22,
+                    'EnablePeriodSelection', 'SmoothLines', 'ShowSymbols', 'AnimationEnabled', 'ShowVerticalGrid'                           => false,
+                    'AnimationDuration'                                                                                                     => 350,
+                    'AnimationDurationUpdate'                                                                                               => 500,
+                    'AnimationEasing', 'AnimationEasingUpdate'                                                                              => 'cubicInOut',
+                    'AnimationDelay', 'AnimationDelayUpdate', 'ValueAxisSpacing', 'ZoomSliderSize'                                          => 0,
+                    default                                                                                                                 => true
                 };
                 match ($type) {
                     'string'  => $this->RegisterPropertyString('IPSView' . $name, $default),
@@ -369,7 +373,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                     annotations: $this->PreviewAnnotations(),
                     timeAxisLabelFormat: $this->ReadPropertyString('TimeAxisLabelFormat'),
                     sourceCountCaption: $this->Translate('Preview shows %d of %d sources'),
-                    patternNoticeCaption: $this->Translate('Large SVG patterns are simplified in the preview.')
+                    patternNoticeCaption: $this->Translate('Large SVG patterns are simplified in the preview.'),
+                    periodLabel: $this->CartesianPeriodPreviewLabel([], false)
                 )
             );
             $form = SVGPreviewHelper::withImage(
@@ -387,7 +392,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                     $this->PreviewAnnotations(),
                     $this->EffectiveTimeAxisLabelFormat(true),
                     $this->Translate('Preview shows %d of %d sources'),
-                    $this->Translate('Large SVG patterns are simplified in the preview.')
+                    $this->Translate('Large SVG patterns are simplified in the preview.'),
+                    periodLabel: $this->CartesianPeriodPreviewLabel([], true)
                 )
             );
 
@@ -462,7 +468,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                     timeAxisLabelFormat: (string) ($values['TimeAxisLabelFormat']
                         ?? $this->ReadPropertyString('TimeAxisLabelFormat')),
                     sourceCountCaption: $this->Translate('Preview shows %d of %d sources'),
-                    patternNoticeCaption: $this->Translate('Large SVG patterns are simplified in the preview.')
+                    patternNoticeCaption: $this->Translate('Large SVG patterns are simplified in the preview.'),
+                    periodLabel: $this->CartesianPeriodPreviewLabel($values, false)
                 )
             ));
 
@@ -492,7 +499,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                         : (string) ($values['IPSViewTimeAxisLabelFormat']
                             ?? $this->ReadPropertyString('IPSViewTimeAxisLabelFormat')),
                     $this->Translate('Preview shows %d of %d sources'),
-                    $this->Translate('Large SVG patterns are simplified in the preview.')
+                    $this->Translate('Large SVG patterns are simplified in the preview.'),
+                    periodLabel: $this->CartesianPeriodPreviewLabel($values, true)
                 )
             ));
         } catch (\Throwable $debugFlowException) {
@@ -733,7 +741,9 @@ class EChartsTimeSeries extends IPSModuleStrict
             return $debugFlowResult = $this->HandleEChartsIPSViewRequest(
                 $JSONString,
                 self::DATA_ID_FROM_PARENT,
-                fn (): array => $this->BuildVisualizationState(true)
+                fn (array $payload): array => $this->CartesianTransportState($payload),
+                $this->CartesianPeriodChoices(false) !== [],
+                true
             );
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -836,22 +846,23 @@ class EChartsTimeSeries extends IPSModuleStrict
         return time();
     }
 
-    private function GetTimeSeriesDataForOutput(bool $ipsView): string
+    private function GetTimeSeriesDataForOutput(bool $ipsView, string $period = ''): string
     {
         $error = $this->GetConfigurationError();
         if ($error !== null) {
-            $this->DebugEChartsSetStatus($error['Status']);
+            $this->SetViewStatus($error['Status']);
             throw new RuntimeException($error['Message']);
         }
         if (!$this->HasActiveParent()) {
-            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
+            $this->SetViewStatus(self::STATUS_PARENT_MISSING);
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
 
         $sources = $this->GetValidatedSources();
+        $range = $period !== '' ? $period : $this->EffectiveRange($ipsView);
         $labels = EChartsSourceIdentity::LabelsForSources($sources);
         $annotations = $this->GetValidatedAnnotations($sources);
-        $query = $this->ResolveArchiveQuery(count($sources), $ipsView);
+        $query = $this->ResolveArchiveQuery(count($sources), $ipsView, $range);
         $axisModel = $this->BuildAxisModel($sources);
         $axes = $axisModel['Axes'];
         $axisIndexes = $axisModel['SeriesIndexes'];
@@ -884,8 +895,8 @@ class EChartsTimeSeries extends IPSModuleStrict
         $stackGaps = $query['AggregationLevel'] !== null && array_column($series, 'stackGroup') !== []
             ? EChartsArchiveStack::GapTimestamps($series, $query['AggregationLevel'], date_default_timezone_get())
             : [];
-        $this->WriteAttributeString('LastError', '');
-        $this->DebugEChartsSetStatus(IS_ACTIVE);
+        $this->SetViewError('');
+        $this->SetViewStatus(IS_ACTIVE);
 
         $json = json_encode([
             'schemaVersion' => 1,
@@ -898,7 +909,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'design'              => $this->ReadTimeSeriesDesign()
             ],
             'range'         => [
-                'key'                 => $this->EffectiveRange($ipsView),
+                'key'                 => $range,
                 'durationSeconds'     => $query['DurationSeconds'],
                 'startTimestamp'      => $query['StartTimestamp'],
                 'endTimestamp'        => $query['EndTimestamp'],
@@ -918,8 +929,8 @@ class EChartsTimeSeries extends IPSModuleStrict
             'truncated'     => $truncated
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
         if (strlen($json) > self::MAXIMUM_MODEL_BYTES) {
-            $this->WriteAttributeString('LastError', self::MODEL_TOO_LARGE_MESSAGE);
-            $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
+            $this->SetViewError(self::MODEL_TOO_LARGE_MESSAGE);
+            $this->SetViewStatus(self::STATUS_CONFIGURATION_INVALID);
             throw new UnexpectedValueException(self::MODEL_TOO_LARGE_MESSAGE, self::STATUS_CONFIGURATION_INVALID);
         }
         return $json;
@@ -975,7 +986,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ];
-        $html = $this->RenderChartPage($ipsView, $configuration);
+        $html = $this->WithEChartsPeriodSelection($this->RenderChartPage($ipsView, $configuration), $ipsView, $this->CartesianPeriodChoices($ipsView));
         if (strlen($html) > 1048576) {
             $this->WriteAttributeString('LastError', self::MODEL_TOO_LARGE_MESSAGE);
             $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
@@ -1342,10 +1353,10 @@ class EChartsTimeSeries extends IPSModuleStrict
     }
 
     /** @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,Mode:string,AggregationLevel:int|null,Limit:int,CalendarAligned:bool,AcceptLiveUpdates:bool,Empty:bool} */
-    private function ResolveArchiveQuery(int $sourceCount, bool $ipsView = false): array
+    private function ResolveArchiveQuery(int $sourceCount, bool $ipsView = false, ?string $range = null): array
     {
         return EChartsArchiveQuery::Resolve(
-            $this->EffectiveRange($ipsView),
+            $range ?? $this->EffectiveRange($ipsView),
             $this->EffectiveCustomRangeValue($ipsView),
             $this->EffectiveCustomRangeUnit($ipsView),
             $this->ReadPropertyString('DataMode'),
@@ -1365,6 +1376,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'yesterday'     => $this->Translate('Yesterday'),
                 'current-week'  => $this->Translate('This week'),
                 'current-month' => $this->Translate('This month'),
+                'current-year'  => $this->Translate('This year'),
                 default         => $range
             };
         }
@@ -1418,14 +1430,14 @@ class EChartsTimeSeries extends IPSModuleStrict
                     $operation
                 );
             } catch (Throwable $exception) {
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
                 throw new RuntimeException('The gateway returned an invalid archive response.');
             }
             if (!$response['Success']) {
                 $errorCode = (string) ($response['Error']['Code'] ?? 'GATEWAY_REQUEST_FAILED');
-                $this->WriteAttributeString('LastError', $errorCode);
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError($errorCode);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway archive request failed: ' . $errorCode);
             }
 
@@ -1508,7 +1520,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     }
 
     /** @return array<string,mixed> */
-    private function BuildVisualizationState(bool $ipsView = false): array
+    private function BuildVisualizationState(bool $ipsView = false, string $period = ''): array
     {
         if ($this->HasJSLiveImport()) {
             return $this->BuildJSLiveImportState($ipsView);
@@ -1533,7 +1545,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             ];
         }
         try {
-            $chart = json_decode($this->GetTimeSeriesDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
+            $chart = json_decode($this->GetTimeSeriesDataForOutput($ipsView, $period), true, 512, JSON_THROW_ON_ERROR);
             if ($ipsView) {
                 $chart['theme'] = $this->EffectiveIPSViewTheme();
                 $chart['chart']['enableZoom'] = $this->EffectiveIPSViewEnableZoom();
@@ -1668,7 +1680,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     private function NextCalendarRangeBoundary(bool $ipsView, int $now): ?int
     {
         $range = $this->EffectiveRange($ipsView);
-        if (!in_array($range, self::CALENDAR_RANGES, true)) {
+        if (!in_array($range, EChartsArchiveQuery::CALENDAR_RANGES, true)) {
             return null;
         }
 
@@ -1680,7 +1692,8 @@ class EChartsTimeSeries extends IPSModuleStrict
         return match ($range) {
             'today', 'yesterday' => $today->modify('+1 day')->getTimestamp() + 2,
             'current-week'       => $today->modify('monday next week')->getTimestamp() + 2,
-            'current-month'      => $today->modify('first day of next month')->getTimestamp() + 2
+            'current-month'      => $today->modify('first day of next month')->getTimestamp() + 2,
+            'current-year'       => $today->setDate((int) $today->format('Y') + 1, 1, 1)->getTimestamp() + 2
         };
     }
 
@@ -2201,6 +2214,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                             ['caption' => 'Yesterday', 'value' => 'yesterday'],
                             ['caption' => 'This week', 'value' => 'current-week'],
                             ['caption' => 'This month', 'value' => 'current-month'],
+                            ['caption' => 'This year', 'value' => 'current-year'],
                             ['caption' => 'Custom', 'value' => 'custom']
                         ]
                     ],

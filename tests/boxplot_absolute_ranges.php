@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/archive_period_view.php';
+
 require_once dirname(__DIR__) . '/EChartsBoxplot/module.php';
 
 final class TestableAbsoluteEChartsBoxplot extends EChartsBoxplot
@@ -124,6 +126,7 @@ final class TestableAbsoluteEChartsBoxplot extends EChartsBoxplot
             $later['range'] === $range && $later['boxplot']['data'] === $model['boxplot']['data'],
             'A fixed historical Boxplot must not slide when the clock advances.'
         );
+        verifyArchivePeriodView($chart);
         foreach ([$chart->GetVisualizationTile(), $chart->GetIPSViewHTML()] as $html) {
             assertGatewayGauge(str_contains($html, json_encode($range, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES))
                 && strlen($html) < SYMCON_OUTPUT_BUFFER_LIMIT, 'Both Boxplot outputs must embed the same fixed time window within 1 MiB.');

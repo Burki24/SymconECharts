@@ -12,6 +12,7 @@ use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAnimationDesign;
+use SymconECharts\EChartsArchivePeriodView;
 use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
@@ -41,6 +42,7 @@ require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
+require_once __DIR__ . '/../libs/EChartsArchivePeriodView.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsSliderSize.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
@@ -59,6 +61,7 @@ class EChartsStateTimeline extends IPSModuleStrict
     use EChartsBarPreviewForm;
     use SymconECharts\StateTimelinePreview;
     use EChartsIPSViewDesignForm;
+    use EChartsArchivePeriodView;
     use EChartsIPSViewTransport;
     use EChartsTransientRefresh;
     use IPSViewHTMLPageHelper;
@@ -76,19 +79,20 @@ class EChartsStateTimeline extends IPSModuleStrict
     private const STATUS_GATEWAY_FAILED = 204;
     private const MAXIMUM_TOTAL_POINTS = 16000;
     private const DESIGN_DEFAULTS = [
-        'ZoomSliderSize'       => 0,
-        'EChartsTheme'         => 'auto', 'EnableZoom' => true, 'ShowTooltip' => true, 'ShowLabels' => true,
-        'ShowGrid'             => true, 'RowHeightPercent' => 65, 'BarOpacityPercent' => 90, 'BorderWidth' => 0,
-        'TitleFontSizePercent' => 110, 'AxisFontSizePercent' => 75, 'LabelFontSizePercent' => 75,
-        'TitleColor'           => -1, 'AxisColor' => -1, 'LabelColor' => -1, 'BorderColor' => -1,
-        'UnknownColor'         => 0x777B83,
-        'BorderType'           => 'solid', 'BorderRadius' => 0, 'LabelPosition' => 'center',
-        'FontFamily'           => 'Arial', 'TitleBold' => true, 'TitleItalic' => false,
-        'AxisLabelBold'        => false, 'AxisLabelItalic' => false, 'LabelBold' => false, 'LabelItalic' => false,
-        'ShowTimeLabels'       => true, 'ShowSourceLabels' => true, 'ShowAxisLine' => true, 'ShowAxisTicks' => false,
-        'AxisLineWidth'        => 1, 'AxisLineType' => 'solid', 'AxisLabelMargin' => 12, 'TimeLabelFormat' => 'auto',
-        'GridColor'            => -1, 'GridOpacityPercent' => 20, 'GridLineWidth' => 1, 'GridLineType' => 'solid',
-        'EmphasisEnabled'      => true, 'EmphasisFocus' => 'none', 'BlurOpacityPercent' => 20
+        'EnablePeriodSelection' => false,
+        'ZoomSliderSize'        => 0,
+        'EChartsTheme'          => 'auto', 'EnableZoom' => true, 'ShowTooltip' => true, 'ShowLabels' => true,
+        'ShowGrid'              => true, 'RowHeightPercent' => 65, 'BarOpacityPercent' => 90, 'BorderWidth' => 0,
+        'TitleFontSizePercent'  => 110, 'AxisFontSizePercent' => 75, 'LabelFontSizePercent' => 75,
+        'TitleColor'            => -1, 'AxisColor' => -1, 'LabelColor' => -1, 'BorderColor' => -1,
+        'UnknownColor'          => 0x777B83,
+        'BorderType'            => 'solid', 'BorderRadius' => 0, 'LabelPosition' => 'center',
+        'FontFamily'            => 'Arial', 'TitleBold' => true, 'TitleItalic' => false,
+        'AxisLabelBold'         => false, 'AxisLabelItalic' => false, 'LabelBold' => false, 'LabelItalic' => false,
+        'ShowTimeLabels'        => true, 'ShowSourceLabels' => true, 'ShowAxisLine' => true, 'ShowAxisTicks' => false,
+        'AxisLineWidth'         => 1, 'AxisLineType' => 'solid', 'AxisLabelMargin' => 12, 'TimeLabelFormat' => 'auto',
+        'GridColor'             => -1, 'GridOpacityPercent' => 20, 'GridLineWidth' => 1, 'GridLineType' => 'solid',
+        'EmphasisEnabled'       => true, 'EmphasisFocus' => 'none', 'BlurOpacityPercent' => 20
     ];
 
     public function Create(): void
@@ -382,7 +386,9 @@ class EChartsStateTimeline extends IPSModuleStrict
             return $debugFlowResult = $this->HandleEChartsIPSViewRequest(
                 $JSONString,
                 self::DATA_ID_FROM_PARENT,
-                fn (): array => $this->BuildVisualizationState(true)
+                fn (array $payload): array => $this->BuildArchivePeriodView($payload),
+                $this->EChartsPeriodSelectionEnabled(false),
+                true
             );
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -454,23 +460,24 @@ class EChartsStateTimeline extends IPSModuleStrict
     /** @param array<string,mixed> $values */
     protected function BarPreviewSvg(array $values, bool $ipsView): string
     {
-        return $this->StateTimelinePreviewSvg($values, $ipsView);
+        return $this->WithArchivePeriodPreview($this->StateTimelinePreviewSvg($values, $ipsView), $values, $ipsView);
     }
 
-    private function GetStateTimelineDataForOutput(bool $ipsView): string
+    private function GetStateTimelineDataForOutput(bool $ipsView, string $period = ''): string
     {
         $error = $this->GetConfigurationError();
         if ($error !== null) {
-            $this->WriteAttributeString('LastError', $error['Message']);
-            $this->DebugEChartsSetStatus($error['Status']);
+            $this->SetViewError($error['Message']);
+            $this->SetViewStatus($error['Status']);
             throw new RuntimeException($error['Message']);
         }
         if (!$this->HasActiveParent()) {
-            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
+            $this->SetViewStatus(self::STATUS_PARENT_MISSING);
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         $sources = $this->GetValidatedSources();
-        $query = $this->ResolveTimeQuery();
+        $rangeKey = $period === '' ? $this->ReadPropertyString('Range') : $period;
+        $query = $this->ResolveTimeQuery(['Range' => $rangeKey]);
         $rows = [];
         $pointCount = 0;
         $encodedRowBytes = 0;
@@ -490,8 +497,8 @@ class EChartsStateTimeline extends IPSModuleStrict
                     $archive['VariableType'] === 0
                 );
             } catch (Throwable $exception) {
-                $this->WriteAttributeString('LastError', 'INVALID_ARCHIVE_DATA');
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError('INVALID_ARCHIVE_DATA');
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw $exception;
             }
             foreach ($segments as &$segment) {
@@ -509,9 +516,9 @@ class EChartsStateTimeline extends IPSModuleStrict
             }
             $rows[] = $row;
         }
-        $this->WriteAttributeString('LastError', '');
-        $this->DebugEChartsSetStatus(IS_ACTIVE);
-        $range = ['key'    => $this->ReadPropertyString('Range'), 'startTimestamp' => $query['StartTimestamp'],
+        $this->SetViewError('');
+        $this->SetViewStatus(IS_ACTIVE);
+        $range = ['key'    => $rangeKey, 'startTimestamp' => $query['StartTimestamp'],
             'endTimestamp' => $query['EndTimestamp'], 'timezone' => date_default_timezone_get()];
         if ($range['key'] === 'absolute') {
             $range += ['requestedStartTimestamp' => $query['StartTimestamp'], 'requestedEndTimestamp' => $query['EndTimestamp']];
@@ -530,7 +537,7 @@ class EChartsStateTimeline extends IPSModuleStrict
 
     private function RenderStateTimelineHTMLPage(bool $ipsView): string
     {
-        return $this->RenderChartPage($ipsView, [
+        $html = $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts StateTimeline',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -552,6 +559,7 @@ class EChartsStateTimeline extends IPSModuleStrict
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
+        return $this->WithEChartsPeriodSelection($html, $ipsView, $this->ArchivePeriodChoices($ipsView));
     }
 
     private function Initialize(): void
@@ -685,7 +693,7 @@ class EChartsStateTimeline extends IPSModuleStrict
             $operation = EChartsDataProtocol::OPERATION_ARCHIVE_STATES_READ;
             $payload = ['VariableID' => $source['VariableID'], 'StartTimestamp' => $query['StartTimestamp'],
                 'EndTimestamp'       => $query['EndTimestamp'], 'Limit' => $limit];
-            $this->WriteAttributeString('LastError', '');
+            $this->SetViewError('');
             try {
                 $response = EChartsDataProtocol::DecodeResponse(
                     $this->DebugEChartsSendToParent($this->EncodeDataFlowMessage(
@@ -695,14 +703,14 @@ class EChartsStateTimeline extends IPSModuleStrict
                     $operation
                 );
             } catch (Throwable $exception) {
-                $this->WriteAttributeString('LastError', 'INVALID_ARCHIVE_RESPONSE');
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError('INVALID_ARCHIVE_RESPONSE');
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned an invalid StateTimeline archive response.', 0, $exception);
             }
             if (!$response['Success']) {
                 $code = (string) ($response['Error']['Code'] ?? 'GATEWAY_REQUEST_FAILED');
-                $this->WriteAttributeString('LastError', $code);
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError($code);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway archive request failed: ' . $code);
             }
             $archive = $response['Payload'];
@@ -721,8 +729,8 @@ class EChartsStateTimeline extends IPSModuleStrict
                 || ($archive['EndTimestamp'] ?? null) !== $query['EndTimestamp']
                 || ($archive['VariableType'] ?? null) !== IPS_GetVariable($source['VariableID'])['VariableType']
                 || ($archive['ArchiveAggregationType'] ?? null) !== 'standard') {
-                $this->WriteAttributeString('LastError', 'INVALID_ARCHIVE_DATA');
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError('INVALID_ARCHIVE_DATA');
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned invalid StateTimeline archive data.');
             }
             $archive['RawPointCount'] = $rawPointCount;
@@ -738,8 +746,8 @@ class EChartsStateTimeline extends IPSModuleStrict
 
     private function FailArchiveBudget(): never
     {
-        $this->WriteAttributeString('LastError', 'ARCHIVE_TRUNCATED');
-        $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+        $this->SetViewError('ARCHIVE_TRUNCATED');
+        $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
         throw new RuntimeException('Too many state changes. Choose a shorter time range.');
     }
 
@@ -767,26 +775,26 @@ class EChartsStateTimeline extends IPSModuleStrict
     }
 
     /** @return array<string,mixed> */
-    private function BuildVisualizationState(bool $ipsView = false): array
+    private function BuildVisualizationState(bool $ipsView = false, string $period = ''): array
     {
         $configurationError = $this->GetConfigurationError();
         if ($configurationError !== null) {
-            $this->WriteAttributeString('LastError', $configurationError['Message']);
-            $this->DebugEChartsSetStatus($configurationError['Status']);
+            $this->SetViewError($configurationError['Message']);
+            $this->SetViewStatus($configurationError['Status']);
             if ($this->ReadPropertyString('Range') === 'absolute' && $configurationError['Status'] === self::STATUS_CONFIGURATION_INVALID) {
                 return $this->ErrorState($configurationError['Message']);
             }
             return $this->ErrorState('Configure valid StateTimeline archive variables.');
         }
         if (!$this->HasActiveParent()) {
-            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
+            $this->SetViewStatus(self::STATUS_PARENT_MISSING);
             return $this->ErrorState('Connect an active EChartsGateway.');
         }
         try {
-            $chart = json_decode($this->GetStateTimelineDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
+            $chart = json_decode($this->GetStateTimelineDataForOutput($ipsView, $period), true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
-            return $this->ErrorState(match ($this->ReadAttributeString('LastError')) {
+            return $this->ErrorState(match ($this->GetViewError()) {
                 'ARCHIVE_TRUNCATED'     => 'Too many state changes. Choose a shorter time range.',
                 'INVALID_ARCHIVE_DATA'  => 'The StateTimeline archive data is invalid.',
                 default                 => 'The StateTimeline values could not be loaded.'

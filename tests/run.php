@@ -130,6 +130,7 @@ $commands = [
     ['Test ThemeRiver Gateway and output integration', 'php tests/gateway_gauges.php --theme-river'],
     ['Verify local quality runner', 'php tests/quality.php --help'],
     ['Test persistent IPSView transport', 'node tests/ipsview_transport.js'],
+    ['Test view-local period selection', 'node tests/period_selection.js'],
     ['Test shared ECharts zoom', 'node tests/echarts_zoom.js'],
     ['Test shared ECharts label design', 'node tests/label_design.js'],
     ['Test Time Series tile design layout', 'node tests/time_series_layout.js'],

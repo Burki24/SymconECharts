@@ -25,6 +25,8 @@
     var currentState = bootstrap.state || null;
     var currentOffset = 0;
     var navigating = false;
+    var viewPeriod = '';
+    var periodRevision = 0;
     var loadError = 'The Heatmap values could not be loaded.';
     var retainOnTransientError = design.createTransientFailureRetainer(
         { get hidden() { return chartElement.hidden && (!comparisonElement || comparisonElement.hidden); } },
@@ -458,6 +460,8 @@
     function stateURL(offset) {
         var path = bootstrap.options && bootstrap.options.heatmapStatePath;
         if (!path || !/^\/hook\/SymconECharts\/state\//.test(path)) { throw new Error('Missing state path.'); }
+        var request = path + '?offset=' + offset + (bootstrap.mode === 'symcon' ? '&output=tile' : '');
+        if (window.SymconEChartsPeriodSelection) { return window.SymconEChartsPeriodSelection.withPeriod(request); }
         var location = window.location || {};
         var protocol = location.protocol;
         var host = location.host;
@@ -473,14 +477,14 @@
                 host = window.top.location.host;
             }
         }
-        return protocol + '//' + host + path + '?offset=' + offset
-            + (bootstrap.mode === 'symcon' ? '&output=tile' : '');
+        return protocol + '//' + host + request;
     }
 
     function navigate(offset) {
         if (navigating || offset < 0 || offset > maxOffset(currentState && currentState.chart
             ? currentState.chart.heatmap || {} : {})
             || !currentState || !currentState.chart) { return; }
+        var revision = periodRevision;
         navigating = true;
         updatePeriod(currentState.chart.heatmap || {},
             ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8));
@@ -493,6 +497,7 @@
                     return response.json();
                 })
                 .then(function (state) {
+                    if (revision !== periodRevision) { return; }
                     if (!state || state.status !== 'ready' || !state.chart
                         || !sameView(state.chart.heatmap, requestedView)
                         || state.chart.heatmap.windowOffset !== offset) {
@@ -501,10 +506,12 @@
                     if (currentState && currentState.chart && sameView(currentState.chart.heatmap, requestedView)) { render(state); }
                 })
                 .catch(function () {
+                    if (revision !== periodRevision) { return; }
                     warningElement.textContent = translate(loadError);
                     warningElement.hidden = false;
                 })
                 .finally(function () {
+                    if (revision !== periodRevision) { return; }
                     navigating = false;
                     if (currentState && currentState.chart) {
                         updatePeriod(currentState.chart.heatmap || {},
@@ -527,6 +534,12 @@
     window.handleMessage = function (message) {
         var state = design.parseVisualizationState(message);
         if (!state) { return; }
+        if ((state.viewPeriod || '') !== viewPeriod) {
+            viewPeriod = state.viewPeriod || '';
+            periodRevision += 1;
+            navigating = false;
+            currentOffset = 0;
+        }
         if (currentOffset > 0 && state.chart && state.chart.heatmap
             && state.chart.heatmap.windowOffset === 0 && currentState && currentState.chart
             && sameView(state.chart.heatmap, currentState.chart.heatmap)) {

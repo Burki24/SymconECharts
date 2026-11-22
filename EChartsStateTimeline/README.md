@@ -79,7 +79,7 @@ Fehlende oder ungültige Daten sowie nicht existierende und doppeldeutige
 Uhrzeiten beim Zeitwechsel werden abgewiesen. Bitte eindeutige Grenzen wählen.
 Ein Fenster über einen Zeitwechsel ist möglich, auch bei nicht ganzstündigen
 Offsetänderungen; seine Dauer entspricht der tatsächlich verstrichenen Zeit.
-Beide Ausgabewege und Vorschauen verwenden dieselben Grenzen. Bestehende
+Beide Ausgabewege starten mit den Zeitgrenzen aus der Vorschau. Bestehende
 Zeiträume, Zustandszuordnungen, Designs und alle Archivbudgets bleiben erhalten.
 
 Aktualisiert wird minütlich. Der Tooltip nennt Quelle, Zustand, Wert, Beginn,
@@ -167,6 +167,16 @@ Zustandswechseln muss der Zeitraum verkürzt werden.
 Bei mehr als acht Quellen kennzeichnet die statische Vorschau ausdrücklich
 die ersten acht von insgesamt bis zu 32 Zeilen. Scrollen und Zeitzoom sind
 nur im eigentlichen Diagramm bedienbar.
+
+## Zeitraum im Diagramm wechseln
+
+Aktiviere im **Kacheldesigner** die Option **Zeitraumauswahl anzeigen**. In der
+geöffneten Ansicht kannst du dann zwischen den letzten 24 Stunden, 7 Tagen und
+30 Tagen wechseln. Mit der Standardauswahl kehrst du zum konfigurierten
+Zeitraum zurück, auch bei einem festen historischen Von-/Bis-Zeitraum.
+IPSView übernimmt die Einstellung aus der Kachel oder verwendet dieselbe Option
+im eigenen Designer. Jede Ansicht lädt ihre Archivwerte mit den bisherigen
+Lesegrenzen. Andere geöffnete Ansichten behalten ihre Auswahl.
 
 ## Konfigurationsreferenz und Skriptzugriff
 

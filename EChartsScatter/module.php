@@ -16,6 +16,7 @@ use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
+use SymconECharts\EChartsCartesianPeriodSelection;
 use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
@@ -23,6 +24,7 @@ use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsLabelDesign;
 use SymconECharts\EChartsNormalization;
+use SymconECharts\EChartsPeriodPreview;
 use SymconECharts\EChartsSliderSize;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
@@ -41,6 +43,8 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsCartesianPeriodSelection.php';
+require_once __DIR__ . '/../libs/EChartsPeriodPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
@@ -69,6 +73,7 @@ class EChartsScatter extends IPSModuleStrict
     use EChartsBarPreviewForm;
     use EChartsIPSViewDesignForm;
     use EChartsIPSViewTransport;
+    use EChartsCartesianPeriodSelection;
     use EChartsTransientRefresh;
     use IPSViewHTMLPageHelper;
     use ResponsiveVisualizationHelper;
@@ -86,6 +91,7 @@ class EChartsScatter extends IPSModuleStrict
     private const ROLES = ['x', 'y', 'size'];
     private const REDUCERS = ['auto', 'average', 'sum', 'minimum', 'maximum'];
     private const DESIGN_PROPERTY_TYPES = [
+        'EnablePeriodSelection'   => 'boolean',
         'EChartsTheme'            => 'string',
         'ShowGrid'                => 'boolean',
         'EnableZoom'              => 'boolean',
@@ -154,6 +160,7 @@ class EChartsScatter extends IPSModuleStrict
             $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
             $this->RegisterPropertyBoolean('ShowGrid', true);
             $this->RegisterPropertyBoolean('EnableZoom', true);
+            $this->RegisterPropertyBoolean('EnablePeriodSelection', false);
             $this->RegisterPropertyInteger('ZoomSliderSize', 0);
             $this->RegisterPropertyBoolean('EnableBrush', false);
             $this->RegisterPropertyBoolean('ShowValues', false);
@@ -199,22 +206,22 @@ class EChartsScatter extends IPSModuleStrict
             $this->RegisterPropertyInteger('IPSViewBackgroundOpacityPercent', EChartsIPSViewBackground::DEFAULT_OPACITY_PERCENT);
             foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
                 $default = match ($name) {
-                    'EChartsTheme'                                                                              => EChartsAsset::THEME_AUTO,
-                    'ValueLabelPosition'                                                                        => 'auto',
-                    'ValueLabelContent'                                                                         => 'y',
-                    'XAxisRangeMode', 'YAxisRangeMode', 'ColorMapRangeMode', 'BubbleRangeMode'                  => 'data',
-                    'ColorMapDimension'                                                                         => 'y',
-                    'AnimationEasing', 'AnimationEasingUpdate'                                                  => 'cubicInOut',
-                    'ShowGrid', 'EnableZoom', 'AnimationEnabled'                                                => true,
-                    'ShowValues', 'AdaptiveValueLabels', 'EnableBrush', 'ColorMapEnabled', 'ColorMapShowLegend' => false,
-                    'PointSize'                                                                                 => 12, 'BubbleMaxSize' => 48,
-                    'ValueLabelDistance'                                                                        => 5,
-                    'XAxisMinimum', 'YAxisMinimum', 'ColorMapMinimum', 'BubbleMinimum'                          => 0.0,
-                    'XAxisMaximum', 'YAxisMaximum', 'ColorMapMaximum', 'BubbleMaximum'                          => 100.0,
-                    'TitleFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'                       => 100,
-                    'AnimationDuration'                                                                         => 350, 'AnimationDurationUpdate' => 500,
-                    'AnimationDelay', 'AnimationDelayUpdate', 'ZoomSliderSize'                                  => 0,
-                    default                                                                                     => -1
+                    'EChartsTheme'                                                                                                       => EChartsAsset::THEME_AUTO,
+                    'ValueLabelPosition'                                                                                                 => 'auto',
+                    'ValueLabelContent'                                                                                                  => 'y',
+                    'XAxisRangeMode', 'YAxisRangeMode', 'ColorMapRangeMode', 'BubbleRangeMode'                                           => 'data',
+                    'ColorMapDimension'                                                                                                  => 'y',
+                    'AnimationEasing', 'AnimationEasingUpdate'                                                                           => 'cubicInOut',
+                    'ShowGrid', 'EnableZoom', 'AnimationEnabled'                                                                         => true,
+                    'EnablePeriodSelection', 'ShowValues', 'AdaptiveValueLabels', 'EnableBrush', 'ColorMapEnabled', 'ColorMapShowLegend' => false,
+                    'PointSize'                                                                                                          => 12, 'BubbleMaxSize' => 48,
+                    'ValueLabelDistance'                                                                                                 => 5,
+                    'XAxisMinimum', 'YAxisMinimum', 'ColorMapMinimum', 'BubbleMinimum'                                                   => 0.0,
+                    'XAxisMaximum', 'YAxisMaximum', 'ColorMapMaximum', 'BubbleMaximum'                                                   => 100.0,
+                    'TitleFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'                                                => 100,
+                    'AnimationDuration'                                                                                                  => 350, 'AnimationDurationUpdate' => 500,
+                    'AnimationDelay', 'AnimationDelayUpdate', 'ZoomSliderSize'                                                           => 0,
+                    default                                                                                                              => -1
                 };
                 match ($type) {
                     'string'  => $this->RegisterPropertyString('IPSView' . $name, $default),
@@ -569,7 +576,9 @@ class EChartsScatter extends IPSModuleStrict
             return $debugFlowResult = $this->HandleEChartsIPSViewRequest(
                 $JSONString,
                 self::DATA_ID_FROM_PARENT,
-                fn (): array => $this->BuildVisualizationState(true)
+                $this->CartesianTransportState(...),
+                true,
+                true
             );
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -922,7 +931,12 @@ class EChartsScatter extends IPSModuleStrict
             . ($axisFontSize + 2) . '" fill="' . EChartsBarPreview::E($axisColor) . '">'
             . EChartsBarPreview::E($yLabel) . '</text>';
 
-        return $svg . '</svg>';
+        return EChartsPeriodPreview::Apply(
+            $svg . '</svg>',
+            $this->BarPreviewValue($values, 'EnablePeriodSelection', 'boolean', $ipsView),
+            $this->Translate('Period'),
+            $palette
+        );
     }
 
     private static function PreviewInterpolatedColor(string $low, string $high, float $fraction): string
@@ -954,22 +968,23 @@ class EChartsScatter extends IPSModuleStrict
         return $mode === 'zero' ? [min(0.0, $minimum), max(0.0, $maximum)] : [$minimum, $maximum];
     }
 
-    private function GetScatterDataForOutput(bool $ipsView): string
+    private function GetScatterDataForOutput(bool $ipsView, string $period = ''): string
     {
         $error = $this->GetConfigurationError();
         if ($error !== null) {
-            $this->WriteAttributeString('LastError', $error['Message']);
-            $this->DebugEChartsSetStatus($error['Status']);
+            $this->SetViewError($error['Message']);
+            $this->SetViewStatus($error['Status']);
             throw new RuntimeException($error['Message']);
         }
         if (!$this->HasActiveParent()) {
-            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
+            $this->SetViewStatus(self::STATUS_PARENT_MISSING);
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         $groups = $this->GetValidatedGroups();
         $sourceCount = array_sum(array_map(static fn (array $g): int => count($g['sources']), $groups));
+        $range = $period !== '' ? $period : $this->EffectiveRange($ipsView);
         $query = EChartsArchiveQuery::Resolve(
-            $this->EffectiveRange($ipsView),
+            $range,
             $this->EffectiveCustomRangeValue($ipsView),
             $this->EffectiveCustomRangeUnit($ipsView),
             $this->ReadPropertyString('DataMode'),
@@ -1009,8 +1024,8 @@ class EChartsScatter extends IPSModuleStrict
                     'unit'                  => $metadata[$role]['unit'], 'decimals' => $metadata[$role]['decimals']];
             }
         }
-        $this->WriteAttributeString('LastError', '');
-        $this->DebugEChartsSetStatus(IS_ACTIVE);
+        $this->SetViewError('');
+        $this->SetViewStatus(IS_ACTIVE);
 
         $json = json_encode([
             'schemaVersion' => 1,
@@ -1020,7 +1035,7 @@ class EChartsScatter extends IPSModuleStrict
             'scatter'       => ['title' => $this->ReadPropertyString('Title'), 'style' => $this->ReadDesignStyle($ipsView)],
             'roles'         => $metadata,
             'range'         => [
-                'key'              => $this->EffectiveRange($ipsView),
+                'key'              => $range,
                 'startTimestamp'   => $query['StartTimestamp'],
                 'endTimestamp'     => $query['EndTimestamp'],
                 'aggregationLevel' => $query['AggregationLevel'],
@@ -1028,8 +1043,8 @@ class EChartsScatter extends IPSModuleStrict
             ],
         ] + ($named ? ['groups' => $models] : ['points' => $models[0]['points']]) + ['truncated' => $truncated], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
         if ($named && strlen($json) > 200000) {
-            $this->WriteAttributeString('LastError', 'SCATTER_MODEL_TOO_LARGE');
-            $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
+            $this->SetViewError('SCATTER_MODEL_TOO_LARGE');
+            $this->SetViewStatus(self::STATUS_CONFIGURATION_INVALID);
             throw new RuntimeException('The Scatter comparison model exceeds its output budget.');
         }
         return $json;
@@ -1038,7 +1053,7 @@ class EChartsScatter extends IPSModuleStrict
     private function RenderScatterHTMLPage(bool $ipsView): string
     {
 
-        return $this->RenderChartPage($ipsView, [
+        $html = $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Scatter',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -1076,6 +1091,7 @@ class EChartsScatter extends IPSModuleStrict
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
+        return $this->WithEChartsPeriodSelection($html, $ipsView, $this->CartesianPeriodChoices($ipsView));
     }
 
     private function Initialize(): void
@@ -1275,13 +1291,13 @@ class EChartsScatter extends IPSModuleStrict
                     $operation
                 );
             } catch (Throwable $exception) {
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned an invalid Scatter archive response.', 0, $exception);
             }
             if (!$response['Success']) {
                 $code = (string) ($response['Error']['Code'] ?? 'GATEWAY_REQUEST_FAILED');
-                $this->WriteAttributeString('LastError', $code);
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError($code);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway archive request failed: ' . $code);
             }
             $archive = $response['Payload'];
@@ -1324,7 +1340,7 @@ class EChartsScatter extends IPSModuleStrict
     }
 
     /** @return array<string,mixed> */
-    private function BuildVisualizationState(bool $ipsView = false): array
+    private function BuildVisualizationState(bool $ipsView = false, string $period = ''): array
     {
         if ($this->GetConfigurationError() !== null) {
             return ['schemaVersion' => 1, 'family' => 'scatter', 'status' => 'error',
@@ -1335,7 +1351,7 @@ class EChartsScatter extends IPSModuleStrict
                 'chart'             => null, 'error' => 'Connect an active EChartsGateway.'];
         }
         try {
-            $chart = json_decode($this->GetScatterDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
+            $chart = json_decode($this->GetScatterDataForOutput($ipsView, $period), true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
             return ['schemaVersion' => 1, 'family' => 'scatter', 'status' => 'error',

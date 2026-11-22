@@ -32,6 +32,11 @@ Modulanleitung und gelten zusätzlich zu den Bedienbereichen des Formulars.
   DateTime-JSON enthält die Integer-Felder `year`, `month`, `day`, `hour`,
   `minute`, `second`; reine Kalenderdaten nur `year`, `month`, `day`.
   Nicht existierende oder doppeldeutige Ortszeiten werden abgewiesen.
+- **Zeitraumauswahl anzeigen** (`EnablePeriodSelection`, `IPSViewEnablePeriodSelection`, jeweils Boolean, Standard `false`):
+  TimeSeries, BarHistory, Scatter, Boxplot, Parallel, Candlestick, ThemeRiver,
+  StateTimeline, Calendar und Heatmap bieten passende Archivzeiträume direkt im
+  Diagramm an. Die Auswahl gilt nur im geöffneten Dokument. Ein eigenes
+  IPSView-Design hat eine unabhängige Einstellung.
 - **Abhängigkeiten:** Eine passende Modusauswahl aktiviert die zugehörigen
   Detailfelder, etwa manuelle Skalen, Gradienten, SVG oder feste Zeiträume.
   Nicht jeder einzeln gültige Feldwert ergibt eine gültige Gesamtkonfiguration.
@@ -191,7 +196,7 @@ Quellen gleicher Einheit bei automatischer oder fester Verdichtung.
 | Ausrichtung | `Orientation` | String | `"vertical"` | `"vertical"` Vertikal oder `"horizontal"` Horizontal |
 | IPSView-Ausrichtung | `IPSViewOrientation` | String | `"vertical"` | Eigene Ausrichtung bei deaktiviertem Kacheldesign |
 | Titel | `Title` | String | `""` | Siehe Modulanleitung |
-| Zeitraum | `Range` | String | `"24h"` | `"1h"` 1 Stunde; `"6h"` 6 Stunden; `"24h"` 24 Stunden; `"7d"` 7 Tage; `"30d"` 30 Tage; `"today"` Heute; `"yesterday"` Gestern; `"current-week"` Diese Woche; `"current-month"` Dieser Monat; `"custom"` Benutzerdefiniert |
+| Zeitraum | `Range` | String | `"24h"` | `"1h"` 1 Stunde; `"6h"` 6 Stunden; `"24h"` 24 Stunden; `"7d"` 7 Tage; `"30d"` 30 Tage; `"today"` Heute; `"yesterday"` Gestern; `"current-week"` Diese Woche; `"current-month"` Dieser Monat; `"current-year"` Dieses Jahr; `"custom"` Benutzerdefiniert |
 | Zeitraumwert | `CustomRangeValue` | Integer | `7` | 1–1000 |
 | Zeitraumeinheit | `CustomRangeUnit` | String | `"day"` | `"minute"` Minuten; `"hour"` Stunden; `"day"` Tage; `"week"` Wochen |
 | Datenmodus | `DataMode` | String | `"auto"` | `"raw"` Rohwerte; `"auto"` Automatische Verdichtung; `"minute"` 1 Minute; `"five-minutes"` 5 Minuten; `"fifteen-minutes"` 15 Minuten; `"hour"` 1 Stunde; `"day"` 1 Tag |
@@ -228,7 +233,7 @@ Quellen gleicher Einheit bei automatischer oder fester Verdichtung.
 | Startverzögerung | `AnimationDelay` | Integer | `0` | 0–3000 ms |
 | Aktualisierungsverzögerung | `AnimationDelayUpdate` | Integer | `0` | 0–3000 ms |
 | Zeiteinstellungen der Kachel verwenden | `IPSViewUseTileTimeSettings` | Boolean | `true` | `true` / `false` |
-| IPSView-Zeitraum | `IPSViewRange` | String | `"24h"` | `"1h"` 1 Stunde; `"6h"` 6 Stunden; `"24h"` 24 Stunden; `"7d"` 7 Tage; `"30d"` 30 Tage; `"today"` Heute; `"yesterday"` Gestern; `"current-week"` Diese Woche; `"current-month"` Dieser Monat; `"custom"` Benutzerdefiniert |
+| IPSView-Zeitraum | `IPSViewRange` | String | `"24h"` | `"1h"` 1 Stunde; `"6h"` 6 Stunden; `"24h"` 24 Stunden; `"7d"` 7 Tage; `"30d"` 30 Tage; `"today"` Heute; `"yesterday"` Gestern; `"current-week"` Diese Woche; `"current-month"` Dieser Monat; `"current-year"` Dieses Jahr; `"custom"` Benutzerdefiniert |
 | Zeitraumwert | `IPSViewCustomRangeValue` | Integer | `7` | 1–1000 |
 | Zeitraumeinheit | `IPSViewCustomRangeUnit` | String | `"day"` | `"minute"` Minuten; `"hour"` Stunden; `"day"` Tage; `"week"` Wochen |
 | Beschriftung der Zeitachse | `IPSViewTimeAxisLabelFormat` | String | `"auto"` | `"auto"` Automatisch; `"time"` Uhrzeit; `"date"` Datum; `"date-time"` Datum und Uhrzeit |
@@ -1855,7 +1860,7 @@ Die [gemeinsamen IPSView-Regeln](#gemeinsame-ipsview-einstellungen) und gegebene
 | --- | --- | --- | --- | --- |
 | Streudiagramm (optional mit Blasengröße) | `Sources` | String | `"[]"` | Siehe Modulanleitung |
 | Titel | `Title` | String | `""` | Siehe Modulanleitung |
-| Zeitraum | `Range` | String | `"24h"` | `"1h"` 1 Stunde; `"6h"` 6 Stunden; `"24h"` 24 Stunden; `"7d"` 7 Tage; `"30d"` 30 Tage; `"today"` Heute; `"yesterday"` Gestern; `"current-week"` Diese Woche; `"current-month"` Dieser Monat; `"custom"` Benutzerdefiniert |
+| Zeitraum | `Range` | String | `"24h"` | `"1h"` 1 Stunde; `"6h"` 6 Stunden; `"24h"` 24 Stunden; `"7d"` 7 Tage; `"30d"` 30 Tage; `"today"` Heute; `"yesterday"` Gestern; `"current-week"` Diese Woche; `"current-month"` Dieser Monat; `"current-year"` Dieses Jahr; `"custom"` Benutzerdefiniert |
 | Zeitraumwert | `CustomRangeValue` | Integer | `7` | 1–1000 |
 | Zeitraumeinheit | `CustomRangeUnit` | String | `"day"` | `"minute"` Minuten; `"hour"` Stunden; `"day"` Tage; `"week"` Wochen |
 | Verdichtung | `DataMode` | String | `"auto"` | `"auto"` Automatisch; `"minute"` 1 Minute; `"five-minutes"` 5 Minuten; `"fifteen-minutes"` 15 Minuten; `"hour"` 1 Stunde; `"day"` 1 day |
@@ -1904,7 +1909,7 @@ Die [gemeinsamen IPSView-Regeln](#gemeinsame-ipsview-einstellungen) und gegebene
 | Startverzögerung | `AnimationDelay` | Integer | `0` | 0–3000 ms |
 | Aktualisierungsverzögerung | `AnimationDelayUpdate` | Integer | `0` | 0–3000 ms |
 | Zeiteinstellungen der Kachel verwenden | `IPSViewUseTileTimeSettings` | Boolean | `true` | `true` / `false` |
-| IPSView-Zeitraum | `IPSViewRange` | String | `"24h"` | `"1h"` 1 Stunde; `"6h"` 6 Stunden; `"24h"` 24 Stunden; `"7d"` 7 Tage; `"30d"` 30 Tage; `"today"` Heute; `"yesterday"` Gestern; `"current-week"` Diese Woche; `"current-month"` Dieser Monat; `"custom"` Benutzerdefiniert |
+| IPSView-Zeitraum | `IPSViewRange` | String | `"24h"` | `"1h"` 1 Stunde; `"6h"` 6 Stunden; `"24h"` 24 Stunden; `"7d"` 7 Tage; `"30d"` 30 Tage; `"today"` Heute; `"yesterday"` Gestern; `"current-week"` Diese Woche; `"current-month"` Dieser Monat; `"current-year"` Dieses Jahr; `"custom"` Benutzerdefiniert |
 | Zeitraumwert | `IPSViewCustomRangeValue` | Integer | `7` | 1–1000 |
 | Zeitraumeinheit | `IPSViewCustomRangeUnit` | String | `"day"` | `"minute"` Minuten; `"hour"` Stunden; `"day"` Tage; `"week"` Wochen |
 
@@ -2167,7 +2172,7 @@ zwei Leistungsvariablen steht in der [Modulanleitung](../EChartsTimeSeries/READM
 | Zeitreihenquellen | `Sources` | String | `"[]"` | Siehe Modulanleitung |
 | Referenzlinien und Wertebereiche | `Annotations` | String | `"[]"` | Siehe Modulanleitung |
 | Titel | `Title` | String | `""` | Siehe Modulanleitung |
-| Zeitraum | `Range` | String | `"24h"` | `"1h"` 1 Stunde; `"6h"` 6 Stunden; `"24h"` 24 Stunden; `"7d"` 7 Tage; `"30d"` 30 Tage; `"today"` Heute; `"yesterday"` Gestern; `"current-week"` Diese Woche; `"current-month"` Dieser Monat; `"custom"` Benutzerdefiniert |
+| Zeitraum | `Range` | String | `"24h"` | `"1h"` 1 Stunde; `"6h"` 6 Stunden; `"24h"` 24 Stunden; `"7d"` 7 Tage; `"30d"` 30 Tage; `"today"` Heute; `"yesterday"` Gestern; `"current-week"` Diese Woche; `"current-month"` Dieser Monat; `"current-year"` Dieses Jahr; `"custom"` Benutzerdefiniert |
 | Zeitraumwert | `CustomRangeValue` | Integer | `7` | 1–1000 |
 | Zeitraumeinheit | `CustomRangeUnit` | String | `"day"` | `"minute"` Minuten; `"hour"` Stunden; `"day"` Tage; `"week"` Wochen |
 | Beschriftung der Zeitachse | `TimeAxisLabelFormat` | String | `"auto"` | `"auto"` Automatisch; `"time"` Uhrzeit; `"date"` Datum; `"date-time"` Datum und Uhrzeit |
@@ -2206,7 +2211,7 @@ zwei Leistungsvariablen steht in der [Modulanleitung](../EChartsTimeSeries/READM
 | Rasterfarbe | `GridColor` | Integer | `-1` | `0xRRGGBB`; Automatik nach Feldvorgabe |
 | Wertfarbe | `ValueColor` | Integer | `-1` | `0xRRGGBB`; Automatik nach Feldvorgabe |
 | Zeiteinstellungen der Kachel verwenden | `IPSViewUseTileTimeSettings` | Boolean | `true` | `true` / `false` |
-| IPSView-Zeitraum | `IPSViewRange` | String | `"24h"` | `"1h"` 1 Stunde; `"6h"` 6 Stunden; `"24h"` 24 Stunden; `"7d"` 7 Tage; `"30d"` 30 Tage; `"today"` Heute; `"yesterday"` Gestern; `"current-week"` Diese Woche; `"current-month"` Dieser Monat; `"custom"` Benutzerdefiniert |
+| IPSView-Zeitraum | `IPSViewRange` | String | `"24h"` | `"1h"` 1 Stunde; `"6h"` 6 Stunden; `"24h"` 24 Stunden; `"7d"` 7 Tage; `"30d"` 30 Tage; `"today"` Heute; `"yesterday"` Gestern; `"current-week"` Diese Woche; `"current-month"` Dieser Monat; `"current-year"` Dieses Jahr; `"custom"` Benutzerdefiniert |
 | Zeitraumwert | `IPSViewCustomRangeValue` | Integer | `7` | 1–1000 |
 | Zeitraumeinheit | `IPSViewCustomRangeUnit` | String | `"day"` | `"minute"` Minuten; `"hour"` Stunden; `"day"` Tage; `"week"` Wochen |
 | Beschriftung der Zeitachse | `IPSViewTimeAxisLabelFormat` | String | `"auto"` | `"auto"` Automatisch; `"time"` Uhrzeit; `"date"` Datum; `"date-time"` Datum und Uhrzeit |

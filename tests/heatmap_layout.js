@@ -362,6 +362,21 @@ if (fs.existsSync(localECharts)) {
 async function verifyNavigation() {
     const previousModel = { ...datedModel, heatmap: { ...datedModel.heatmap,
         windowOffset: 1, startDate: '2026-09-30', endDate: '2026-10-06' } };
+    let completeOldPeriod;
+    const switched = render(datedModel, 600, 400, 'ipsview', path => {
+        assert.match(path, /^https:\/\/opaque\.example\/hook\/.*offset=1&period=1w$/);
+        return new Promise(resolve => { completeOldPeriod = resolve; });
+    });
+    switched.window.location = {href: 'about:blank'};
+    switched.window.SymconEChartsPeriodSelection = {withPeriod(path) {
+        return new URL(path + '&period=1w', 'https://opaque.example').href;
+    }};
+    switched.window.handleMessage({status: 'ready', viewPeriod: '1w', chart: datedModel});
+    switched.click('previous');
+    switched.window.handleMessage({status: 'ready', chart: datedModel});
+    completeOldPeriod({ok: true, json: async () => ({status: 'ready', chart: previousModel})});
+    await new Promise(resolve => setImmediate(resolve));
+    assert.ok(switched.nextElement.disabled, 'A response to the old picker selection cannot navigate the current view.');
     const requests = [];
     const navigable = render(datedModel, 600, 400, 'symcon', url => {
         requests.push(url);

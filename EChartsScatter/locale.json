@@ -154,7 +154,10 @@
             "The Scatter values could not be loaded.": "Die Scatter-Werte konnten nicht geladen werden.",
             "Scatter data could not be refreshed. Showing the last available values.": "Scatter-Daten konnten nicht aktualisiert werden. Die letzten verfügbaren Werte bleiben sichtbar.",
             "No common completed archive intervals.": "Keine gemeinsamen abgeschlossenen Archivintervalle vorhanden.",
-            "The selected range was truncated by the point budget.": "Der gewählte Zeitraum wurde durch das Punktbudget abgeschnitten."
+            "The selected range was truncated by the point budget.": "Der gewählte Zeitraum wurde durch das Punktbudget abgeschnitten.",
+            "Show period selection": "Zeitraumauswahl anzeigen",
+            "Period": "Zeitraum",
+            "This year": "Dieses Jahr"
         }
     }
 }

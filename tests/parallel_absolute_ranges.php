@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/archive_period_view.php';
+
 // Isolated route in gateway_gauges.php: real module, planner, pairing and Gateway.
 (static function (): void
 {
@@ -78,6 +80,7 @@ declare(strict_types=1);
             $again['range'] === $data['range'] && $again['parallel']['rows'] === $data['parallel']['rows'],
             'Refreshing later must not shift historical boundaries or replace archive values with current values.'
         );
+        verifyArchivePeriodView($chart);
         foreach ([$chart->GetVisualizationTile(), $chart->GetIPSViewHTML()] as $html) {
             assertGatewayGauge(
                 str_contains($html, '"requestedStartTimestamp":') && strlen($html) < SYMCON_OUTPUT_BUFFER_LIMIT,

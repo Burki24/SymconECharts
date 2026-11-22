@@ -13,6 +13,7 @@ use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\BoxplotStatistics;
 use SymconECharts\EChartsAnimationDesign;
+use SymconECharts\EChartsArchivePeriodView;
 use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
@@ -35,6 +36,7 @@ require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
 require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
+require_once __DIR__ . '/../libs/EChartsArchivePeriodView.php';
 require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
@@ -63,6 +65,7 @@ class EChartsBoxplot extends IPSModuleStrict
     use EChartsBarPreviewForm;
     use SymconECharts\BoxplotPreview;
     use EChartsIPSViewDesignForm;
+    use EChartsArchivePeriodView;
     use EChartsIPSViewTransport;
     use EChartsTransientRefresh;
     use IPSViewHTMLPageHelper;
@@ -81,14 +84,15 @@ class EChartsBoxplot extends IPSModuleStrict
     private const MAXIMUM_SOURCE_COUNT = 32;
     private const MAXIMUM_TOTAL_POINTS = 10000;
     private const DESIGN_DEFAULTS = [
-        'EChartsTheme'         => 'auto', 'Orientation' => 'vertical', 'ShowTooltip' => true,
-        'ZoomSliderSize'       => 0,
-        'ShowGrid'             => true, 'ShowAxisLabels' => true, 'BoxWidth' => 40, 'BorderWidth' => 2, 'BoxOpacityPercent' => 70,
-        'TitleFontSizePercent' => 100, 'AxisFontSizePercent' => 100, 'TitleColor' => -1, 'AxisColor' => -1, 'BorderColor' => -1,
-        'MinBoxWidth'          => 1, 'BorderType' => 'solid', 'ShadowBlur' => 0, 'ShadowColor' => -1, 'ShadowOffsetX' => 0, 'ShadowOffsetY' => 0,
-        'HoverFocus'           => 'self', 'BlurOpacityPercent' => 10, 'AxisLineWidth' => 1, 'ShowAxisTicks' => true,
-        'AxisLabelRotate'      => 0, 'AxisLabelMaxWidth' => 0, 'TitleBold' => true, 'AxisLabelBold' => false,
-        'SplitNumber'          => 5, 'GridLineType' => 'solid', 'GridLineWidth' => 1, 'GridOpacityPercent' => 25, 'GridColor' => -1
+        'EnablePeriodSelection' => false,
+        'EChartsTheme'          => 'auto', 'Orientation' => 'vertical', 'ShowTooltip' => true,
+        'ZoomSliderSize'        => 0,
+        'ShowGrid'              => true, 'ShowAxisLabels' => true, 'BoxWidth' => 40, 'BorderWidth' => 2, 'BoxOpacityPercent' => 70,
+        'TitleFontSizePercent'  => 100, 'AxisFontSizePercent' => 100, 'TitleColor' => -1, 'AxisColor' => -1, 'BorderColor' => -1,
+        'MinBoxWidth'           => 1, 'BorderType' => 'solid', 'ShadowBlur' => 0, 'ShadowColor' => -1, 'ShadowOffsetX' => 0, 'ShadowOffsetY' => 0,
+        'HoverFocus'            => 'self', 'BlurOpacityPercent' => 10, 'AxisLineWidth' => 1, 'ShowAxisTicks' => true,
+        'AxisLabelRotate'       => 0, 'AxisLabelMaxWidth' => 0, 'TitleBold' => true, 'AxisLabelBold' => false,
+        'SplitNumber'           => 5, 'GridLineType' => 'solid', 'GridLineWidth' => 1, 'GridOpacityPercent' => 25, 'GridColor' => -1
     ];
 
     public function Create(): void
@@ -383,7 +387,9 @@ class EChartsBoxplot extends IPSModuleStrict
             return $debugFlowResult = $this->HandleEChartsIPSViewRequest(
                 $JSONString,
                 self::DATA_ID_FROM_PARENT,
-                fn (): array => $this->BuildVisualizationState(true)
+                fn (array $payload): array => $this->BuildArchivePeriodView($payload),
+                $this->EChartsPeriodSelectionEnabled(false),
+                true
             );
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -455,24 +461,25 @@ class EChartsBoxplot extends IPSModuleStrict
     /** @param array<string,mixed> $values */
     protected function BarPreviewSvg(array $values, bool $ipsView): string
     {
-        return $this->BoxplotPreviewSvg($values, $ipsView);
+        return $this->WithArchivePeriodPreview($this->BoxplotPreviewSvg($values, $ipsView), $values, $ipsView);
     }
 
-    private function GetBoxplotDataForOutput(bool $ipsView): string
+    private function GetBoxplotDataForOutput(bool $ipsView, string $period = ''): string
     {
         $error = $this->GetConfigurationError();
         if ($error !== null) {
-            $this->WriteAttributeString('LastError', $error['Message']);
-            $this->DebugEChartsSetStatus($error['Status']);
+            $this->SetViewError($error['Message']);
+            $this->SetViewStatus($error['Status']);
             throw new RuntimeException($error['Message']);
         }
         if (!$this->HasActiveParent()) {
-            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
+            $this->SetViewStatus(self::STATUS_PARENT_MISSING);
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         $sources = $this->GetValidatedSources();
-        $query = $this->ResolveTimeQuery(count($sources));
-        $range = ['key'    => $this->ReadPropertyString('Range'), 'startTimestamp' => $query['StartTimestamp'],
+        $rangeKey = $period === '' ? $this->ReadPropertyString('Range') : $period;
+        $query = $this->ResolveTimeQuery(count($sources), ['Range' => $rangeKey]);
+        $range = ['key'    => $rangeKey, 'startTimestamp' => $query['StartTimestamp'],
             'endTimestamp' => $query['EndTimestamp'], 'aggregationLevel' => 0];
         if ($range['key'] === 'absolute') {
             $range += ['requestedStartTimestamp' => $query['RequestedStartTimestamp'],
@@ -490,18 +497,18 @@ class EChartsBoxplot extends IPSModuleStrict
                 $pointCount += count($archive['Points']);
                 $summary = BoxplotStatistics::Summarize($archive['Points'], $query['StartTimestamp'], $query['EndTimestamp'], $this->ReadPropertyString('WhiskerMode'));
             } catch (Throwable $exception) {
-                if ($this->ReadAttributeString('LastError') === '') {
-                    $this->WriteAttributeString('LastError', 'INVALID_ARCHIVE_SAMPLES');
+                if ($this->GetViewError() === '') {
+                    $this->SetViewError('INVALID_ARCHIVE_SAMPLES');
                 }
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw $exception;
             }
             $data[] = ['id' => 'variable-' . $source['VariableID'], 'variableID' => $source['VariableID'],
                 'label'     => $source['Label'], 'unit' => $source['Unit'], 'decimals' => $source['Decimals'],
                 'color'     => $source['Color'] < 0 ? '' : EChartsAsset::ColorToHex($source['Color']), ...$summary];
         }
-        $this->WriteAttributeString('LastError', '');
-        $this->DebugEChartsSetStatus(IS_ACTIVE);
+        $this->SetViewError('');
+        $this->SetViewStatus(IS_ACTIVE);
         return json_encode(
             ['schemaVersion' => 1, 'family' => 'boxplot', 'theme' => $this->EffectiveTheme($ipsView),
                 'boxplot'    => ['title' => $this->ReadPropertyString('Title'), 'unit' => $sources[0]['Unit'],
@@ -514,7 +521,7 @@ class EChartsBoxplot extends IPSModuleStrict
 
     private function RenderBoxplotHTMLPage(bool $ipsView): string
     {
-        return $this->RenderChartPage($ipsView, [
+        $html = $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Boxplot',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -554,6 +561,7 @@ class EChartsBoxplot extends IPSModuleStrict
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
+        return $this->WithEChartsPeriodSelection($html, $ipsView, $this->ArchivePeriodChoices($ipsView));
     }
 
     private function Initialize(): void
@@ -716,7 +724,7 @@ class EChartsBoxplot extends IPSModuleStrict
                 'StartTimestamp'     => $query['StartTimestamp'], 'EndTimestamp' => $query['EndTimestamp'],
                 'Mode'               => 'aggregated', 'Reducer' => 'average',
                 'Limit'              => $limit, 'AggregationLevel' => $query['AggregationLevel']];
-            $this->WriteAttributeString('LastError', '');
+            $this->SetViewError('');
             try {
                 $response = EChartsDataProtocol::DecodeResponse(
                     $this->DebugEChartsSendToParent($this->EncodeDataFlowMessage(
@@ -726,14 +734,14 @@ class EChartsBoxplot extends IPSModuleStrict
                     $operation
                 );
             } catch (Throwable $exception) {
-                $this->WriteAttributeString('LastError', 'INVALID_ARCHIVE_RESPONSE');
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError('INVALID_ARCHIVE_RESPONSE');
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned an invalid Boxplot archive response.', 0, $exception);
             }
             if (!$response['Success']) {
                 $code = (string) ($response['Error']['Code'] ?? 'GATEWAY_REQUEST_FAILED');
-                $this->WriteAttributeString('LastError', $code);
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError($code);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway archive request failed: ' . $code);
             }
             $archive = $response['Payload'];
@@ -746,8 +754,8 @@ class EChartsBoxplot extends IPSModuleStrict
                 || ($archive['EndTimestamp'] ?? null) !== $query['EndTimestamp']
                 || ($archive['EffectiveReducer'] ?? null) !== 'average'
                 || ($archive['ArchiveAggregationType'] ?? null) !== 'standard') {
-                $this->WriteAttributeString('LastError', 'INVALID_ARCHIVE_DATA');
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError('INVALID_ARCHIVE_DATA');
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned invalid Boxplot archive data.');
             }
             return $debugFlowResult = $archive;
@@ -762,8 +770,8 @@ class EChartsBoxplot extends IPSModuleStrict
 
     private function FailArchiveBudget(): never
     {
-        $this->WriteAttributeString('LastError', 'ARCHIVE_TRUNCATED');
-        $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+        $this->SetViewError('ARCHIVE_TRUNCATED');
+        $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
         throw new RuntimeException('Too many Boxplot archive samples. Choose a shorter time range.');
     }
 
@@ -791,7 +799,7 @@ class EChartsBoxplot extends IPSModuleStrict
     }
 
     /** @return array<string,mixed> */
-    private function BuildVisualizationState(bool $ipsView = false): array
+    private function BuildVisualizationState(bool $ipsView = false, string $period = ''): array
     {
         $error = $this->GetConfigurationError();
         if ($error !== null) {
@@ -804,10 +812,10 @@ class EChartsBoxplot extends IPSModuleStrict
             return $this->ErrorState('Connect an active EChartsGateway.');
         }
         try {
-            $chart = json_decode($this->GetBoxplotDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
+            $chart = json_decode($this->GetBoxplotDataForOutput($ipsView, $period), true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
-            return $this->ErrorState(match ($this->ReadAttributeString('LastError')) {
+            return $this->ErrorState(match ($this->GetViewError()) {
                 'REDUCER_NOT_SUPPORTED' => 'Boxplot requires standard archive variables, not counters.',
                 'ARCHIVE_TRUNCATED'     => 'Too many Boxplot archive samples. Choose a shorter time range.',
                 default                 => 'The Boxplot values could not be loaded.'

@@ -21,7 +21,7 @@ Alternativ ist **Benutzerdefiniert** mit einer Anzahl von 1–1000 Minuten,
 Stunden, Tagen oder Wochen verfügbar. Das ist ein rollierendes Zeitfenster.
 Für feste Anfangs-/Enddaten ist **Fester historischer Zeitraum** verfügbar.
 Bei rollierenden Zeitfenstern entspricht ein Tag 24 Stunden,
-eine Woche sieben solchen Tagen. Kachel und IPSView verwenden denselben Zeitraum.
+eine Woche sieben solchen Tagen. Kachel und IPSView starten mit dem konfigurierten Zeitraum.
 Standardwerte werden ohne ausdrückliche Kennzahl als Intervallmittelwerte,
 Zähler als Intervallsummen abgerufen. Nur Intervalle mit Werten auf *allen* Achsen werden gezeichnet;
 fehlende Werte werden nicht interpoliert. Das aktuelle, noch nicht
@@ -155,7 +155,8 @@ Diese Grenze steht auch im Hinweis an der Achsenpositionsanzeige.
 Die Grenze betrifft geladene Aggregate aller Achsen, nicht nur die am Ende
 gemeinsamen Linien oder den sichtbaren Ausschnitt. Längere Zeiträume erhöhen sie nicht.
 Bei Kürzung bleiben der Hinweis und die jüngsten gemeinsamen Intervalle
-erhalten. Kachel und IPSView teilen den Zeitraum, aber nicht zwingend das Design.
+erhalten. Kachel und IPSView starten mit dem konfigurierten Zeitraum. Bei
+aktivierter Zeitraumauswahl lässt er sich in jeder Ansicht separat wechseln.
 Die Entwurfsvorschau zeigt die gewählten Grenzen und weiterhin ausschließlich
 gekennzeichnete Beispieldaten. Alte Zeiträume und gespeicherte Konfigurationen
 bleiben unverändert nutzbar.
@@ -170,6 +171,16 @@ verwendet gekennzeichnete Beispieldaten;
 die echten Archivdaten erscheinen nach Übernahme in Kachel und IPSView.
 Das Modul benötigt ein aktives EChartsGateway und löst selbst keine
 Archivänderungen aus.
+
+## Zeitraum im Diagramm wechseln
+
+Aktiviere im **Kacheldesigner** die Option **Zeitraumauswahl anzeigen**. In der
+geöffneten Ansicht kannst du dann zwischen den letzten 24 Stunden, 7 Tagen und
+30 Tagen wechseln. Mit der Standardauswahl kehrst du zum konfigurierten
+Zeitraum zurück, auch bei einem festen historischen Von-/Bis-Zeitraum.
+IPSView übernimmt die Einstellung aus der Kachel oder verwendet dieselbe Option
+im eigenen Designer. Jede Ansicht lädt ihre Archivwerte mit den bisherigen
+Lesegrenzen. Andere geöffnete Ansichten behalten ihre Auswahl.
 
 ## Konfigurationsreferenz und Skriptzugriff
 

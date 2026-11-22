@@ -62,7 +62,7 @@ try {
             if ($payload['InstanceID'] !== $device || $payload['Channel'] !== $channel) {
                 return '';
             }
-            return EChartsDataProtocol::EncodeSuccessResponse('ipsview.state', ['State' => ['device' => $device, 'output' => $payload['Output']]]);
+            return EChartsDataProtocol::EncodeSuccessResponse('ipsview.state', ['State' => ['device' => $device, 'output' => $payload['Output'], 'period' => $payload['Period'] ?? '', 'offset' => $payload['WindowOffset']]]);
         }];
     }
     $getState = static function (TestableEChartsGateway $handler, int $device, string $token, array $query = []): array
@@ -77,9 +77,16 @@ try {
         foreach ([6101, 7101] as $device) {
             $result = $getState($handler, $device, $channel);
             assertGatewayGauge($result['status'] === 200 && $result['state']['device'] === $device, 'Every hook handler must route through the actual connected gateway.');
+            foreach (['tile', 'ipsview'] as $output) {
+                $view = $getState($handler, $device, $channel, ['output' => $output, 'period' => '7d', 'offset' => '2']);
+                assertGatewayGauge($view['status'] === 200 && $view['state']['period'] === '7d' && $view['state']['output'] === $output && $view['state']['offset'] === 2, 'The selected period and navigation offset must reach the correct output across gateways.');
+            }
         }
     }
     assertGatewayGauge($getState($first, 7101, str_repeat('b', 32))['status'] === 404, 'Cross-gateway routing must preserve channel authorization.');
+    foreach ([['24h'], str_repeat('a', 33), '24 hours'] as $invalidPeriod) {
+        assertGatewayGauge($getState($first, 7101, $channel, ['period' => $invalidPeriod])['status'] === 400, 'Malformed period parameters must fail before data is loaded.');
+    }
     assertGatewayGauge($getState($first, 7101, $channel, ['offset' => '-1'])['status'] === 400, 'Invalid offsets must still fail before dispatch.');
     assertGatewayGauge($getState($first, 7101, $channel, ['output' => 'tile'])['state']['output'] === 'tile', 'Native tile navigation must retain its authenticated output contract.');
     assertGatewayGauge($first->GetTransportState(7101, $channel, 0, 'ipsview') === '', 'A gateway must not impersonate another gateway child.');

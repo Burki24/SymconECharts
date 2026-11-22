@@ -1,6 +1,7 @@
 {
     "translations": {
         "de": {
+            "Show period selection": "Zeitraumauswahl anzeigen",
             "Chart background": "Diagrammhintergrund",
             "Select a valid chart background color.": "Bitte eine gültige Farbe für den Diagrammhintergrund wählen.",
             "Fixed historical period": "Fester historischer Zeitraum",

@@ -182,6 +182,18 @@ unabhängig eingestellt werden. Bei einem vorübergehenden Ladefehler bleibt
 eine zuletzt gültige Grafik sichtbar und die Archivabfrage wird beim nächsten
 Aktualisierungsintervall wiederholt.
 
+### Zeitraum im Diagramm wechseln
+
+Aktiviere **Zeitraumauswahl anzeigen** im Kacheldesigner oder im eigenständigen IPSView-Designer.
+Ein Menü im Diagramm wechselt zwischen den letzten sieben Tagen, abgeschlossenen
+Monatsblöcken (1, 3, 6 oder 12 Monate) und dem Zeitraum seit Jahresbeginn.
+Mit den Pfeilen blätterst Du innerhalb der gewählten Ansicht. In Vergleichsansichten wirkt
+die Wahl auf die Panels mit gemeinsamem Zeitraum. Panels mit eigenen historischen Grenzen
+behalten diese. Das Menü bietet die Zeiträume an, die ins gemeinsame Archivbudget passen.
+Über **Standard** kehrst Du zum konfigurierten Zeitraum zurück.
+
+Die Auswahl gilt für die geöffnete Ansicht. Beim erneuten Öffnen gilt wieder der konfigurierte Zeitraum.
+
 ## Konfigurationsreferenz und Skriptzugriff
 
 Die [Feldreferenz](../docs/KONFIGURATION.md#echartsheatmap) enthält

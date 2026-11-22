@@ -7,6 +7,7 @@ namespace SymconECharts;
 use Burki24\SymconModuleHelper\SVGPreviewHelper;
 
 require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
+require_once __DIR__ . '/../libs/EChartsPeriodPreview.php';
 require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
 require_once __DIR__ . '/../libs/EChartsPreviewSymbol.php';
 require_once __DIR__ . '/../libs/EChartsValueAxisLayout.php';
@@ -30,7 +31,8 @@ final class EChartsTimeSeriesPreview
         array $annotations = [],
         string $timeAxisLabelFormat = 'auto',
         string $sourceCountCaption = 'Preview shows %d of %d sources',
-        string $patternNoticeCaption = 'Large SVG patterns are simplified in the preview.'
+        string $patternNoticeCaption = 'Large SVG patterns are simplified in the preview.',
+        string $periodLabel = ''
     ): string {
         $palette = EChartsAsset::ThemePreviewPalette($theme);
         $allSeries = $series !== [] ? $series : [
@@ -398,7 +400,7 @@ final class EChartsTimeSeriesPreview
                 . '" data-preview-patterns-simplified="true">' . SVGPreviewHelper::escape($patternNoticeCaption) . '</text></svg>';
         }
         return EChartsPreviewSourceCount::Append(
-            $svg,
+            EChartsPeriodPreview::Apply($svg, $periodLabel !== '', $periodLabel, $palette),
             count($series),
             count($allSeries),
             $sourceCountCaption,

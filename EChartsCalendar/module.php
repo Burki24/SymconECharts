@@ -22,9 +22,11 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsPeriodPreview;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
+use SymconECharts\EChartsWindowPeriodSelection;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
@@ -35,6 +37,8 @@ require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsPeriodPreview.php';
+require_once __DIR__ . '/../libs/EChartsWindowPeriodSelection.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
@@ -60,6 +64,7 @@ class EChartsCalendar extends IPSModuleStrict
     use CalendarPreview;
     use EChartsIPSViewDesignForm;
     use EChartsIPSViewTransport;
+    use EChartsWindowPeriodSelection;
     use EChartsTransientRefresh;
     use IPSViewHTMLPageHelper;
     use ResponsiveVisualizationHelper;
@@ -75,21 +80,22 @@ class EChartsCalendar extends IPSModuleStrict
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
     private const DESIGN_DEFAULTS = [
-        'EChartsTheme'         => 'auto', 'Orientation' => 'auto', 'ShowTooltip' => true,
-        'ShowMonthLabels'      => true, 'ShowWeekdayLabels' => true, 'FirstWeekday' => 1,
-        'ShowDayNumbers'       => false, 'ShowValues' => false, 'ShowColorScale' => true,
-        'CellBorderWidth'      => 1, 'CellBorderColor' => -1, 'EmptyCellColor' => -1,
-        'LowColor'             => 0x5070DD, 'HighColor' => 0xFB628B,
-        'TitleFontSizePercent' => 100, 'AxisFontSizePercent' => 100, 'ValueFontSizePercent' => 100,
-        'TitleColor'           => -1, 'AxisColor' => -1, 'ValueColor' => -1,
-        'ShowMonthSeparators'  => true, 'MonthLineWidth' => 0, 'MonthLineType' => 'solid', 'MonthLineColor' => -1,
-        'MonthLabelPosition'   => 'start', 'WeekdayLabelPosition' => 'start',
-        'MonthLabelMargin'     => 8, 'WeekdayLabelMargin' => 8, 'MonthLabelAlign' => 'center', 'MonthLabelFormat' => 'name',
-        'ShowYearLabel'        => false, 'YearLabelPosition' => 'auto', 'YearLabelMargin' => 30,
-        'YearFontSizePercent'  => 100, 'YearColor' => -1, 'LabelBold' => false,
-        'CellOpacityPercent'   => 100, 'CellBorderType' => 'solid', 'HoverHighlight' => true, 'HoverBorderColor' => -1,
-        'ReverseColorScale'    => false, 'UseFixedColorRange' => false,
-        'ColorScaleMinimum'    => 0.0, 'ColorScaleMaximum' => 100.0
+        'EnablePeriodSelection' => false,
+        'EChartsTheme'          => 'auto', 'Orientation' => 'auto', 'ShowTooltip' => true,
+        'ShowMonthLabels'       => true, 'ShowWeekdayLabels' => true, 'FirstWeekday' => 1,
+        'ShowDayNumbers'        => false, 'ShowValues' => false, 'ShowColorScale' => true,
+        'CellBorderWidth'       => 1, 'CellBorderColor' => -1, 'EmptyCellColor' => -1,
+        'LowColor'              => 0x5070DD, 'HighColor' => 0xFB628B,
+        'TitleFontSizePercent'  => 100, 'AxisFontSizePercent' => 100, 'ValueFontSizePercent' => 100,
+        'TitleColor'            => -1, 'AxisColor' => -1, 'ValueColor' => -1,
+        'ShowMonthSeparators'   => true, 'MonthLineWidth' => 0, 'MonthLineType' => 'solid', 'MonthLineColor' => -1,
+        'MonthLabelPosition'    => 'start', 'WeekdayLabelPosition' => 'start',
+        'MonthLabelMargin'      => 8, 'WeekdayLabelMargin' => 8, 'MonthLabelAlign' => 'center', 'MonthLabelFormat' => 'name',
+        'ShowYearLabel'         => false, 'YearLabelPosition' => 'auto', 'YearLabelMargin' => 30,
+        'YearFontSizePercent'   => 100, 'YearColor' => -1, 'LabelBold' => false,
+        'CellOpacityPercent'    => 100, 'CellBorderType' => 'solid', 'HoverHighlight' => true, 'HoverBorderColor' => -1,
+        'ReverseColorScale'     => false, 'UseFixedColorRange' => false,
+        'ColorScaleMinimum'     => 0.0, 'ColorScaleMaximum' => 100.0
     ];
 
     public function Create(): void
@@ -383,7 +389,8 @@ class EChartsCalendar extends IPSModuleStrict
             return $debugFlowResult = $this->HandleEChartsIPSViewRequest(
                 $JSONString,
                 self::DATA_ID_FROM_PARENT,
-                fn (array $payload): array => $this->BuildVisualizationState(($payload['Output'] ?? 'ipsview') !== 'tile', (int) ($payload['WindowOffset'] ?? 0)),
+                $this->WindowPeriodTransportState(...),
+                true,
                 true
             );
         } catch (\Throwable $debugFlowException) {
@@ -456,29 +463,35 @@ class EChartsCalendar extends IPSModuleStrict
     /** Historical design preview: no archive reads and no state changes. */
     protected function BarPreviewSvg(array $values, bool $ipsView): string
     {
-        return $this->CalendarPreviewSvg($values, $ipsView);
+        return EChartsPeriodPreview::Apply(
+            $this->CalendarPreviewSvg($values, $ipsView),
+            $this->BarPreviewValue($values, 'EnablePeriodSelection', 'boolean', $ipsView),
+            $this->Translate('Period'),
+            EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView))
+        );
     }
 
-    private function GetCalendarDataForOutput(bool $ipsView, int $windowOffset = 0): string
+    private function GetCalendarDataForOutput(bool $ipsView, int $windowOffset = 0, string $period = ''): string
     {
         $error = $this->GetConfigurationError();
         if ($error !== null) {
-            $this->WriteAttributeString('LastError', $error['Message']);
-            $this->DebugEChartsSetStatus($error['Status']);
+            $this->SetViewError($error['Message']);
+            $this->SetViewStatus($error['Status']);
             throw new RuntimeException($error['Message']);
         }
         if (!$this->HasActiveParent()) {
-            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
+            $this->SetViewStatus(self::STATUS_PARENT_MISSING);
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         $id = $this->ReadPropertyInteger('SourceVariableID');
-        $window = $this->ResolveCalendarWindow($windowOffset);
+        $window = $this->ResolveCalendarWindow($windowOffset, $period === '' ? []
+            : ['Period' => $period, 'Year' => 0, 'Month' => 0, 'Quarter' => 0]);
         $archive = $this->ReadArchiveSource(['VariableID' => $id], $window);
         try {
             $cells = CalendarData::Cells($archive['Points'], $window, $this->ReadPropertyString('Metric'));
         } catch (Throwable $exception) {
-            $this->WriteAttributeString('LastError', $exception->getMessage());
-            $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+            $this->SetViewError($exception->getMessage());
+            $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
             throw $exception;
         }
         $presentation = EChartsVariablePresentation::Resolve(
@@ -490,8 +503,8 @@ class EChartsCalendar extends IPSModuleStrict
             $this->ReadPropertyBoolean('UseVariablePresentation')
         );
         $labels = EChartsSourceIdentity::LabelsForSources([['VariableID' => $id, 'Label' => '']]);
-        $this->WriteAttributeString('LastError', '');
-        $this->DebugEChartsSetStatus(IS_ACTIVE);
+        $this->SetViewError('');
+        $this->SetViewStatus(IS_ACTIVE);
         $style = $this->ReadDesignStyle($ipsView);
         $viewKey = hash('sha256', json_encode([$id, $this->ReadPropertyString('Metric'), $window['Period'],
             $window['BaseStartDate'], $window['BaseEndDate'], $window['Timezone'], $labels[$id], $presentation, $style, $this->EffectiveTheme($ipsView),
@@ -511,9 +524,31 @@ class EChartsCalendar extends IPSModuleStrict
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
     }
 
+    private function PeriodChoices(bool $ipsView): array
+    {
+        if (!$this->EChartsPeriodSelectionEnabled($ipsView)) {
+            return [];
+        }
+        $choices = ['month' => $this->Translate('Current month'), 'quarter' => $this->Translate('Current quarter'),
+            'year'          => $this->Translate('Current year')];
+        try {
+            $configured = $this->ResolveCalendarWindow();
+        } catch (InvalidArgumentException) {
+            return [];
+        }
+        $period = $configured['Period'];
+        if (isset($choices[$period])) {
+            $current = $this->ResolveCalendarWindow(0, ['Period' => $period, 'Year' => 0, 'Month' => 0, 'Quarter' => 0]);
+            if ($current['StartDate'] === $configured['StartDate']) {
+                unset($choices[$period]);
+            }
+        }
+        return ['' => $configured['Label']] + $choices;
+    }
+
     private function RenderCalendarHTMLPage(bool $ipsView): string
     {
-        return $this->RenderChartPage($ipsView, [
+        $html = $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Calendar',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -562,6 +597,7 @@ class EChartsCalendar extends IPSModuleStrict
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
+        return $this->WithEChartsPeriodSelection($html, $ipsView, $this->PeriodChoices($ipsView));
     }
 
     private function Initialize(): void
@@ -642,7 +678,7 @@ class EChartsCalendar extends IPSModuleStrict
                 return $debugFlowResult = ['Points' => [], 'Truncated' => false];
             }
             $operation = EChartsDataProtocol::OPERATION_ARCHIVE_READ;
-            $this->WriteAttributeString('LastError', '');
+            $this->SetViewError('');
             $consumption = $this->ReadPropertyString('Metric') === 'consumption';
             $reducer = $consumption ? 'sum' : $this->ReadPropertyString('Metric');
             $payload = ['VariableID' => $source['VariableID'],
@@ -658,20 +694,20 @@ class EChartsCalendar extends IPSModuleStrict
                     $operation
                 );
             } catch (Throwable $exception) {
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned an invalid Calendar archive response.', 0, $exception);
             }
             if (!$response['Success']) {
                 $code = (string) ($response['Error']['Code'] ?? 'GATEWAY_REQUEST_FAILED');
-                $this->WriteAttributeString('LastError', $code);
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError($code);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway archive request failed: ' . $code);
             }
             $archive = $response['Payload'];
             if (in_array($archive['ArchiveAggregationType'] ?? null, ['standard', 'counter'], true)
                 && $archive['ArchiveAggregationType'] !== ($consumption ? 'counter' : 'standard')) {
-                $this->WriteAttributeString('LastError', 'ARCHIVE_TYPE_MISMATCH');
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError('ARCHIVE_TYPE_MISMATCH');
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The Calendar metric does not match the archive aggregation type.');
             }
             if (($archive['VariableID'] ?? null) !== $source['VariableID']
@@ -681,7 +717,7 @@ class EChartsCalendar extends IPSModuleStrict
                 || ($archive['EndTimestamp'] ?? null) !== $query['EndTimestamp']
                 || ($archive['EffectiveReducer'] ?? null) !== $reducer
                 || ($archive['ArchiveAggregationType'] ?? null) !== ($consumption ? 'counter' : 'standard')) {
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned invalid Calendar archive data.');
             }
             return $debugFlowResult = $archive;
@@ -712,7 +748,7 @@ class EChartsCalendar extends IPSModuleStrict
     }
 
     /** @return array<string,mixed> */
-    private function BuildVisualizationState(bool $ipsView = false, int $windowOffset = 0): array
+    private function BuildVisualizationState(bool $ipsView = false, int $windowOffset = 0, string $period = ''): array
     {
         $configurationError = $this->GetConfigurationError();
         if ($configurationError !== null) {
@@ -722,10 +758,10 @@ class EChartsCalendar extends IPSModuleStrict
             return $this->ErrorState('Connect an active EChartsGateway.');
         }
         try {
-            $chart = json_decode($this->GetCalendarDataForOutput($ipsView, $windowOffset), true, 512, JSON_THROW_ON_ERROR);
+            $chart = json_decode($this->GetCalendarDataForOutput($ipsView, $windowOffset, $period), true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
-            $mismatch = in_array($this->ReadAttributeString('LastError'), ['REDUCER_NOT_SUPPORTED', 'ARCHIVE_TYPE_MISMATCH'], true);
+            $mismatch = in_array($this->GetViewError(), ['REDUCER_NOT_SUPPORTED', 'ARCHIVE_TYPE_MISMATCH'], true);
             return $this->ErrorState($mismatch
                 ? ($this->ReadPropertyString('Metric') === 'consumption'
                     ? 'Calendar consumption requires a counter archive variable.'

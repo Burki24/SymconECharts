@@ -12,6 +12,7 @@ use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAnimationDesign;
+use SymconECharts\EChartsArchivePeriodView;
 use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
@@ -43,6 +44,7 @@ require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
+require_once __DIR__ . '/../libs/EChartsArchivePeriodView.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
@@ -60,6 +62,7 @@ class EChartsParallel extends IPSModuleStrict
     use EChartsAnimationDesign;
     use EChartsBarPreviewForm;
     use EChartsIPSViewDesignForm;
+    use EChartsArchivePeriodView;
     use EChartsIPSViewTransport;
     use EChartsTransientRefresh;
     use IPSViewHTMLPageHelper;
@@ -78,12 +81,13 @@ class EChartsParallel extends IPSModuleStrict
     private const MAX_AXES = 16;
     private const MAX_ARCHIVE_AGGREGATES = 10000;
     private const DESIGN_DEFAULTS = [
-        'EChartsTheme'         => 'auto', 'ShowTooltip' => true, 'Smooth' => false,
-        'LineWidth'            => 2, 'LineOpacityPercent' => 45, 'LineColor' => -1,
-        'LineType'             => 'solid', 'ActiveLineOpacityPercent' => 100, 'InactiveLineOpacityPercent' => 5,
-        'ShowAxisLabels'       => true, 'ShowAxisTicks' => true, 'AxisLineWidth' => 1, 'AxisNameGap' => 20,
-        'TitleFontSizePercent' => 100, 'AxisFontSizePercent' => 100,
-        'TitleColor'           => -1, 'AxisColor' => -1
+        'EnablePeriodSelection' => false,
+        'EChartsTheme'          => 'auto', 'ShowTooltip' => true, 'Smooth' => false,
+        'LineWidth'             => 2, 'LineOpacityPercent' => 45, 'LineColor' => -1,
+        'LineType'              => 'solid', 'ActiveLineOpacityPercent' => 100, 'InactiveLineOpacityPercent' => 5,
+        'ShowAxisLabels'        => true, 'ShowAxisTicks' => true, 'AxisLineWidth' => 1, 'AxisNameGap' => 20,
+        'TitleFontSizePercent'  => 100, 'AxisFontSizePercent' => 100,
+        'TitleColor'            => -1, 'AxisColor' => -1
     ];
 
     public function Create(): void
@@ -377,7 +381,9 @@ class EChartsParallel extends IPSModuleStrict
             return $debugFlowResult = $this->HandleEChartsIPSViewRequest(
                 $JSONString,
                 self::DATA_ID_FROM_PARENT,
-                fn (): array => $this->BuildVisualizationState(true)
+                fn (array $payload): array => $this->BuildArchivePeriodView($payload),
+                $this->EChartsPeriodSelectionEnabled(false),
+                true
             );
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -448,6 +454,11 @@ class EChartsParallel extends IPSModuleStrict
 
     /** @param array<string,mixed> $values */
     protected function BarPreviewSvg(array $values, bool $ipsView): string
+    {
+        return $this->WithArchivePeriodPreview($this->ParallelPreviewSvg($values, $ipsView), $values, $ipsView);
+    }
+
+    private function ParallelPreviewSvg(array $values, bool $ipsView): string
     {
         $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
         $title = (string) ($values['Title'] ?? $this->ReadPropertyString('Title'));
@@ -565,22 +576,23 @@ class EChartsParallel extends IPSModuleStrict
         return $svg . '</svg>';
     }
 
-    private function GetParallelDataForOutput(bool $ipsView): string
+    private function GetParallelDataForOutput(bool $ipsView, string $period = ''): string
     {
         $error = $this->GetConfigurationError();
         if ($error !== null) {
-            $this->WriteAttributeString('LastError', $error['Message']);
-            $this->DebugEChartsSetStatus($error['Status']);
+            $this->SetViewError($error['Message']);
+            $this->SetViewStatus($error['Status']);
             throw new RuntimeException($error['Message']);
         }
         if (!$this->HasActiveParent()) {
-            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
+            $this->SetViewStatus(self::STATUS_PARENT_MISSING);
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         $sources = $this->GetValidatedSources();
         $budget = $this->ReadPropertyInteger('LineBudget');
-        $query = $this->ResolveTimeQuery(count($sources));
-        $range = ['key'        => $this->ReadPropertyString('Range'),
+        $rangeKey = $period === '' ? $this->ReadPropertyString('Range') : $period;
+        $query = $this->ResolveTimeQuery(count($sources), ['Range' => $rangeKey]);
+        $range = ['key'        => $rangeKey,
             'startTimestamp'   => $query['StartTimestamp'], 'endTimestamp' => $query['EndTimestamp'],
             'aggregationLevel' => $query['AggregationLevel'], 'lineBudget' => $budget];
         if (count($sources) > 10) {
@@ -614,8 +626,8 @@ class EChartsParallel extends IPSModuleStrict
             }
             $rangeInfo['outOfRangeCount'] = $outside;
         }
-        $this->WriteAttributeString('LastError', '');
-        $this->DebugEChartsSetStatus(IS_ACTIVE);
+        $this->SetViewError('');
+        $this->SetViewStatus(IS_ACTIVE);
         return json_encode([
             'schemaVersion' => 1, 'family' => 'parallel', 'theme' => $this->EffectiveTheme($ipsView),
             'parallel'      => [
@@ -630,7 +642,7 @@ class EChartsParallel extends IPSModuleStrict
 
     private function RenderParallelHTMLPage(bool $ipsView): string
     {
-        return $this->RenderChartPage($ipsView, [
+        $html = $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Parallel',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -674,6 +686,7 @@ class EChartsParallel extends IPSModuleStrict
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
+        return $this->WithEChartsPeriodSelection($html, $ipsView, $this->ArchivePeriodChoices($ipsView));
     }
 
     private function Initialize(): void
@@ -872,13 +885,13 @@ class EChartsParallel extends IPSModuleStrict
                     $operation
                 );
             } catch (Throwable $exception) {
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned an invalid Parallel archive response.', 0, $exception);
             }
             if (!$response['Success']) {
                 $code = (string) ($response['Error']['Code'] ?? 'GATEWAY_REQUEST_FAILED');
-                $this->WriteAttributeString('LastError', $code);
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError($code);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway archive request failed: ' . $code);
             }
             $archive = $response['Payload'];
@@ -887,21 +900,21 @@ class EChartsParallel extends IPSModuleStrict
             if ($source['Metric'] !== 'auto') {
                 $type = $source['Metric'] === 'consumption' ? 'counter' : 'standard';
                 if (($archive['ArchiveAggregationType'] ?? null) !== $type) {
-                    $this->WriteAttributeString('LastError', 'ARCHIVE_TYPE_MISMATCH');
-                    $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                    $this->SetViewError('ARCHIVE_TYPE_MISMATCH');
+                    $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                     throw new RuntimeException('The Parallel axis metric does not match the archive aggregation type.');
                 }
                 if (($archive['EffectiveReducer'] ?? null) !== $payload['Reducer']
                     || ($archive['StartTimestamp'] ?? null) !== $query['StartTimestamp']
                     || ($archive['EndTimestamp'] ?? null) !== $query['EndTimestamp']) {
-                    $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                    $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                     throw new RuntimeException('The gateway returned invalid Parallel archive data.');
                 }
             }
             if (($archive['VariableID'] ?? null) !== $source['VariableID']
                 || !is_array($archive['Points'] ?? null) || !array_is_list($archive['Points'])
                 || count($archive['Points']) > $query['Limit'] || !is_bool($archive['Truncated'] ?? null)) {
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned invalid Parallel archive data.');
             }
             return $debugFlowResult = $archive;
@@ -938,7 +951,7 @@ class EChartsParallel extends IPSModuleStrict
     }
 
     /** @return array<string,mixed> */
-    private function BuildVisualizationState(bool $ipsView = false): array
+    private function BuildVisualizationState(bool $ipsView = false, string $period = ''): array
     {
         $error = $this->GetConfigurationError();
         if ($error !== null) {
@@ -951,7 +964,7 @@ class EChartsParallel extends IPSModuleStrict
             return $this->ErrorState('Connect an active EChartsGateway.');
         }
         try {
-            $chart = json_decode($this->GetParallelDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
+            $chart = json_decode($this->GetParallelDataForOutput($ipsView, $period), true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
             return $this->ErrorState('The Parallel values could not be loaded.');

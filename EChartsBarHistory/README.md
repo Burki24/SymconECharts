@@ -143,6 +143,12 @@ Bewegungskurven und Verzögerungen von 0–3000 ms. Standard ist cubicInOut ohne
 Verzögerung. Diese gilt für den gesamten Übergang; 0 ms unterdrückt ihn und die
 Systemeinstellung für reduzierte Bewegung schaltet Animationen ab.
 
+### Zeitraum direkt im Diagramm wechseln
+
+Aktiviere im Kacheldesigner **Zeitraumauswahl anzeigen**. Unter dem Diagramm erscheint die aktuelle Auswahl. Ein Tipp öffnet die Zeiträume, etwa **6 Stunden**, **24 Stunden**, **Heute**, **Diese Woche**, **Dieser Monat** oder **Dieses Jahr**. Bei **24 Stunden** reicht das Fenster vom aktuellen Zeitpunkt aus zurück. **Heute** beginnt um Mitternacht in der Symcon-Zeitzone.
+
+Beim Wechsel lädt das Diagramm die Archivwerte für den gewählten Zeitraum mit der eingestellten Verdichtung und dem vorhandenen Punktbudget. Die Zoomleiste dient weiterhin zum Vergrößern eines Ausschnitts. Die Auswahl gilt nur für die geöffnete Ansicht. Beim erneuten Öffnen gilt wieder der konfigurierte Zeitraum. Für IPSView kannst Du **Kacheldesign verwenden** deaktivieren und die Auswahl getrennt einblenden.
+
 ## Vorschau und Verfügbarkeit
 
 Die SVG-Vorschauen folgen auch ungespeicherten Änderungen an Titel, Quellen,

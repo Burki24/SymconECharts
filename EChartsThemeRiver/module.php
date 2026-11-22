@@ -12,6 +12,7 @@ use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAnimationDesign;
+use SymconECharts\EChartsArchivePeriodView;
 use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
@@ -43,6 +44,7 @@ require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
+require_once __DIR__ . '/../libs/EChartsArchivePeriodView.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsPreviewSymbol.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
@@ -64,6 +66,7 @@ class EChartsThemeRiver extends IPSModuleStrict
     use EChartsBarPreviewForm;
     use SymconECharts\ThemeRiverPreview;
     use EChartsIPSViewDesignForm;
+    use EChartsArchivePeriodView;
     use EChartsIPSViewTransport;
     use EChartsTransientRefresh;
     use IPSViewHTMLPageHelper;
@@ -83,20 +86,21 @@ class EChartsThemeRiver extends IPSModuleStrict
     private const MODEL_TOO_LARGE_MESSAGE = 'The ThemeRiver model is too large. Choose a shorter range.';
     private const LOAD_BUDGET_MESSAGE = 'The ThemeRiver archive load budget was exceeded.';
     private const DESIGN_DEFAULTS = [
-        'EChartsTheme'         => 'auto', 'ShowTooltip' => true, 'ShowLegend' => true, 'ShowLabels' => false,
-        'BandOpacityPercent'   => 85, 'BorderWidth' => 0, 'BorderColor' => -1,
-        'ShowAxisLabels'       => true, 'ShowAxisTicks' => true,
-        'TitleFontSizePercent' => 100, 'AxisFontSizePercent' => 100,
-        'LabelFontSizePercent' => 100, 'LegendFontSizePercent' => 100,
-        'TitleColor'           => -1, 'AxisColor' => -1, 'LabelColor' => -1, 'LegendColor' => -1,
-        'BandHeightPercent'    => 84, 'BorderType' => 'solid', 'ShadowBlur' => 0, 'ShadowColor' => -1,
-        'ShadowOffsetX'        => 0, 'ShadowOffsetY' => 0, 'EmphasisEnabled' => true, 'EmphasisFocus' => 'self', 'BlurOpacityPercent' => 10,
-        'ShowAxisLine'         => true, 'AxisLineWidth' => 1, 'AxisLineType' => 'solid', 'AxisLabelMargin' => 12, 'TimeLabelFormat' => 'auto',
-        'ShowGrid'             => false, 'GridLineWidth' => 1, 'GridLineType' => 'dashed', 'GridColor' => -1, 'GridOpacityPercent' => 20,
-        'LegendPosition'       => 'bottom', 'LegendAlignment' => 'left', 'LegendIcon' => 'roundRect',
-        'LegendItemWidth'      => 25, 'LegendItemHeight' => 14, 'LegendItemGap' => 10, 'FontFamily' => 'Arial, sans-serif',
-        'TitleBold'            => true, 'AxisLabelBold' => false, 'LabelBold' => false, 'LegendBold' => false,
-        'TitleItalic'          => false, 'AxisLabelItalic' => false, 'LabelItalic' => false, 'LegendItalic' => false
+        'EnablePeriodSelection' => false,
+        'EChartsTheme'          => 'auto', 'ShowTooltip' => true, 'ShowLegend' => true, 'ShowLabels' => false,
+        'BandOpacityPercent'    => 85, 'BorderWidth' => 0, 'BorderColor' => -1,
+        'ShowAxisLabels'        => true, 'ShowAxisTicks' => true,
+        'TitleFontSizePercent'  => 100, 'AxisFontSizePercent' => 100,
+        'LabelFontSizePercent'  => 100, 'LegendFontSizePercent' => 100,
+        'TitleColor'            => -1, 'AxisColor' => -1, 'LabelColor' => -1, 'LegendColor' => -1,
+        'BandHeightPercent'     => 84, 'BorderType' => 'solid', 'ShadowBlur' => 0, 'ShadowColor' => -1,
+        'ShadowOffsetX'         => 0, 'ShadowOffsetY' => 0, 'EmphasisEnabled' => true, 'EmphasisFocus' => 'self', 'BlurOpacityPercent' => 10,
+        'ShowAxisLine'          => true, 'AxisLineWidth' => 1, 'AxisLineType' => 'solid', 'AxisLabelMargin' => 12, 'TimeLabelFormat' => 'auto',
+        'ShowGrid'              => false, 'GridLineWidth' => 1, 'GridLineType' => 'dashed', 'GridColor' => -1, 'GridOpacityPercent' => 20,
+        'LegendPosition'        => 'bottom', 'LegendAlignment' => 'left', 'LegendIcon' => 'roundRect',
+        'LegendItemWidth'       => 25, 'LegendItemHeight' => 14, 'LegendItemGap' => 10, 'FontFamily' => 'Arial, sans-serif',
+        'TitleBold'             => true, 'AxisLabelBold' => false, 'LabelBold' => false, 'LegendBold' => false,
+        'TitleItalic'           => false, 'AxisLabelItalic' => false, 'LabelItalic' => false, 'LegendItalic' => false
     ];
 
     public function Create(): void
@@ -394,7 +398,9 @@ class EChartsThemeRiver extends IPSModuleStrict
             return $debugFlowResult = $this->HandleEChartsIPSViewRequest(
                 $JSONString,
                 self::DATA_ID_FROM_PARENT,
-                fn (): array => $this->BuildVisualizationState(true)
+                fn (array $payload): array => $this->BuildArchivePeriodView($payload),
+                $this->EChartsPeriodSelectionEnabled(false),
+                true
             );
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -466,23 +472,24 @@ class EChartsThemeRiver extends IPSModuleStrict
     /** @param array<string,mixed> $values */
     protected function BarPreviewSvg(array $values, bool $ipsView): string
     {
-        return $this->ThemeRiverPreviewSvg($values, $ipsView);
+        return $this->WithArchivePeriodPreview($this->ThemeRiverPreviewSvg($values, $ipsView), $values, $ipsView);
     }
 
-    private function GetThemeRiverDataForOutput(bool $ipsView): string
+    private function GetThemeRiverDataForOutput(bool $ipsView, string $period = ''): string
     {
         $error = $this->GetConfigurationError();
         if ($error !== null) {
-            $this->WriteAttributeString('LastError', $error['Message']);
-            $this->DebugEChartsSetStatus($error['Status']);
+            $this->SetViewError($error['Message']);
+            $this->SetViewStatus($error['Status']);
             throw new RuntimeException($error['Message']);
         }
         if (!$this->HasActiveParent()) {
-            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
+            $this->SetViewStatus(self::STATUS_PARENT_MISSING);
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         $sources = $this->GetValidatedSources();
-        $query = $this->ResolveTimeQuery();
+        $rangeKey = $period === '' ? $this->ReadPropertyString('Range') : $period;
+        $query = $this->ResolveTimeQuery(['Range' => $rangeKey]);
         $series = [];
         $descriptors = [];
         $loadedAggregates = 0;
@@ -491,8 +498,8 @@ class EChartsThemeRiver extends IPSModuleStrict
             try {
                 $loadedAggregates = ThemeRiverData::CountLoadedAggregates($loadedAggregates, count($archive['Points']));
             } catch (InvalidArgumentException $exception) {
-                $this->WriteAttributeString('LastError', 'ARCHIVE_BUDGET_EXCEEDED');
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError('ARCHIVE_BUDGET_EXCEEDED');
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw $exception;
             }
             $series[] = $archive['Points'];
@@ -504,13 +511,13 @@ class EChartsThemeRiver extends IPSModuleStrict
         try {
             $data = ThemeRiverData::Join($series, $query['Intervals']);
         } catch (Throwable $exception) {
-            $this->WriteAttributeString('LastError', 'INVALID_ARCHIVE_DATA');
-            $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+            $this->SetViewError('INVALID_ARCHIVE_DATA');
+            $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
             throw $exception;
         }
-        $this->WriteAttributeString('LastError', '');
-        $this->DebugEChartsSetStatus(IS_ACTIVE);
-        $range = ['key'    => $this->ReadPropertyString('Range'), 'startTimestamp' => $query['StartTimestamp'],
+        $this->SetViewError('');
+        $this->SetViewStatus(IS_ACTIVE);
+        $range = ['key'    => $rangeKey, 'startTimestamp' => $query['StartTimestamp'],
             'endTimestamp' => $query['EndTimestamp'], 'aggregationLevel' => $query['AggregationLevel'],
             'timezone'     => date_default_timezone_get(), 'loadedAggregates' => $loadedAggregates,
             'loadBudget'   => ThemeRiverData::MAXIMUM_LOADED_AGGREGATES];
@@ -528,8 +535,8 @@ class EChartsThemeRiver extends IPSModuleStrict
             'range' => $range
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
         if (strlen($json) > self::MAXIMUM_MODEL_BYTES) {
-            $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
-            $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
+            $this->SetViewError('MODEL_TOO_LARGE');
+            $this->SetViewStatus(self::STATUS_CONFIGURATION_INVALID);
             throw new RuntimeException(self::MODEL_TOO_LARGE_MESSAGE);
         }
         return $json;
@@ -588,6 +595,7 @@ class EChartsThemeRiver extends IPSModuleStrict
             ]
         ];
         $html = $this->RenderChartPage($ipsView, $configuration);
+        $html = $this->WithEChartsPeriodSelection($html, $ipsView, $this->ArchivePeriodChoices($ipsView));
         if (strlen($html) > 1048576) {
             $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
             $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
@@ -752,7 +760,7 @@ class EChartsThemeRiver extends IPSModuleStrict
                 'StartTimestamp'     => $query['StartTimestamp'], 'EndTimestamp' => $query['EndTimestamp'],
                 'Mode'               => 'aggregated', 'Reducer' => $contract['reducer'],
                 'Limit'              => $query['Limit'], 'AggregationLevel' => $query['AggregationLevel']];
-            $this->WriteAttributeString('LastError', '');
+            $this->SetViewError('');
             try {
                 $response = EChartsDataProtocol::DecodeResponse(
                     $this->DebugEChartsSendToParent($this->EncodeDataFlowMessage(
@@ -762,26 +770,26 @@ class EChartsThemeRiver extends IPSModuleStrict
                     $operation
                 );
             } catch (Throwable $exception) {
-                $this->WriteAttributeString('LastError', 'INVALID_ARCHIVE_RESPONSE');
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError('INVALID_ARCHIVE_RESPONSE');
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned an invalid ThemeRiver archive response.', 0, $exception);
             }
             if (!$response['Success']) {
                 $code = (string) ($response['Error']['Code'] ?? 'GATEWAY_REQUEST_FAILED');
-                $this->WriteAttributeString('LastError', $code);
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError($code);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway archive request failed: ' . $code);
             }
             $archive = $response['Payload'];
             if (in_array($archive['ArchiveAggregationType'] ?? null, ['standard', 'counter'], true)
                 && $archive['ArchiveAggregationType'] !== $contract['archiveType']) {
-                $this->WriteAttributeString('LastError', 'ARCHIVE_TYPE_MISMATCH');
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError('ARCHIVE_TYPE_MISMATCH');
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException($this->ArchiveTypeError());
             }
             if (is_array($archive['Points'] ?? null) && count($archive['Points']) > $query['Limit']) {
-                $this->WriteAttributeString('LastError', 'ARCHIVE_BUDGET_EXCEEDED');
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError('ARCHIVE_BUDGET_EXCEEDED');
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException(self::LOAD_BUDGET_MESSAGE);
             }
             if (($archive['VariableID'] ?? null) !== $source['VariableID']
@@ -791,8 +799,8 @@ class EChartsThemeRiver extends IPSModuleStrict
                 || !in_array($archive['VariableType'] ?? null, [1, 2], true)
                 || ($archive['EffectiveReducer'] ?? null) !== $contract['reducer']
                 || ($archive['ArchiveAggregationType'] ?? null) !== $contract['archiveType']) {
-                $this->WriteAttributeString('LastError', 'INVALID_ARCHIVE_DATA');
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError('INVALID_ARCHIVE_DATA');
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned invalid ThemeRiver archive data.');
             }
             return $debugFlowResult = $archive;
@@ -836,12 +844,12 @@ class EChartsThemeRiver extends IPSModuleStrict
     }
 
     /** @return array<string,mixed> */
-    private function BuildVisualizationState(bool $ipsView = false): array
+    private function BuildVisualizationState(bool $ipsView = false, string $period = ''): array
     {
         $configurationError = $this->GetConfigurationError();
         if ($configurationError !== null) {
-            $this->WriteAttributeString('LastError', $configurationError['Message']);
-            $this->DebugEChartsSetStatus($configurationError['Status']);
+            $this->SetViewError($configurationError['Message']);
+            $this->SetViewStatus($configurationError['Status']);
             if ($this->ReadPropertyString('Range') === 'absolute' && $configurationError['Status'] === self::STATUS_CONFIGURATION_INVALID) {
                 return $this->ErrorState($configurationError['Message']);
             }
@@ -851,14 +859,14 @@ class EChartsThemeRiver extends IPSModuleStrict
             ], true) ? $configurationError['Message'] : 'Configure valid ThemeRiver archive variables.');
         }
         if (!$this->HasActiveParent()) {
-            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
+            $this->SetViewStatus(self::STATUS_PARENT_MISSING);
             return $this->ErrorState('Connect an active EChartsGateway.');
         }
         try {
-            $chart = json_decode($this->GetThemeRiverDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
+            $chart = json_decode($this->GetThemeRiverDataForOutput($ipsView, $period), true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
-            return $this->ErrorState(match ($this->ReadAttributeString('LastError')) {
+            return $this->ErrorState(match ($this->GetViewError()) {
                 'MODEL_TOO_LARGE'                                => self::MODEL_TOO_LARGE_MESSAGE,
                 'ARCHIVE_BUDGET_EXCEEDED'                        => self::LOAD_BUDGET_MESSAGE,
                 'REDUCER_NOT_SUPPORTED', 'ARCHIVE_TYPE_MISMATCH' => $this->ArchiveTypeError(),

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/archive_period_view.php';
+
 // Real module/Gateway with synthetic Kernel archives and the existing test fixture.
 (static function (): void
 {
@@ -88,6 +90,7 @@ declare(strict_types=1);
         }
         $chart->now = strtotime('2026-11-01 12:34:00');
         assertGatewayGauge($model() === $data, 'A later refresh must not move historical state boundaries or replace archive states.');
+        verifyArchivePeriodView($chart);
         foreach ([$chart->GetVisualizationTile(), $chart->GetIPSViewHTML()] as $html) {
             assertGatewayGauge(
                 str_contains($html, '"requestedStartTimestamp":' . $start) && strlen($html) < SYMCON_OUTPUT_BUFFER_LIMIT,

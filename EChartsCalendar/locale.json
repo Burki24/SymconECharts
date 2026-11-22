@@ -197,7 +197,11 @@
             "Right": "Rechts",
             "Year label distance": "Abstand der Jahresbeschriftung",
             "Year label size": "Größe der Jahresbeschriftung",
-            "Year label color": "Farbe der Jahresbeschriftung"
+            "Year label color": "Farbe der Jahresbeschriftung",
+            "Show period selection": "Zeitraumauswahl anzeigen",
+            "Period": "Zeitraum",
+            "Current month": "Aktueller Monat",
+            "Current quarter": "Aktuelles Quartal"
         }
     }
 }

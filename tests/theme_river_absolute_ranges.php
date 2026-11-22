@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/archive_period_view.php';
+
 // Uses the existing ThemeRiver fixture, real Gateway and synthetic Kernel archives.
 (static function (): void
 {
@@ -71,6 +73,7 @@ declare(strict_types=1);
             && array_unique(array_column($queries, 'Limit')) === [1000], 'Fixed periods must retain explicit average reducer and per-source load limits.');
         $chart->now = strtotime('2026-11-01 12:34:00');
         assertGatewayGauge($model() === $data, 'Historical periods and original values must stay stable as time advances.');
+        verifyArchivePeriodView($chart);
         foreach ([$chart->GetVisualizationTile(), $chart->GetIPSViewHTML()] as $html) {
             assertGatewayGauge(
                 str_contains($html, '"requestedStartTimestamp":') && strlen($html) < SYMCON_OUTPUT_BUFFER_LIMIT,

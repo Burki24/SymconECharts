@@ -16,6 +16,8 @@
     var theme = null;
     var currentState = bootstrap.state || null;
     var navigating = false;
+    var viewPeriod = '';
+    var periodRevision = 0;
     var currentOffset = 0;
     var header = ((bootstrap.options && bootstrap.options.tileHeaderInset) || 0);
     var chartBootstrap = { mode: bootstrap.mode, options: { tileHeaderVisible: false } };
@@ -251,6 +253,8 @@
     function stateURL(offset) {
         var path = bootstrap.options.calendarStatePath;
         if (!path || !/^\/hook\/SymconECharts\/state\//.test(path)) { throw new Error('Missing state path.'); }
+        var request = path + '?offset=' + offset + (bootstrap.mode === 'symcon' ? '&output=tile' : '');
+        if (window.SymconEChartsPeriodSelection) { return window.SymconEChartsPeriodSelection.withPeriod(request); }
         var location = window.location || {};
         var protocol = location.protocol;
         var host = location.host;
@@ -261,8 +265,7 @@
             if (base) { protocol = base[1]; host = base[2]; }
             else { protocol = window.top.location.protocol; host = window.top.location.host; }
         }
-        return protocol + '//' + host + path + '?offset=' + offset
-            + (bootstrap.mode === 'symcon' ? '&output=tile' : '');
+        return protocol + '//' + host + request;
     }
     function sameView(a, b) {
         if (!a || !b) { return false; }
@@ -272,6 +275,7 @@
     function navigate(offset) {
         var calendar = currentState && currentState.chart && currentState.chart.calendar;
         if (navigating || !calendar || offset < 0 || offset > calendar.maxOffset) { return; }
+        var revision = periodRevision;
         navigating = true;
         updatePeriod(calendar);
         Promise.resolve().then(function () {
@@ -281,6 +285,7 @@
             if (!response.ok) { throw new Error('Calendar request failed.'); }
             return response.json();
         }).then(function (state) {
+            if (revision !== periodRevision) { return; }
             if (!state || state.status !== 'ready' || !state.chart || state.chart.family !== 'calendar'
                 || !sameView(state.chart.calendar, calendar) || state.chart.calendar.windowOffset !== offset) {
                 throw new Error('Invalid Calendar response.');
@@ -288,9 +293,11 @@
             // A configuration update may have arrived while the request was in flight.
             if (sameView(currentState.chart.calendar, calendar)) { render(state); }
         }).catch(function () {
+            if (revision !== periodRevision) { return; }
             warning.textContent = translate(loadError);
             warning.hidden = false;
         }).finally(function () {
+            if (revision !== periodRevision) { return; }
             navigating = false;
             if (currentState && currentState.chart && currentState.chart.calendar) { updatePeriod(currentState.chart.calendar); }
         });
@@ -301,6 +308,12 @@
     window.handleMessage = function (message) {
         var state = design.parseVisualizationState(message);
         if (!state) { return; }
+        if ((state.viewPeriod || '') !== viewPeriod) {
+            viewPeriod = state.viewPeriod || '';
+            periodRevision += 1;
+            navigating = false;
+            currentOffset = 0;
+        }
         var calendar = state.chart && state.chart.calendar;
         if (currentOffset > 0 && calendar && calendar.windowOffset === 0 && currentState && currentState.chart
             && sameView(currentState.chart.calendar, calendar)) { navigate(currentOffset); return; }

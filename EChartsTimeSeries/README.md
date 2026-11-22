@@ -87,8 +87,8 @@ Die Gruppen **1–32** stehen bei automatischer und fester Verdichtung zur Verf�
 
 - rollende Zeiträume von 1 Stunde, 6 Stunden, 24 Stunden, 7 Tagen und 30 Tagen
   sowie frei definierbare Fenster in Minuten, Stunden, Tagen oder Wochen;
-- kalendergebundene Ansichten für heute, gestern, die laufende Woche und den
-  laufenden Monat; die Grenzen folgen der Symcon-Zeitzone und berücksichtigen
+- kalendergebundene Ansichten für heute, gestern, die laufende Woche den
+  laufenden Monat und das laufende Jahr; die Grenzen folgen der Symcon-Zeitzone und berücksichtigen
   Zeitumstellungen;
 - automatische Zeitachsenbeschriftung oder ausdrückliche Anzeige von Uhrzeit,
   Datum beziehungsweise Datum und Uhrzeit;
@@ -261,6 +261,14 @@ deaktiviere **Kacheldesign verwenden** und stelle die Reglerdicke im
 `raw` bleibt immer eine echte Rohwertabfrage; `realtime` ist der ausdrücklich
 archivfreie Live-Modus und nur `auto` wählt selbstständig eine
 Verdichtungsstufe.
+
+### Zeitraum direkt im Diagramm wechseln
+
+Aktiviere im Kacheldesigner **Zeitraumauswahl anzeigen**. Unter dem Diagramm erscheint die aktuelle Auswahl. Ein Tipp öffnet die Zeiträume, etwa **6 Stunden**, **24 Stunden**, **Heute**, **Diese Woche**, **Dieser Monat** oder **Dieses Jahr**. Bei **24 Stunden** reicht das Fenster vom aktuellen Zeitpunkt aus zurück. **Heute** beginnt um Mitternacht in der Symcon-Zeitzone.
+
+Beim Wechsel lädt das Diagramm die Archivwerte für den gewählten Zeitraum mit der eingestellten Verdichtung und dem vorhandenen Punktbudget. Die Zoomleiste dient weiterhin zum Vergrößern eines Ausschnitts. Die Auswahl gilt nur für die geöffnete Ansicht. Beim erneuten Öffnen gilt wieder der konfigurierte Zeitraum. Für IPSView kannst Du **Kacheldesign verwenden** deaktivieren und die Auswahl getrennt einblenden.
+
+Im Datenmodus **Echtzeit** sammelt das Diagramm nur neue Werte ab dem Öffnen. Die Archiv-Zeitraumauswahl erscheint deshalb ausschließlich in den Archivmodi.
 
 ## Viele Reihen und Reihenauswahl
 

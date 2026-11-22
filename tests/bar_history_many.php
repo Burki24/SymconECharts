@@ -80,6 +80,8 @@ declare(strict_types=1);
     };
 
     try {
+        require_once __DIR__ . '/cartesian_period_selection.php';
+        verifyCartesianPeriodSelection($configure([$sources[0]], 'raw', 200), $now, $requests);
         $defaults = new TestableEChartsBarHistory();
         $defaults->Create();
         assertGatewayGauge(

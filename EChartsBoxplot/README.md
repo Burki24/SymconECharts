@@ -67,8 +67,7 @@ Seltene Zeitzonenwechsel mit einer nicht ganzstündigen Verschiebung, etwa
 abgewiesen. Zeiträume davor oder danach sowie die üblichen ganzstündigen
 Sommer-/Winterzeitwechsel bleiben unterstützt.
 
-Kachel und IPSView verwenden denselben festen Zeitraum; ihre Designs bleiben
-unabhängig. Die Formularvorschau zeigt die gewählten Grenzen samt UTC-Offset
+Kachel und IPSView starten mit denselben festen Zeitgrenzen. Die Formularvorschau zeigt die gewählten Grenzen samt UTC-Offset
 und Zeitzone, aber weiterhin ausdrücklich Beispieldaten. Ungültige Datumsentwürfe
 werden in der Vorschau erklärt, ohne Archive zu lesen. Die bisherigen
 Voreinstellungen und rollierenden benutzerdefinierten Zeiträume bleiben erhalten.
@@ -165,6 +164,16 @@ für beide Ausgaben gemeinsam. Optional kann der IPSView-Hintergrund durchschein
 
 Der Diagrammtitel steht unter dem Symcon-Kachelkopf. Eine Änderung der
 Gestaltung verändert weder Variablenwerte noch Archivdaten.
+
+## Zeitraum im Diagramm wechseln
+
+Aktiviere im **Kacheldesigner** die Option **Zeitraumauswahl anzeigen**. In der
+geöffneten Ansicht kannst du dann zwischen den letzten 24 Stunden, 7 Tagen und
+30 Tagen wechseln. Mit der Standardauswahl kehrst du zum konfigurierten
+Zeitraum zurück, auch bei einem festen historischen Von-/Bis-Zeitraum.
+IPSView übernimmt die Einstellung aus der Kachel oder verwendet dieselbe Option
+im eigenen Designer. Jede Ansicht lädt ihre Archivwerte mit den bisherigen
+Lesegrenzen. Andere geöffnete Ansichten behalten ihre Auswahl.
 
 ## Konfigurationsreferenz und Skriptzugriff
 

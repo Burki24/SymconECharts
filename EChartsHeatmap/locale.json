@@ -157,7 +157,9 @@
             "Variable presentation is invalid.": "Die Variablendarstellung ist ungültig.",
             "Variable unit metadata is invalid.": "Die Einheitenmetadaten der Variable sind ungültig.",
             "Archive variable": "Archivvariable",
-            "Variable profile unit metadata is invalid.": "Die Einheitenmetadaten des Variablenprofils sind ungültig."
+            "Variable profile unit metadata is invalid.": "Die Einheitenmetadaten des Variablenprofils sind ungültig.",
+            "Show period selection": "Zeitraumauswahl anzeigen",
+            "Period": "Zeitraum"
         }
     }
 }

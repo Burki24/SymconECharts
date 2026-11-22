@@ -153,6 +153,18 @@ stehen. Nach wiederholtem Fehler erscheint ein Hinweis und das Modul versucht
 nach 60 Sekunden erneut zu lesen. Ohne frühere Daten oder bei ungültiger
 Konfiguration erscheint eine Fehlermeldung.
 
+### Zeitraum im Diagramm wechseln
+
+Mit **Zeitraumauswahl anzeigen** im Kacheldesigner oder im eigenständigen IPSView-Designer
+bekommt das Diagramm ein kleines Auswahlmenü. Du kannst etwa zwischen den letzten 6 oder
+24 Stunden, **Heute**, der laufenden Woche, dem laufenden Monat und dem laufenden Jahr
+wechseln. Für die Auswahl werden Archivdaten im gewählten Zeitfenster geladen. Bei
+Vergleichsgruppen gilt dasselbe Fenster für alle Gruppen. Die Zuordnung gemeinsamer Intervalle
+und das Punktbudget gelten auch hier. Über **Standard** kehrst Du zum konfigurierten Zeitraum
+zurück.
+
+Die Auswahl gilt für die geöffnete Ansicht. Beim erneuten Öffnen gilt wieder der konfigurierte Zeitraum.
+
 ## Konfigurationsreferenz und Skriptzugriff
 
 Die [Feldreferenz](../docs/KONFIGURATION.md#echartsscatter) enthält

@@ -755,6 +755,9 @@ Gateway-Anfrage/Reihe. Acht Wertachsen bleiben die Grenze. Beide Familien
 verwenden die gemeinsame Achsenzuordnung aus
 [ADR 0116](adr/0116-individual-archive-value-axes.md). Einzelne Reihen können
 auch bei gleicher Einheit eine eigene Skala und Seite erhalten.
+Die optionale Zeitraumauswahl verwendet den lesenden Zustandsabruf des Gateways.
+Anfrage, Abgrenzung zum Zoom und Aktualisierung pro geöffnetem Dokument sind in
+[ADR 0117](adr/0117-view-local-archive-periods.md) beschrieben.
 Optionale Flächenstapel verwenden dieselben Gruppen- und Einheitenregeln wie
 BarHistory. Die Zeitreihe unterbricht auch die Verbindung über ein Intervall,
 für das sämtliche Gruppenquellen fehlen, siehe

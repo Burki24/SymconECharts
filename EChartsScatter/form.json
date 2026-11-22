@@ -269,6 +269,10 @@
                             "value": "current-month"
                         },
                         {
+                            "caption": "This year",
+                            "value": "current-year"
+                        },
+                        {
                             "caption": "Custom",
                             "value": "custom"
                         }
@@ -427,6 +431,11 @@
                             "type": "CheckBox",
                             "name": "EnableZoom",
                             "caption": "Enable X/Y zoom"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "EnablePeriodSelection",
+                            "caption": "Show period selection"
                         },
                         {
                             "type": "NumberSpinner",

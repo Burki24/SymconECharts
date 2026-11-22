@@ -154,18 +154,24 @@ class EChartsGateway extends IPSModuleStrict
     /** A shared HTTP handler delegates to the child's real parent; the child still authorizes its channel. */
     public function GetTransportState(int $DeviceID, string $Channel, int $WindowOffset, string $Output): string
     {
-        return $this->DebugFlowCall(__FUNCTION__, __LINE__, function () use ($DeviceID, $Channel, $WindowOffset, $Output): string
+        return $this->GetPeriodTransportState($DeviceID, $Channel, $WindowOffset, $Output, '');
+    }
+
+    public function GetPeriodTransportState(int $DeviceID, string $Channel, int $WindowOffset, string $Output, string $Period): string
+    {
+        return $this->DebugFlowCall(__FUNCTION__, __LINE__, function () use ($DeviceID, $Channel, $WindowOffset, $Output, $Period): string
         {
             if (!IPS_InstanceExists($DeviceID)
                 || IPS_GetInstance($DeviceID)['ConnectionID'] !== $this->InstanceID
                 || preg_match('/^[a-f0-9]{32}$/D', $Channel) !== 1
                 || $WindowOffset < 0 || $WindowOffset > EChartsDataProtocol::MAX_STATE_WINDOW_OFFSET
-                || !in_array($Output, ['tile', 'ipsview'], true)) {
+                || !in_array($Output, ['tile', 'ipsview'], true) || !EChartsDataProtocol::IsValidPeriodKey($Period)) {
                 return '';
             }
             $request = EChartsDataProtocol::CreateRequest(EChartsDataProtocol::OPERATION_IPSVIEW_STATE, [
                 'InstanceID'   => $DeviceID, 'Channel' => $Channel,
-                'WindowOffset' => $WindowOffset, 'Output' => $Output
+                'WindowOffset' => $WindowOffset, 'Output' => $Output,
+                ...($Period === '' ? [] : ['Period' => $Period])
             ]);
             $this->DebugFlowEvent(__FUNCTION__, __LINE__, 'SENDEN', 'Zustandsanfrage an verbundene Diagramminstanzen weitergegeben; Zugriffskanal bleibt geschützt.', ['Zielinstanz' => $DeviceID]);
             $responses = $this->SendDataToChildren($this->EncodeDataFlowMessage(self::DATA_ID_TO_CHILD, $request));
@@ -227,15 +233,16 @@ class EChartsGateway extends IPSModuleStrict
 
             $offset = $_GET['offset'] ?? '0';
             $output = $_GET['output'] ?? 'ipsview';
+            $period = $_GET['period'] ?? '';
             if (!is_string($offset) || preg_match('/^(0|[1-9][0-9]{0,2})$/D', $offset) !== 1
                 || (int) $offset > EChartsDataProtocol::MAX_STATE_WINDOW_OFFSET
-                || !in_array($output, ['tile', 'ipsview'], true)) {
+                || !in_array($output, ['tile', 'ipsview'], true) || !EChartsDataProtocol::IsValidPeriodKey($period)) {
                 $this->SendHookResponse(400, '');
 
                 return;
             }
 
-            $body = $this->RouteTransportState((int) $matches[1], $matches[2], (int) $offset, $output);
+            $body = $this->RouteTransportState((int) $matches[1], $matches[2], (int) $offset, $output, $period);
             $this->SendHookResponse($body === '' ? 404 : 200, $body, 'application/json; charset=utf-8');
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -307,7 +314,7 @@ class EChartsGateway extends IPSModuleStrict
         }
     }
 
-    private function RouteTransportState(int $deviceID, string $channel, int $offset, string $output): string
+    private function RouteTransportState(int $deviceID, string $channel, int $offset, string $output, string $period): string
     {
         if (!IPS_InstanceExists($deviceID)) {
             return '';
@@ -317,9 +324,11 @@ class EChartsGateway extends IPSModuleStrict
             || IPS_GetInstance($parentID)['ModuleInfo']['ModuleID'] !== self::GATEWAY_MODULE_ID) {
             return '';
         }
-        return $parentID === $this->InstanceID
-            ? $this->GetTransportState($deviceID, $channel, $offset, $output)
-            : ECGW_GetTransportState($parentID, $deviceID, $channel, $offset, $output);
+        if ($parentID === $this->InstanceID) {
+            return $this->GetPeriodTransportState($deviceID, $channel, $offset, $output, $period);
+        }
+        return $period === '' ? ECGW_GetTransportState($parentID, $deviceID, $channel, $offset, $output)
+            : ECGW_GetPeriodTransportState($parentID, $deviceID, $channel, $offset, $output, $period);
     }
 
     /** @param array<string, mixed> $payload */

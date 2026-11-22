@@ -24,6 +24,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsLabelDesign;
+use SymconECharts\EChartsPeriodPreview;
 use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSliderSize;
 use SymconECharts\EChartsSourceIdentity;
@@ -42,6 +43,7 @@ require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
+require_once __DIR__ . '/../libs/EChartsCartesianPeriodSelection.php';
 require_once __DIR__ . '/../libs/EChartsArchiveStack.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
@@ -61,6 +63,7 @@ require_once __DIR__ . '/../libs/EChartsUnitAxes.php';
 require_once __DIR__ . '/../libs/EChartsValueAxisForm.php';
 require_once __DIR__ . '/../libs/EChartsValueAxisLayout.php';
 require_once __DIR__ . '/../libs/EChartsSliderSize.php';
+require_once __DIR__ . '/../libs/EChartsPeriodPreview.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 
 class EChartsBarHistory extends IPSModuleStrict
@@ -76,6 +79,7 @@ class EChartsBarHistory extends IPSModuleStrict
     use IPSViewHTMLPageHelper;
     use EChartsIPSViewDesignForm;
     use EChartsIPSViewTransport;
+    use \SymconECharts\EChartsCartesianPeriodSelection;
     use ResponsiveVisualizationHelper;
     use VisualizationAssetHelper;
     use VisualizationThemeHelper;
@@ -104,6 +108,7 @@ class EChartsBarHistory extends IPSModuleStrict
         'ValueLabelDistance'      => 'integer',
         'ShowGrid'                => 'boolean',
         'EnableZoom'              => 'boolean',
+        'EnablePeriodSelection'   => 'boolean',
         'ZoomSliderSize'          => 'integer',
         'RoundedBars'             => 'boolean',
         'BarWidthPercent'         => 'integer',
@@ -159,6 +164,7 @@ class EChartsBarHistory extends IPSModuleStrict
             $this->RegisterPropertyInteger('ValueLabelDistance', 5);
             $this->RegisterPropertyBoolean('ShowGrid', true);
             $this->RegisterPropertyBoolean('EnableZoom', true);
+            $this->RegisterPropertyBoolean('EnablePeriodSelection', false);
             $this->RegisterPropertyInteger('ZoomSliderSize', 0);
             $this->RegisterPropertyBoolean('RoundedBars', false);
             $this->RegisterPropertyInteger('BarWidthPercent', 70);
@@ -195,21 +201,21 @@ class EChartsBarHistory extends IPSModuleStrict
             );
             foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
                 $default = match ($name) {
-                    'EChartsTheme'                                => EChartsAsset::THEME_AUTO,
-                    'Orientation'                                 => 'vertical',
-                    'ValueAxisSpacing', 'ZoomSliderSize'          => 0,
-                    'BarFillMode'                                 => 'solid',
-                    'BarSVG'                                      => '',
-                    'BarSVGSizePercent'                           => 100,
-                    'ShowValues', 'RoundedBars'                   => false,
-                    'ValueLabelPosition'                          => 'auto',
-                    'ValueLabelDistance'                          => 5,
-                    'ShowGrid', 'EnableZoom', 'AnimationEnabled'  => true,
-                    'AnimationDuration'                           => 350,
-                    'AnimationDurationUpdate'                     => 500,
-                    'AnimationEasing', 'AnimationEasingUpdate'    => 'cubicInOut',
-                    'AnimationDelay', 'AnimationDelayUpdate'      => 0,
-                    'BarWidthPercent'                             => 70,
+                    'EChartsTheme'                                                         => EChartsAsset::THEME_AUTO,
+                    'Orientation'                                                          => 'vertical',
+                    'ValueAxisSpacing', 'ZoomSliderSize'                                   => 0,
+                    'BarFillMode'                                                          => 'solid',
+                    'BarSVG'                                                               => '',
+                    'BarSVGSizePercent'                                                    => 100,
+                    'EnablePeriodSelection', 'ShowValues', 'RoundedBars'                   => false,
+                    'ValueLabelPosition'                                                   => 'auto',
+                    'ValueLabelDistance'                                                   => 5,
+                    'ShowGrid', 'EnableZoom', 'AnimationEnabled'                           => true,
+                    'AnimationDuration'                                                    => 350,
+                    'AnimationDurationUpdate'                                              => 500,
+                    'AnimationEasing', 'AnimationEasingUpdate'                             => 'cubicInOut',
+                    'AnimationDelay', 'AnimationDelayUpdate'                               => 0,
+                    'BarWidthPercent'                                                      => 70,
                     'BarOpacityPercent', 'TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent',
                     'ValueFontSizePercent'      => 100,
                     'BarCornerRadius'           => 6,
@@ -538,7 +544,9 @@ class EChartsBarHistory extends IPSModuleStrict
             return $debugFlowResult = $this->HandleEChartsIPSViewRequest(
                 $JSONString,
                 self::DATA_ID_FROM_PARENT,
-                fn (): array => $this->BuildVisualizationState(true)
+                fn (array $payload): array => $this->CartesianTransportState($payload),
+                $this->CartesianPeriodChoices(false) !== [],
+                true
             );
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -883,8 +891,9 @@ class EChartsBarHistory extends IPSModuleStrict
                 . EChartsBarPreview::E($palette['accent']) . '" fill-opacity="0.4"/>';
         }
 
+        $periodLabel = $this->CartesianPeriodPreviewLabel($values, $ipsView);
         return EChartsPreviewSourceCount::Append(
-            $svg . '</svg>',
+            EChartsPeriodPreview::Apply($svg . '</svg>', $periodLabel !== '', $periodLabel, $palette),
             count($items),
             count($data['items']),
             $this->Translate('Preview shows %d of %d sources'),
@@ -899,24 +908,25 @@ class EChartsBarHistory extends IPSModuleStrict
         return time();
     }
 
-    private function GetBarHistoryDataForOutput(bool $ipsView): string
+    private function GetBarHistoryDataForOutput(bool $ipsView, string $period = ''): string
     {
         $error = $this->GetConfigurationError();
         if ($error !== null) {
-            $this->WriteAttributeString('LastError', $error['Message']);
-            $this->DebugEChartsSetStatus($error['Status']);
+            $this->SetViewError($error['Message']);
+            $this->SetViewStatus($error['Status']);
             throw new RuntimeException($error['Message']);
         }
         if (!$this->HasActiveParent()) {
-            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
+            $this->SetViewStatus(self::STATUS_PARENT_MISSING);
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
 
         $sources = $this->GetValidatedSources();
+        $range = $period !== '' ? $period : $this->EffectiveRange($ipsView);
         $axisModel = EChartsUnitAxes::Build($sources);
         $labels = EChartsSourceIdentity::LabelsForSources($sources);
         $query = EChartsArchiveQuery::Resolve(
-            $this->EffectiveRange($ipsView),
+            $range,
             $this->EffectiveCustomRangeValue($ipsView),
             $this->EffectiveCustomRangeUnit($ipsView),
             $this->ReadPropertyString('DataMode'),
@@ -948,8 +958,8 @@ class EChartsBarHistory extends IPSModuleStrict
             ];
             $truncated = $truncated || $archive['Truncated'];
         }
-        $this->WriteAttributeString('LastError', '');
-        $this->DebugEChartsSetStatus(IS_ACTIVE);
+        $this->SetViewError('');
+        $this->SetViewStatus(IS_ACTIVE);
 
         $json = json_encode([
             'schemaVersion' => 1,
@@ -965,7 +975,7 @@ class EChartsBarHistory extends IPSModuleStrict
             ],
             'axes'          => $axisModel['Axes'],
             'range'         => [
-                'key'                 => $this->EffectiveRange($ipsView),
+                'key'                 => $range,
                 'startTimestamp'      => $query['StartTimestamp'],
                 'endTimestamp'        => $query['EndTimestamp'],
                 'dataMode'            => $this->ReadPropertyString('DataMode'),
@@ -977,8 +987,8 @@ class EChartsBarHistory extends IPSModuleStrict
             'truncated'     => $truncated
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
         if (strlen($json) > self::MAXIMUM_MODEL_BYTES) {
-            $this->WriteAttributeString('LastError', self::MODEL_TOO_LARGE_MESSAGE);
-            $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
+            $this->SetViewError(self::MODEL_TOO_LARGE_MESSAGE);
+            $this->SetViewStatus(self::STATUS_CONFIGURATION_INVALID);
             throw new RuntimeException(self::MODEL_TOO_LARGE_MESSAGE);
         }
         return $json;
@@ -1035,7 +1045,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ];
-        $html = $this->RenderChartPage($ipsView, $configuration);
+        $html = $this->WithEChartsPeriodSelection($this->RenderChartPage($ipsView, $configuration), $ipsView, $this->CartesianPeriodChoices($ipsView));
         if (strlen($html) > 1048576) {
             $this->WriteAttributeString('LastError', self::MODEL_TOO_LARGE_MESSAGE);
             $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
@@ -1229,13 +1239,13 @@ class EChartsBarHistory extends IPSModuleStrict
                     $operation
                 );
             } catch (Throwable $exception) {
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned an invalid archive response.', 0, $exception);
             }
             if (!$response['Success']) {
                 $errorCode = (string) ($response['Error']['Code'] ?? 'GATEWAY_REQUEST_FAILED');
-                $this->WriteAttributeString('LastError', $errorCode);
-                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->SetViewError($errorCode);
+                $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway archive request failed: ' . $errorCode);
             }
             $archive = $response['Payload'];
@@ -1308,7 +1318,7 @@ class EChartsBarHistory extends IPSModuleStrict
     }
 
     /** @return array<string,mixed> */
-    private function BuildVisualizationState(bool $ipsView = false): array
+    private function BuildVisualizationState(bool $ipsView = false, string $period = ''): array
     {
         if ($this->HasJSLiveImport()) {
             return $this->BuildJSLiveImportState($ipsView);
@@ -1335,7 +1345,7 @@ class EChartsBarHistory extends IPSModuleStrict
             ];
         }
         try {
-            $chart = json_decode($this->GetBarHistoryDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
+            $chart = json_decode($this->GetBarHistoryDataForOutput($ipsView, $period), true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
             return [

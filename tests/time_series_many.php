@@ -76,6 +76,8 @@ declare(strict_types=1);
     };
 
     try {
+        require_once __DIR__ . '/cartesian_period_selection.php';
+        verifyCartesianPeriodSelection($configure([$sources[0]], 'raw', 200), $now, $requests);
         $temperature = array_replace($sources[0], ['Unit' => '°C', 'Label' => 'Temperatur']);
         $humidity = array_replace($sources[1], ['Unit' => '%', 'Label' => 'Feuchtigkeit']);
         $GLOBALS['symconTestVariables'][96999] = ['VariableType' => 3, 'VariableUpdated' => $now, 'Value' => '55 %', 'Name' => 'Feuchtigkeit als Text'];

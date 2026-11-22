@@ -101,7 +101,7 @@ enthalten. Ebenso kann eine eigene Dauer von einer Woche (168 Stunden) eine
 vollständige 169-Stunden-Kalenderwoche beim Herbstwechsel nicht enthalten.
 Die festen Wochenvorgaben zählen lokale Daten und erhalten die ganze Vorwoche.
 Ein leerer Zeitraum löst keine Archivabfrage aus. Kachel und IPSView
-verwenden dieselbe Zeitkonfiguration; Designänderungen verändern sie nicht.
+starten mit der Zeitkonfiguration der Instanz.
 
 „Fester historischer Zeitraum“ ergänzt eine Von-/Bis-Auswahl in der angezeigten
 Symcon-Zeitzone. Der Beginn ist eingeschlossen, das Ende ausgeschlossen und darf
@@ -188,6 +188,17 @@ in der echten Kachel beziehungsweise in IPSView geprüft, nicht im statischen SV
 IPSView erzeugt bei aktivierter Ausgabe eine WebContent-Variable
 „Candlestick für IPSView“. Der Diagrammtitel erscheint in der Kachel
 unterhalb des Kachelnamens und Vergrößerungsbuttons.
+
+## Zeitraum im Diagramm wechseln
+
+Aktiviere im **Kacheldesigner** die Option **Zeitraumauswahl anzeigen**. In der
+geöffneten Ansicht kannst du dann zwischen den letzten 24 Stunden, 7 Tagen und
+30 Tagen wechseln. Die Auswahl bietet nur Zeiträume an, die für das Kerzenintervall
+mindestens eine abgeschlossene Kerze und höchstens 720 Kerzen enthalten. Mit der Standardauswahl kehrst du zum konfigurierten
+Zeitraum zurück, auch bei einem festen historischen Von-/Bis-Zeitraum.
+IPSView übernimmt die Einstellung aus der Kachel oder verwendet dieselbe Option
+im eigenen Designer. Jede Ansicht lädt ihre Archivwerte mit den bisherigen
+Lesegrenzen. Andere geöffnete Ansichten behalten ihre Auswahl.
 
 ## Konfigurationsreferenz und Skriptzugriff
 

@@ -268,6 +268,11 @@ function ECGW_GetTransportState(int $instanceID, int $deviceID, string $channel,
     return $GLOBALS['symconTestGatewayObjects'][$instanceID]->GetTransportState($deviceID, $channel, $offset, $output);
 }
 
+function ECGW_GetPeriodTransportState(int $instanceID, int $deviceID, string $channel, int $offset, string $output, string $period): string
+{
+    return $GLOBALS['symconTestGatewayObjects'][$instanceID]->GetPeriodTransportState($deviceID, $channel, $offset, $output, $period);
+}
+
 function WC_PushMessage(int $instanceID, string $path, string $message): void
 {
     $GLOBALS['symconTestWebSocketMessages'][] = [

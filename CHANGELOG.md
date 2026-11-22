@@ -8,6 +8,9 @@
 
 ## Neu
 
+- Eine optionale kompakte Zeitraumauswahl in Kachel und IPSView lädt für
+  Archivdiagramme die Daten des gewählten Fensters. Die Auswahl gilt je
+  geöffneter Ansicht. Der konfigurierte Startzeitraum bleibt erhalten.
 - Die Dicke der Zoom- und Navigationsregler lässt sich im Kachel- und IPSView-Designer
   auf 1–64 Pixel einstellen. Bei 0 gilt die bisherige automatische Größe.
   Das gilt für den Zeitzoom in TimeSeries, BarHistory, Candlestick und StateTimeline,

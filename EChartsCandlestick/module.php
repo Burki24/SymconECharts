@@ -13,6 +13,7 @@ use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\CandlestickData;
 use SymconECharts\EChartsAnimationDesign;
+use SymconECharts\EChartsArchivePeriodView;
 use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
@@ -43,6 +44,7 @@ require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
+require_once __DIR__ . '/../libs/EChartsArchivePeriodView.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsSliderSize.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
@@ -63,6 +65,7 @@ class EChartsCandlestick extends IPSModuleStrict
     use EChartsBarPreviewForm;
     use SymconECharts\CandlestickPreview;
     use EChartsIPSViewDesignForm;
+    use EChartsArchivePeriodView;
     use EChartsIPSViewTransport;
     use EChartsTransientRefresh;
     use IPSViewHTMLPageHelper;
@@ -79,6 +82,7 @@ class EChartsCandlestick extends IPSModuleStrict
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
     private const DESIGN_DEFAULTS = [
+        'EnablePeriodSelection'    => false,
         'ZoomSliderSize'           => 0,
         'EChartsTheme'             => 'auto', 'Orientation' => 'vertical', 'ShowTooltip' => true,
         'ShowGrid'                 => true, 'ShowAxisLabels' => true, 'CandleWidth' => 40, 'BorderWidth' => 2, 'CandleOpacityPercent' => 70,
@@ -390,7 +394,9 @@ class EChartsCandlestick extends IPSModuleStrict
             return $debugFlowResult = $this->HandleEChartsIPSViewRequest(
                 $JSONString,
                 self::DATA_ID_FROM_PARENT,
-                fn (): array => $this->BuildVisualizationState(true)
+                fn (array $payload): array => $this->BuildArchivePeriodView($payload),
+                $this->EChartsPeriodSelectionEnabled(false),
+                true
             );
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -462,24 +468,25 @@ class EChartsCandlestick extends IPSModuleStrict
     /** @param array<string,mixed> $values */
     protected function BarPreviewSvg(array $values, bool $ipsView): string
     {
-        return $this->CandlestickPreviewSvg($values, $ipsView);
+        return $this->WithArchivePeriodPreview($this->CandlestickPreviewSvg($values, $ipsView), $values, $ipsView);
     }
 
-    private function GetCandlestickDataForOutput(bool $ipsView): string
+    private function GetCandlestickDataForOutput(bool $ipsView, string $period = ''): string
     {
         $error = $this->GetConfigurationError();
         if ($error !== null) {
-            $this->WriteAttributeString('LastError', $error['Message']);
-            $this->DebugEChartsSetStatus($error['Status']);
+            $this->SetViewError($error['Message']);
+            $this->SetViewStatus($error['Status']);
             throw new RuntimeException($error['Message']);
         }
         if (!$this->HasActiveParent()) {
-            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
+            $this->SetViewStatus(self::STATUS_PARENT_MISSING);
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         $sources = $this->GetValidatedSources();
-        $query = $this->ResolveTimeQuery();
-        $range = ['key'    => $this->ReadPropertyString('Range'), 'startTimestamp' => $query['StartTimestamp'],
+        $rangeKey = $period === '' ? $this->ReadPropertyString('Range') : $period;
+        $query = $this->ResolveTimeQuery(['Range' => $rangeKey]);
+        $range = ['key'    => $rangeKey, 'startTimestamp' => $query['StartTimestamp'],
             'endTimestamp' => $query['EndTimestamp'], 'timezone' => date_default_timezone_get()];
         if ($range['key'] === 'absolute') {
             $range += ['requestedStartTimestamp' => $query['RequestedStartTimestamp'],
@@ -501,12 +508,14 @@ class EChartsCandlestick extends IPSModuleStrict
                 foreach ($sources as $source) {
                     $data[$source['VariableID']] = CandlestickData::Summarize($points[$source['VariableID']] ?? [], $query);
                 }
-                $this->SetBuffer('CandlestickCache', json_encode(['key' => $key, 'expires' => $this->CurrentTimestamp() + 60,
-                    'data'                                              => $data], JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION));
+                if ($period === '') {
+                    $this->SetBuffer('CandlestickCache', json_encode(['key' => $key, 'expires' => $this->CurrentTimestamp() + 60,
+                        'data'                                              => $data], JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION));
+                }
             }
         } catch (Throwable $exception) {
-            $this->WriteAttributeString('LastError', $exception->getMessage());
-            $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+            $this->SetViewError($exception->getMessage());
+            $this->SetViewStatus(self::STATUS_GATEWAY_FAILED);
             throw $exception;
         }
         $panels = [];
@@ -520,8 +529,8 @@ class EChartsCandlestick extends IPSModuleStrict
             $panels[] = ['id' => (string) $source['VariableID'], 'variableID' => $source['VariableID'],
                 'sourceLabel' => $source['Label'], 'unit' => $source['Unit'], 'data' => $items];
         }
-        $this->WriteAttributeString('LastError', '');
-        $this->DebugEChartsSetStatus(IS_ACTIVE);
+        $this->SetViewError('');
+        $this->SetViewStatus(IS_ACTIVE);
         return json_encode(
             ['schemaVersion'     => 1, 'family' => 'candlestick', 'theme' => $this->EffectiveTheme($ipsView),
                 'candlestick'    => ['title' => $this->ReadPropertyString('Title'), 'unit' => $sources[0]['Unit'],
@@ -537,7 +546,7 @@ class EChartsCandlestick extends IPSModuleStrict
     private function RenderCandlestickHTMLPage(bool $ipsView): string
     {
         $startup = EChartsStartupState::Startup($this->BuildVisualizationState($ipsView));
-        return $this->RenderChartPage($ipsView, [
+        $html = $this->RenderChartPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Candlestick',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -576,6 +585,7 @@ class EChartsCandlestick extends IPSModuleStrict
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
+        return $this->WithEChartsPeriodSelection($html, $ipsView, $this->ArchivePeriodChoices($ipsView));
     }
 
     private function Initialize(): void
@@ -632,6 +642,16 @@ class EChartsCandlestick extends IPSModuleStrict
                 ? $this->Translate($exception->getMessage()) : $exception->getMessage()];
         }
         return null;
+    }
+
+    private function SupportsArchivePeriod(string $period): bool
+    {
+        try {
+            $query = $this->ResolveTimeQuery(['Range' => $period]);
+            return !$query['Empty'];
+        } catch (InvalidArgumentException) {
+            return false;
+        }
     }
 
     /** Pure shared planning for saved settings and read-only preview drafts. */
@@ -757,7 +777,7 @@ class EChartsCandlestick extends IPSModuleStrict
     }
 
     /** @return array<string,mixed> */
-    private function BuildVisualizationState(bool $ipsView = false): array
+    private function BuildVisualizationState(bool $ipsView = false, string $period = ''): array
     {
         $configurationError = $this->GetConfigurationError();
         if ($configurationError !== null) {
@@ -772,13 +792,13 @@ class EChartsCandlestick extends IPSModuleStrict
             return $this->ErrorState('Connect an active EChartsGateway.');
         }
         try {
-            $chart = json_decode($this->GetCandlestickDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
+            $chart = json_decode($this->GetCandlestickDataForOutput($ipsView, $period), true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
-            if (str_contains($this->ReadAttributeString('LastError'), 'too dense')) {
+            if (str_contains($this->GetViewError(), 'too dense')) {
                 return $this->ErrorState('The archive is too dense. Choose a shorter time range.');
             }
-            return $this->ErrorState($this->ReadAttributeString('LastError') === 'Candlestick requires standard archive variables, not counters.'
+            return $this->ErrorState($this->GetViewError() === 'Candlestick requires standard archive variables, not counters.'
                 ? 'Candlestick requires standard archive variables, not counters.' : 'The Candlestick values could not be loaded.');
         }
         return ['schemaVersion' => 1, 'family' => 'candlestick', 'status' => 'ready', 'chart' => $this->WithChartBackground($chart, $ipsView), 'error' => null];

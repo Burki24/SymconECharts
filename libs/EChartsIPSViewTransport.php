@@ -8,11 +8,16 @@ use Closure;
 use RuntimeException;
 use Throwable;
 
+require_once __DIR__ . '/EChartsPeriodControl.php';
+require_once __DIR__ . '/EChartsViewDiagnostics.php';
+
 /**
  * Adds the shared persistent IPSView transport to ECharts device modules.
  */
 trait EChartsIPSViewTransport
 {
+    use EChartsViewDiagnostics;
+
     private const ECHARTS_IPSVIEW_CHANNEL_ATTRIBUTE = 'IPSViewTransportChannel';
     private const ECHARTS_IPSVIEW_HOOK = '/hook/SymconECharts';
 
@@ -25,6 +30,27 @@ trait EChartsIPSViewTransport
     protected function VisualizationInteractionScriptURL(): string
     {
         return self::ECHARTS_IPSVIEW_HOOK . '/assets/interaction.js';
+    }
+
+    protected function EChartsPeriodSelectionEnabled(bool $ipsView): bool
+    {
+        $prefix = $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign') ? 'IPSView' : '';
+        return $this->ReadPropertyBoolean($prefix . 'EnablePeriodSelection');
+    }
+
+    /** @param array<string,string> $choices */
+    protected function WithEChartsPeriodSelection(string $html, bool $ipsView, array $choices): string
+    {
+        if ($choices === [] || !$this->EChartsPeriodSelectionEnabled($ipsView)) {
+            return $html;
+        }
+        return EChartsPeriodControl::Page(
+            $html,
+            $this->EChartsIPSViewTransportOptions()['statePath'],
+            $ipsView,
+            $choices,
+            $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()) === 'de'
+        );
     }
 
     /** @return array{statePath:string,socketPath:string} */
@@ -111,7 +137,8 @@ trait EChartsIPSViewTransport
         string $json,
         string $dataID,
         Closure $stateBuilder,
-        bool $allowTile = false
+        bool $allowTile = false,
+        bool $allowPeriod = false
     ): string {
         $debugFlowResult = null;
         $debugFlowFailed = false;
@@ -127,20 +154,28 @@ trait EChartsIPSViewTransport
                 $payload = $request['Payload'];
                 $output = $payload['Output'] ?? 'ipsview';
                 $offset = $payload['WindowOffset'] ?? 0;
+                $period = $payload['Period'] ?? '';
                 if (($payload['InstanceID'] ?? null) !== $this->InstanceID
                     || !is_string($payload['Channel'] ?? null)
                     || !hash_equals($this->EChartsIPSViewChannel(), $payload['Channel'])
                     || !in_array($output, ['tile', 'ipsview'], true)
                     || !is_int($offset) || $offset < 0 || $offset > EChartsDataProtocol::MAX_STATE_WINDOW_OFFSET
+                    || !EChartsDataProtocol::IsValidPeriodKey($period)
+                    || ($period !== '' && (!$allowPeriod || !$this->EChartsPeriodSelectionEnabled($output === 'ipsview')))
                     || ($output === 'tile'
                         ? !$allowTile : !$this->IsIPSViewHTMLPageEnabled())
                 ) {
                     return $debugFlowResult = '';
                 }
 
+                $state = $period === '' ? $stateBuilder($payload)
+                    : $this->WithViewDiagnostics(true, fn (): array => $stateBuilder($payload));
+                if ($period !== '') {
+                    $state['viewPeriod'] = $period;
+                }
                 return $debugFlowResult = EChartsDataProtocol::EncodeSuccessResponse(
                     EChartsDataProtocol::OPERATION_IPSVIEW_STATE,
-                    ['State' => $stateBuilder($payload)]
+                    ['State' => $state]
                 );
             } catch (Throwable $exception) {
                 $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);

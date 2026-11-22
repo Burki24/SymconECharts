@@ -20,7 +20,12 @@ final class EChartsArchiveQuery
         '7d'  => 604800,
         '30d' => 2592000
     ];
-    public const CALENDAR_RANGES = ['today', 'yesterday', 'current-week', 'current-month'];
+    public const CALENDAR_RANGES = ['today', 'yesterday', 'current-week', 'current-month', 'current-year'];
+    public const PERIOD_PRESETS = [
+        '1h'            => '1 hour', '6h' => '6 hours', '24h' => '24 hours', '7d' => '7 days', '30d' => '30 days',
+        'today'         => 'Today', 'yesterday' => 'Yesterday', 'current-week' => 'This week',
+        'current-month' => 'This month', 'current-year' => 'This year'
+    ];
     public const CUSTOM_RANGE_UNITS = [
         'minute' => 60,
         'hour'   => 3600,
@@ -530,7 +535,8 @@ final class EChartsArchiveQuery
             'today'         => $today,
             'yesterday'     => $today->modify('-1 day'),
             'current-week'  => $today->modify('monday this week'),
-            'current-month' => $today->modify('first day of this month')
+            'current-month' => $today->modify('first day of this month'),
+            'current-year'  => $today->setDate((int) $today->format('Y'), 1, 1)
         };
         $end = $range === 'yesterday' ? $today->getTimestamp() - 1 : $now;
 

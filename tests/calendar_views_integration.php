@@ -98,6 +98,27 @@ declare(strict_types=1);
                 'Native date-only controls and active-only fields must match the selected period.'
             );
         }
+        $calendar->SetTestProperty('EnablePeriodSelection', true);
+        $periodRequest = $calendarRequest;
+        $periodRequest['Payload']['Output'] = 'tile';
+        $periodRequest['Payload']['Period'] = 'month';
+        $periodRequest['Payload']['WindowOffset'] = 1;
+        $state = SymconECharts\EChartsDataProtocol::DecodeResponse(
+            $calendar->ReceiveData(json_encode($periodRequest, JSON_THROW_ON_ERROR)),
+            'ipsview.state'
+        )['Payload']['State'];
+        assertGatewayGauge($state['viewPeriod'] === 'month' && $state['chart']['calendar']['startDate'] === '2026-09-01'
+            && $model()['period'] === 'absolute', 'The month picker must use current calendar bounds and relative navigation, leaving the fixed default intact.');
+        $before = count($queries);
+        $periodRequest['Payload']['Period'] = 'not-a-period';
+        assertGatewayGauge(
+            $calendar->ReceiveData(json_encode($periodRequest, JSON_THROW_ON_ERROR)) === '' && count($queries) === $before,
+            'A forged Calendar preset must not issue archive queries.'
+        );
+        $periodRequest['Payload']['Output'] = 'ipsview';
+        $periodRequest['Payload']['Period'] = 'month';
+        assertGatewayGauge($calendar->ReceiveData(json_encode($periodRequest, JSON_THROW_ON_ERROR)) === '', 'The independent IPSView picker remains disabled.');
+        $calendar->SetTestProperty('EnablePeriodSelection', false);
         $counterID = 88003;
         $GLOBALS['symconTestVariables'][$counterID] = ['VariableType' => 2, 'VariableUpdated' => 1780000000, 'Value' => 1234.0, 'Name' => 'Calendar view counter'];
         $GLOBALS['symconTestArchiveVariables'][$counterID] = ['AggregationType' => 1, 'LoggedValues' => [], 'AggregatedValues' => [
