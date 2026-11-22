@@ -666,6 +666,14 @@
                     ]
                 },
                 {
+                    "type": "NumberSpinner",
+                    "name": "ValueAxisSpacing",
+                    "caption": "Value axis spacing (0 = automatic)",
+                    "minimum": 0,
+                    "maximum": 120,
+                    "suffix": "px"
+                },
+                {
                     "type": "RowLayout",
                     "items": [
                         {

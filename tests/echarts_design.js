@@ -90,6 +90,15 @@ assert.equal(recoveryWarningElement.hidden, true, 'Fresh data must clear the war
 assert.equal(retainFailure({ status: 'error', error: 'Invalid configuration' }, readyState, {}), false,
     'Configuration failures must not retain a stale chart.');
 const fontSizePercent = window.SYMC_ECHARTS_DESIGN.fontSizePercent;
+const valueAxisSpacing = window.SYMC_ECHARTS_DESIGN.valueAxisSpacing;
+for (const automatic of [undefined, 0, -1, 121, 1.5]) {
+    assert.equal(valueAxisSpacing(automatic, 54, 130, 2), 54);
+}
+assert.equal(valueAxisSpacing(24, 54, 130, 2), 24);
+assert.equal(valueAxisSpacing(120, 54, 130, 1), 120);
+assert.equal(valueAxisSpacing(120, 54, 48, 3), 16, 'Extra axes must share the available margin.');
+assert.equal(valueAxisSpacing(24, 54, 90, 0), 0, 'A single axis needs no extra margin.');
+assert.equal(valueAxisSpacing(24, 54, -4, 2), 0);
 const chartTitleLayout = window.SYMC_ECHARTS_DESIGN.chartTitleLayout;
 assert.deepEqual(JSON.parse(JSON.stringify(chartTitleLayout(
     { mode: 'symcon', options: { tileHeaderVisible: true, tileHeaderInset: 58 } }, 'Chart', 18

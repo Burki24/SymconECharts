@@ -170,6 +170,7 @@
             "Title size": "Titelgröße",
             "Legend size": "Legendengröße",
             "Axis label size": "Achsenbeschriftungsgröße",
+            "Value axis spacing (0 = automatic)": "Abstand der Wertachsen (0 = automatisch)",
             "Title color": "Titelfarbe",
             "Legend color": "Legendenfarbe",
             "Axis color": "Achsenfarbe",

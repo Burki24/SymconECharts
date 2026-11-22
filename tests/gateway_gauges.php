@@ -5379,6 +5379,7 @@ assertGatewayGauge(
             'showVerticalGrid'        => true,
             'showXAxis'               => false,
             'showYAxis'               => true,
+            'valueAxisSpacing'        => 0,
             'titleFontSizePercent'    => 125,
             'legendFontSizePercent'   => 110,
             'axisFontSizePercent'     => 150,

@@ -103,6 +103,14 @@ rechts und folgt der Zeitachse. Die Vorschau zeigt die gewählte Ausrichtung.
 Für eine andere Ausrichtung in IPSView deaktivieren Sie dort **Kacheldesign verwenden**
 und wählen die Ausrichtung im IPSView-Designer.
 
+Unter **Abstand der Wertachsen (0 = automatisch)** legen Sie fest, wie weit
+zwei sichtbare Wertachsen auf derselben Seite auseinanderliegen. **0** verwendet
+die bisherige Automatik. Für engere Skalen auf dem Handy können Sie beispielsweise
+**24 px** ausprobieren. Wählbar sind 1 bis 120 px. Bei horizontalen Balken
+gilt der Abstand für die Achsen unten bzw. oben. Beide Designer zeigen die
+Änderung in der Vorschau. Bei knappem Platz wird der gewählte Abstand verkleinert,
+damit für die Balken Platz bleibt.
+
 Einstellbar sind Theme, Balkenbreite, Deckkraft, Rundung samt Radius, Gitter,
 Wertbeschriftung und getrennte Schriftgrößen/-farben für Titel, Legende, Achsen
 und Werte. Die Achsenschrift gilt auch für die Einheitenüberschrift.

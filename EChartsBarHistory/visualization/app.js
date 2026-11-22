@@ -162,13 +162,12 @@
             var topMargin = axisCounts.right ? axisMargin : 0;
             gridBottom = axisCounts.left ? axisMargin : 16;
             var offsetBudget = Math.max(0, (chartHeight - gridTop) * 0.65 - topMargin - gridBottom);
-            axisOffsetStep = extraAxes ? Math.min(axisFontSize * 2.8, offsetBudget / extraAxes) : 0;
+            axisOffsetStep = echartsDesign.valueAxisSpacing(style.valueAxisSpacing, axisFontSize * 2.8, offsetBudget, extraAxes);
             gridTop += topMargin + axisOffsetStep * Math.max(0, axisCounts.right - 1);
             gridBottom += axisOffsetStep * Math.max(0, axisCounts.left - 1);
         } else {
             var maximumAxisMargin = Math.max(58, Math.min(190, chartWidth * 0.32));
-            axisOffsetStep = maximumSideCount > 1
-                ? Math.min(54, (maximumAxisMargin - 58) / (maximumSideCount - 1)) : 0;
+            axisOffsetStep = echartsDesign.valueAxisSpacing(style.valueAxisSpacing, 54, maximumAxisMargin - 58, maximumSideCount - 1);
             leftMargin = axisCounts.left > 0 ? 52 + axisOffsetStep * (axisCounts.left - 1) : 28;
             rightMargin = axisCounts.right > 0 ? 52 + axisOffsetStep * (axisCounts.right - 1) : 28;
             gridBottom = zoom ? (compact ? 42 : 70) : (compact ? 32 : 58);

@@ -456,6 +456,36 @@ const tooltip = multi.option.tooltip.formatter([
 assert.match(tooltip, /21.5 °C/);
 assert.match(tooltip, /58 %/);
 
+for (const mode of ['symcon', 'ipsview']) {
+    for (const orientation of ['vertical', 'horizontal']) {
+        const horizontal = orientation === 'horizontal';
+        const axisKey = horizontal ? 'xAxis' : 'yAxis';
+        const gridSides = horizontal ? ['bottom', 'top'] : ['left', 'right'];
+        const renderSpacing = valueAxisSpacing => render(false, mode, false, true, false, 750, 600, {
+            status: 'ready', chart: {
+                bar: { style: { orientation, valueAxisSpacing } },
+                axes: ['left', 'left', 'right', 'right'].map(position => ({ unit: '°C', position })),
+                series: [0, 1, 2, 3].map(axisIndex => ({ id: 's' + axisIndex, axisIndex,
+                    points: [[1780000100, 21.5]] }))
+            }
+        });
+        const automatic = renderSpacing(0).option;
+        assert.deepEqual({ ...automatic.grid }, { ...renderSpacing(undefined).option.grid });
+        const layout = renderSpacing(24);
+        assert.deepEqual(Array.from(layout.option[axisKey], axis => axis.offset), [0, 24, 0, 24]);
+        const automaticStep = horizontal ? 12 * 2.8 : 54;
+        assert.equal(automatic[axisKey][1].offset, automaticStep);
+        for (const side of gridSides) {
+            assert.ok(Math.abs(automatic.grid[side] - layout.option.grid[side] - (automaticStep - 24)) < 1e-6,
+                'Reducing the spacing must return the reserved margin to the plot.');
+        }
+        const large = renderSpacing(120);
+        assert.equal(large.option[axisKey][3].offset, 120);
+        large.resizeTo(320, 195);
+        assert.ok(large.option[axisKey][3].offset < 120, 'Limit repeated axes on a small display after a resize.');
+    }
+}
+
 const manySources = Array.from({ length: 32 }, (_, index) => ({
     id: 'variable-' + (10000 + index), variableID: 10000 + index,
     label: index < 2 ? 'Same label' : 'Synthetic sensor ' + (index + 1),

@@ -71,6 +71,13 @@
         return Math.max(0, Math.min(100, percent)) / 100;
     }
 
+    function valueAxisSpacing(configured, automaticLimit, availableSpace, extraAxisCount) {
+        if (extraAxisCount <= 0) { return 0; }
+        var requested = Number.isInteger(configured) && configured >= 1 && configured <= 120
+            ? configured : automaticLimit;
+        return Math.min(requested, Math.max(0, availableSpace) / extraAxisCount);
+    }
+
     function prefersReducedMotion() {
         return typeof global.matchMedia === 'function'
             && global.matchMedia('(prefers-reduced-motion: reduce)').matches === true;
@@ -296,6 +303,7 @@
         colorWithAlpha: colorWithAlpha,
         barOutlineStyle: barOutlineStyle,
         fontSizePercent: fontSizePercent,
+        valueAxisSpacing: valueAxisSpacing,
         chartTitleLayout: chartTitleLayout,
         valueLabel: valueLabel,
         gaugeLabelOffsets: gaugeLabelOffsets,

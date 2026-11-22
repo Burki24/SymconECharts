@@ -141,6 +141,58 @@ declare(strict_types=1);
             'Two temperature sources must retain distinct sides, explicit ranges and series assignments.'
         );
 
+        $spacingRows = [$outdoor, array_replace($humidity, ['AxisPosition' => 'left', 'AxisRangeMode' => 'manual',
+            'AxisMinimum'                                                  => 0, 'AxisMaximum' => 100]),
+            array_replace($hotWater, ['VariableID' => $sources[2]['VariableID']])];
+        $spacing = $configure($spacingRows, 'realtime', 200);
+        $spacing->SetTestProperty('EnableIPSView', true);
+        $spacing->SetTestProperty('ValueAxisSpacing', 24);
+        $spacing->SetTestProperty('IPSViewValueAxisSpacing', 48);
+        foreach ([true, false] as $inherited) {
+            $spacing->SetTestProperty('IPSViewUseTileDesign', $inherited);
+            $spacing->ApplyChanges();
+            $form = json_decode($spacing->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+            foreach ([['', 24], ['IPSView', $inherited ? 24 : 48]] as [$prefix, $expected]) {
+                $html = $prefix === '' ? $spacing->GetVisualizationTile() : $spacing->GetIPSViewHTML();
+                $axisField = findGaugeFormElement($form['elements'], $prefix . 'ValueAxisSpacing');
+                $preview = findGaugeFormElement($form['elements'], $prefix . 'TimeSeriesPreview')['image'];
+                $svg = base64_decode(substr($preview, strlen('data:image/svg+xml;base64,')), true);
+                assertGatewayGauge(
+                    $startup($html)['chart']['chart']['design']['valueAxisSpacing'] === $expected
+                    && $axisField['minimum'] === 0 && $axisField['maximum'] === 120
+                    && str_contains($axisField['onChange'], '$' . $prefix . 'ValueAxisSpacing')
+                    && preg_match_all('/data-preview-axis="left" x1="([\d.]+)"/', $svg, $matches) === 2
+                    && (float) $matches[1][0] - (float) $matches[1][1] === (float) $expected
+                    && preg_match_all('/data-preview-axis-range="left"[^>]* y="([\d.]+)"/', $svg, $labels) === 2
+                    && (float) $labels[1][1] - (float) $labels[1][0] >= 11,
+                    'Both outputs and form previews must respect inherited and independent axis spacing.'
+                );
+            }
+        }
+        $saved = $spacing->GetTestProperties();
+        $spacing->UpdateTimeSeriesPreviewFromForm('{"ValueAxisSpacing":18,"IPSViewValueAxisSpacing":30}');
+        foreach ([['TimeSeriesPreview', 18], ['IPSViewTimeSeriesPreview', 30]] as [$field, $expected]) {
+            $updates = array_values(array_filter($spacing->GetTestFormUpdates(), static fn (array $row): bool => $row['Field'] === $field));
+            $svg = base64_decode(substr(end($updates)['Value'], strlen('data:image/svg+xml;base64,')), true);
+            assertGatewayGauge(
+                preg_match_all('/data-preview-axis="left" x1="([\d.]+)"/', $svg, $matches) === 2
+                && (float) $matches[1][0] - (float) $matches[1][1] === (float) $expected
+                && str_contains($svg, '<path d="M ' . $matches[1][0] . ' ')
+                && $spacing->GetTestProperties() === $saved,
+                'Each unsaved spacing must move its preview axes and the plotted samples without persisting the draft.'
+            );
+        }
+        $GLOBALS['symconTestCopyTarget'] = $spacing;
+        try {
+            $spacing->CopyTileDesignToIPSView();
+        } finally {
+            unset($GLOBALS['symconTestCopyTarget']);
+        }
+        assertGatewayGauge(
+            $spacing->GetTestProperties()['IPSViewValueAxisSpacing'] === 24,
+            'Copying the tile design must include the spacing between value axes.'
+        );
+
         $old = $configure(array_slice($sources, 0, 8), 'realtime', 2000);
         $defaults = (new TestableEChartsTimeSeries());
         $defaults->Create();

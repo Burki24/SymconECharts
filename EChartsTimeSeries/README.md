@@ -241,7 +241,15 @@ HTML-Dokument.
 
 Bis zu acht unterschiedliche effektive Einheiten sind möglich. Automatisch
 verteilt die Einheitenachsen auf beide Seiten; mehrere Achsen derselben Seite
-werden versetzt dargestellt.
+werden versetzt dargestellt. Unter **Kacheldesigner → Flächen und Achsen →
+Abstand der Wertachsen** bestimmt `0` den Abstand automatisch. Mit **24 px**
+kannst Du zum Beispiel die zweite linke Skala näher an die erste rücken.
+Du kannst 1 bis 120 px vorgeben. Reicht der Platz bei vielen Achsen oder in
+einer schmalen Kachel nicht aus, verkleinert das Diagramm den Abstand.
+Für einen anderen Abstand in IPSView deaktiviere **Kacheldesign verwenden**
+und stelle den Wert im **unabhängigen IPSView-Designer** ein. Beide
+Vorschauen zeigen den Abstand zwischen den sichtbaren Wertachsen.
+
 `raw` bleibt immer eine echte Rohwertabfrage; `realtime` ist der ausdrücklich
 archivfreie Live-Modus und nur `auto` wählt selbstständig eine
 Verdichtungsstufe.

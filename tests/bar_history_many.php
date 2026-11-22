@@ -88,6 +88,11 @@ declare(strict_types=1);
             'Both Historical Bar designers must default to vertical columns.'
         );
         assertGatewayGauge(
+            $defaults->GetTestProperties()['ValueAxisSpacing'] === 0
+            && $defaults->GetTestProperties()['IPSViewValueAxisSpacing'] === 0,
+            'Old and new configurations must use automatic value-axis spacing in both outputs.'
+        );
+        assertGatewayGauge(
             $defaults->GetTestProperties()['PointBudget'] === 1000,
             'The established Historical Bar point-budget default must remain 1000.'
         );
@@ -129,7 +134,16 @@ declare(strict_types=1);
             && array_column($axisData['axes'], 'maximum') === [100.0, 40.0, 60.0],
             'Equal-unit shared and individual series must resolve their own scales and sides in source order.'
         );
+        foreach (['ValueAxisSpacing', 'IPSViewValueAxisSpacing'] as $field) {
+            $control = findGaugeFormElement($axisForm['elements'], $field);
+            assertGatewayGauge(
+                $control['minimum'] === 0 && $control['maximum'] === 120
+                && str_contains($control['onChange'], 'ECBH_UpdateBarPreviewFromForm'),
+                'Each spacing control must update the unsaved previews.'
+            );
+        }
         $axisModule->UpdateBarPreviewFromForm(json_encode(['Sources' => $axisRows, 'Orientation' => 'horizontal',
+            'ValueAxisSpacing'                                       => 18, 'IPSViewValueAxisSpacing' => 48,
             'IPSViewUseTileDesign'                                   => false, 'IPSViewOrientation' => 'vertical'], JSON_THROW_ON_ERROR));
         foreach (array_slice($axisModule->GetTestFormUpdates(), -2) as $image) {
             $svg = base64_decode(substr($image['Value'], strlen('data:image/svg+xml;base64,')), true);
@@ -138,7 +152,33 @@ declare(strict_types=1);
                 && substr_count($svg, 'data-preview-axis="' . ($image['Field'] === 'BarPreview' ? 'bottom' : 'left') . '"') === 2,
                 'Both previews must display the configured ranges of separate equal-unit axes.'
             );
+            $tile = $image['Field'] === 'BarPreview';
+            $xml = new DOMDocument();
+            $xml->loadXML($svg);
+            $axes = (new DOMXPath($xml))->query('//*[@data-preview-axis="' . ($tile ? 'bottom' : 'left') . '"]');
+            $coordinate = $tile ? 'y1' : 'x1';
+            $spacing = abs((float) $axes->item(0)->getAttribute($coordinate) - (float) $axes->item(1)->getAttribute($coordinate));
+            assertGatewayGauge($spacing === ($tile ? 18.0 : 48.0), 'Each draft must position both axis lines at its requested distance.');
         }
+        $axisModule->SetTestProperty('EnableIPSView', true);
+        $axisModule->SetTestProperty('ValueAxisSpacing', 18);
+        $axisModule->SetTestProperty('IPSViewValueAxisSpacing', 48);
+        $axisModule->ApplyChanges();
+        assertGatewayGauge(str_contains($axisModule->GetIPSViewHTML(), '"valueAxisSpacing":18'), 'IPSView inherits the tile spacing.');
+        $axisModule->SetTestProperty('IPSViewUseTileDesign', false);
+        $axisModule->ApplyChanges();
+        assertGatewayGauge(
+            str_contains($axisModule->GetIPSViewHTML(), '"valueAxisSpacing":48')
+            && $decode($axisModule)['bar']['style']['valueAxisSpacing'] === 18,
+            'Independent designer values must reach their respective charts.'
+        );
+        $GLOBALS['symconTestCopyTarget'] = $axisModule;
+        try {
+            $axisModule->CopyTileDesignToIPSView();
+        } finally {
+            unset($GLOBALS['symconTestCopyTarget']);
+        }
+        assertGatewayGauge($axisModule->GetTestProperties()['IPSViewValueAxisSpacing'] === 18, 'Copying the design includes its spacing.');
         $ownStack = $axisRows;
         $ownStack[2]['StackGroup'] = 1;
         $invalidOwnStack = $configure($ownStack, 'hour');

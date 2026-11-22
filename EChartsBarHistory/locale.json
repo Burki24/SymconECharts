@@ -83,6 +83,7 @@
             "Point budget": "Punktbudget",
             "Tile designer": "Kacheldesigner",
             "Orientation": "Ausrichtung",
+            "Value axis spacing (0 = automatic)": "Abstand der Wertachsen (0 = automatisch)",
             "Left / bottom": "Links / unten",
             "Right / top": "Rechts / oben",
             "Vertical": "Vertikal",

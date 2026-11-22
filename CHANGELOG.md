@@ -8,6 +8,9 @@
 
 ## Neu
 
+- In EChartsTimeSeries und EChartsBarHistory lässt sich der Abstand zwischen
+  Wertachsen auf derselben Seite für Kachel und IPSView getrennt einstellen.
+  Die Designer zeigen den Abstand in der Vorschau. Bei 0 gilt die bisherige Automatik.
 - In EChartsTimeSeries und EChartsBarHistory kann jede ungestapelte Messreihe
   eine eigene Wertachse mit eigener Seite und eigenen Skalenwerten erhalten.
   Standardmäßig teilen sich Reihen gleicher Einheit weiterhin eine Achse.

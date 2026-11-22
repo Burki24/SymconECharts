@@ -232,8 +232,9 @@
         var baseAxisMargin = Math.round(58 * Math.max(1, axisFontSize / 12));
         var maximumAxisMargin = Math.max(baseAxisMargin, Math.min(190, chartWidth * 0.32));
         var maximumSideCount = Math.max(axisCounts.left, axisCounts.right);
-        var axisOffsetStep = maximumSideCount > 1
-            ? Math.min(90, (maximumAxisMargin - baseAxisMargin) / (maximumSideCount - 1)) : 0;
+        var axisOffsetStep = echartsDesign.valueAxisSpacing(
+            design.valueAxisSpacing, 90, maximumAxisMargin - baseAxisMargin, maximumSideCount - 1
+        );
         var leftMargin = axisCounts.left > 0 ? baseAxisMargin + axisOffsetStep * (axisCounts.left - 1) : 22;
         var rightMargin = axisCounts.right > 0 ? baseAxisMargin + axisOffsetStep * (axisCounts.right - 1) : 22;
         if (design.showYAxis === false) {

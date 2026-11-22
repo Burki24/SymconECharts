@@ -30,6 +30,7 @@ use SymconECharts\EChartsStartupState;
 use SymconECharts\EChartsSvgImage;
 use SymconECharts\EChartsUnitAxes;
 use SymconECharts\EChartsValueAxisForm;
+use SymconECharts\EChartsValueAxisLayout;
 use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -57,6 +58,7 @@ require_once __DIR__ . '/../libs/EChartsStartupState.php';
 require_once __DIR__ . '/../libs/EChartsSvgImage.php';
 require_once __DIR__ . '/../libs/EChartsUnitAxes.php';
 require_once __DIR__ . '/../libs/EChartsValueAxisForm.php';
+require_once __DIR__ . '/../libs/EChartsValueAxisLayout.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 
 class EChartsBarHistory extends IPSModuleStrict
@@ -94,6 +96,7 @@ class EChartsBarHistory extends IPSModuleStrict
     private const DESIGN_PROPERTY_TYPES = [
         'EChartsTheme'            => 'string',
         'Orientation'             => 'string',
+        'ValueAxisSpacing'        => 'integer',
         'ShowValues'              => 'boolean',
         'ValueLabelPosition'      => 'string',
         'ValueLabelDistance'      => 'integer',
@@ -147,6 +150,7 @@ class EChartsBarHistory extends IPSModuleStrict
             $this->RegisterPropertyString('TimeAxisLabelFormat', 'auto');
             $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
             $this->RegisterPropertyString('Orientation', 'vertical');
+            $this->RegisterPropertyInteger('ValueAxisSpacing', 0);
             $this->RegisterPropertyBoolean('ShowValues', false);
             $this->RegisterPropertyString('ValueLabelPosition', 'auto');
             $this->RegisterPropertyInteger('ValueLabelDistance', 5);
@@ -189,6 +193,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 $default = match ($name) {
                     'EChartsTheme'                                => EChartsAsset::THEME_AUTO,
                     'Orientation'                                 => 'vertical',
+                    'ValueAxisSpacing'                            => 0,
                     'BarFillMode'                                 => 'solid',
                     'BarSVG'                                      => '',
                     'BarSVGSizePercent'                           => 100,
@@ -652,13 +657,31 @@ class EChartsBarHistory extends IPSModuleStrict
         $svg .= '<text x="696" y="55" text-anchor="end" fill="' . EChartsBarPreview::E($palette['muted'])
             . '" font-size="11">' . EChartsBarPreview::E($range) . '</text>';
         $horizontal = $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView) === 'horizontal';
+        $counts = array_count_values(array_map(
+            static fn (int $index): string => $axisModel['Axes'][$index]['position'],
+            array_keys($visibleAxes)
+        ));
+        $leftExtra = max(0, ($counts['left'] ?? 0) - 1);
+        $rightExtra = max(0, ($counts['right'] ?? 0) - 1);
+        $maximumExtra = max($leftExtra, $rightExtra);
+        $spacing = $this->BarPreviewValue($values, 'ValueAxisSpacing', 'integer', $ipsView);
+        // Keep the legend, axis captions and zoom outside the example plot.
+        $step = $horizontal
+            ? EChartsValueAxisLayout::Spacing($spacing, $axisSize * 2.8, 165 * 0.65, $leftExtra + $rightExtra)
+            : EChartsValueAxisLayout::Spacing($spacing, 54, 132, $maximumExtra);
+        $plotLeft = $horizontal ? 90 : 65 + $leftExtra * $step;
+        $plotRight = $horizontal ? 642 : 680 - $rightExtra * $step;
+        $plotTop = $horizontal ? 110 + $rightExtra * $step : 93 + $maximumExtra * ($axisSize + 2);
+        $plotBottom = $horizontal ? 275 - $leftExtra * $step : 265;
+        $plotWidth = $plotRight - $plotLeft;
+        $plotHeight = $plotBottom - $plotTop;
         $showGrid = $this->BarPreviewValue($values, 'ShowGrid', 'boolean', $ipsView);
         if ($showGrid) {
             for ($i = 0; $i <= 4; ++$i) {
-                $position = $horizontal ? 90 + $i * 138 : 265 - $i * 43;
+                $position = $horizontal ? $plotLeft + $i * $plotWidth / 4 : $plotBottom - $i * $plotHeight / 4;
                 $line = $horizontal
-                    ? 'x1="' . $position . '" y1="110" x2="' . $position . '" y2="275"'
-                    : 'x1="65" y1="' . $position . '" x2="680" y2="' . $position . '"';
+                    ? 'x1="' . $position . '" y1="' . $plotTop . '" x2="' . $position . '" y2="' . $plotBottom . '"'
+                    : 'x1="' . $plotLeft . '" y1="' . $position . '" x2="' . $plotRight . '" y2="' . $position . '"';
                 $svg .= '<line ' . $line . ' stroke="' . EChartsBarPreview::E($gridColor) . '"/>';
             }
         }
@@ -677,17 +700,17 @@ class EChartsBarHistory extends IPSModuleStrict
             $positionIndex = $visibleAxisCounts[$axis['position']]++;
             if ($horizontal) {
                 $side = $left ? 'bottom' : 'top';
-                $axisY = $left ? 275 + $positionIndex * 12 : 110 - $positionIndex * 12;
+                $axisY = $left ? $plotBottom + $positionIndex * $step : $plotTop - $positionIndex * $step;
                 $line = 'x1="90" y1="' . $axisY . '" x2="642" y2="' . $axisY . '"';
                 $captionX = 86;
                 $captionY = $axisY + 4;
                 $anchor = 'end';
             } else {
                 $side = $axis['position'];
-                $axisX = $left ? 65 - $positionIndex * 12 : 680 + $positionIndex * 12;
-                $line = 'x1="' . $axisX . '" y1="93" x2="' . $axisX . '" y2="265"';
-                $captionX = $left ? 68 + $positionIndex * 110 : 676 - $positionIndex * 110;
-                $captionY = 88;
+                $axisX = $left ? $plotLeft - $positionIndex * $step : $plotRight + $positionIndex * $step;
+                $line = 'x1="' . $axisX . '" y1="' . $plotTop . '" x2="' . $axisX . '" y2="' . $plotBottom . '"';
+                $captionX = $axisX + ($left ? 3 : -4);
+                $captionY = $plotTop - 5 - $positionIndex * ($axisSize + 2);
                 $anchor = $left ? 'start' : 'end';
             }
             $svg .= '<line data-preview-axis="' . $side . '" ' . $line . ' stroke="' . EChartsBarPreview::E($color) . '"/>';
@@ -748,7 +771,7 @@ class EChartsBarHistory extends IPSModuleStrict
             $slots[$key] ??= count($slots);
             $slotByItem[$index] = $slots[$key];
         }
-        $bucketSpan = $horizontal ? 11 : 40;
+        $bucketSpan = ($horizontal ? $plotHeight : $plotWidth - 15) / 15;
         $slot = $bucketSpan / max(1, count($slots));
         $thickness = $slot * $barWidth / 100;
         $slotCounts = array_count_values($slotByItem);
@@ -763,7 +786,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 $column = $slotByItem[$index];
                 $timeOffset = $bucket * $bucketSpan + $column * $slot + ($slot - $thickness) / 2;
                 $sampleValue = 5 + $sample / 10;
-                $length = $sample / $scale * ($horizontal ? 3 : 1);
+                $length = $sample / $scale / 180 * ($horizontal ? $plotWidth : $plotHeight);
                 $offset = $offsets[$column];
                 $axis = $axisModel['Axes'][$axisModel['SeriesIndexes'][$item['previewPaletteIndex']]];
                 if (isset($axis['minimum'], $axis['maximum'])) {
@@ -773,18 +796,18 @@ class EChartsBarHistory extends IPSModuleStrict
                     $sampleValue = ($sampleMinimum + ($maximum - $sampleMinimum) * ($sample / 200)) / $slotCounts[$column];
                     $start = max($minimum, min($maximum, $totals[$column]));
                     $end = max($minimum, min($maximum, $totals[$column] + $sampleValue));
-                    $span = $horizontal ? 552 : 165;
+                    $span = $horizontal ? $plotWidth : $plotHeight;
                     $offset = (min($start, $end) - $minimum) / ($maximum - $minimum) * $span;
                     $length = abs($end - $start) / ($maximum - $minimum) * $span;
                 }
                 if ($horizontal) {
-                    $x = 90 + $offset;
-                    $y = 110 + $timeOffset;
+                    $x = $plotLeft + $offset;
+                    $y = $plotTop + $timeOffset;
                     $width = $length;
                     $height = $thickness;
                 } else {
-                    $x = 70 + $timeOffset;
-                    $y = 265 - $offset - $length;
+                    $x = $plotLeft + 5 + $timeOffset;
+                    $y = $plotBottom - $offset - $length;
                     $width = $thickness;
                     $height = $length;
                 }
@@ -828,7 +851,8 @@ class EChartsBarHistory extends IPSModuleStrict
                     )) . '</text>';
             }
         }
-        $rangePosition = $horizontal ? 'x="82" y="193" text-anchor="end"' : 'x="70" y="286"';
+        $rangePosition = $horizontal ? 'x="82" y="' . ($plotTop + $plotHeight / 2) . '" text-anchor="end"'
+            : 'x="' . ($plotLeft + 5) . '" y="286"';
         $svg .= '<text ' . $rangePosition . ' fill="' . EChartsBarPreview::E($axisColor)
             . '" font-size="' . $axisSize . '">' . EChartsBarPreview::E($range)
             . '</text>';
@@ -837,8 +861,10 @@ class EChartsBarHistory extends IPSModuleStrict
                 . '" font-size="10">' . EChartsBarPreview::E($this->Translate('SVG pattern (schematic)')) . '</text>';
         }
         if ($this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView)) {
-            $track = $horizontal ? 'x="696" y="110" width="11" height="165"' : 'x="75" y="320" width="600" height="11"';
-            $selection = $horizontal ? 'x="697" y="133" width="9" height="115"' : 'x="160" y="321" width="420" height="9"';
+            $track = $horizontal ? 'x="696" y="' . $plotTop . '" width="11" height="' . $plotHeight . '"'
+                : 'x="' . ($plotLeft + 10) . '" y="320" width="' . ($plotWidth - 15) . '" height="11"';
+            $selection = $horizontal ? 'x="697" y="' . ($plotTop + $plotHeight * 0.14) . '" width="9" height="' . ($plotHeight * 0.7) . '"'
+                : 'x="' . ($plotLeft + 10 + ($plotWidth - 15) * 0.14) . '" y="321" width="' . (($plotWidth - 15) * 0.7) . '" height="9"';
             $svg .= '<rect ' . $track . ' data-preview-zoom="' . ($horizontal ? 'vertical' : 'horizontal')
                 . '" rx="3" fill="' . EChartsBarPreview::E($palette['surface'])
                 . '" stroke="' . EChartsBarPreview::E($palette['border']) . '"/>';
@@ -1376,6 +1402,7 @@ class EChartsBarHistory extends IPSModuleStrict
     {
         if (!$this->AnimationIsValid($prefix)
             || !in_array($this->ReadPropertyString($prefix . 'Orientation'), ['vertical', 'horizontal'], true)
+            || !EChartsValueAxisLayout::IsValidSpacing($this->ReadPropertyInteger($prefix . 'ValueAxisSpacing'))
             || !EChartsLabelDesign::IsValidPosition($this->ReadPropertyString($prefix . 'ValueLabelPosition'), EChartsLabelDesign::CARTESIAN_POSITIONS)
             || !EChartsLabelDesign::IsValidDistance($this->ReadPropertyInteger($prefix . 'ValueLabelDistance'))
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
@@ -1471,6 +1498,7 @@ class EChartsBarHistory extends IPSModuleStrict
         $style = [
             ...$this->ReadAnimationStyle($prefix),
             'orientation'          => $this->ReadPropertyString($prefix . 'Orientation'),
+            'valueAxisSpacing'     => $this->ReadPropertyInteger($prefix . 'ValueAxisSpacing'),
             'showValues'           => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
             'valueLabelPosition'   => $this->ReadPropertyString($prefix . 'ValueLabelPosition'),
             'valueLabelDistance'   => $this->ReadPropertyInteger($prefix . 'ValueLabelDistance'),

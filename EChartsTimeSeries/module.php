@@ -29,6 +29,7 @@ use SymconECharts\EChartsTimeSeriesDesign;
 use SymconECharts\EChartsTimeSeriesPreview;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsUnitAxes;
+use SymconECharts\EChartsValueAxisLayout;
 use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -110,7 +111,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         'GapDetectionMode', 'GapThresholdMinutes',
         'LineWidthPercent', 'SmoothLines', 'ShowSymbols', 'SymbolSizePercent',
         'ShowValues', 'ValueLabelPosition', 'ValueLabelDistance',
-        'AreaOpacityPercent', 'ShowGrid', 'ShowVerticalGrid', 'ShowXAxis', 'ShowYAxis',
+        'AreaOpacityPercent', 'ShowGrid', 'ShowVerticalGrid', 'ShowXAxis', 'ShowYAxis', 'ValueAxisSpacing',
         'TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent',
         'TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'VerticalGridColor', 'ValueColor',
         'IPSViewUseTileDesign', 'IPSViewEChartsTheme', 'IPSViewLegendPosition', 'IPSViewEnableZoom',
@@ -119,7 +120,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         'IPSViewAnimationDelay', 'IPSViewAnimationDelayUpdate',
         'IPSViewLineWidthPercent', 'IPSViewSmoothLines', 'IPSViewShowSymbols', 'IPSViewSymbolSizePercent',
         'IPSViewShowValues', 'IPSViewValueLabelPosition', 'IPSViewValueLabelDistance',
-        'IPSViewAreaOpacityPercent', 'IPSViewShowGrid', 'IPSViewShowVerticalGrid', 'IPSViewShowXAxis', 'IPSViewShowYAxis',
+        'IPSViewAreaOpacityPercent', 'IPSViewShowGrid', 'IPSViewShowVerticalGrid', 'IPSViewShowXAxis', 'IPSViewShowYAxis', 'IPSViewValueAxisSpacing',
         'IPSViewTitleFontSizePercent', 'IPSViewLegendFontSizePercent', 'IPSViewAxisFontSizePercent', 'IPSViewValueFontSizePercent',
         'IPSViewTitleColor', 'IPSViewLegendColor', 'IPSViewAxisColor', 'IPSViewGridColor', 'IPSViewVerticalGridColor', 'IPSViewValueColor',
         'IPSViewUseTileTimeSettings', 'IPSViewRange', 'IPSViewCustomRangeValue', 'IPSViewCustomRangeUnit',
@@ -149,6 +150,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         'ShowVerticalGrid'        => 'boolean',
         'ShowXAxis'               => 'boolean',
         'ShowYAxis'               => 'boolean',
+        'ValueAxisSpacing'        => 'integer',
         'TitleFontSizePercent'    => 'integer',
         'LegendFontSizePercent'   => 'integer',
         'AxisFontSizePercent'     => 'integer',
@@ -201,6 +203,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             $this->RegisterPropertyBoolean('ShowVerticalGrid', false);
             $this->RegisterPropertyBoolean('ShowXAxis', true);
             $this->RegisterPropertyBoolean('ShowYAxis', true);
+            $this->RegisterPropertyInteger('ValueAxisSpacing', 0);
             foreach (['TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'] as $name) {
                 $this->RegisterPropertyInteger($name, 100);
             }
@@ -237,7 +240,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                     'AnimationDuration'                                                                            => 350,
                     'AnimationDurationUpdate'                                                                      => 500,
                     'AnimationEasing', 'AnimationEasingUpdate'                                                     => 'cubicInOut',
-                    'AnimationDelay', 'AnimationDelayUpdate'                                                       => 0,
+                    'AnimationDelay', 'AnimationDelayUpdate', 'ValueAxisSpacing'                                   => 0,
                     default                                                                                        => true
                 };
                 match ($type) {
@@ -457,7 +460,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 )
             ));
 
-            $useTileDesign = (bool) ($values['IPSViewUseTileDesign'] ?? true);
+            $useTileDesign = (bool) ($values['IPSViewUseTileDesign'] ?? $this->ReadPropertyBoolean('IPSViewUseTileDesign'));
             $this->UpdateFormField('IPSViewTimeSeriesPreview', 'image', SVGPreviewHelper::dataUri(
                 EChartsTimeSeriesPreview::CreateSvg(
                     $this->PreviewSeries($values['Sources'] ?? null),
@@ -1730,6 +1733,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             'showVerticalGrid'      => $this->ReadPropertyBoolean($prefix . 'ShowVerticalGrid'),
             'showXAxis'             => $this->ReadPropertyBoolean($prefix . 'ShowXAxis'),
             'showYAxis'             => $this->ReadPropertyBoolean($prefix . 'ShowYAxis'),
+            'valueAxisSpacing'      => $this->ReadPropertyInteger($prefix . 'ValueAxisSpacing'),
             'titleFontSizePercent'  => $this->ReadPropertyInteger($prefix . 'TitleFontSizePercent'),
             'legendFontSizePercent' => $this->ReadPropertyInteger($prefix . 'LegendFontSizePercent'),
             'axisFontSizePercent'   => $this->ReadPropertyInteger($prefix . 'AxisFontSizePercent'),
@@ -1761,6 +1765,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             'ShowVerticalGrid'        => 'showVerticalGrid',
             'ShowXAxis'               => 'showXAxis',
             'ShowYAxis'               => 'showYAxis',
+            'ValueAxisSpacing'        => 'valueAxisSpacing',
             'TitleFontSizePercent'    => 'titleFontSizePercent',
             'LegendFontSizePercent'   => 'legendFontSizePercent',
             'AxisFontSizePercent'     => 'axisFontSizePercent',
@@ -2056,6 +2061,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             && $this->ReadPropertyInteger($prefix . 'SymbolSizePercent') <= 200
             && EChartsLabelDesign::IsValidPosition($this->ReadPropertyString($prefix . 'ValueLabelPosition'), EChartsLabelDesign::CARTESIAN_POSITIONS)
             && EChartsLabelDesign::IsValidDistance($this->ReadPropertyInteger($prefix . 'ValueLabelDistance'))
+            && EChartsValueAxisLayout::IsValidSpacing($this->ReadPropertyInteger($prefix . 'ValueAxisSpacing'))
             && $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent') >= 0
             && $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent') <= 100
             && $this->IsValidTimeSeriesTypography($prefix);

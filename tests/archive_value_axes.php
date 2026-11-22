@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use SymconECharts\EChartsUnitAxes;
+use SymconECharts\EChartsValueAxisLayout;
 
 require_once __DIR__ . '/../libs/EChartsUnitAxes.php';
+require_once __DIR__ . '/../libs/EChartsValueAxisLayout.php';
 
 // A private axis can occur before, between or after shared rows with exactly the same unit.
 $sources = [
@@ -41,4 +43,10 @@ if (EChartsUnitAxes::ResolveRange(['AxisRangeMode' => 'presentation', 'AxisMinim
     throw new RuntimeException('Automatic and presentation scales must preserve their range fallback rules.');
 }
 
-echo "Shared and individual archive axis assignments verified.\n";
+foreach ([[0, 2, 54.0], [24, 3, 24.0], [120, 1, 120.0], [120, 3, 40.0], [24, 0, 0.0]] as [$spacing, $extraAxes, $expected]) {
+    if (EChartsValueAxisLayout::Spacing($spacing, 54, 120, $extraAxes) !== $expected) {
+        throw new RuntimeException('Value axis spacing must fit the available preview space.');
+    }
+}
+
+echo "Shared and individual archive axis assignments and spacing verified.\n";

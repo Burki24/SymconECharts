@@ -740,16 +740,29 @@ for (const mode of ['symcon', 'ipsview']) {
         { unit: '°C', position: 'right', minimum: 20, maximum: 60 }];
     const sources = axes.map((axis, index) => ({ id: 'sensor-' + index, label: ['Humidity', 'Outside', 'Water'][index],
         unit: axis.unit, axisIndex: index, decimals: 1, style: 'line', points: [[1000, 30], [2000, 32]] }));
-    const chart = render(undefined, axes, 750, sources, 'dark', {}, mode, false, false, 'auto', undefined, false, 420, native);
+    const automatic = render(undefined, axes, 750, sources, 'dark', {}, mode);
+    const explicitAuto = render({ valueAxisSpacing: 0 }, axes, 750, sources, 'dark', {}, mode);
+    assert.equal(automatic.yAxis[1].offset, 90);
+    assert.equal(explicitAuto.yAxis[1].offset, automatic.yAxis[1].offset);
+    assert.equal(explicitAuto.grid.left, automatic.grid.left);
+    const spacing = mode === 'symcon' ? 24 : 80;
+    const chart = render({ valueAxisSpacing: spacing }, axes, 750, sources, 'dark', {}, mode,
+        false, false, 'auto', undefined, true, 420, native);
     assert.deepEqual(Array.from(chart.series, item => item.yAxisIndex), [0, 1, 2]);
-    assert.ok(chart.yAxis[1].offset > chart.yAxis[0].offset);
+    assert.deepEqual(Array.from(chart.yAxis, axis => axis.offset), [0, spacing, 0]);
+    assert.equal(chart.grid.left, automatic.grid.left - 90 + spacing);
+    assert.equal(chart.grid.right, automatic.grid.right);
     for (const [index, axis] of axes.entries()) {
         const valueAxis = native.getModel().getSeriesByIndex(index).coordinateSystem.getAxis('y');
         assert.equal(valueAxis.position, axis.position);
         assert.deepEqual(valueAxis.scale.getExtent(), [axis.minimum, axis.maximum]);
     }
-    native.dispatchAction({ type: 'legendToggleSelect', name: 'sensor-1' });
-    assert.deepEqual(native.getOption().yAxis.map(axis => axis.show), [true, false, true]);
+    chart.resizeTest.resizeWidth(320);
+    assert.ok(native.getOption().yAxis[1].offset <= 320 * 0.32 - 58);
+    native.dispatchAction({ type: 'legendToggleSelect', name: 'sensor-0' });
+    assert.deepEqual(native.getOption().yAxis.map(axis => axis.show), [false, true, true]);
+    assert.equal(native.getOption().yAxis[1].offset, 0);
+    assert.equal(native.getOption().grid[0].left, 58);
     native.dispose();
 }
 for (const mode of ['symcon', 'ipsview']) {
