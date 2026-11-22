@@ -461,15 +461,21 @@ for (const mode of ['symcon', 'ipsview']) {
         const horizontal = orientation === 'horizontal';
         const axisKey = horizontal ? 'xAxis' : 'yAxis';
         const gridSides = horizontal ? ['bottom', 'top'] : ['left', 'right'];
-        const renderSpacing = valueAxisSpacing => render(false, mode, false, true, false, 750, 600, {
+        const renderSpacing = (valueAxisSpacing, zoomSliderSize = 0) => render(false, mode, false, true, false, 750, 600, {
             status: 'ready', chart: {
-                bar: { style: { orientation, valueAxisSpacing } },
+                bar: { style: { orientation, valueAxisSpacing, enableZoom: true, zoomSliderSize } },
                 axes: ['left', 'left', 'right', 'right'].map(position => ({ unit: '°C', position })),
                 series: [0, 1, 2, 3].map(axisIndex => ({ id: 's' + axisIndex, axisIndex,
                     points: [[1780000100, 21.5]] }))
             }
         });
         const automatic = renderSpacing(0).option;
+        const touchSlider = renderSpacing(0, 32).option;
+        const dimension = horizontal ? 'width' : 'height';
+        const reservedSide = horizontal ? 'right' : 'bottom';
+        assert.equal(automatic.dataZoom[1][dimension], 12);
+        assert.equal(touchSlider.dataZoom[1][dimension], 32);
+        assert.equal(touchSlider.grid[reservedSide] - automatic.grid[reservedSide], 20);
         assert.deepEqual({ ...automatic.grid }, { ...renderSpacing(undefined).option.grid });
         const layout = renderSpacing(24);
         assert.deepEqual(Array.from(layout.option[axisKey], axis => axis.offset), [0, 24, 0, 24]);

@@ -25,6 +25,7 @@ use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsLabelDesign;
 use SymconECharts\EChartsPreviewSourceCount;
+use SymconECharts\EChartsSliderSize;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsStartupState;
 use SymconECharts\EChartsSvgImage;
@@ -59,6 +60,7 @@ require_once __DIR__ . '/../libs/EChartsSvgImage.php';
 require_once __DIR__ . '/../libs/EChartsUnitAxes.php';
 require_once __DIR__ . '/../libs/EChartsValueAxisForm.php';
 require_once __DIR__ . '/../libs/EChartsValueAxisLayout.php';
+require_once __DIR__ . '/../libs/EChartsSliderSize.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 
 class EChartsBarHistory extends IPSModuleStrict
@@ -102,6 +104,7 @@ class EChartsBarHistory extends IPSModuleStrict
         'ValueLabelDistance'      => 'integer',
         'ShowGrid'                => 'boolean',
         'EnableZoom'              => 'boolean',
+        'ZoomSliderSize'          => 'integer',
         'RoundedBars'             => 'boolean',
         'BarWidthPercent'         => 'integer',
         'BarFillMode'             => 'string',
@@ -156,6 +159,7 @@ class EChartsBarHistory extends IPSModuleStrict
             $this->RegisterPropertyInteger('ValueLabelDistance', 5);
             $this->RegisterPropertyBoolean('ShowGrid', true);
             $this->RegisterPropertyBoolean('EnableZoom', true);
+            $this->RegisterPropertyInteger('ZoomSliderSize', 0);
             $this->RegisterPropertyBoolean('RoundedBars', false);
             $this->RegisterPropertyInteger('BarWidthPercent', 70);
             $this->RegisterPropertyString('BarFillMode', 'solid');
@@ -193,7 +197,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 $default = match ($name) {
                     'EChartsTheme'                                => EChartsAsset::THEME_AUTO,
                     'Orientation'                                 => 'vertical',
-                    'ValueAxisSpacing'                            => 0,
+                    'ValueAxisSpacing', 'ZoomSliderSize'          => 0,
                     'BarFillMode'                                 => 'solid',
                     'BarSVG'                                      => '',
                     'BarSVGSizePercent'                           => 100,
@@ -665,14 +669,18 @@ class EChartsBarHistory extends IPSModuleStrict
         $rightExtra = max(0, ($counts['right'] ?? 0) - 1);
         $maximumExtra = max($leftExtra, $rightExtra);
         $spacing = $this->BarPreviewValue($values, 'ValueAxisSpacing', 'integer', $ipsView);
+        $sliderSize = $this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView)
+            ? EChartsSliderSize::Resolve($this->BarPreviewValue($values, 'ZoomSliderSize', 'integer', $ipsView), 11)
+            : 0;
+        $extraZoomSpace = max(0, $sliderSize - 11);
         // Keep the legend, axis captions and zoom outside the example plot.
         $step = $horizontal
             ? EChartsValueAxisLayout::Spacing($spacing, $axisSize * 2.8, 165 * 0.65, $leftExtra + $rightExtra)
             : EChartsValueAxisLayout::Spacing($spacing, 54, 132, $maximumExtra);
         $plotLeft = $horizontal ? 90 : 65 + $leftExtra * $step;
-        $plotRight = $horizontal ? 642 : 680 - $rightExtra * $step;
+        $plotRight = $horizontal ? 642 - $extraZoomSpace : 680 - $rightExtra * $step;
         $plotTop = $horizontal ? 110 + $rightExtra * $step : 93 + $maximumExtra * ($axisSize + 2);
-        $plotBottom = $horizontal ? 275 - $leftExtra * $step : 265;
+        $plotBottom = $horizontal ? 275 - $leftExtra * $step : 265 - $extraZoomSpace;
         $plotWidth = $plotRight - $plotLeft;
         $plotHeight = $plotBottom - $plotTop;
         $showGrid = $this->BarPreviewValue($values, 'ShowGrid', 'boolean', $ipsView);
@@ -701,7 +709,7 @@ class EChartsBarHistory extends IPSModuleStrict
             if ($horizontal) {
                 $side = $left ? 'bottom' : 'top';
                 $axisY = $left ? $plotBottom + $positionIndex * $step : $plotTop - $positionIndex * $step;
-                $line = 'x1="90" y1="' . $axisY . '" x2="642" y2="' . $axisY . '"';
+                $line = 'x1="90" y1="' . $axisY . '" x2="' . $plotRight . '" y2="' . $axisY . '"';
                 $captionX = 86;
                 $captionY = $axisY + 4;
                 $anchor = 'end';
@@ -852,19 +860,22 @@ class EChartsBarHistory extends IPSModuleStrict
             }
         }
         $rangePosition = $horizontal ? 'x="82" y="' . ($plotTop + $plotHeight / 2) . '" text-anchor="end"'
-            : 'x="' . ($plotLeft + 5) . '" y="286"';
+            : 'x="' . ($plotLeft + 5) . '" y="' . ($plotBottom + 21) . '"';
         $svg .= '<text ' . $rangePosition . ' fill="' . EChartsBarPreview::E($axisColor)
             . '" font-size="' . $axisSize . '">' . EChartsBarPreview::E($range)
             . '</text>';
         if ($fillMode === 'svg') {
-            $svg .= '<text x="696" y="307" text-anchor="end" fill="' . EChartsBarPreview::E($palette['muted'])
+            $svg .= '<text x="' . (696 - ($horizontal ? $extraZoomSpace : 0)) . '" y="' . (307 - ($horizontal ? 0 : $extraZoomSpace))
+                . '" text-anchor="end" fill="' . EChartsBarPreview::E($palette['muted'])
                 . '" font-size="10">' . EChartsBarPreview::E($this->Translate('SVG pattern (schematic)')) . '</text>';
         }
-        if ($this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView)) {
-            $track = $horizontal ? 'x="696" y="' . $plotTop . '" width="11" height="' . $plotHeight . '"'
-                : 'x="' . ($plotLeft + 10) . '" y="320" width="' . ($plotWidth - 15) . '" height="11"';
-            $selection = $horizontal ? 'x="697" y="' . ($plotTop + $plotHeight * 0.14) . '" width="9" height="' . ($plotHeight * 0.7) . '"'
-                : 'x="' . ($plotLeft + 10 + ($plotWidth - 15) * 0.14) . '" y="321" width="' . (($plotWidth - 15) * 0.7) . '" height="9"';
+        if ($sliderSize > 0) {
+            $sliderX = 707 - $sliderSize;
+            $sliderY = 331 - $sliderSize;
+            $track = $horizontal ? 'x="' . $sliderX . '" y="' . $plotTop . '" width="' . $sliderSize . '" height="' . $plotHeight . '"'
+                : 'x="' . ($plotLeft + 10) . '" y="' . $sliderY . '" width="' . ($plotWidth - 15) . '" height="' . $sliderSize . '"';
+            $selection = $horizontal ? 'x="' . $sliderX . '" y="' . ($plotTop + $plotHeight * 0.14) . '" width="' . $sliderSize . '" height="' . ($plotHeight * 0.7) . '"'
+                : 'x="' . ($plotLeft + 10 + ($plotWidth - 15) * 0.14) . '" y="' . $sliderY . '" width="' . (($plotWidth - 15) * 0.7) . '" height="' . $sliderSize . '"';
             $svg .= '<rect ' . $track . ' data-preview-zoom="' . ($horizontal ? 'vertical' : 'horizontal')
                 . '" rx="3" fill="' . EChartsBarPreview::E($palette['surface'])
                 . '" stroke="' . EChartsBarPreview::E($palette['border']) . '"/>';
@@ -1403,6 +1414,7 @@ class EChartsBarHistory extends IPSModuleStrict
         if (!$this->AnimationIsValid($prefix)
             || !in_array($this->ReadPropertyString($prefix . 'Orientation'), ['vertical', 'horizontal'], true)
             || !EChartsValueAxisLayout::IsValidSpacing($this->ReadPropertyInteger($prefix . 'ValueAxisSpacing'))
+            || !EChartsSliderSize::IsValid($this->ReadPropertyInteger($prefix . 'ZoomSliderSize'))
             || !EChartsLabelDesign::IsValidPosition($this->ReadPropertyString($prefix . 'ValueLabelPosition'), EChartsLabelDesign::CARTESIAN_POSITIONS)
             || !EChartsLabelDesign::IsValidDistance($this->ReadPropertyInteger($prefix . 'ValueLabelDistance'))
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
@@ -1504,6 +1516,7 @@ class EChartsBarHistory extends IPSModuleStrict
             'valueLabelDistance'   => $this->ReadPropertyInteger($prefix . 'ValueLabelDistance'),
             'showGrid'             => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
             'enableZoom'           => $this->ReadPropertyBoolean($prefix . 'EnableZoom'),
+            'zoomSliderSize'       => $this->ReadPropertyInteger($prefix . 'ZoomSliderSize'),
             'roundedBars'          => $this->ReadPropertyBoolean($prefix . 'RoundedBars'),
             'barWidthPercent'      => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
             'barFillMode'          => $this->ReadPropertyString($prefix . 'BarFillMode'),

@@ -335,6 +335,12 @@ for (const mode of ['symcon', 'ipsview']) {
     }
     manySections.push({id:'total',label:'Final section total',kind:'total',change:100,before:0,after:100,section:100,sectionLabel:'Same'});
     const nav = waterfallHarness(mode, manySections, {}, true, 460);
+    const size = mode === 'ipsview' ? 44 : 32;
+    const mobile = waterfallHarness(mode, manySections, {zoomSliderSize: size}, true, 460).option;
+    assert.equal(nav.option.dataZoom[0].height, 12);
+    assert.equal(mobile.dataZoom[0].height, size);
+    assert.equal(mobile.grid.bottom - nav.option.grid.bottom, size - 12);
+    assert.equal(mobile.dataZoom[0].bottom, 36);
     assert.equal(nav.option.xAxis.data.length,201);
     assert.deepEqual([nav.option.yAxis.min,nav.option.yAxis.max],[0,100], 'Earlier sections and hidden values determine the full scale.');
     assert.equal(nav.option.dataZoom[0].bottom,36, 'Navigation must leave room for the permanent section note.');

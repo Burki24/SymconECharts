@@ -94,6 +94,8 @@ gemeinsamer Einheit, nichtnegativer Werte und eigener Skala bleibt erhalten.
 
 ## Skala und Symbole
 
+Mit **Reglerdicke (0 = automatisch)** im Kacheldesigner stellst Du die Dicke der Kategoriennavigation auf 1 bis 64 Pixel ein. 0 verwendet die bisherige Automatik (12 Pixel). Probiere auf dem Handy beispielsweise 32 Pixel. Im IPSView-Designer kannst Du bei eigenem Design einen anderen Wert wählen.
+
 Bei mehr als 16 Quellen erscheint automatisch eine Kategoriennavigation:
 rechts bei horizontalen Balken, unten bei vertikalen Balken. Der sichtbare
 Ausschnitt passt sich an Platz und Schriftgröße an und enthält höchstens

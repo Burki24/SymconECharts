@@ -99,13 +99,14 @@
             style.showValues === true ? valueSpan + 4 : 0);
         var availableWidth = Math.max(1, (chartElement.clientWidth || 800) - 76 - axisSize * 4);
         var visibleCount = Math.max(1, Math.min(steps.length, Math.floor(availableWidth / minimumSpan)));
+        var sliderSize = echartsDesign.sliderSize(style.zoomSliderSize, 12);
         var scroll = steps.length > visibleCount;
         var keys = steps.map(function (step, index) { return String(step.id || 'step-' + index); });
         var viewport = categoryNavigation.window(keys, scroll ? visibleCount : steps.length);
         var first = viewport.first;
         var stepsByID = Object.create(null);
         steps.forEach(function (step, index) { stepsByID[keys[index]] = step; });
-        var bottom = 48 + (scroll ? 28 : 0) + (hasSections ? 32 : 0);
+        var bottom = 48 + (scroll ? sliderSize + 16 : 0) + (hasSections ? 32 : 0);
         var minimum = 0, maximum = 0;
         var helpersPositive = [];
         var helpersNegative = [];
@@ -195,7 +196,7 @@
                 containLabel: true },
             dataZoom: scroll ? [
                 { id: 'category-scroll', type: 'slider', xAxisIndex: 0, orient: 'horizontal',
-                    bottom: hasSections ? 36 : 4, height: 12, left: 52, right: 24,
+                    bottom: hasSections ? 36 : 4, height: sliderSize, left: 52, right: 24,
                     startValue: first, endValue: viewport.last, filterMode: 'filter', zoomLock: true,
                     showDetail: false, showDataShadow: false, brushSelect: false },
                 { id: 'category-scroll-inside', type: 'inside', xAxisIndex: 0,

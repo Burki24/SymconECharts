@@ -78,6 +78,7 @@
             "ECharts theme": "ECharts-Theme",
             "Automatic (Symcon design)": "Automatisch (Symcon-Design)",
             "Show values": "Werte anzeigen",
+            "Slider thickness (0 = automatic)": "Reglerdicke (0 = automatisch)",
             "Show grid": "Raster anzeigen",
             "Rounded bars": "Abgerundete Balken",
             "Bar width": "Balkenbreite",

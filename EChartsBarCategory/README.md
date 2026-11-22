@@ -51,6 +51,8 @@ Gespeicherte Farb- und Designwerte werden nicht automatisch geändert.
 
 ## Kategoriennavigation und Abstände
 
+Mit **Reglerdicke (0 = automatisch)** im Kacheldesigner stellst Du die Dicke der Kategoriennavigation auf 1 bis 64 Pixel ein. 0 verwendet die bisherige Automatik (12 Pixel). Probiere auf dem Handy beispielsweise 32 Pixel. Im IPSView-Designer kannst Du bei eigenem Design einen anderen Wert wählen.
+
 Die Grenze von **100 Quellen** gilt insgesamt über alle Kategorien und Reihen.
 Passen sie nicht in den verfügbaren Raum, erscheinen Kategorienschieber und
 Mausradnavigation. Die Zahl sichtbarer Kategorien folgt der Ausgabegröße,

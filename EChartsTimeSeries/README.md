@@ -133,7 +133,7 @@ Die Gruppen **1–32** stehen bei automatischer und fester Verdichtung zur Verf�
 - Durchschnitt, Zählersumme, Minimum und Maximum entsprechend dem
   versionierten Archivvertrag;
 - native Kachel mit lokalen, integritätsgeprüften ECharts- und Theme-Dateien;
-- Mausrad-Zoom und eine schmale Zoomleiste in der nativen Kachel und im
+- Mausrad-Zoom und eine höhenverstellbare Zoomleiste in der nativen Kachel und im
   IPSView-WebContent-Widget;
 - der gewählte Zoom-Ausschnitt bleibt bei normalen Datenaktualisierungen erhalten;
 - kollabierter Kacheldesigner mit sofortiger SVG-Vorschau für Theme,
@@ -249,6 +249,14 @@ einer schmalen Kachel nicht aus, verkleinert das Diagramm den Abstand.
 Für einen anderen Abstand in IPSView deaktiviere **Kacheldesign verwenden**
 und stelle den Wert im **unabhängigen IPSView-Designer** ein. Beide
 Vorschauen zeigen den Abstand zwischen den sichtbaren Wertachsen.
+
+Für eine größere Zeitleiste auf dem Handy öffne den **Kacheldesigner**.
+Neben **Zoom aktivieren** stellst Du die **Reglerdicke (0 = automatisch)** ein.
+Probiere beispielsweise **32 px** aus. Möglich sind 1 bis 64 px. Bei **0** wählt
+das Diagramm die bisherige Höhe automatisch. Bei sehr wenig Platz begrenzt es
+die Höhe, damit die Kurven sichtbar bleiben. Für einen eigenen Wert in IPSView
+deaktiviere **Kacheldesign verwenden** und stelle die Reglerdicke im
+**IPSView-Designer** ein. Die Vorschau zeigt die gewählte Höhe.
 
 `raw` bleibt immer eine echte Rohwertabfrage; `realtime` ist der ausdrücklich
 archivfreie Live-Modus und nur `auto` wählt selbstständig eine

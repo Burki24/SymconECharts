@@ -22,6 +22,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsNormalization;
+use SymconECharts\EChartsSliderSize;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsSourceImportForm;
 use SymconECharts\EChartsTransientRefresh;
@@ -99,6 +100,7 @@ class EChartsPictorialBar extends IPSModuleStrict
         'ShowTooltip'             => true,
         'ShowLabels'              => true,
         'ShowValues'              => true,
+        'ZoomSliderSize'          => 0,
         'ShowGrid'                => true,
         'TitleFontSizePercent'    => 100,
         'AxisFontSizePercent'     => 100,
@@ -704,6 +706,7 @@ class EChartsPictorialBar extends IPSModuleStrict
     private function IsValidDesign(string $prefix): bool
     {
         if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme')) || !$this->AnimationIsValid($prefix)
+            || !EChartsSliderSize::IsValid($this->ReadPropertyInteger($prefix . 'ZoomSliderSize'))
             || !in_array($this->ReadPropertyString($prefix . 'Orientation'), ['vertical', 'horizontal'], true)
             || !in_array($this->ReadPropertyString($prefix . 'SortOrder'), ['configured', 'ascending', 'descending'], true)
             || !in_array($this->ReadPropertyString($prefix . 'FontFamily'), ['Arial, sans-serif', 'Verdana, sans-serif', 'Georgia, serif', 'monospace'], true)

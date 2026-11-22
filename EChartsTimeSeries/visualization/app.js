@@ -220,6 +220,13 @@
             ? (titleVisible ? titleBlock : 34) + Math.max(30, legendFontSize + 18)
             : (titleVisible ? Math.max(48, titleFontSize + 30) : 20));
         var gridBottom = bottomLegend ? (zoom ? 94 : 58) : (zoom ? 64 : 34);
+        var automaticSliderSize = zoomController.sliderThickness(compact);
+        var zoomSliderSize = zoomController.sliderThickness(compact, design.zoomSliderSize);
+        if (zoom) {
+            var availableExtra = Math.max(0, Math.floor((Number(chartElement.clientHeight) || 400) - gridTop - gridBottom - 24));
+            zoomSliderSize = Math.min(zoomSliderSize, automaticSliderSize + availableExtra);
+            gridBottom += zoomSliderSize - automaticSliderSize;
+        }
         var axisCounts = { left: 0, right: 0 };
         var normalizedAxes = axes.map(function (axis, index) {
             var position = axis.position === 'left' || axis.position === 'right'
@@ -326,7 +333,7 @@
                     return rows.join('<br>');
                 }
             },
-            dataZoom: zoomController.timeAxisOptions(zoom, bootstrap.mode, bottomLegend ? 38 : 12, compact),
+            dataZoom: zoomController.timeAxisOptions(zoom, bootstrap.mode, bottomLegend ? 38 : 12, compact, false, zoomSliderSize),
             xAxis: {
                 type: 'time',
                 min: model.range.startTimestamp * 1000,

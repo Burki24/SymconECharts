@@ -103,6 +103,13 @@ rechts und folgt der Zeitachse. Die Vorschau zeigt die gewählte Ausrichtung.
 Für eine andere Ausrichtung in IPSView deaktivieren Sie dort **Kacheldesign verwenden**
 und wählen die Ausrichtung im IPSView-Designer.
 
+Unter **Achsen und Anzeige → Reglerdicke (0 = automatisch)** stellen Sie bei
+aktivem Zeitzoom die Höhe der Zeitleiste ein. Bei horizontalen Balken bestimmt
+der Wert die Breite der Leiste rechts. Auf dem Handy sind beispielsweise **32 px**
+ein Ausgangspunkt. Möglich sind 1 bis 64 px. **0** verwendet die bisherige
+automatische Größe. Bei sehr geringer Höhe wird die Leiste unter den Balken
+begrenzt. Kachel und unabhängiger IPSView-Designer haben jeweils eine Vorschau.
+
 Unter **Abstand der Wertachsen (0 = automatisch)** legen Sie fest, wie weit
 zwei sichtbare Wertachsen auf derselben Seite auseinanderliegen. **0** verwendet
 die bisherige Automatik. Für engere Skalen auf dem Handy können Sie beispielsweise

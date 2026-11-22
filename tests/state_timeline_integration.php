@@ -148,7 +148,7 @@ $extendedDesign = ['BorderType' => 'dashed', 'BorderRadius' => 12, 'LabelPositio
     'ShowSourceLabels'          => false, 'ShowAxisLine' => false, 'ShowAxisTicks' => true, 'AxisLineWidth' => 3,
     'AxisLineType'              => 'dotted', 'AxisLabelMargin' => 20, 'TimeLabelFormat' => 'dateTime',
     'GridColor'                 => 0x123ABC, 'GridOpacityPercent' => 45, 'GridLineWidth' => 2, 'GridLineType' => 'dashed',
-    'EmphasisEnabled'           => false, 'EmphasisFocus' => 'self', 'BlurOpacityPercent' => 15];
+    'EmphasisEnabled'           => false, 'EmphasisFocus' => 'self', 'BlurOpacityPercent' => 15, 'ZoomSliderSize' => 36];
 foreach ($extendedDesign as $name => $value) {
     foreach (['', 'IPSView'] as $prefix) {
         $control = findGaugeFormElement($form['elements'], $prefix . $name);
@@ -430,9 +430,15 @@ assertGatewayGauge(
     '32 source references, real HTML outputs and both form previews must remain bounded.'
 );
 $timeline->UpdateBarPreviewFromForm(json_encode(['Sources' => array_slice($largeSources, 0, 32),
-    'ShowSourceLabels'                                     => true], JSON_THROW_ON_ERROR));
+    'ShowSourceLabels'                                     => true, 'ZoomSliderSize' => 36, 'IPSViewZoomSliderSize' => 36], JSON_THROW_ON_ERROR));
 foreach (array_slice($timeline->GetTestFormUpdates(), -2) as $update) {
     $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+    $xml = new DOMDocument();
+    assertGatewayGauge(
+        $xml->loadXML($svg, LIBXML_NONET)
+        && (new DOMXPath($xml))->query('//*[@data-row-slider and @width="36"]')->length === 1,
+        'The row navigator uses the requested width in both previews.'
+    );
     assertGatewayGauge(substr_count($svg, 'data-source-label="true"') === 8
         && str_contains($svg, 'Preview: first 8 of 32 rows. Scroll in the chart to see all.')
         && str_contains($svg, 'Equal contact'), 'A large preview must explicitly identify its real-source subset.');

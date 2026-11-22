@@ -544,6 +544,14 @@
                             "minimum": 0,
                             "maximum": 120,
                             "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ZoomSliderSize",
+                            "caption": "Slider thickness (0 = automatic)",
+                            "minimum": 0,
+                            "maximum": 64,
+                            "suffix": "px"
                         }
                     ]
                 },

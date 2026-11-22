@@ -255,6 +255,14 @@ for (const mode of ['symcon', 'ipsview']) {
             style: { ...manyModel.boxplot.style, orientation } } };
         const fixture = render(input, mode, true, dimensions.width, dimensions.height, native);
         const initial = fixture.option;
+        const size = mode === 'ipsview' ? 44 : 32;
+        const thumb = orientation === 'horizontal' ? 'width' : 'height';
+        const margin = orientation === 'horizontal' ? 'right' : 'bottom';
+        const mobile = render({ ...input, boxplot: { ...input.boxplot,
+            style: { ...input.boxplot.style, zoomSliderSize: size } } }, mode, true, dimensions.width, dimensions.height).option;
+        assert.equal(initial.dataZoom[0][thumb], 12);
+        assert.equal(mobile.dataZoom[0][thumb], size);
+        assert.equal(mobile.grid[margin] - initial.grid[margin], size - 12);
         const count = initial.dataZoom[0].endValue + 1;
         assert.ok(count >= 1 && count < 32);
         assert.equal(initial.dataZoom[1].moveOnMouseWheel, true);

@@ -94,6 +94,7 @@
             "Symbol gap": "Symbolabstand",
             "Maximum bar width": "Maximale Balkenbreite",
             "Scale maximum (0 = automatic)": "Skalenmaximum (0 = automatisch)",
+            "Slider thickness (0 = automatic)": "Reglerdicke (0 = automatisch)",
             "Show grid": "Raster anzeigen",
             "Show category labels": "Kategorienbeschriftungen anzeigen",
             "Show values": "Werte anzeigen",

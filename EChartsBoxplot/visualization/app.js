@@ -106,9 +106,10 @@
             labelWidth = Math.min(labelWidth, Math.max(12, (horizontal ? slot * 0.7 : height * 0.3) / sine));
             if (!horizontal && style.showAxisLabels !== false) { bottom += labelWidth * sine; }
         }
+        var sliderSize = design.sliderSize(style.zoomSliderSize, 12);
         var scroll = visibleCount < items.length;
-        if (scroll && horizontal) { right += 28; }
-        if (scroll && !horizontal) { bottom += 28; }
+        if (scroll && horizontal) { right += sliderSize + 16; }
+        if (scroll && !horizontal) { bottom += sliderSize + 16; }
         var anchorIndex = items.findIndex(function (item) { return item.id === categoryAnchor; });
         var first = Math.max(0, Math.min(items.length - visibleCount, anchorIndex >= 0 ? anchorIndex : categoryStart));
         var boxWidth = Math.max(1, Math.min(requestedBoxWidth, slot * 0.65));
@@ -178,8 +179,8 @@
             xAxis: horizontal ? value : category, yAxis: horizontal ? category : value,
             dataZoom: scroll ? [
                 { id: 'category-scroll', type: 'slider',
-                    ...(horizontal ? { yAxisIndex: 0, orient: 'vertical', right: 6, width: 12, top: top, bottom: bottom }
-                        : { xAxisIndex: 0, orient: 'horizontal', bottom: 4, height: 12, left: left, right: right }),
+                    ...(horizontal ? { yAxisIndex: 0, orient: 'vertical', right: 6, width: sliderSize, top: top, bottom: bottom }
+                        : { xAxisIndex: 0, orient: 'horizontal', bottom: 4, height: sliderSize, left: left, right: right }),
                     startValue: first, endValue: first + visibleCount - 1, filterMode: 'filter',
                     zoomLock: true,
                     showDetail: false, showDataShadow: false, brushSelect: false },

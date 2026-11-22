@@ -23,6 +23,7 @@ use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsLabelDesign;
 use SymconECharts\EChartsPreviewSourceCount;
+use SymconECharts\EChartsSliderSize;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
@@ -562,7 +563,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
                     . EChartsBarPreview::E(EChartsBarPreview::FormatValue($value, $previewDecimals, $previewUnit, $language)) . '</text>';
             }
         }
-        return EChartsPreviewSourceCount::Append(
+        $svg = EChartsPreviewSourceCount::Append(
             $svg . '</svg>',
             $shownSources,
             count($data['items']),
@@ -570,6 +571,14 @@ class EChartsBarWaterfall extends IPSModuleStrict
             $palette['muted'],
             696,
             351
+        );
+        return EChartsBarPreview::WithCategorySlider(
+            $svg,
+            false,
+            $this->BarPreviewValue($values, 'ZoomSliderSize', 'integer', $ipsView),
+            count($items),
+            count($steps),
+            $palette
         );
     }
 
@@ -842,6 +851,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
         $this->RegisterPropertyString($prefix . 'ValueLabelPosition', 'auto');
         $this->RegisterPropertyInteger($prefix . 'ValueLabelDistance', 5);
         $this->RegisterPropertyBoolean($prefix . 'ShowGrid', true);
+        $this->RegisterPropertyInteger($prefix . 'ZoomSliderSize', 0);
         $this->RegisterPropertyInteger($prefix . 'BarWidthPercent', 60);
         $this->RegisterPropertyInteger($prefix . 'StartColor', -1);
         $this->RegisterPropertyInteger($prefix . 'IncreaseColor', -1);
@@ -860,6 +870,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
             'ValueLabelPosition'      => 'string',
             'ValueLabelDistance'      => 'integer',
             'ShowGrid'                => 'boolean',
+            'ZoomSliderSize'          => 'integer',
             'BarWidthPercent'         => 'integer',
             'StartColor'              => 'integer',
             'IncreaseColor'           => 'integer',
@@ -883,6 +894,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
             || !EChartsLabelDesign::IsValidPosition($this->ReadPropertyString($prefix . 'ValueLabelPosition'), EChartsLabelDesign::CARTESIAN_POSITIONS)
             || !EChartsLabelDesign::IsValidDistance($this->ReadPropertyInteger($prefix . 'ValueLabelDistance'))
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
+            || !EChartsSliderSize::IsValid($this->ReadPropertyInteger($prefix . 'ZoomSliderSize'))
             || $this->ReadPropertyInteger($prefix . 'BarWidthPercent') < 20
             || $this->ReadPropertyInteger($prefix . 'BarWidthPercent') > 100
         ) {
@@ -916,6 +928,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
             'valueLabelPosition' => $this->ReadPropertyString($prefix . 'ValueLabelPosition'),
             'valueLabelDistance' => $this->ReadPropertyInteger($prefix . 'ValueLabelDistance'),
             'showGrid'           => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
+            'zoomSliderSize'     => $this->ReadPropertyInteger($prefix . 'ZoomSliderSize'),
             'barWidthPercent'    => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
             'colors'             => $colors,
             ...$this->ReadBarTypography(array_keys(self::TEXT_FONTS), array_keys(self::TEXT_COLORS), $prefix)

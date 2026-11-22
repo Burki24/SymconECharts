@@ -78,6 +78,10 @@
         return Math.min(requested, Math.max(0, availableSpace) / extraAxisCount);
     }
 
+    function sliderSize(configured, automatic) {
+        return Number.isInteger(configured) && configured > 0 && configured <= 64 ? configured : automatic;
+    }
+
     function prefersReducedMotion() {
         return typeof global.matchMedia === 'function'
             && global.matchMedia('(prefers-reduced-motion: reduce)').matches === true;
@@ -304,6 +308,7 @@
         barOutlineStyle: barOutlineStyle,
         fontSizePercent: fontSizePercent,
         valueAxisSpacing: valueAxisSpacing,
+        sliderSize: sliderSize,
         chartTitleLayout: chartTitleLayout,
         valueLabel: valueLabel,
         gaugeLabelOffsets: gaugeLabelOffsets,

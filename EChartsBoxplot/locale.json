@@ -74,6 +74,7 @@
             "Border width": "Rahmenbreite",
             "Box opacity": "Boxdeckkraft",
             "Border color": "Rahmenfarbe",
+            "Slider thickness (0 = automatic)": "Reglerdicke (0 = automatisch)",
             "Show grid": "Raster anzeigen",
             "Show axis labels": "Achsenbeschriftungen anzeigen",
             "Title size": "Titelgröße",

@@ -7,6 +7,7 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-zoom.js'), 'utf8');
 const window = {};
+vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8'), { window });
 vm.runInNewContext(source, { window });
 const zoom = window.SymconEChartsZoom;
 
@@ -17,6 +18,17 @@ assert.equal(zoom.options(true, 'ipsview', 38)[0].zoomOnMouseWheel, false);
 assert.equal(zoom.options(true, 'ipsview', 38)[1].bottom, 38);
 assert.equal(zoom.sliderThickness(false), 12);
 assert.equal(zoom.sliderThickness(true), 8);
+for (const automatic of [undefined, 0, -1, 65, 12.5]) {
+    assert.equal(zoom.sliderThickness(true, automatic), 8);
+    assert.equal(zoom.sliderThickness(false, automatic), 12);
+}
+for (const size of [1, 32, 64]) {
+    assert.equal(zoom.timeAxisOptions(true, 'symcon', 10, true, false, size)[1].height, size);
+    const vertical = zoom.categoryTimeOptions(true, true, true, 10, [0, 1], size)[1];
+    assert.equal(vertical.width, size);
+    assert.equal(vertical.handleSize, size);
+    assert.deepEqual(Array.from(vertical.yAxisIndex), [0, 1]);
+}
 assert.equal(zoom.timeAxisOptions(true, 'symcon', 22, false)[1].height, 12);
 assert.equal(zoom.timeAxisOptions(true, 'ipsview', 38, true)[1].height, 8);
 assert.equal(zoom.timeAxisOptions(true, 'ipsview', 38, true)[1].showDetail, false);

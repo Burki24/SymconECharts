@@ -72,6 +72,7 @@
             "Automatic (Symcon design)": "Automatisch (Symcon-Design)",
             "Show grid": "Raster anzeigen",
             "Enable X/Y zoom": "X/Y-Zoom aktivieren",
+            "Slider thickness (0 = automatic)": "Reglerdicke (0 = automatisch)",
             "Enable area selection": "Bereichsauswahl aktivieren",
             "Select points": "Punkte auswählen",
             "Clear selection": "Auswahl aufheben",

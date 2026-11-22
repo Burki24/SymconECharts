@@ -144,7 +144,8 @@ declare(strict_types=1);
         }
         $axisModule->UpdateBarPreviewFromForm(json_encode(['Sources' => $axisRows, 'Orientation' => 'horizontal',
             'ValueAxisSpacing'                                       => 18, 'IPSViewValueAxisSpacing' => 48,
-            'IPSViewUseTileDesign'                                   => false, 'IPSViewOrientation' => 'vertical'], JSON_THROW_ON_ERROR));
+            'IPSViewUseTileDesign'                                   => false, 'IPSViewOrientation' => 'vertical',
+            'ZoomSliderSize'                                         => 28, 'IPSViewZoomSliderSize' => 45], JSON_THROW_ON_ERROR));
         foreach (array_slice($axisModule->GetTestFormUpdates(), -2) as $image) {
             $svg = base64_decode(substr($image['Value'], strlen('data:image/svg+xml;base64,')), true);
             assertGatewayGauge(
@@ -155,6 +156,11 @@ declare(strict_types=1);
             $tile = $image['Field'] === 'BarPreview';
             $xml = new DOMDocument();
             $xml->loadXML($svg);
+            $track = (new DOMXPath($xml))->query('//*[@data-preview-zoom]')->item(0);
+            assertGatewayGauge(
+                $track !== null && $track->getAttribute($tile ? 'width' : 'height') === ($tile ? '28' : '45'),
+                'Each draft must resize the time slider across its time axis.'
+            );
             $axes = (new DOMXPath($xml))->query('//*[@data-preview-axis="' . ($tile ? 'bottom' : 'left') . '"]');
             $coordinate = $tile ? 'y1' : 'x1';
             $spacing = abs((float) $axes->item(0)->getAttribute($coordinate) - (float) $axes->item(1)->getAttribute($coordinate));
@@ -163,13 +169,18 @@ declare(strict_types=1);
         $axisModule->SetTestProperty('EnableIPSView', true);
         $axisModule->SetTestProperty('ValueAxisSpacing', 18);
         $axisModule->SetTestProperty('IPSViewValueAxisSpacing', 48);
+        $axisModule->SetTestProperty('ZoomSliderSize', 28);
+        $axisModule->SetTestProperty('IPSViewZoomSliderSize', 45);
         $axisModule->ApplyChanges();
         assertGatewayGauge(str_contains($axisModule->GetIPSViewHTML(), '"valueAxisSpacing":18'), 'IPSView inherits the tile spacing.');
+        assertGatewayGauge(str_contains($axisModule->GetIPSViewHTML(), '"zoomSliderSize":28'), 'IPSView inherits the tile slider.');
         $axisModule->SetTestProperty('IPSViewUseTileDesign', false);
         $axisModule->ApplyChanges();
         assertGatewayGauge(
             str_contains($axisModule->GetIPSViewHTML(), '"valueAxisSpacing":48')
-            && $decode($axisModule)['bar']['style']['valueAxisSpacing'] === 18,
+            && $decode($axisModule)['bar']['style']['valueAxisSpacing'] === 18
+            && str_contains($axisModule->GetIPSViewHTML(), '"zoomSliderSize":45')
+            && $decode($axisModule)['bar']['style']['zoomSliderSize'] === 28,
             'Independent designer values must reach their respective charts.'
         );
         $GLOBALS['symconTestCopyTarget'] = $axisModule;
@@ -179,6 +190,7 @@ declare(strict_types=1);
             unset($GLOBALS['symconTestCopyTarget']);
         }
         assertGatewayGauge($axisModule->GetTestProperties()['IPSViewValueAxisSpacing'] === 18, 'Copying the design includes its spacing.');
+        assertGatewayGauge($axisModule->GetTestProperties()['IPSViewZoomSliderSize'] === 28, 'Copying the design includes its slider.');
         $ownStack = $axisRows;
         $ownStack[2]['StackGroup'] = 1;
         $invalidOwnStack = $configure($ownStack, 'hour');

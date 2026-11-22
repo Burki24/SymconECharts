@@ -148,6 +148,8 @@ declare(strict_types=1);
         $spacing->SetTestProperty('EnableIPSView', true);
         $spacing->SetTestProperty('ValueAxisSpacing', 24);
         $spacing->SetTestProperty('IPSViewValueAxisSpacing', 48);
+        $spacing->SetTestProperty('ZoomSliderSize', 30);
+        $spacing->SetTestProperty('IPSViewZoomSliderSize', 45);
         foreach ([true, false] as $inherited) {
             $spacing->SetTestProperty('IPSViewUseTileDesign', $inherited);
             $spacing->ApplyChanges();
@@ -157,6 +159,15 @@ declare(strict_types=1);
                 $axisField = findGaugeFormElement($form['elements'], $prefix . 'ValueAxisSpacing');
                 $preview = findGaugeFormElement($form['elements'], $prefix . 'TimeSeriesPreview')['image'];
                 $svg = base64_decode(substr($preview, strlen('data:image/svg+xml;base64,')), true);
+                $slider = findGaugeFormElement($form['elements'], $prefix . 'ZoomSliderSize');
+                $size = $prefix === '' || $inherited ? 30 : 45;
+                assertGatewayGauge(
+                    $slider['minimum'] === 0 && $slider['maximum'] === 64
+                    && str_contains($slider['onChange'], '$' . $prefix . 'ZoomSliderSize')
+                    && $startup($html)['chart']['chart']['design']['zoomSliderSize'] === $size
+                    && preg_match('/data-preview-zoom="horizontal"[^>]+height="' . $size . '"/', $svg) === 1,
+                    'Both outputs and previews must use their effective slider thickness.'
+                );
                 assertGatewayGauge(
                     $startup($html)['chart']['chart']['design']['valueAxisSpacing'] === $expected
                     && $axisField['minimum'] === 0 && $axisField['maximum'] === 120
@@ -170,7 +181,7 @@ declare(strict_types=1);
             }
         }
         $saved = $spacing->GetTestProperties();
-        $spacing->UpdateTimeSeriesPreviewFromForm('{"ValueAxisSpacing":18,"IPSViewValueAxisSpacing":30}');
+        $spacing->UpdateTimeSeriesPreviewFromForm('{"ValueAxisSpacing":18,"IPSViewValueAxisSpacing":30,"ZoomSliderSize":18,"IPSViewZoomSliderSize":30}');
         foreach ([['TimeSeriesPreview', 18], ['IPSViewTimeSeriesPreview', 30]] as [$field, $expected]) {
             $updates = array_values(array_filter($spacing->GetTestFormUpdates(), static fn (array $row): bool => $row['Field'] === $field));
             $svg = base64_decode(substr(end($updates)['Value'], strlen('data:image/svg+xml;base64,')), true);
@@ -178,6 +189,7 @@ declare(strict_types=1);
                 preg_match_all('/data-preview-axis="left" x1="([\d.]+)"/', $svg, $matches) === 2
                 && (float) $matches[1][0] - (float) $matches[1][1] === (float) $expected
                 && str_contains($svg, '<path d="M ' . $matches[1][0] . ' ')
+                && preg_match('/data-preview-zoom="horizontal"[^>]+height="' . $expected . '"/', $svg) === 1
                 && $spacing->GetTestProperties() === $saved,
                 'Each unsaved spacing must move its preview axes and the plotted samples without persisting the draft.'
             );
@@ -189,8 +201,9 @@ declare(strict_types=1);
             unset($GLOBALS['symconTestCopyTarget']);
         }
         assertGatewayGauge(
-            $spacing->GetTestProperties()['IPSViewValueAxisSpacing'] === 24,
-            'Copying the tile design must include the spacing between value axes.'
+            $spacing->GetTestProperties()['IPSViewValueAxisSpacing'] === 24
+            && $spacing->GetTestProperties()['IPSViewZoomSliderSize'] === 30,
+            'Copying the tile design must include axis spacing and slider thickness.'
         );
 
         $old = $configure(array_slice($sources, 0, 8), 'realtime', 2000);

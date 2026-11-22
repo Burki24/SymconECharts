@@ -167,6 +167,7 @@
             "Monospace": "Nichtproportional",
             "Italic title": "Titel kursiv",
             "Italic axis labels": "Achsenbeschriftungen kursiv",
+            "Slider thickness (0 = automatic)": "Reglerdicke (0 = automatisch)",
             "Enable time zoom": "Zeitzoom aktivieren",
             "Time zoom is interactive in the chart.": "Zeitzoom ist im Diagramm interaktiv bedienbar.",
             "Use named comparison panels": "Benannte Vergleichspanels verwenden",

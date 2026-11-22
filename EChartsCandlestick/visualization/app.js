@@ -94,7 +94,7 @@
         var left = (horizontal ? Math.min(width * 0.35, Math.max(60, font * 12)) : Math.min(width * 0.25, Math.max(45, font * 5))) + Math.max(0, margin - 8);
         var bottom = horizontal ? font * 3 + 24 : font * 2 + 22;
         var zoom = style.enableZoom === true;
-        var zoomSpace = zoom ? zoomController.sliderThickness(compact) + 22 : 0;
+        var zoomSpace = zoom ? zoomController.sliderThickness(compact, style.zoomSliderSize) + 22 : 0;
         if (!horizontal) { bottom += zoomSpace; }
         var right = (horizontal ? Math.max(30, font * 3) : 22) + (horizontal ? zoomSpace : 0);
         bottom += Math.max(0, margin - 8);
@@ -139,7 +139,7 @@
             splitLine: { show: style.showGrid !== false, lineStyle: { color: style.gridColor || colors.border,
                 type: style.gridLineType || 'solid', width: style.gridLineWidth == null ? 1 : style.gridLineWidth,
                 opacity: style.gridOpacityPercent == null ? 0.25 : style.gridOpacityPercent / 100 } } };
-        var dataZoom = zoomController.categoryTimeOptions(zoom, compact, horizontal, compact ? 10 : 14);
+        var dataZoom = zoomController.categoryTimeOptions(zoom, compact, horizontal, compact ? 10 : 14, null, style.zoomSliderSize);
         if (horizontal && dataZoom[1]) { dataZoom[1].top = top; dataZoom[1].bottom = bottom; }
         return {
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
@@ -198,7 +198,7 @@
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var titleLayout = design.chartTitleLayout(chartBootstrap, candle.title, titleSize);
         var top = titleLayout.contentTop + 8;
-        var zoomSpace = style.enableZoom ? zoomController.sliderThickness(width < 430) + 28 : 10;
+        var zoomSpace = style.enableZoom ? zoomController.sliderThickness(width < 430, style.zoomSliderSize) + 28 : 10;
         var cell = { width: (width - (horizontal ? zoomSpace : 0)) / (horizontal ? panels.length : 1),
             height: (height - top - (horizontal ? 0 : zoomSpace)) / (horizontal ? 1 : panels.length), zoom: style.enableZoom === true };
         var children = panels.map(function (panel) {
@@ -242,7 +242,7 @@
             return formatters[parameter.seriesIndex](parameter);
         } });
         option.dataZoom = zoomController.categoryTimeOptions(style.enableZoom === true, width < 430, horizontal, width < 430 ? 10 : 14,
-            panels.map(function (_, index) { return index; }));
+            panels.map(function (_, index) { return index; }), style.zoomSliderSize);
         if (horizontal && option.dataZoom[1]) {
             option.dataZoom[1].top = option.grid[0].top;
             option.dataZoom[1].bottom = height - option.grid[0].top - option.grid[0].height;

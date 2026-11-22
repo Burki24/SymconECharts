@@ -552,6 +552,14 @@ for (const output of ['symcon', 'ipsview']) {
         }
         const smallSet = render(orientation, 'configured', output, 'simple', densityItems.slice(0, 13),
             {barWidthPercent: 100, showValues: true}, false, {width: 420, height: 340});
+        const size = output === 'ipsview' ? 44 : 32;
+        const thumb = orientation === 'horizontal' ? 'width' : 'height';
+        const margin = orientation === 'horizontal' ? 'right' : 'bottom';
+        const mobile = render(orientation, 'configured', output, 'simple', densityItems.slice(0, 13),
+            {barWidthPercent: 100, showValues: true, zoomSliderSize: size}, false, {width: 420, height: 340});
+        assert.equal(smallSet.dataZoom[0][thumb], 12);
+        assert.equal(mobile.dataZoom[0][thumb], size);
+        assert.equal(mobile.grid[margin] - smallSet.grid[margin], size - 12);
         assert.ok(visibleCategories(smallSet, orientation) < 13 && smallSet.dataZoom.length === 2,
             'Small charts must navigate even fewer than sixteen categories when text/bars need more room.');
     }

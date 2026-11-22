@@ -23,6 +23,7 @@ use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsLabelDesign;
 use SymconECharts\EChartsNormalization;
+use SymconECharts\EChartsSliderSize;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsValueRange;
@@ -51,6 +52,7 @@ require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
 require_once __DIR__ . '/../libs/EChartsNormalization.php';
 require_once __DIR__ . '/../libs/EChartsValueRange.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
+require_once __DIR__ . '/../libs/EChartsSliderSize.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/ScatterPairing.php';
@@ -87,6 +89,7 @@ class EChartsScatter extends IPSModuleStrict
         'EChartsTheme'            => 'string',
         'ShowGrid'                => 'boolean',
         'EnableZoom'              => 'boolean',
+        'ZoomSliderSize'          => 'integer',
         'EnableBrush'             => 'boolean',
         'ShowValues'              => 'boolean',
         'AdaptiveValueLabels'     => 'boolean',
@@ -151,6 +154,7 @@ class EChartsScatter extends IPSModuleStrict
             $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
             $this->RegisterPropertyBoolean('ShowGrid', true);
             $this->RegisterPropertyBoolean('EnableZoom', true);
+            $this->RegisterPropertyInteger('ZoomSliderSize', 0);
             $this->RegisterPropertyBoolean('EnableBrush', false);
             $this->RegisterPropertyBoolean('ShowValues', false);
             $this->RegisterPropertyBoolean('AdaptiveValueLabels', false);
@@ -209,7 +213,7 @@ class EChartsScatter extends IPSModuleStrict
                     'XAxisMaximum', 'YAxisMaximum', 'ColorMapMaximum', 'BubbleMaximum'                          => 100.0,
                     'TitleFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'                       => 100,
                     'AnimationDuration'                                                                         => 350, 'AnimationDurationUpdate' => 500,
-                    'AnimationDelay', 'AnimationDelayUpdate'                                                    => 0,
+                    'AnimationDelay', 'AnimationDelayUpdate', 'ZoomSliderSize'                                  => 0,
                     default                                                                                     => -1
                 };
                 match ($type) {
@@ -757,10 +761,14 @@ class EChartsScatter extends IPSModuleStrict
                     $colorMapLanguage
                 )) . '</text>';
         }
+        $zoom = $this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView);
+        $size = $this->BarPreviewValue($values, 'ZoomSliderSize', 'integer', $ipsView);
+        $thickness = EChartsSliderSize::Resolve($size, 7);
+        $extra = $zoom ? $thickness - 7 : 0;
         $left = 105;
-        $right = 670;
+        $right = 670 - $extra;
         $top = 70;
-        $bottom = 286;
+        $bottom = 286 - $extra;
         $xRange = $this->PreviewAxisBounds($values, $ipsView, 'X', 1.0, 15.0);
         $yRange = $this->PreviewAxisBounds($values, $ipsView, 'Y', 50.0, 100.0);
         $axisFontSize = max(8, min(20, (int) round(11 * $this->BarPreviewValue(
@@ -777,7 +785,7 @@ class EChartsScatter extends IPSModuleStrict
                     . ' M ' . $left . ' ' . EChartsBarPreview::N($y) . ' H ' . $right
                     . '" stroke="' . EChartsBarPreview::E($gridColor) . '" opacity="0.65"/>';
             }
-            $svg .= '<text x="' . EChartsBarPreview::N($x) . '" y="305" text-anchor="middle" font-size="'
+            $svg .= '<text x="' . EChartsBarPreview::N($x) . '" y="' . ($bottom + 19) . '" text-anchor="middle" font-size="'
                 . $axisFontSize . '" fill="' . EChartsBarPreview::E($axisColor) . '">'
                 . EChartsBarPreview::E(EChartsBarPreview::N($xRange[0] + ($xRange[1] - $xRange[0]) * $i / 4))
                 . '</text>';
@@ -788,14 +796,15 @@ class EChartsScatter extends IPSModuleStrict
         }
         $svg .= '<path d="M ' . $left . ' ' . $top . ' V ' . $bottom . ' H ' . $right
             . '" fill="none" stroke="' . EChartsBarPreview::E($axisColor) . '"/>';
-        if ($this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView)) {
+        if ($zoom) {
             $sliderColor = EChartsBarPreview::E($palette['accent']);
-            $svg .= '<path d="M ' . $left . ' 320 H ' . $right . ' M 692 ' . $top . ' V ' . $bottom
+            $tracks = 'M ' . $left . ' ' . (320 - $extra / 2) . ' H ' . $right
+                . ' M ' . (692 - $extra / 2) . ' ' . $top . ' V ' . $bottom;
+            $svg .= '<path d="' . $tracks
                 . '" fill="none" stroke="' . EChartsBarPreview::E($gridColor)
-                . '" stroke-width="7" stroke-linecap="round"/>';
-            $svg .= '<path d="M ' . $left . ' 320 H ' . $right . ' M 692 ' . $top . ' V ' . $bottom
-                . '" fill="none" stroke="' . $sliderColor
-                . '" stroke-width="3" stroke-linecap="round"/>';
+                . '" stroke-width="' . $thickness . '" stroke-linecap="' . ($size === 0 ? 'round' : 'butt') . '"/>';
+            $svg .= '<path d="' . $tracks . '" fill="none" stroke="' . $sliderColor
+                . '" stroke-width="' . max(1, round($thickness * 3 / 7)) . '" stroke-linecap="' . ($size === 0 ? 'round' : 'butt') . '"/>';
         }
         $svg .= '<defs><clipPath id="scatter-preview-plot"><rect x="' . $left . '" y="' . $top
             . '" width="' . ($right - $left) . '" height="' . ($bottom - $top) . '"/></clipPath></defs>';
@@ -1407,6 +1416,7 @@ class EChartsScatter extends IPSModuleStrict
             return false;
         }
         if (!$this->AnimationIsValid($prefix)
+            || !EChartsSliderSize::IsValid($this->ReadPropertyInteger($prefix . 'ZoomSliderSize'))
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
             || !in_array($this->ReadPropertyString($prefix . 'ValueLabelContent'), ['x', 'y', 'both'], true)
             || !EChartsLabelDesign::IsValidPosition(
@@ -1505,7 +1515,7 @@ class EChartsScatter extends IPSModuleStrict
                 $style[lcfirst($axis) . 'Axis' . $bound] = $this->ReadPropertyFloat($prefix . $axis . 'Axis' . $bound);
             }
         }
-        foreach (['ValueLabelDistance', 'PointSize', 'BubbleMaxSize', 'TitleFontSizePercent',
+        foreach (['ValueLabelDistance', 'ZoomSliderSize', 'PointSize', 'BubbleMaxSize', 'TitleFontSizePercent',
             'AxisFontSizePercent', 'ValueFontSizePercent'] as $name) {
             $style[lcfirst($name)] = $this->ReadPropertyInteger($prefix . $name);
         }

@@ -21,6 +21,7 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsSliderSize;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\StateTimelineData;
@@ -41,6 +42,7 @@ require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsSliderSize.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/StateTimelineData.php';
@@ -74,6 +76,7 @@ class EChartsStateTimeline extends IPSModuleStrict
     private const STATUS_GATEWAY_FAILED = 204;
     private const MAXIMUM_TOTAL_POINTS = 16000;
     private const DESIGN_DEFAULTS = [
+        'ZoomSliderSize'       => 0,
         'EChartsTheme'         => 'auto', 'EnableZoom' => true, 'ShowTooltip' => true, 'ShowLabels' => true,
         'ShowGrid'             => true, 'RowHeightPercent' => 65, 'BarOpacityPercent' => 90, 'BorderWidth' => 0,
         'TitleFontSizePercent' => 110, 'AxisFontSizePercent' => 75, 'LabelFontSizePercent' => 75,
@@ -857,7 +860,8 @@ class EChartsStateTimeline extends IPSModuleStrict
 
     private function IsValidDesign(string $prefix): bool
     {
-        if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
+        if (!EChartsSliderSize::IsValid($this->ReadPropertyInteger($prefix . 'ZoomSliderSize'))
+            || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
             || !$this->AnimationIsValid($prefix)) {
             return false;
         }

@@ -8,6 +8,11 @@
 
 ## Neu
 
+- Die Dicke der Zoom- und Navigationsregler lässt sich im Kachel- und IPSView-Designer
+  auf 1–64 Pixel einstellen. Bei 0 gilt die bisherige automatische Größe.
+  Das gilt für den Zeitzoom in TimeSeries, BarHistory, Candlestick und StateTimeline,
+  die Zeilennavigation in StateTimeline, den X/Y-Zoom in Scatter und die
+  Kategoriennavigation in BarCategory, BarWaterfall, Boxplot und PictorialBar.
 - In EChartsTimeSeries und EChartsBarHistory lässt sich der Abstand zwischen
   Wertachsen auf derselben Seite für Kachel und IPSView getrennt einstellen.
   Die Designer zeigen den Abstand in der Vorschau. Bei 0 gilt die bisherige Automatik.

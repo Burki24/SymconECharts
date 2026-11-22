@@ -363,6 +363,21 @@ assert.equal(ipsview.option.dataZoom[1].zoomOnMouseWheel, false);
 const compactBubble = render(model, 'ipsview', 400, 240);
 assert.equal(compactBubble.option.dataZoom[2].height, 8);
 assert.equal(compactBubble.option.dataZoom[3].width, 8);
+for (const mode of ['symcon', 'ipsview']) {
+    const thicker = render({ ...model, scatter: { ...model.scatter, style: {
+        ...model.scatter.style, zoomSliderSize: 36
+    } } }, mode, 400, 320).option;
+    assert.equal(thicker.dataZoom[2].height, 36);
+    assert.equal(thicker.dataZoom[3].width, 36);
+    assert.equal(thicker.dataZoom[2].handleSize, 36);
+    assert.equal(thicker.grid.bottom, compactBubble.option.grid.bottom + 28);
+    assert.equal(thicker.grid.right, compactBubble.option.grid.right + 28);
+}
+const tiny = render({ ...groupedModel, scatter: { ...groupedModel.scatter, style: {
+    ...groupedModel.scatter.style, zoomSliderSize: 64
+} } }, 'ipsview', 300, 200).option;
+assert.ok(tiny.dataZoom[2].height >= 8 && tiny.dataZoom[2].height < 64);
+assert.equal(tiny.dataZoom[2].height, tiny.dataZoom[3].width);
 for (const entry of bubble.option.dataZoom) {
     entry.start = entry.xAxisIndex === 0 ? 20 : 35;
     entry.end = entry.xAxisIndex === 0 ? 65 : 80;

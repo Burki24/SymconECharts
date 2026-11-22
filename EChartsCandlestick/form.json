@@ -559,6 +559,14 @@
                             "caption": "Enable time zoom"
                         },
                         {
+                            "type": "NumberSpinner",
+                            "name": "ZoomSliderSize",
+                            "caption": "Slider thickness (0 = automatic)",
+                            "minimum": 0,
+                            "maximum": 64,
+                            "suffix": "px"
+                        },
+                        {
                             "type": "CheckBox",
                             "name": "IncludeZero",
                             "caption": "Include zero in value axis"

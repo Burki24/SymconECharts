@@ -169,9 +169,10 @@
         var left = horizontal && style.showLabels !== false ? Math.min(width * 0.32,axisFont * 11 + 14) : Math.min(width * 0.22,axisFont * 5);
         var right = horizontal && style.showValues !== false ? Math.min(width * 0.28,valueFont * 8 + 14) : 20;
         var bottom = horizontal ? axisFont * 2 + 22 : (style.showLabels !== false ? axisFont * 3 + 20 : 24);
+        var sliderSize = design.sliderSize(style.zoomSliderSize, 12);
         var scroll = items.length > 16;
         if (scroll) {
-            if (horizontal) { right += 28; } else { bottom += 28; }
+            if (horizontal) { right += sliderSize + 16; } else { bottom += sliderSize + 16; }
         }
         if (horizontal && style.showLabels !== false) {
             var requestedColumn = Number(style.labelColumnWidthPercent) || 0;
@@ -286,8 +287,8 @@
             grid:{left:left,right:right,top:top,bottom:bottom,containLabel:false},
             xAxis:horizontal?value:category,yAxis:horizontal?category:value,
             dataZoom:scroll ? [
-                {id:'category-scroll',type:'slider',...(horizontal ? {yAxisIndex:0,orient:'vertical',right:6,width:12,top:top,bottom:bottom}
-                    : {xAxisIndex:0,orient:'horizontal',bottom:4,height:12,left:left,right:right}),
+                {id:'category-scroll',type:'slider',...(horizontal ? {yAxisIndex:0,orient:'vertical',right:6,width:sliderSize,top:top,bottom:bottom}
+                    : {xAxisIndex:0,orient:'horizontal',bottom:4,height:sliderSize,left:left,right:right}),
                     startValue:first,endValue:first+visibleCount-1,filterMode:'filter',zoomLock:true,showDetail:false,
                     showDataShadow:false,brushSelect:false,borderColor:colors.border,fillerColor:colors.muted},
                 {id:'category-scroll-inside',type:'inside',...(horizontal ? {yAxisIndex:0} : {xAxisIndex:0}),
@@ -314,7 +315,7 @@
                 blur:{itemStyle:{opacity:style.blurOpacityPercent == null ? 0.1 : style.blurOpacityPercent/100}},
                 label:{show:style.showValues !== false,position:valuePositions[style.valuePosition || 'outside'],color:style.valueColor || colors.text,
                     distance:style.valueDistance == null ? 5 : style.valueDistance,fontFamily:fontFamily,fontWeight:style.valueBold === true ? 'bold' : 'normal',
-                    fontSize:valueFont,overflow:'truncate',width:horizontal?Math.max(8,right-10-(scroll?28:0)):Math.max(12,cross*0.95),
+                    fontSize:valueFont,overflow:'truncate',width:horizontal?Math.max(8,right-10-(scroll?sliderSize+16:0)):Math.max(12,cross*0.95),
                     formatter:function(p){return items[p.dataIndex]?format(items[p.dataIndex]):'';}},
                 labelLayout:compound ? gradientLabelLayout : {hideOverlap:style.hideOverlap !== false},
                 data:items.map(function(x){return {id:x.id,name:x.label,value:Math.min(maximum,x.value),

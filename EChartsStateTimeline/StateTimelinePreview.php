@@ -87,9 +87,10 @@ trait StateTimelinePreview
             return 1.05 / ($luminance + 0.05) >= ($luminance + 0.05) / 0.05560539162420272 ? '#FFFFFF' : '#111111';
         };
         $left = $this->BarPreviewValue($values, 'ShowSourceLabels', 'boolean', $ipsView) ? 170 : 24;
-        $right = 692;
+        $sliderSize = EChartsSliderSize::Resolve($this->BarPreviewValue($values, 'ZoomSliderSize', 'integer', $ipsView), 12);
+        $right = 692 - ($totalRows > 8 ? $sliderSize : 0);
         $top = 88;
-        $bottom = $this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView) ? 288 : 315;
+        $bottom = $this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView) ? 300 - $sliderSize : 315;
         $timeFormat = $this->BarPreviewValue($values, 'TimeLabelFormat', 'string', $ipsView);
         $margin = $number('AxisLabelMargin', 0, 30);
         $bottom -= max(0, $margin - 12) + ($timeFormat === 'dateTime' ? (int) ceil($axisFont * 1.3) : 0);
@@ -181,9 +182,11 @@ trait StateTimelinePreview
                 . ($timeFormat === 'dateTime' ? '<tspan x="' . $n($x) . '" dy="' . $n($axisFont * 1.3) . '">' . $e($time) . '</tspan>' : '') . '</text>';
         }
         if ($this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView)) {
-            $svg .= '<rect x="' . $left . '" y="330" width="' . ($right - $left) . '" height="12" fill="' . $e($palette['surface'] ?? $palette['background']) . '" stroke="' . $e($palette['border']) . '"/>';
+            $svg .= '<rect data-time-slider="true" x="' . $left . '" y="' . (342 - $sliderSize) . '" width="' . ($right - $left) . '" height="' . $sliderSize . '" fill="' . $e($palette['surface'] ?? $palette['background']) . '" stroke="' . $e($palette['border']) . '"/>';
         }
         if ($totalRows > 8) {
+            $svg .= '<rect data-row-slider="true" x="' . ($right + 14) . '" y="' . $top . '" width="' . $sliderSize
+                . '" height="' . $n($bottom - $top) . '" fill="' . $e($palette['surface'] ?? $palette['background']) . '" stroke="' . $e($palette['border']) . '"/>';
             $svg .= '<text x="360" y="356" text-anchor="middle" font-size="10" fill="' . $e($palette['text']) . '">'
                 . $e(sprintf($this->Translate('Preview: first %d of %d rows. Scroll in the chart to see all.'), 8, $totalRows)) . '</text>';
         }

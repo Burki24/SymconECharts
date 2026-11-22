@@ -136,7 +136,12 @@ bleiben. Diese Mausinteraktion ist in der statischen Vorschau nicht darstellbar.
 Der Diagrammtitel steht in der Kachel unter dem nativen Kachelnamen und
 Vergrößerungsbutton. IPSView reserviert diesen zusätzlichen Kopfbereich nicht.
 Zoom vergrößert den Zeitbereich innerhalb des Diagramms, ohne die Konfiguration
-zu ändern. Animation einschließlich Dauer und Bewegungskurve ist einstellbar.
+zu ändern. Mit **Reglerdicke (0 = automatisch)** wählst Du im Kacheldesigner
+und bei eigenem IPSView-Design für jede Ausgabe die Größe. 0 verwendet die
+automatische Größe. Ein Wert von 1 bis 64 Pixeln bestimmt die Höhe der
+Zeitleiste unten und bei mehr als acht Quellen auch die Breite der
+Zeilennavigation rechts. Probiere auf dem Handy zum Beispiel 32 Pixel aus.
+Animation einschließlich Dauer und Bewegungskurve ist einstellbar.
 
 Bei mehr als acht Quellen zeigt das Diagramm einen lesbaren Ausschnitt von
 höchstens acht Zeilen. Mit der senkrechten **Zeilennavigation rechts** sind

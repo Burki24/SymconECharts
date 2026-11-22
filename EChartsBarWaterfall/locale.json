@@ -71,6 +71,7 @@
             "Automatic (Symcon design)": "Automatisch (Symcon-Design)",
             "Automatic (theme)": "Automatisch (Theme)",
             "Show values": "Werte anzeigen",
+            "Slider thickness (0 = automatic)": "Reglerdicke (0 = automatisch)",
             "Show grid": "Raster anzeigen",
             "Bar width": "Balkenbreite",
             "Start color": "Startfarbe",

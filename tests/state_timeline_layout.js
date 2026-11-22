@@ -283,10 +283,14 @@ for (const mode of ['symcon', 'ipsview']) {
             rows: Array.from({length: 32}, (_, index) => ({id: 'variable-' + (100 + index), label: 'Same contact',
                 segments: [{startTimestamp: start, endTimestamp: start + 86400, value: index === 31 ? null : index,
                     label: index === 31 ? 'Unknown last row' : 'State ' + index, color: index === 31 ? '' : '#2288AA'}]})),
-            style: {...model.stateTimeline.style, enableZoom}}};
+            style: {...model.stateTimeline.style, enableZoom, zoomSliderSize:36}}};
         const output = render(largeModel, mode, 630, 500);
         const rowZoom = output.option.dataZoom.find(entry => entry.id === 'state-row-scroll');
         assert.ok(rowZoom, 'More than eight rows need a native independent row navigator.');
+        assert.equal(rowZoom.width, 36);
+        assert.ok(output.option.grid.right >= rowZoom.width + rowZoom.right);
+        const timeZoom = output.option.dataZoom.find(entry => entry.id === 'state-time-slider');
+        assert.equal(timeZoom?.height, enableZoom ? 36 : undefined);
         assert.equal(output.option.yAxis.data.length, 32, 'Navigation must keep all ID-distinct rows in the model.');
         assert.equal(output.option.series[0].data.length, 32);
         assert.ok(rowZoom.endValue < 8, 'Initial rows remain legible instead of squeezing all 32 into the tile.');

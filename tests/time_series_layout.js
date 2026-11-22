@@ -745,6 +745,12 @@ for (const mode of ['symcon', 'ipsview']) {
     assert.equal(automatic.yAxis[1].offset, 90);
     assert.equal(explicitAuto.yAxis[1].offset, automatic.yAxis[1].offset);
     assert.equal(explicitAuto.grid.left, automatic.grid.left);
+    const touchSlider = render({ zoomSliderSize: 32 }, axes, 375, sources, 'dark', {}, mode);
+    assert.equal(touchSlider.dataZoom[1].height, 32);
+    assert.equal(touchSlider.grid.bottom - automatic.grid.bottom, 32 - automatic.dataZoom[1].height);
+    const small = render({ zoomSliderSize: 64, legendPosition: 'bottom' }, axes, 320, sources, 'dark', {}, mode,
+        false, false, 'auto', undefined, false, 165);
+    assert.ok(small.dataZoom[1].height < 64 && small.dataZoom[1].height >= 8);
     const spacing = mode === 'symcon' ? 24 : 80;
     const chart = render({ valueAxisSpacing: spacing }, axes, 750, sources, 'dark', {}, mode,
         false, false, 'auto', undefined, true, 420, native);

@@ -164,6 +164,10 @@ Die Werteachse kann den Nullpunkt einschließen, ohne Messwerte zu ändern.
 und auf Touchgeräten mit zwei Fingern gezoomt werden. Bei horizontalen Kerzen
 steht der Regler rechts, sonst unten. Beide Designer können die Option
 unabhängig verwenden; standardmäßig ist sie ausgeschaltet.
+Mit **Reglerdicke (0 = automatisch)** lässt sich die Höhe des unteren Reglers
+bzw. die Breite des rechten Reglers auf 1 bis 64 Pixel einstellen. Auf dem
+Handy kannst Du beispielsweise 32 Pixel ausprobieren. Die Einstellung gilt
+auch für den gemeinsamen Zeitregler der Vergleichspanels.
 
 Der Zoom ist ausschließlich eine flüchtige Ansicht der bereits geladenen
 Intervalle. Die vollständigen Kerzen bestimmen weiterhin die Werteskala;

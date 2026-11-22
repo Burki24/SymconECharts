@@ -24,6 +24,7 @@ use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsLabelDesign;
 use SymconECharts\EChartsNormalization;
 use SymconECharts\EChartsPreviewSourceCount;
+use SymconECharts\EChartsSliderSize;
 use SymconECharts\EChartsSvgImage;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
@@ -580,6 +581,10 @@ class EChartsBarCategory extends IPSModuleStrict
             $previewAxisSize * ($horizontal ? 1.5 : 2.4) + 4,
             $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView) ? $previewValueSpan + 4 : 0
         );
+        $totalCategories = $mode === 'simple' ? count($items) : count(array_unique(array_map(
+            static fn (array $item): string => trim((string) ($item['Category'] ?? '')),
+            $items
+        )));
         $items = array_slice($items, 0, max(1, (int) floor(($horizontal ? 210 : 568) / $previewSpan)));
         $svg = EChartsBarPreview::Open(
             $palette,
@@ -791,7 +796,7 @@ class EChartsBarCategory extends IPSModuleStrict
             ++$groupIndex;
         }
 
-        return EChartsPreviewSourceCount::Append(
+        $svg = EChartsPreviewSourceCount::Append(
             $svg . '</g></svg>',
             count($items),
             count($data['items']),
@@ -799,6 +804,14 @@ class EChartsBarCategory extends IPSModuleStrict
             $palette['muted'],
             696,
             351
+        );
+        return EChartsBarPreview::WithCategorySlider(
+            $svg,
+            $horizontal,
+            $this->BarPreviewValue($values, 'ZoomSliderSize', 'integer', $ipsView),
+            $groupCount,
+            $totalCategories,
+            $palette
         );
     }
 
@@ -1127,6 +1140,7 @@ class EChartsBarCategory extends IPSModuleStrict
         $this->RegisterPropertyString($prefix . 'ValueLabelPosition', 'auto');
         $this->RegisterPropertyInteger($prefix . 'ValueLabelDistance', 5);
         $this->RegisterPropertyBoolean($prefix . 'ShowGrid', true);
+        $this->RegisterPropertyInteger($prefix . 'ZoomSliderSize', 0);
         $this->RegisterPropertyBoolean($prefix . 'RoundedBars', false);
         $this->RegisterPropertyInteger($prefix . 'BarWidthPercent', 70);
         $this->RegisterPropertyString($prefix . 'BarFillMode', 'solid');
@@ -1153,6 +1167,7 @@ class EChartsBarCategory extends IPSModuleStrict
             'ValueLabelPosition'      => 'string',
             'ValueLabelDistance'      => 'integer',
             'ShowGrid'                => 'boolean',
+            'ZoomSliderSize'          => 'integer',
             'RoundedBars'             => 'boolean',
             'BarWidthPercent'         => 'integer',
             'BarFillMode'             => 'string',
@@ -1193,6 +1208,7 @@ class EChartsBarCategory extends IPSModuleStrict
             && EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
             && EChartsLabelDesign::IsValidPosition($this->ReadPropertyString($prefix . 'ValueLabelPosition'), EChartsLabelDesign::CARTESIAN_POSITIONS)
             && EChartsLabelDesign::IsValidDistance($this->ReadPropertyInteger($prefix . 'ValueLabelDistance'))
+            && EChartsSliderSize::IsValid($this->ReadPropertyInteger($prefix . 'ZoomSliderSize'))
             && $this->ReadPropertyInteger($prefix . 'BarWidthPercent') >= 20
             && $this->ReadPropertyInteger($prefix . 'BarWidthPercent') <= 100
             && in_array($this->ReadPropertyString($prefix . 'BarFillMode'), self::BAR_FILL_MODES, true)
@@ -1226,6 +1242,7 @@ class EChartsBarCategory extends IPSModuleStrict
             'valueLabelPosition' => $this->ReadPropertyString($prefix . 'ValueLabelPosition'),
             'valueLabelDistance' => $this->ReadPropertyInteger($prefix . 'ValueLabelDistance'),
             'showGrid'           => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
+            'zoomSliderSize'     => $this->ReadPropertyInteger($prefix . 'ZoomSliderSize'),
             'roundedBars'        => $this->ReadPropertyBoolean($prefix . 'RoundedBars'),
             'barWidthPercent'    => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
             'barFillMode'        => $this->ReadPropertyString($prefix . 'BarFillMode'),

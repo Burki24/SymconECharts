@@ -61,6 +61,8 @@ trait CandlestickPreview
         }
         $horizontal = $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView) === 'horizontal';
         $zoom = $this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView);
+        $sliderSize = EChartsSliderSize::Resolve($this->BarPreviewValue($values, 'ZoomSliderSize', 'integer', $ipsView), 8);
+        $valueWidth = 520 - ($zoom && $horizontal ? $sliderSize - 8 : 0);
         $svg = str_replace('<svg ', '<svg data-time-zoom="' . ($zoom ? 'true' : 'false') . '" ', $svg);
         $axis = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
         $axisLine = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisLineColor', 'integer', $ipsView), $palette['border']);
@@ -83,7 +85,7 @@ trait CandlestickPreview
         if ($rotation !== 0) {
             $labelWidth = min($labelWidth, max(12, ($horizontal ? $slot * 0.7 : 90) / $sine));
         }
-        $bottom = 295 - ($zoom && !$horizontal ? 24 : 0) - (!$horizontal && $this->BarPreviewValue($values, 'ShowAxisLabels', 'boolean', $ipsView) ? $labelWidth * $sine : 0);
+        $bottom = 295 - ($zoom && !$horizontal ? 16 + $sliderSize : 0) - (!$horizontal && $this->BarPreviewValue($values, 'ShowAxisLabels', 'boolean', $ipsView) ? $labelWidth * $sine : 0);
         $shadow = max(0, min(20, $this->BarPreviewValue($values, 'ShadowBlur', 'integer', $ipsView)));
         $offsetX = max(-20, min(20, $this->BarPreviewValue($values, 'ShadowOffsetX', 'integer', $ipsView)));
         $offsetY = max(-20, min(20, $this->BarPreviewValue($values, 'ShadowOffsetY', 'integer', $ipsView)));
@@ -97,7 +99,7 @@ trait CandlestickPreview
             . '"' . $dash($this->BarPreviewValue($values, 'GridLineType', 'string', $ipsView)) . '>';
         if ($this->BarPreviewValue($values, 'ShowGrid', 'boolean', $ipsView)) {
             for ($tick = 0; $tick <= $splits; $tick++) {
-                $position = $horizontal ? 160 + $tick * 520 / $splits : $bottom - $tick * ($bottom - 75) / $splits;
+                $position = $horizontal ? 160 + $tick * $valueWidth / $splits : $bottom - $tick * ($bottom - 75) / $splits;
                 $gridWidth = max(0, min(5, $this->BarPreviewValue($values, 'GridLineWidth', 'integer', $ipsView)));
                 $svg .= $horizontal ? $line($position, 75, $position, $bottom, $grid, $gridWidth)
                     : $line(80, $position, 680, $position, $grid, $gridWidth);
@@ -111,7 +113,7 @@ trait CandlestickPreview
         $svg .= '</g>';
         if ($this->BarPreviewValue($values, 'ShowAxisLabels', 'boolean', $ipsView)) {
             for ($tick = 0; $tick <= $splits; $tick++) {
-                $x = $horizontal ? 160 + $tick * 520 / $splits : 78 - $margin;
+                $x = $horizontal ? 160 + $tick * $valueWidth / $splits : 78 - $margin;
                 $y = $horizontal ? $bottom + $font + $margin : $bottom - $tick * ($bottom - 75) / $splits + 4;
                 $svg .= '<text x="' . $n($x) . '" y="' . $n($y) . '" text-anchor="' . ($horizontal ? 'middle' : 'end')
                     . '" font-size="' . $n($font) . '" font-style="' . $italic . '" font-weight="' . $bold . '" fill="' . $e($axis) . '">' . $n($minimumValue + (40 - $minimumValue) * $tick / $splits) . '</text>';
@@ -129,10 +131,10 @@ trait CandlestickPreview
             $position = $this->BarPreviewValue($values, 'ReverseTimeAxis', 'boolean', $ipsView) ? count($items) - $index - 1 : $index;
             $center = ($horizontal ? 75 : 80) + $slot * ($horizontal ? count($items) - $position - 0.5 : $position + 0.5);
             $offset = ($index % 4) * 0.07;
-            $stats = array_map(static function ($v) use ($horizontal, $offset, $minimumValue, $bottom): float
+            $stats = array_map(static function ($v) use ($horizontal, $offset, $minimumValue, $bottom, $valueWidth): float
             {
                 $fraction = (($v + $offset) * 40 - $minimumValue) / (40 - $minimumValue);
-                return $horizontal ? 160 + 520 * $fraction : $bottom - ($bottom - 75) * $fraction;
+                return $horizontal ? 160 + $valueWidth * $fraction : $bottom - ($bottom - 75) * $fraction;
             }, [0.10, 0.30, 0.45, 0.60, 0.75]);
             $kind = ['RiseColor', 'FallColor', 'DojiColor'][$index % 3];
             $color = EChartsBarPreview::Color($this->BarPreviewValue($values, $kind, 'integer', $ipsView), $kind === 'DojiColor' ? $palette['text'] : ($kind === 'RiseColor' ? $palette['accent'] : ($palette['seriesColors'][3] ?? '#E66B6B')));
@@ -169,8 +171,8 @@ trait CandlestickPreview
             }
         }
         if ($zoom) {
-            $svg .= '<rect data-time-slider="true" x="' . ($horizontal ? '700' : '80') . '" y="' . ($horizontal ? '75' : '311')
-                . '" width="' . ($horizontal ? '8' : '600') . '" height="' . ($horizontal ? $n($bottom - 75) : '8')
+            $svg .= '<rect data-time-slider="true" x="' . ($horizontal ? 708 - $sliderSize : 80) . '" y="' . ($horizontal ? 75 : 319 - $sliderSize)
+                . '" width="' . ($horizontal ? $sliderSize : 600) . '" height="' . ($horizontal ? $n($bottom - 75) : $sliderSize)
                 . '" rx="2" fill="' . $e($palette['accent']) . '" fill-opacity="0.35" stroke="' . $e($palette['border']) . '"/>';
         }
         // Hover and zoom cannot be triggered inside the static SVG.
@@ -209,8 +211,11 @@ trait CandlestickPreview
                 . EChartsBarPreview::E($this->Translate('Configure one to four unique numeric Candlestick panel variables.')) . '</text></svg>';
         }
         $horizontal = $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView) === 'horizontal';
-        $width = $horizontal ? 720 * count($sources) : 720;
-        $height = $horizontal ? 450 : 80 + 360 * count($sources);
+        $zoom = $this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView);
+        $sliderSize = EChartsSliderSize::Resolve($this->BarPreviewValue($values, 'ZoomSliderSize', 'integer', $ipsView), 8);
+        $extra = $zoom ? max(0, $sliderSize - 8) : 0;
+        $width = $horizontal ? 720 * count($sources) + $extra : 720;
+        $height = $horizontal ? 450 : 80 + 360 * count($sources) + $extra;
         $svg = str_replace(
             ['width="720" height="360" viewBox="0 0 720 360"', '<rect width="720" height="360"'],
             ['width="' . $width . '" height="' . $height . '" viewBox="0 0 ' . $width . ' ' . $height . '" data-panel-count="' . count($sources) . '"',
@@ -229,9 +234,9 @@ trait CandlestickPreview
             $child = preg_replace('/<svg /', '<svg x="' . ($horizontal ? 720 * $index : 0) . '" y="' . (70 + ($horizontal ? 0 : 360 * $index)) . '" ', $child, 1);
             $svg .= $child;
         }
-        if ($this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView)) {
-            $svg .= '<rect data-time-slider="true" x="' . ($horizontal ? $width - 15 : 80) . '" y="' . ($horizontal ? 110 : $height - 12)
-                . '" width="' . ($horizontal ? 8 : 600) . '" height="' . ($horizontal ? 220 : 8) . '" fill="' . EChartsBarPreview::E($palette['accent']) . '"/>';
+        if ($zoom) {
+            $svg .= '<rect data-time-slider="true" x="' . ($horizontal ? $width - 7 - $sliderSize : 80) . '" y="' . ($horizontal ? 110 : $height - 4 - $sliderSize)
+                . '" width="' . ($horizontal ? $sliderSize : 600) . '" height="' . ($horizontal ? 220 : $sliderSize) . '" fill="' . EChartsBarPreview::E($palette['accent']) . '"/>';
         }
         return $svg . '</svg>';
     }

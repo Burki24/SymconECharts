@@ -213,9 +213,10 @@
         var crossSpace = Math.max(1, horizontal ? (chartElement.clientHeight || 500) - top - bottom - axisSize * 1.5
             : (chartElement.clientWidth || 800) - left - right - axisSize * 4);
         var visibleCount = Math.max(1, Math.min(chartData.categories.length, Math.floor(crossSpace / minimumSpan)));
+        var sliderSize = echartsDesign.sliderSize(style.zoomSliderSize, 12);
         var scroll = visibleCount < chartData.categories.length;
-        if (scroll && horizontal) { right += 28; }
-        if (scroll && !horizontal) { bottom += 28; }
+        if (scroll && horizontal) { right += sliderSize + 16; }
+        if (scroll && !horizontal) { bottom += sliderSize + 16; }
         var categorySpan = Math.min(minimumSpan, crossSpace);
         var first = categoryNavigation.window(chartData.categoryKeys, visibleCount).first;
         var categoryKeys = scroll ? chartData.categoryKeys : chartData.categories;
@@ -319,8 +320,8 @@
             },
             dataZoom: scroll ? [
                 { id: 'category-scroll', type: 'slider',
-                    ...(horizontal ? { yAxisIndex: 0, orient: 'vertical', right: 6, width: 12, top: top, bottom: bottom }
-                        : { xAxisIndex: 0, orient: 'horizontal', bottom: 4, height: 12, left: left, right: right }),
+                    ...(horizontal ? { yAxisIndex: 0, orient: 'vertical', right: 6, width: sliderSize, top: top, bottom: bottom }
+                        : { xAxisIndex: 0, orient: 'horizontal', bottom: 4, height: sliderSize, left: left, right: right }),
                     startValue: first, endValue: first + visibleCount - 1, filterMode: 'filter', zoomLock: true,
                     showDetail: false, showDataShadow: false, brushSelect: false },
                 { id: 'category-scroll-inside', type: 'inside',

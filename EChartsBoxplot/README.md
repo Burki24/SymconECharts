@@ -122,6 +122,8 @@ Achsenbeschriftung sowie Schriftgrößen und Farben für Titel und Achsen.
 Die maximale Boxbreite wird auf schmalen Flächen automatisch begrenzt.
 Lange Kategorienamen werden bei Platzmangel gekürzt; im Tooltip bleiben sie vollständig.
 
+Mit **Reglerdicke (0 = automatisch)** im Kacheldesigner stellst Du die Dicke der Kategoriennavigation auf 1 bis 64 Pixel ein. 0 verwendet die bisherige Automatik (12 Pixel). Probiere auf dem Handy beispielsweise 32 Pixel. Im IPSView-Designer kannst Du bei eigenem Design einen anderen Wert wählen.
+
 Bei vielen Kategorien erscheint automatisch eine Navigation per Schieberegler
 oder Mausrad. Das gilt horizontal und vertikal. Boxbreite und Schriftgröße
 bestimmen, wie viele Kategorien gleichzeitig lesbar sind. Der Ausschnitt bleibt

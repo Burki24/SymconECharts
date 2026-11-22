@@ -62,6 +62,9 @@ assertGatewayGauge(
 $candleForm = json_decode($candle->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     $candleData['candlestick']['style']['enableZoom'] === false
+    && $candleData['candlestick']['style']['zoomSliderSize'] === 0
+    && findGaugeFormElement($candleForm['elements'], 'ZoomSliderSize') !== null
+    && str_contains(findGaugeFormElement($candleForm['elements'], 'IPSViewZoomSliderSize')['onChange'], 'ECCA_UpdateBarPreviewFromForm')
     && $candleData['candlestick']['variableID'] === 88500
     && findGaugeFormElement($candleForm['elements'], 'EnableZoom') !== null
     && str_contains(findGaugeFormElement($candleForm['elements'], 'IPSViewEnableZoom')['onChange'], 'ECCA_UpdateBarPreviewFromForm'),
@@ -69,22 +72,29 @@ assertGatewayGauge(
 );
 $zoomQueries = $GLOBALS['symconTestArchiveQueryCount'];
 $candle->SetTestProperty('IPSViewEnableZoom', true);
+$candle->SetTestProperty('IPSViewZoomSliderSize', 44);
 $zoomIPS = $candle->GetIPSViewHTML();
 $zoomTile = json_decode($candle->GetCandlestickData(), true);
 assertGatewayGauge(
     str_contains($zoomIPS, '"enableZoom":true') && $zoomTile['candlestick']['style']['enableZoom'] === false
+    && str_contains($zoomIPS, '"zoomSliderSize":44') && $zoomTile['candlestick']['style']['zoomSliderSize'] === 0
     && $zoomTile['candlestick']['data'] === $candleData['candlestick']['data']
     && $GLOBALS['symconTestArchiveQueryCount'] === $zoomQueries
     && str_contains($zoomIPS, 'SymconEChartsZoom') && !str_contains($zoomIPS, '{{ECHARTS_ZOOM_SCRIPT}}'),
     'Independent zoom must reuse the same data/cache and embed the shared controller.'
 );
-$candle->UpdateBarPreviewFromForm('{"EnableZoom":true,"IPSViewEnableZoom":true,"IPSViewOrientation":"horizontal"}');
-foreach (array_slice($candle->GetTestFormUpdates(), -2) as $update) {
+$candle->UpdateBarPreviewFromForm('{"EnableZoom":true,"IPSViewEnableZoom":true,"IPSViewOrientation":"horizontal","ZoomSliderSize":32,"IPSViewZoomSliderSize":40}');
+foreach (array_slice($candle->GetTestFormUpdates(), -2) as $index => $update) {
     $zoomSVG = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
     $zoomDocument = new DOMDocument();
     assertGatewayGauge(
         $zoomDocument->loadXML($zoomSVG, LIBXML_NONET) && str_contains($zoomSVG, 'data-time-slider="true"'),
         'Both pure synthetic SVG previews indicate the selected zoom setting.'
+    );
+    $slider = (new DOMXPath($zoomDocument))->query('//*[@data-time-slider]')->item(0);
+    assertGatewayGauge(
+        $slider->getAttribute($index === 0 ? 'height' : 'width') === ($index === 0 ? '32' : '40'),
+        'Independent draft slider sizes must follow the time axis in both previews.'
     );
 }
 assertGatewayGauge(
@@ -93,6 +103,7 @@ assertGatewayGauge(
     'Preview drafts must not load archives or persist the zoom setting.'
 );
 $candle->SetTestProperty('IPSViewEnableZoom', false);
+$candle->SetTestProperty('IPSViewZoomSliderSize', 0);
 assertGatewayGauge(
     str_contains(findGaugeFormElement($candleForm['elements'], 'VariableID')['onChange'], 'ECCA_UpdateBarPreviewFromForm')
     && findGaugeFormElement($candleForm['elements'], 'IPSViewRiseColor')['enabled'] === true,

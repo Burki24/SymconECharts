@@ -164,7 +164,7 @@ trait BoxplotPreview
             }
         }
         // Hover effects cannot be triggered inside the static SVG; explain that boundary.
-        return EChartsPreviewSourceCount::Append(
+        $svg = EChartsPreviewSourceCount::Append(
             $svg . '<text x="24" y="350" font-size="10" fill="' . $e($palette['muted']) . '">'
                 . $e($this->Translate('Hover effects are visible in the chart.')) . '</text></svg>',
             count($items),
@@ -173,6 +173,14 @@ trait BoxplotPreview
             $palette['muted'],
             696,
             333
+        );
+        return EChartsBarPreview::WithCategorySlider(
+            $svg,
+            $horizontal,
+            $this->BarPreviewValue($values, 'ZoomSliderSize', 'integer', $ipsView),
+            count($items),
+            count($allItems),
+            $palette
         );
     }
 }

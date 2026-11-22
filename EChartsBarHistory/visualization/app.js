@@ -142,6 +142,8 @@
         var chartWidth = Math.max(320, Number(chartElement.clientWidth) || 750);
         var chartHeight = Math.max(160, Number(chartElement.clientHeight) || 420);
         var compact = chartHeight < 280;
+        var automaticSliderSize = zoomController.sliderThickness(compact);
+        var zoomSliderSize = zoomController.sliderThickness(compact, style.zoomSliderSize);
         var displayedTitleSize = compact ? Math.min(titleFontSize, 14) : titleFontSize;
         var displayedLegendSize = compact
             ? echartsDesign.fontSizePercent(style.legendFontSizePercent, 10) : legendFontSize;
@@ -155,7 +157,7 @@
             var labelTime = model.range && Number(model.range.endTimestamp) * 1000 || Date.now();
             var timeLabelLength = formatTimestamp(labelTime, bar.timeAxisLabelFormat || 'auto').length;
             leftMargin = Math.min(chartWidth * 0.38, Math.max(48, 20 + timeLabelLength * axisFontSize * 0.65));
-            rightMargin = zoom ? 48 : 24;
+            rightMargin = zoom ? 48 + zoomSliderSize - automaticSliderSize : 24;
             // Keep space for the bars even when several units share a short tile.
             var axisMargin = Math.min(axisFontSize * 2 + 14, (chartHeight - gridTop) * 0.28);
             var extraAxes = Math.max(0, axisCounts.left - 1) + Math.max(0, axisCounts.right - 1);
@@ -171,12 +173,17 @@
             leftMargin = axisCounts.left > 0 ? 52 + axisOffsetStep * (axisCounts.left - 1) : 28;
             rightMargin = axisCounts.right > 0 ? 52 + axisOffsetStep * (axisCounts.right - 1) : 28;
             gridBottom = zoom ? (compact ? 42 : 70) : (compact ? 32 : 58);
+            if (zoom) {
+                var availableExtra = Math.max(0, Math.floor(chartHeight - gridTop - gridBottom - 24));
+                zoomSliderSize = Math.min(zoomSliderSize, automaticSliderSize + availableExtra);
+                gridBottom += zoomSliderSize - automaticSliderSize;
+            }
         }
         var plotWidth = chartWidth - leftMargin - rightMargin;
         var plotHeight = chartHeight - gridTop - gridBottom - 20;
         var timeTickCount = Math.max(2, Math.floor(horizontal ? plotHeight / (axisFontSize * 2) : plotWidth / (axisFontSize * 10)));
         var valueTickCount = Math.max(2, Math.floor(horizontal ? plotWidth / (axisFontSize * 6) : plotHeight / (axisFontSize * 2)));
-        var dataZoom = zoomController.timeAxisOptions(zoom, bootstrap.mode, compact ? 18 : 22, compact, horizontal);
+        var dataZoom = zoomController.timeAxisOptions(zoom, bootstrap.mode, compact ? 18 : 22, compact, horizontal, zoomSliderSize);
         if (horizontal && zoom) {
             dataZoom[1].top = gridTop;
             dataZoom[1].bottom = gridBottom;

@@ -23,6 +23,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsPreviewSourceCount;
+use SymconECharts\EChartsSliderSize;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
@@ -81,6 +82,7 @@ class EChartsBoxplot extends IPSModuleStrict
     private const MAXIMUM_TOTAL_POINTS = 10000;
     private const DESIGN_DEFAULTS = [
         'EChartsTheme'         => 'auto', 'Orientation' => 'vertical', 'ShowTooltip' => true,
+        'ZoomSliderSize'       => 0,
         'ShowGrid'             => true, 'ShowAxisLabels' => true, 'BoxWidth' => 40, 'BorderWidth' => 2, 'BoxOpacityPercent' => 70,
         'TitleFontSizePercent' => 100, 'AxisFontSizePercent' => 100, 'TitleColor' => -1, 'AxisColor' => -1, 'BorderColor' => -1,
         'MinBoxWidth'          => 1, 'BorderType' => 'solid', 'ShadowBlur' => 0, 'ShadowColor' => -1, 'ShadowOffsetX' => 0, 'ShadowOffsetY' => 0,
@@ -880,6 +882,7 @@ class EChartsBoxplot extends IPSModuleStrict
     private function IsValidDesign(string $prefix): bool
     {
         if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme')) || !$this->AnimationIsValid($prefix)
+            || !EChartsSliderSize::IsValid($this->ReadPropertyInteger($prefix . 'ZoomSliderSize'))
             || !in_array($this->ReadPropertyString($prefix . 'Orientation'), ['vertical', 'horizontal'], true)
             || !in_array($this->ReadPropertyString($prefix . 'BorderType'), ['solid', 'dashed', 'dotted'], true)
             || !in_array($this->ReadPropertyString($prefix . 'GridLineType'), ['solid', 'dashed', 'dotted'], true)

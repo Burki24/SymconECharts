@@ -122,6 +122,10 @@ zoomen; in IPSView wird das Mausrad gesondert verarbeitet. Beide Achsenausschnit
 bleiben bei einer Aktualisierung desselben Zeitraums erhalten und werden beim
 Wechsel des Zeitraums zurückgesetzt. Der Zoom ist im Kachel- und im
 unabhängigen IPSView-Designer getrennt abschaltbar.
+Mit **Reglerdicke (0 = automatisch)** bestimmen Sie die Höhe des X-Reglers
+und die Breite des Y-Reglers gemeinsam. Auf einem Touchgerät können Sie
+beispielsweise 32 px einstellen. Bei 0 verwendet die Anzeige wie bisher
+eine an die Diagrammgröße angepasste Dicke.
 Optional aktiviert die Bereichsauswahl zwei ECharts-Werkzeuge: Ein Rechteck
 markiert Punkte in der X/Y-Fläche, das zweite hebt die Auswahl auf. Die
 nutzbare Symbolgröße passt sich dabei der Kachel- oder Widgetgröße an. Die

@@ -75,8 +75,14 @@ foreach (['horizontal', 'vertical'] as $orientation) {
         'SVG category centers, not only the painted bar thickness, must move closer together.'
     );
 }
-$largeCategory->UpdateBarPreviewFromForm('{"Orientation":"horizontal","BarWidthPercent":20,"IPSViewUseTileDesign":false,"IPSViewOrientation":"horizontal","IPSViewBarWidthPercent":100}');
+$largeCategory->UpdateBarPreviewFromForm('{"Orientation":"horizontal","BarWidthPercent":20,"ZoomSliderSize":32,"IPSViewUseTileDesign":false,"IPSViewOrientation":"horizontal","IPSViewBarWidthPercent":100,"IPSViewZoomSliderSize":44}');
 $independentPreviews = array_map(static fn (array $update): string => base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true), array_slice($largeCategory->GetTestFormUpdates(), -2));
+foreach ([32, 44] as $output => $expectedSize) {
+    $previewDocument = new DOMDocument();
+    $previewDocument->loadXML($independentPreviews[$output]);
+    $slider = (new DOMXPath($previewDocument))->query('//*[@data-category-slider="vertical"]/*')->item(0);
+    assertGatewayGauge($slider instanceof DOMElement && $slider->getAttribute('width') === (string) $expectedSize, 'Independent draft category sliders must have their configured width.');
+}
 preg_match('/data-preview-sources="(\d+)\/100"/', $independentPreviews[0], $tileCount);
 preg_match('/data-preview-sources="(\d+)\/100"/', $independentPreviews[1], $ipsCount);
 assertGatewayGauge((int) $tileCount[1] > (int) $ipsCount[1], 'Independent preview density must use its own width, not the Tile width.');

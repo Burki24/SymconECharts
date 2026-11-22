@@ -9,7 +9,7 @@ const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const palette = { background: '#303236', text: '#F4F5F7', muted: '#969AA2', border: '#A5A9B0',
     track: '#44464A', accent: '#55CBB5', seriesColors: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de'] };
-function state(updated = false, reordered = false) {
+function state(sliderSize, updated = false, reordered = false) {
     const series = Array.from({ length: 32 }, (_, index) => ({
         id: 'variable-' + (10000 + index), variableID: 10000 + index,
         label: index < 2 ? 'Temperatur · gleicher Name' : 'Synthetischer Raum mit langem Namen ' + (index + 1),
@@ -20,25 +20,25 @@ function state(updated = false, reordered = false) {
     }));
     return { status: 'ready', chart: { family: 'time-series', theme: 'auto',
         chart: { title: '32 Reihen · 32.000 Archivpunkte', enableZoom: true,
-            design: { legendPosition: 'bottom' } },
+            design: { legendPosition: 'bottom', zoomSliderSize: sliderSize } },
         axes: [{ unit: '°C', position: 'left' }, { unit: '%', position: 'right' }],
         series: reordered ? series.reverse() : series, annotations: [],
         range: { key: 'day', dataMode: 'raw', startTimestamp: 1800000000, endTimestamp: 1800059940,
             pointLimitPerSeries: 1000, acceptLiveUpdates: false }, truncated: false } };
 }
-function page(mode) {
+function page(mode, sliderSize) {
     const module = 'EChartsTimeSeries';
     const compressed = fs.existsSync(path.join(root, 'libs/echarts-startup.js'));
-    const bootstrap = { mode, state: compressed ? null : state(),
+    const bootstrap = { mode, state: compressed ? null : state(sliderSize),
         translations: JSON.parse(read(module + '/locale.json')).translations.de,
         options: { tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: { auto: palette },
-            ...(compressed ? { compressedStateGzipBase64: gzipSync(JSON.stringify(state())).toString('base64') } : {}) } };
+            ...(compressed ? { compressedStateGzipBase64: gzipSync(JSON.stringify(state(sliderSize))).toString('base64') } : {}) } };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px',
         VIEWPORT_CONTENT: 'width=device-width, initial-scale=1', DOCUMENT_TITLE: 'TimeSeries synthetic browser fixture',
         VISUALIZATION_THEME: ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-muted:#969aa2;--symc-border:#a5a9b0}',
         MODULE_STYLE: read(module + '/visualization/style.css'), IPSVIEW_STYLE: '',
         INTERACTION_SCRIPT: '<script>' + read('libs/helper/visualization/interaction.min.js') + '</script>',
-        ECHARTS_SCRIPT: read('libs/echarts/6.1.0/echarts.cartesian.min.js'), ECHARTS_THEME_SCRIPT: '',
+        ECHARTS_SCRIPT: '<script src="/cartesian.js"></script>', ECHARTS_THEME_SCRIPT: '',
         ECHARTS_DESIGN_SCRIPT: read('libs/echarts-design.js') + '\n' + read('libs/echarts-zoom.js')
             + '\n' + read('libs/echarts-pattern.js') + '\n' + read('libs/echarts-series-selection.js')
             + '\n' + read('libs/echarts-archive-stack.js') + (compressed ? '\n' + read('libs/echarts-startup.js') : ''),
@@ -51,7 +51,7 @@ function page(mode) {
         function select(){chart().dispatchAction({type:'legendToggleSelect',name:'variable-10000'});
         chart().dispatchAction({type:'legendScroll',scrollDataIndex:8});
         chart().dispatchAction({type:'dataZoom',dataZoomIndex:0,start:20,end:80});report();}
-        function refresh(){window.handleMessage(${JSON.stringify(state(true, true))});report();}`;
+        function refresh(){window.handleMessage(${JSON.stringify(state(sliderSize, true, true))});report();}`;
     html = html.replace('</head>', '<style>.echarts-timeseries-root{height:calc(100% - 38px)}</style></head>');
     html = html.replace('</body>', '<div style="position:absolute;left:12px;bottom:4px;z-index:5;font:10px Arial">'
         + '<button onclick="select()">Auswahl / Zoom</button><button onclick="refresh()">Aktualisieren / umsortieren</button>'
@@ -63,12 +63,24 @@ function page(mode) {
 }
 http.createServer((req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
+    if (url.pathname === '/cartesian.js') {
+        res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
+        res.end(read('libs/echarts/6.1.0/echarts.cartesian.min.js'));
+        return;
+    }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon')); return; }
+    if (url.pathname === '/chart') {
+        const size = Number(url.searchParams.get('sliderSize'));
+        res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon',
+            Number.isInteger(size) && size >= 0 && size <= 64 ? size : 0));
+        return;
+    }
     res.end('<!doctype html><html lang="de"><head><title>TimeSeries · lokale Browserprüfung</title></head>'
         + '<body style="background:#101114;color:white;font:16px Arial;margin:18px"><h1 style="font-size:20px">'
         + 'TimeSeries · 32 Reihen / 32.000 Punkte</h1><div style="display:flex;gap:18px;flex-wrap:wrap">'
         + '<section><h2>Kachel</h2><iframe title="Kachel" src="/chart?mode=symcon" style="border:0;width:400px;height:520px"></iframe></section>'
         + '<section><h2>IPSView</h2><iframe title="IPSView" src="/chart?mode=ipsview" style="border:0;width:720px;height:520px"></iframe></section>'
         + '</div></body></html>');
-}).listen(8816, '127.0.0.1', () => console.log('TimeSeries browser fixture: http://127.0.0.1:8816'));
+}).listen(Number(process.env.TIME_SERIES_BROWSER_PORT ?? 8816), '127.0.0.1', function () {
+    console.log('TimeSeries browser fixture: http://127.0.0.1:' + this.address().port);
+});

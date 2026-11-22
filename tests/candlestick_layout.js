@@ -200,9 +200,10 @@ for (const orientation of ['vertical', 'horizontal']) {
         statistics: i === 0 ? [-20, 60, -30, 80] : (i % 4 === 3 ? null : [10, 15, 8, 18])}));
     const zoomModel = {...model, range: {key:'7d',startTimestamp:1000,endTimestamp:2000},
         candlestick: {...model.candlestick, variableID: 12345, interval:'hour', data,
-            style: {...model.candlestick.style, enableZoom:true, orientation}}};
+            style: {...model.candlestick.style, enableZoom:true, orientation, zoomSliderSize:36}}};
     const engine = nativeWindow.echarts.init(null, null, {renderer:'svg',ssr:true,width:900,height:500});
     const rendered = render(zoomModel, 'ipsview', true, 900, engine);
+    assert.equal(rendered.option.dataZoom[1][orientation === 'horizontal' ? 'width' : 'height'], 36);
     assert.equal(rendered.option.dataZoom.length, 2, 'Optional time zoom must have inside and slider controls.');
     assert.equal(rendered.option.dataZoom[0][orientation === 'horizontal' ? 'yAxisIndex' : 'xAxisIndex'], 0);
     assert.equal(rendered.option.dataZoom[0].filterMode, 'none');
@@ -315,7 +316,9 @@ for (const mode of ['symcon','ipsview']) {
     for (const orientation of ['vertical','horizontal']) {
         for (const count of [2,4]) {
             const comparison=panelModel(count,orientation);
+            comparison.candlestick.style.zoomSliderSize = 40;
             const rendered=render(comparison,mode,true,1400);
+            assert.equal(rendered.option.dataZoom[1][orientation === 'horizontal' ? 'width' : 'height'], 40);
             assert.equal(rendered.rootElement.style.top,mode==='symcon'?'58px':'0px');
             assert.equal(rendered.chartElement.style.top,'0px','Panel scrolling is clipped below the fixed tile header.');
             assert.equal(rendered.option.grid.length,count);

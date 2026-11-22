@@ -56,6 +56,8 @@ Kachel, IPSView und beide Vorschauen verwenden dieselbe vollständige Rechnung.
 
 ## Große Bilanzen und Kategoriennavigation
 
+Mit **Reglerdicke (0 = automatisch)** im Kacheldesigner stellst Du die Dicke der Kategoriennavigation auf 1 bis 64 Pixel ein. 0 verwendet die bisherige Automatik (12 Pixel). Probiere auf dem Handy beispielsweise 32 Pixel. Im IPSView-Designer kannst Du bei eigenem Design einen anderen Wert wählen.
+
 Bei Platzmangel zeigt das Diagramm einen verschiebbaren Ausschnitt mit einer
 horizontalen Kategoriennavigation. Sichtbare Kategorien passen sich an die
 Kachel-/Widgetbreite, Balkenbreite, Schriftgröße und Wertbeschriftung an.

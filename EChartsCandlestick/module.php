@@ -22,6 +22,7 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsSliderSize;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsStartupState;
 use SymconECharts\EChartsTransientRefresh;
@@ -43,6 +44,7 @@ require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsSliderSize.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsStartupState.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
@@ -77,6 +79,7 @@ class EChartsCandlestick extends IPSModuleStrict
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
     private const DESIGN_DEFAULTS = [
+        'ZoomSliderSize'           => 0,
         'EChartsTheme'             => 'auto', 'Orientation' => 'vertical', 'ShowTooltip' => true,
         'ShowGrid'                 => true, 'ShowAxisLabels' => true, 'CandleWidth' => 40, 'BorderWidth' => 2, 'CandleOpacityPercent' => 70,
         'TitleFontSizePercent'     => 100, 'AxisFontSizePercent' => 100, 'TitleColor' => -1, 'AxisColor' => -1, 'BorderColor' => -1,
@@ -846,7 +849,8 @@ class EChartsCandlestick extends IPSModuleStrict
 
     private function IsValidDesign(string $prefix): bool
     {
-        if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme')) || !$this->AnimationIsValid($prefix)
+        if (!EChartsSliderSize::IsValid($this->ReadPropertyInteger($prefix . 'ZoomSliderSize'))
+            || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme')) || !$this->AnimationIsValid($prefix)
             || !in_array($this->ReadPropertyString($prefix . 'Orientation'), ['vertical', 'horizontal'], true)
             || !in_array($this->ReadPropertyString($prefix . 'BorderType'), ['solid', 'dashed', 'dotted'], true)
             || !in_array($this->ReadPropertyString($prefix . 'GridLineType'), ['solid', 'dashed', 'dotted'], true)

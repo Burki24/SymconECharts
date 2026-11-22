@@ -132,6 +132,8 @@ declare(strict_types=1);
         $chart->SetTestProperty('IPSViewUseTileDesign', false);
         $chart->SetTestProperty('IPSViewBubbleRangeMode', 'manual');
         $chart->SetTestProperty('IPSViewBubbleMaximum', 255.0);
+        $chart->SetTestProperty('ZoomSliderSize', 32);
+        $chart->SetTestProperty('IPSViewZoomSliderSize', 44);
         $chart->SetTestProperty('BubbleRangeMode', 'manual');
         $chart->SetTestProperty('BubbleMaximum', 100.0);
         $chart->ApplyChanges();
@@ -141,6 +143,7 @@ declare(strict_types=1);
             assertGatewayGauge(
                 $boot['state']['status'] === 'ready' && count($boot['state']['chart']['groups']) === 16
                 && (float) $boot['state']['chart']['scatter']['style']['bubbleMaximum'] === ($index === 0 ? 100.0 : 255.0)
+                && $boot['state']['chart']['scatter']['style']['zoomSliderSize'] === ($index === 0 ? 32 : 44)
                 && strlen($html) < SYMCON_OUTPUT_BUFFER_LIMIT,
                 'Both outputs and published WebContent retain groups and independent original designs under 1 MiB.'
             );

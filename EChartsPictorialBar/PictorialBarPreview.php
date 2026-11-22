@@ -292,7 +292,14 @@ trait PictorialBarPreview
                     . $e($text) . '</text>';
             }
         }
-        return $svg . '</svg>';
+        return EChartsBarPreview::WithCategorySlider(
+            $svg . '</svg>',
+            $horizontal,
+            $this->BarPreviewValue($values, 'ZoomSliderSize', 'integer', $ipsView),
+            count($items),
+            $totalCount,
+            $palette
+        );
     }
 
     private function PictorialBarPreviewColor(array $values, bool $ipsView, float $value): string

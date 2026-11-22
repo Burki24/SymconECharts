@@ -376,6 +376,19 @@
                     "items": [
                         {
                             "type": "NumberSpinner",
+                            "name": "ZoomSliderSize",
+                            "caption": "Slider thickness (0 = automatic)",
+                            "minimum": 0,
+                            "maximum": 64,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
                             "name": "TitleFontSizePercent",
                             "caption": "Title size",
                             "minimum": 50,

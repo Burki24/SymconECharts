@@ -107,14 +107,15 @@
         var top = titleLayout.contentTop + 14;
         var left = style.showSourceLabels === false ? (compact ? 14 : 24) : Math.min(width * 0.36, Math.max(60, axisFont * 13));
         var scrollRows = rows.length > 8;
-        var right = (compact ? 14 : 24) + (scrollRows ? 28 : 0);
+        var rowSliderWidth = zoom.sliderThickness(compact, style.zoomSliderSize, 12);
+        var right = (compact ? 14 : 24) + (scrollRows ? 16 + rowSliderWidth : 0);
         var sliderBottom = 12;
         var timeFormat = style.timeLabelFormat || 'auto';
         var dateOnly = timeFormat === 'date' || (timeFormat === 'auto' && model.range.endTimestamp - model.range.startTimestamp > 172800);
         var axisMargin = style.axisLabelMargin === undefined ? 12 : Number(style.axisLabelMargin);
         var lineHeight = Math.ceil(axisFont * 1.3);
         var axisExtent = style.showTimeLabels !== false ? lineHeight * (timeFormat === 'dateTime' ? 2 : 1) + axisMargin : (style.showAxisTicks === true ? 5 : 0);
-        var bottom = axisExtent + 10 + (style.enableZoom !== false ? zoom.sliderThickness(compact) + 24 : 0);
+        var bottom = axisExtent + 10 + (style.enableZoom !== false ? zoom.sliderThickness(compact, style.zoomSliderSize) + 24 : 0);
         var plotHeight = Math.max(1, height - top - bottom);
         var visibleRows = scrollRows ? Math.max(1, Math.min(8, Math.floor(plotHeight / Math.max(28, axisFont * 1.8, labelFont * 1.8)))) : rows.length;
         var firstRow = rowAnchor ? rows.findIndex(function (row) {return row.id === rowAnchor;}) : 0;
@@ -129,7 +130,7 @@
                     itemStyle: {color: segment.value === null ? style.unknownColor || colors.muted : segment.color || colorList[colorIndex]}});
             });
         });
-        var dataZoom = zoom.timeAxisOptions(style.enableZoom !== false, bootstrap.mode, sliderBottom, compact);
+        var dataZoom = zoom.timeAxisOptions(style.enableZoom !== false, bootstrap.mode, sliderBottom, compact, false, style.zoomSliderSize);
         dataZoom.forEach(function (entry) {
             entry.id = entry.type === 'inside' ? 'state-time-inside' : 'state-time-slider';
             // Neither endpoint has to lie inside the zoom window for an interval to be visible.
@@ -138,7 +139,7 @@
         });
         if (scrollRows) {
             dataZoom.push({id: 'state-row-scroll', type: 'slider', yAxisIndex: 0, orient: 'vertical',
-                right: 6, top: top, height: plotHeight, width: 12,
+                right: 6, top: top, height: plotHeight, width: rowSliderWidth,
                 startValue: firstRow, endValue: Math.min(rows.length - 1, firstRow + visibleRows - 1),
                 filterMode: 'filter', zoomLock: true, brushSelect: false,
                 showDataShadow: false, showDetail: false});

@@ -144,7 +144,7 @@ declare(strict_types=1);
         {
             throw new RuntimeException('Waterfall preview must not request Gateway data.');
         };
-        $module->UpdateBarPreviewFromForm(json_encode(['Sources' => $draftRows, 'Title' => '<Unsaved>', 'TotalLabel' => '<All sources>', 'ShowValues' => true], JSON_THROW_ON_ERROR));
+        $module->UpdateBarPreviewFromForm(json_encode(['Sources' => $draftRows, 'Title' => '<Unsaved>', 'TotalLabel' => '<All sources>', 'ShowValues' => true, 'ZoomSliderSize' => 44], JSON_THROW_ON_ERROR));
         $images = array_values(array_filter($module->GetTestFormUpdates(), static fn (array $update): bool => in_array($update['Field'], ['BarPreview', 'IPSViewBarPreview'], true) && $update['Parameter'] === 'image'));
         assertGatewayGauge(count($images) >= 2, 'Both bounded Waterfall previews must remain available.');
         foreach (array_slice($images, -2) as $image) {
@@ -163,7 +163,8 @@ declare(strict_types=1);
                 'The preview must disclose five of one hundred sources, omitted steps and the true complete total/range/unit/precision.'
             );
             assertGatewayGauge(
-                $xpath->query('//*[local-name()="rect"]')->length <= 8,
+                $xpath->query('//*[@data-step-id]')->length === 6
+                && $xpath->query('//*[@data-category-slider="horizontal"]/*')->item(0)?->getAttribute('height') === '44',
                 'The preview must remain a bounded sample instead of squeezing all one hundred bars.'
             );
         }

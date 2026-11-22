@@ -7,6 +7,7 @@ namespace SymconECharts;
 use Burki24\SymconModuleHelper\SVGPreviewHelper;
 
 require_once __DIR__ . '/EChartsSourceIdentity.php';
+require_once __DIR__ . '/EChartsSliderSize.php';
 require_once __DIR__ . '/EChartsVariablePresentation.php';
 
 /** Shared SVG primitives and bounded source resolution; chart geometry stays with each module. */
@@ -142,6 +143,32 @@ final class EChartsBarPreview
         }
 
         return $svg;
+    }
+
+    /** Draw the visible category window beside the bounded preview when additional categories are available. */
+    public static function WithCategorySlider(string $svg, bool $vertical, int $configured, int $visible, int $total, array $palette): string
+    {
+        if ($visible < 1 || $visible >= $total) {
+            return $svg;
+        }
+        $size = EChartsSliderSize::Resolve($configured, 12);
+        $width = 720 + ($vertical ? $size + 8 : 0);
+        $height = 360 + ($vertical ? 0 : $size + 8);
+        $svg = str_replace(
+            ['width="720" height="360"', 'viewBox="0 0 720 360"'],
+            ['width="' . $width . '" height="' . $height . '"', 'viewBox="0 0 ' . $width . ' ' . $height . '"'],
+            $svg
+        );
+        $trackLength = $vertical ? 240 : 560;
+        $windowLength = max(1, (int) round($trackLength * $visible / $total));
+        $position = $vertical ? 'x="724" y="60"' : 'x="80" y="364"';
+        $across = $vertical ? 'width' : 'height';
+        $along = $vertical ? 'height' : 'width';
+        $rect = '<rect ' . $position . ' ' . $across . '="' . $size . '" ' . $along . '="';
+        $slider = '<g data-category-slider="' . ($vertical ? 'vertical' : 'horizontal') . '">'
+            . $rect . $trackLength . '" fill="' . self::E($palette['track']) . '"/>'
+            . $rect . $windowLength . '" fill="' . self::E($palette['seriesColors'][0]) . '" fill-opacity="0.45"/></g>';
+        return substr($svg, 0, -strlen('</svg>')) . $slider . '</svg>';
     }
 
     public static function E(string $value): string

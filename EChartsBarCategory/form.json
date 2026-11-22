@@ -343,6 +343,19 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "NumberSpinner",
+                            "name": "ZoomSliderSize",
+                            "caption": "Slider thickness (0 = automatic)",
+                            "minimum": 0,
+                            "maximum": 64,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "Select",
                             "name": "BarFillMode",
                             "caption": "Bar fill",
@@ -582,6 +595,19 @@
                                     "maximum": 100,
                                     "suffix": "%",
                                     "width": "170px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewZoomSliderSize",
+                                    "caption": "Slider thickness (0 = automatic)",
+                                    "minimum": 0,
+                                    "maximum": 64,
+                                    "suffix": "px"
                                 }
                             ]
                         },

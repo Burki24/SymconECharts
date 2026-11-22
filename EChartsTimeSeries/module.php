@@ -23,6 +23,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsLabelDesign;
+use SymconECharts\EChartsSliderSize;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsStartupState;
 use SymconECharts\EChartsTimeSeriesDesign;
@@ -51,6 +52,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
+require_once __DIR__ . '/../libs/EChartsSliderSize.php';
 require_once __DIR__ . '/../libs/EChartsStartupState.php';
 require_once __DIR__ . '/../libs/EChartsTimeSeriesDesign.php';
 require_once __DIR__ . '/../libs/EChartsUnitAxes.php';
@@ -105,7 +107,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const LEGEND_POSITIONS = ['top', 'bottom', 'hidden'];
     private const DESIGN_FORM_FIELDS = [
         'Title', 'Sources', 'Annotations', 'Range', 'CustomRangeValue', 'CustomRangeUnit',
-        'TimeAxisLabelFormat', 'EChartsTheme', 'LegendPosition', 'EnableZoom',
+        'TimeAxisLabelFormat', 'EChartsTheme', 'LegendPosition', 'EnableZoom', 'ZoomSliderSize',
         'AnimationEnabled', 'AnimationDuration', 'AnimationDurationUpdate',
         'AnimationEasing', 'AnimationEasingUpdate', 'AnimationDelay', 'AnimationDelayUpdate',
         'GapDetectionMode', 'GapThresholdMinutes',
@@ -114,7 +116,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         'AreaOpacityPercent', 'ShowGrid', 'ShowVerticalGrid', 'ShowXAxis', 'ShowYAxis', 'ValueAxisSpacing',
         'TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent',
         'TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'VerticalGridColor', 'ValueColor',
-        'IPSViewUseTileDesign', 'IPSViewEChartsTheme', 'IPSViewLegendPosition', 'IPSViewEnableZoom',
+        'IPSViewUseTileDesign', 'IPSViewEChartsTheme', 'IPSViewLegendPosition', 'IPSViewEnableZoom', 'IPSViewZoomSliderSize',
         'IPSViewAnimationEnabled', 'IPSViewAnimationDuration', 'IPSViewAnimationDurationUpdate',
         'IPSViewAnimationEasing', 'IPSViewAnimationEasingUpdate',
         'IPSViewAnimationDelay', 'IPSViewAnimationDelayUpdate',
@@ -131,6 +133,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const DESIGN_PROPERTY_TYPES = [
         'LegendPosition'          => 'string',
         'EnableZoom'              => 'boolean',
+        'ZoomSliderSize'          => 'integer',
         'AnimationEnabled'        => 'boolean',
         'AnimationDuration'       => 'integer',
         'AnimationDurationUpdate' => 'integer',
@@ -190,6 +193,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
             $this->RegisterPropertyString('LegendPosition', 'top');
             $this->RegisterPropertyBoolean('EnableZoom', true);
+            $this->RegisterPropertyInteger('ZoomSliderSize', 0);
             $this->RegisterAnimationProperties('', false, 350, 500);
             $this->RegisterPropertyInteger('LineWidthPercent', 100);
             $this->RegisterPropertyBoolean('SmoothLines', false);
@@ -240,7 +244,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                     'AnimationDuration'                                                                            => 350,
                     'AnimationDurationUpdate'                                                                      => 500,
                     'AnimationEasing', 'AnimationEasingUpdate'                                                     => 'cubicInOut',
-                    'AnimationDelay', 'AnimationDelayUpdate', 'ValueAxisSpacing'                                   => 0,
+                    'AnimationDelay', 'AnimationDelayUpdate', 'ValueAxisSpacing', 'ZoomSliderSize'                 => 0,
                     default                                                                                        => true
                 };
                 match ($type) {
@@ -360,7 +364,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                     $this->PreviewSeries(),
                     $this->ReadPropertyString('Title'),
                     $this->ReadPropertyString('EChartsTheme'),
-                    $this->ReadTimeSeriesDesign() + ['chartBackgroundColor' => $this->EffectiveChartBackgroundColor(false)],
+                    $this->ReadTimeSeriesDesign() + ['chartBackgroundColor' => $this->EffectiveChartBackgroundColor(false),
+                        'enableZoom'                                        => $this->ReadPropertyBoolean('EnableZoom')],
                     annotations: $this->PreviewAnnotations(),
                     timeAxisLabelFormat: $this->ReadPropertyString('TimeAxisLabelFormat'),
                     sourceCountCaption: $this->Translate('Preview shows %d of %d sources'),
@@ -374,7 +379,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                     $this->PreviewSeries(),
                     $this->ReadPropertyString('Title'),
                     $this->EffectiveIPSViewTheme(),
-                    $this->EffectiveIPSViewDesign() + ['chartBackgroundColor' => $this->EffectiveChartBackgroundColor(true)],
+                    $this->EffectiveIPSViewDesign() + ['chartBackgroundColor' => $this->EffectiveChartBackgroundColor(true),
+                        'enableZoom'                                          => $this->EffectiveIPSViewEnableZoom()],
                     $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                     EChartsIPSViewBackground::Color($this->ReadPropertyInteger('IPSViewBackgroundColor')),
                     $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'),
@@ -1734,6 +1740,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             'showXAxis'             => $this->ReadPropertyBoolean($prefix . 'ShowXAxis'),
             'showYAxis'             => $this->ReadPropertyBoolean($prefix . 'ShowYAxis'),
             'valueAxisSpacing'      => $this->ReadPropertyInteger($prefix . 'ValueAxisSpacing'),
+            'zoomSliderSize'        => $this->ReadPropertyInteger($prefix . 'ZoomSliderSize'),
             'titleFontSizePercent'  => $this->ReadPropertyInteger($prefix . 'TitleFontSizePercent'),
             'legendFontSizePercent' => $this->ReadPropertyInteger($prefix . 'LegendFontSizePercent'),
             'axisFontSizePercent'   => $this->ReadPropertyInteger($prefix . 'AxisFontSizePercent'),
@@ -1751,6 +1758,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     private function TimeSeriesDesignFromFormValues(array $values, string $prefix = ''): array
     {
         $design = $this->ReadTimeSeriesDesign($prefix);
+        $design['enableZoom'] = (bool) ($values[$prefix . 'EnableZoom'] ?? $this->ReadPropertyBoolean($prefix . 'EnableZoom'));
         foreach ([
             'LegendPosition'          => 'legendPosition',
             'LineWidthPercent'        => 'lineWidthPercent',
@@ -1766,6 +1774,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             'ShowXAxis'               => 'showXAxis',
             'ShowYAxis'               => 'showYAxis',
             'ValueAxisSpacing'        => 'valueAxisSpacing',
+            'ZoomSliderSize'          => 'zoomSliderSize',
             'TitleFontSizePercent'    => 'titleFontSizePercent',
             'LegendFontSizePercent'   => 'legendFontSizePercent',
             'AxisFontSizePercent'     => 'axisFontSizePercent',
@@ -2062,6 +2071,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             && EChartsLabelDesign::IsValidPosition($this->ReadPropertyString($prefix . 'ValueLabelPosition'), EChartsLabelDesign::CARTESIAN_POSITIONS)
             && EChartsLabelDesign::IsValidDistance($this->ReadPropertyInteger($prefix . 'ValueLabelDistance'))
             && EChartsValueAxisLayout::IsValidSpacing($this->ReadPropertyInteger($prefix . 'ValueAxisSpacing'))
+            && EChartsSliderSize::IsValid($this->ReadPropertyInteger($prefix . 'ZoomSliderSize'))
             && $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent') >= 0
             && $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent') <= 100
             && $this->IsValidTimeSeriesTypography($prefix);
