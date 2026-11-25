@@ -51,7 +51,7 @@ function project(initialState, params) {
         }));
         // Use the actual PHP projection, never a second browser-fixture implementation.
         const projected = JSON.parse(execFileSync('php', ['-r',
-            'require "EChartsRadar/RadarModel.php"; $v=json_decode(stream_get_contents(STDIN),true,512,JSON_THROW_ON_ERROR); echo json_encode(SymconECharts\\RadarModel::Build($v[0],$v[1],$v[2],null,[],true), JSON_THROW_ON_ERROR);'],
+            'require "EChartsRadar/RadarModel.php"; $v=json_decode(stream_get_contents(STDIN),true,512,JSON_THROW_ON_ERROR); echo json_encode(eCharts\\RadarModel::Build($v[0],$v[1],$v[2],null,[],true), JSON_THROW_ON_ERROR);'],
             {cwd: root, input: JSON.stringify([axes, sources, values]), encoding: 'utf8'}));
         radar.axes = projected.axes;
         radar.data = projected.data.map((group, i) => ({...group, initiallyVisible: i < 4}));

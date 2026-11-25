@@ -5,7 +5,7 @@ Die Breite jeder Verbindung entspricht dem aktuellen Wert einer ausgewählten
 Integer- oder Float-Variable. Das Modul bietet eine native Symcon-Kachel und
 optional ein unabhängig gestaltbares IPSView-HTML-Widget.
 
-Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+Installation: Im **Symcon-Modulstore** nach **eCharts** suchen.
 [Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der

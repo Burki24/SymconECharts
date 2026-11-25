@@ -168,7 +168,7 @@ ECharts-Fehler; sie wird nicht als behoben ausgegeben.
 
 Die erste öffentliche Beta wurde durch den Eigentümer veröffentlicht und am
 03.11.2026 in der
-[Community angekündigt](https://community.symcon.de/t/beta-modul-symconecharts-nachfolger-von-jslive-charts/144844).
+[Community angekündigt](https://community.symcon.de/t/144844).
 Die damalige Einreichung ist kein offener Arbeitsschritt mehr. Dieser Bericht
 belegt seine konkrete Migrationstestebene und ersetzt keine Abnahme späterer
 Änderungen. Aktueller Status: [Beta-Unterlagen](BETA_STORE.md). Tatsächliche

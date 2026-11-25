@@ -43,7 +43,7 @@ function render(model, width = 800, height = 420, mode = 'symcon', fetchImpl = n
         SYMC_VISUALIZATION: {
             mode, state: { status: 'ready', chart: model }, translations: {},
             options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0,
-                heatmapStatePath: '/hook/SymconECharts/state/5000/0123456789abcdef0123456789abcdef' }
+                heatmapStatePath: '/hook/eCharts/state/5000/0123456789abcdef0123456789abcdef' }
         },
         echarts: { init: () => chart },
         location: { protocol: 'https:', host: 'symcon.example.test' },
@@ -368,7 +368,7 @@ async function verifyNavigation() {
         return new Promise(resolve => { completeOldPeriod = resolve; });
     });
     switched.window.location = {href: 'about:blank'};
-    switched.window.SymconEChartsPeriodSelection = {withPeriod(path) {
+    switched.window.eChartsPeriodSelection = {withPeriod(path) {
         return new URL(path + '&period=1w', 'https://opaque.example').href;
     }};
     switched.window.handleMessage({status: 'ready', viewPeriod: '1w', chart: datedModel});

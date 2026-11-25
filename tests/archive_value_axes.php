@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsUnitAxes;
-use SymconECharts\EChartsValueAxisLayout;
+use eCharts\EChartsUnitAxes;
+use eCharts\EChartsValueAxisLayout;
 
 require_once __DIR__ . '/../libs/EChartsUnitAxes.php';
 require_once __DIR__ . '/../libs/EChartsValueAxisLayout.php';

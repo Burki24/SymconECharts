@@ -94,7 +94,7 @@ return {case:input.case,width:input.width,height:input.height,variant:input.vari
 var out=document.createElement('pre');out.id='progress-reference';out.textContent=JSON.stringify({errors:window.errors,records:records.slice(0,layoutCount),fills:fills});document.body.appendChild(out);
 },1000);
 })().catch(function(e){window.errors.push(String(e));});`;
-const directory=fs.mkdtempSync(path.join(os.tmpdir(),'SymconECharts-progress-reference-')),html=path.join(directory,'reference.html');
+const directory=fs.mkdtempSync(path.join(os.tmpdir(),'eCharts-progress-reference-')),html=path.join(directory,'reference.html');
 fs.writeFileSync(html,'<!doctype html><html><head><meta charset="utf-8"><style>'+css+'</style></head><body style="text-align:center"><script>'+engine+'</script><script>'+script.replace(/<\/script/gi,'<\\/script')+'</script></body></html>');
 const result=cp.spawnSync(browser,['--headless=new','--disable-gpu','--no-first-run','--no-default-browser-check','--host-resolver-rules=MAP * ~NOTFOUND',
     '--user-data-dir='+path.join(directory,'profile'),'--virtual-time-budget=5000','--dump-dom',pathToFileURL(html).href],{encoding:'utf8',windowsHide:true,maxBuffer:16777216,timeout:45000});

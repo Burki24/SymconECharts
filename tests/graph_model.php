@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\GraphModel;
+use eCharts\GraphModel;
 
 require_once dirname(__DIR__) . '/libs/GraphModel.php';
 

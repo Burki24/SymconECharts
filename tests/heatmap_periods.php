@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsDataProtocol;
+use eCharts\EChartsDataProtocol;
 
 // Real Heatmap/Gateway with synthetic Kernel archives. No installation or archive writes.
 (static function (): void
@@ -81,7 +81,7 @@ use SymconECharts\EChartsDataProtocol;
                     }
                 }
                 $tile = $chart->GetVisualizationTile();
-                preg_match('#/hook/SymconECharts/state/5000/([a-f0-9]{32})#', $tile, $channel);
+                preg_match('#/hook/eCharts/state/5000/([a-f0-9]{32})#', $tile, $channel);
                 foreach (['tile', 'ipsview'] as $output) {
                     foreach ([1, 0] as $offset) {
                         $request = ['DataID' => '{E4749B72-912B-E3E3-1C57-D19019FFDD84}'] + EChartsDataProtocol::CreateRequest('ipsview.state', [

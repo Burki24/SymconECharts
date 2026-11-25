@@ -1,5 +1,5 @@
 {
-    "format": "de.burki24.symconecharts.tree",
+    "format": "de.burki24.echarts.tree",
     "formatVersion": "1.0",
     "rootId": "network",
     "nodes": [

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\TreeHealth;
+use eCharts\TreeHealth;
 
 require_once dirname(__DIR__) . '/EChartsTreeSystemHealth/TreeHealth.php';
 

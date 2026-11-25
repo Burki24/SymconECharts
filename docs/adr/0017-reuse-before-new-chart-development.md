@@ -39,14 +39,14 @@ Grenzen:
 1. Ist die Fähigkeit an genau einen fachlichen Chartvertrag gebunden, bleibt
    sie im zuständigen Gerätemodul.
 2. Ist eine vorhandene Funktion semantisch kompatibel und innerhalb von
-   SymconECharts wiederverwendbar, wird sie vor oder zusammen mit ihrer
+   eCharts wiederverwendbar, wird sie vor oder zusammen mit ihrer
    Wiederverwendung in einen klar abgegrenzten projektspezifischen Baustein
    direkt unter `libs` zentralisiert. Die fertige Chart-Implementierung dient
    dabei als belegte Ausgangsbasis; öffentliche Properties, persistierte
    Formate und sichtbares Verhalten bleiben erhalten.
 3. Ist eine ECharts-unabhängige Fähigkeit voraussichtlich auch für andere
    Symcon-Module oder Repositories nützlich, wird sie in
-   `Symcon_ModuleHelper` zentral entwickelt. SymconECharts übernimmt sie
+   `Symcon_ModuleHelper` zentral entwickelt. eCharts übernimmt sie
    anschließend ausschließlich über `.helper-sync.json` nach `libs/helper`.
    Eine lokale Änderung der synchronisierten Kopie ist ausgeschlossen.
 

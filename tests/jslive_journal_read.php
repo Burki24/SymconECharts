@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/EChartsJSLiveJournalView.php';
 
-use SymconECharts\EChartsImportJson;
-use SymconECharts\EChartsJSLiveJournal;
-use SymconECharts\EChartsJSLiveJournalView;
+use eCharts\EChartsImportJson;
+use eCharts\EChartsJSLiveJournal;
+use eCharts\EChartsJSLiveJournalView;
 
 function journalReadAssert(bool $ok, string $message): void
 {
@@ -37,6 +37,9 @@ function journalReadEntry(int $sequence, string $payload = ''): array
 $journal = ['version' => 1, 'entries' => []];
 for ($i = 1; $i <= 40; ++$i) {
     [$key, $entry] = journalReadEntry($i, str_repeat('synthetic private model ', 1600));
+    if ($i === 1) {
+        $entry['marker'] = \eCharts\EChartsIdentity::LegacyProductName() . ':JSLive:1:' . hash('sha256', $entry['identity']) . ':' . $key;
+    }
     $journal['entries'][$key] = $entry;
 }
 $journal['entries'] = array_reverse($journal['entries'], true);
@@ -49,6 +52,7 @@ do {
     $page = EChartsJSLiveJournalView::Page($journal, $offset, 7, $revision);
     EChartsJSLiveJournalView::ValidatePage($page, $offset, 7, $revision);
     $encoded = EChartsImportJson::Canonical($page);
+    journalReadAssert(!str_contains($encoded, \eCharts\EChartsIdentity::LegacyProductName() . ':JSLive:1:'), 'Public pages must display current ownership identifiers.');
     journalReadAssert(
         strlen($encoded) < 131072 && strlen(json_encode($encoded, JSON_THROW_ON_ERROR)) < 1048576,
         'Page exceeds its own or the native encoded return budget.'

@@ -179,4 +179,4 @@ foreach ($commands as [$label, $command]) {
     }
 }
 
-echo "All SymconECharts tests passed.\n";
+echo "All eCharts tests passed.\n";

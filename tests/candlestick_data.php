@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/EChartsCandlestick/CandlestickData.php';
 
-use SymconECharts\CandlestickData;
+use eCharts\CandlestickData;
 
 function candleAssert(bool $condition, string $message): void
 {

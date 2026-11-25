@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 use InvalidArgumentException;
 use stdClass;
 use Throwable;
 
 require_once __DIR__ . '/EChartsImportJson.php';
+require_once __DIR__ . '/EChartsIdentity.php';
 require_once __DIR__ . '/TreeHierarchy.php';
 
 /** Inert Tree 1.0 documents. Complete validation always precedes view projection. */
@@ -17,6 +18,24 @@ final class EChartsTreeJSON
     public const MAXIMUM_BYTES = 1048576;
     public const MAXIMUM_UPLOAD_BYTES = 1398104;
     public const TRANSPORT_RESERVE_BYTES = 256;
+    private const FORMAT = 'de.burki24.echarts.tree';
+
+    /** Rewrite only the envelope identifier. No Symcon objects are available or needed during SDK migration. */
+    public static function MigrateStoredDocument(string $json): ?string
+    {
+        if ($json === '' || strlen($json) > self::MAXIMUM_BYTES) {
+            return null;
+        }
+        try {
+            $document = EChartsImportJson::Decode($json);
+        } catch (InvalidArgumentException) {
+            return null;
+        }
+        if (!self::UpgradeFormat($document)) {
+            return null;
+        }
+        return EChartsImportJson::Canonical($document);
+    }
 
     public static function Read(string $json, bool $bindings, callable $object, callable $value, array $forbidden = []): array
     {
@@ -29,7 +48,8 @@ final class EChartsTreeJSON
             self::Fail(str_starts_with($exception->getMessage(), 'LIMIT_EXCEEDED:') ? 'LIMIT_EXCEEDED' : 'JSON_INVALID', '');
         }
         self::Fields($document, ['format', 'formatVersion', 'rootId', 'nodes'], ['format', 'formatVersion', 'rootId', 'nodes'], '');
-        if ($document->format !== 'de.burki24.symconecharts.tree' || $document->formatVersion !== '1.0') {
+        self::UpgradeFormat($document);
+        if ($document->format !== self::FORMAT || $document->formatVersion !== '1.0') {
             self::Fail('FORMAT_UNSUPPORTED', '/formatVersion');
         }
         if (!self::ID($document->rootId)) {
@@ -193,6 +213,16 @@ final class EChartsTreeJSON
                 'IMPORT_BUSY'            => 'Another Tree JSON update is in progress. Try again.',
                 default                  => 'The Tree JSON document is invalid. Check the reported field and the Tree JSON contract.'
             }];
+    }
+
+    private static function UpgradeFormat(mixed $document): bool
+    {
+        if (!$document instanceof stdClass || ($document->formatVersion ?? null) !== '1.0'
+            || ($document->format ?? null) !== EChartsIdentity::STORE_BUNDLE_ID . '.tree') {
+            return false;
+        }
+        $document->format = self::FORMAT;
+        return true;
     }
 
     private static function Fields(mixed $value, array $required, array $allowed, string $pointer): void

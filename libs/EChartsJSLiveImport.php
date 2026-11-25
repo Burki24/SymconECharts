@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 use Burki24\SymconModuleHelper\VariablePresentationNormalizationHelper;
 use InvalidArgumentException;
@@ -60,7 +60,7 @@ final class EChartsJSLiveImport
             return $copy;
         }, $package->charts);
         $sameInstallation = $installationID !== null && strcasecmp($package->sourceInstallation->id, $installationID) === 0;
-        $report = ['format'   => 'de.burki24.symconecharts.import-preview', 'formatVersion' => '1.0',
+        $report = ['format'   => 'de.burki24.echarts.import-preview', 'formatVersion' => '1.0',
             'ruleVersion'     => self::RULE_VERSION, 'packageHash' => EChartsImportJson::Hash($package),
             'revisionHash'    => EChartsImportJson::Hash($revision), 'sameInstallation' => $sameInstallation,
             'exportSnapshot'  => ['exportId' => $package->exportId, 'createdAt' => $package->createdAt,

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../EChartsBarPolar/PolarData.php';
 
-use SymconECharts\PolarData;
+use eCharts\PolarData;
 
 function assertPolarData(bool $condition, string $message): void
 {

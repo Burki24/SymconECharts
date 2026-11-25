@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\ZigbeeGraphExportReader;
+use eCharts\ZigbeeGraphExportReader;
 
 require_once dirname(__DIR__) . '/EChartsGraphZ2M/ZigbeeGraphExportReader.php';
 

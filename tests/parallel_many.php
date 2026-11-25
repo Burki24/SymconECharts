@@ -73,7 +73,7 @@ declare(strict_types=1);
             && $model['range']['aggregateBudget'] === 10000, 'Configured and effective line limits must be explicit, never silently saved back.');
         foreach ([$chart->GetVisualizationTile(), $chart->GetIPSViewHTML(), $chart->GetTestVariableValue('IPSViewParallel')] as $index => $html) {
             assertGatewayGauge(strlen($html) < SYMCON_OUTPUT_BUFFER_LIMIT && str_contains($html, 'echarts-parallel-viewport')
-                && str_contains($html, 'SymconEChartsCategoryNavigation'), 'Both bounded outputs must load the complete chart and shared viewport anchor logic.');
+                && str_contains($html, 'eChartsCategoryNavigation'), 'Both bounded outputs must load the complete chart and shared viewport anchor logic.');
             preg_match('/window.SYMC_VISUALIZATION = (.*?);<\/script>/s', $html, $match);
             $state = json_decode($match[1], true, 512, JSON_THROW_ON_ERROR)['state'];
             assertGatewayGauge(

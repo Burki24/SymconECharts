@@ -6,13 +6,13 @@ require_once __DIR__ . '/jslive_family_fixture.php';
 require_once __DIR__ . '/../libs/EChartsJSLiveCreationForm.php';
 require_once __DIR__ . '/../libs/helper/DebugFlowHelper.php';
 
-use SymconECharts\EChartsImportJson;
-use SymconECharts\EChartsJSLiveArchive;
-use SymconECharts\EChartsJSLiveModel;
-use SymconECharts\EChartsJSLivePage;
-use SymconECharts\EChartsJSLivePlan;
-use SymconECharts\EChartsJSLiveRendering;
-use SymconECharts\EChartsJSLiveTargetSnapshot;
+use eCharts\EChartsImportJson;
+use eCharts\EChartsJSLiveArchive;
+use eCharts\EChartsJSLiveModel;
+use eCharts\EChartsJSLivePage;
+use eCharts\EChartsJSLivePlan;
+use eCharts\EChartsJSLiveRendering;
+use eCharts\EChartsJSLiveTargetSnapshot;
 
 const VARIABLE_PRESENTATION_WEB_CONTENT = '{00000000-0000-4000-8000-000000000001}';
 set_error_handler(static function (int $severity, string $message): never
@@ -123,7 +123,10 @@ function IPS_SemaphoreLeave(string $name): bool
 }
 function nativeMutation(int $id, string $action): void
 {
-    if (!$GLOBALS['nativeImport']['locked'] || !isset($GLOBALS['nativeImport']['created'][$id])) {
+    $kernel = &$GLOBALS['nativeImport'];
+    $parent = $kernel['objects'][$id]['ParentID'] ?? 0;
+    $ownedOutput = $action === 'info' && isset($kernel['created'][$parent]) && in_array($id, $kernel['children'][$parent] ?? [], true);
+    if (!$kernel['locked'] || (!isset($kernel['created'][$id]) && !$ownedOutput)) {
         throw new RuntimeException('Attempt to modify a pre-existing object or write without lock');
     }
     $GLOBALS['nativeImport']['mutations'][] = [$id, $action];
@@ -145,6 +148,9 @@ function IPS_SetInfo(int $id, string $value): bool
 {
     nativeMutation($id, 'info');
     $GLOBALS['nativeImport']['objects'][$id]['ObjectInfo'] = $value;
+    if (($GLOBALS['nativeImport']['stopAfterSeal'] ?? null) === $id) {
+        throw new RuntimeException('Simulated interruption immediately after writing the seal');
+    }
     return true;
 }
 function IPS_SetName(int $id, string $value): bool
@@ -248,6 +254,39 @@ function ECGS_GetJSLiveOutputGuards(int $id): string
 {
     return EChartsImportJson::Canonical($GLOBALS['nativeImport']['outputGuards'][$id] ?? []);
 }
+
+function nativeRefreshSeals(int $id, string $marker): void
+{
+    $guards = &$GLOBALS['nativeImport']['outputGuards'][$id];
+    $guards = \eCharts\EChartsJSLiveOwnership::RenewOutputGuards($id, $marker, $guards ?? []);
+    if (($GLOBALS['nativeImport']['stopAfterSeal'] ?? null) === 'guards') {
+        throw new RuntimeException('Simulated interruption immediately after writing the output guards');
+    }
+}
+function ECGS_RefreshJSLiveOutputSeals(int $id, string $marker): void
+{
+    nativeRefreshSeals($id, $marker);
+}
+function ECPI_RefreshJSLiveOutputSeals(int $id, string $marker): void
+{
+    nativeRefreshSeals($id, $marker);
+}
+function ECTS_RefreshJSLiveOutputSeals(int $id, string $marker): void
+{
+    nativeRefreshSeals($id, $marker);
+}
+function ECBH_RefreshJSLiveOutputSeals(int $id, string $marker): void
+{
+    nativeRefreshSeals($id, $marker);
+}
+function ECRH_RefreshJSLiveOutputSeals(int $id, string $marker): void
+{
+    nativeRefreshSeals($id, $marker);
+}
+function ECPG_RefreshJSLiveOutputSeals(int $id, string $marker): void
+{
+    nativeRefreshSeals($id, $marker);
+}
 function ECPI_GetJSLiveOutputGuards(int $id): string
 {
     return EChartsImportJson::Canonical($GLOBALS['nativeImport']['outputGuards'][$id] ?? []);
@@ -320,7 +359,7 @@ function ECPG_GetJSLiveImportHTML(int $id, bool $ipsView): string
 final class NativeImportGateway
 {
     use \Burki24\SymconModuleHelper\DebugFlowHelper;
-    use \SymconECharts\EChartsJSLiveCreationForm;
+    use \eCharts\EChartsJSLiveCreationForm;
     public int $InstanceID = 16000;
     public array $fields = [];
     public array $debug = [];
@@ -473,6 +512,12 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
         $oldJournal['entries'][$retainedEntryID]['phase'] = 'created';
         $oldJournal['entries'][$retainedEntryID]['applyIntent'] = false;
         $oldJournal['entries'][$retainedEntryID]['error'] = 'TARGET_CHANGED';
+        $savedMarker = $oldJournal['entries'][$retainedEntryID]['marker'];
+        $legacyMarker = \eCharts\EChartsIdentity::LegacyProductName() . substr($savedMarker, strlen('eCharts'));
+        $oldJournal['entries'][$retainedEntryID]['marker'] = $legacyMarker;
+        $oldJournal['entries'][$retainedEntryID]['snapshot']['info'] = $legacyMarker;
+        $oldJournal['entries'][$retainedEntryID]['pending']['info'] = $legacyMarker;
+        $kernel['objects'][$retainedID]['ObjectInfo'] = $legacyMarker;
         $gateway->RestoreTestJournal($oldJournal);
         // Native module update cleared the pending settings and old Create resealed the changed object metadata.
         $retainedGuard = $kernel['guard'][$retainedID];
@@ -487,13 +532,59 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
         nativeAssert(
             $result['targetID'] === $retainedID && $result['journalID'] === $retainedEntryID && !IPS_HasChanges($retainedID)
             && count(array_filter($kernel['mutations'], static fn (array $call): bool => $call === [$retainedID, 'configuration'])) === $stageCount + 1
-            && $gateway->GetTestJournal()['entries'][$retainedEntryID]['originalCreationGuard'] === $retainedGuard,
+            && $gateway->GetTestJournal()['entries'][$retainedEntryID]['originalCreationGuard'] === $retainedGuard
+            && $gateway->GetTestJournal()['entries'][$retainedEntryID]['marker'] === $savedMarker
+            && $kernel['objects'][$retainedID]['ObjectInfo'] === $savedMarker,
             'The retained version-1 target must resume after module update without duplicates or losing its historical creation proof.'
         );
+    }
+    if ($count === 1) {
+        $installed = $gateway->GetTestJournal();
+        $entry = &$installed['entries'][$result['journalID']];
+        $canonical = $entry['marker'];
+        $legacy = \eCharts\EChartsIdentity::LegacyProductName() . substr($canonical, strlen('eCharts'));
+        $entry['marker'] = $entry['snapshot']['info'] = $kernel['objects'][$result['targetID']]['ObjectInfo'] = $legacy;
+        foreach ($entry['receipt']['outputs'] as &$output) {
+            $child = $output['id'];
+            $output['object']['ObjectInfo'] = $kernel['objects'][$child]['ObjectInfo'] = $legacy . ':output:' . $output['ident'];
+            $kernel['outputGuards'][$result['targetID']][$child] = EChartsImportJson::Hash(EChartsJSLiveTargetSnapshot::Output($child));
+        }
+        unset($output, $entry);
+        $gateway->RestoreTestJournal($installed);
+        $expectedObjects = $kernel['objects'];
+        $expectedObjects[$result['targetID']]['ObjectInfo'] = $canonical;
+        $expectedObjects[$child]['ObjectInfo'] = $canonical . ':output:' . $expectedObjects[$child]['ObjectIdent'];
+        $untouched = count($kernel['mutations']);
+        $originalName = $kernel['objects'][$child]['ObjectName'];
+        $kernel['objects'][$child]['ObjectName'] = 'Manual change';
+        $blocked = json_decode($gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($confirmation)), true, 64, JSON_THROW_ON_ERROR);
+        nativeAssert(
+            $blocked['charts'][$row['chartKey']]['error'] === 'TARGET_CHANGED' && count($kernel['mutations']) === $untouched,
+            'An edited historical output must block the migration before any physical write.'
+        );
+        $kernel['objects'][$child]['ObjectName'] = $originalName;
+        foreach ([$result['targetID'], $child, 'guards'] as $stop) {
+            $kernel['stopAfterSeal'] = $stop;
+            $failed = json_decode($gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($confirmation)), true, 64, JSON_THROW_ON_ERROR);
+            nativeAssert($failed['charts'][$row['chartKey']]['status'] === 'failed'
+                && $gateway->GetTestJournal()['entries'][$result['journalID']]['v1Seal'] === 2, 'A partial seal migration must remain resumable.');
+        }
+        unset($kernel['stopAfterSeal']);
     }
     $mutations = count($kernel['mutations']);
     $again = json_decode($gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($confirmation)), true, 64, JSON_THROW_ON_ERROR);
     nativeAssert($again['charts'][$row['chartKey']]['targetID'] === $result['targetID'] && count($kernel['mutations']) === $mutations, 'Completed retry must not reapply configuration.');
+    if ($count === 1) {
+        $complete = $again['charts'][$row['chartKey']];
+        $saved = $gateway->GetTestJournal()['entries'][$result['journalID']];
+        nativeAssert(
+            $complete['status'] === 'complete' && $kernel['objects'] === $expectedObjects
+            && $saved['marker'] === $canonical && !isset($saved['v1Seal'])
+            && $kernel['outputGuards'][$result['targetID']][$child] === EChartsImportJson::Hash(EChartsJSLiveTargetSnapshot::Output($child))
+            && !str_contains(EChartsImportJson::Canonical([$saved['receipt'], $complete['outputs']]), $legacy),
+            'A migrated completed import must update only the two seals and their proof, with canonical receipts.'
+        );
+    }
     $after = EChartsImportJson::Hash([$kernel['configuration'][$originalID], $kernel['configuration'][16000], $kernel['configuration'][17000],
         array_intersect_key($kernel['variables'], array_flip(array_column($original->sources, 'variableId'))), $kernel['profiles'], $kernel['archives']]);
     nativeAssert($before === $after, 'Existing source, native formatting, profile, original/gateway configuration or archive changed.');
@@ -592,6 +683,13 @@ nativeAssert(str_starts_with($error, 'PACKAGE_INVALID:') && $gateway->fields['JS
 nativeAssert((new ReflectionMethod(NativeImportGateway::class, 'JSLiveImportFromForm'))->getNumberOfRequiredParameters() === 7, 'Native callback arguments must not depend on PHP defaults.');
 
 // Cross-gateway reservations must scan every bounded page, including conflicts on the last page.
+$targetID = $lastNativeResult['targetID'];
+$savedInfo = $kernel['objects'][$targetID]['ObjectInfo'];
+$kernel['objects'][$targetID]['ObjectInfo'] = \eCharts\EChartsIdentity::LegacyProductName() . ':JSLive:1:' . hash('sha256', $lastNativeRow['identity']) . ':' . str_repeat('f', 32);
+nativeThrows(fn () => $gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($lastNativeConfirmation)), 'RECOVERY_REQUIRED:');
+nativeAssert(count($kernel['mutations']) === $mutations, 'An orphan pre-rename marker must reserve the origin without writes.');
+$kernel['objects'][$targetID]['ObjectInfo'] = $savedInfo;
+
 $peer = new NativeImportGateway();
 $peer->InstanceID = 16001;
 $kernel['instances'][16001] = nativeInstance('{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}');
@@ -605,7 +703,7 @@ for ($n = 1; $n <= 75; ++$n) {
     $entry = $template;
     $entry['sequence'] = $n;
     $entry['identity'] = 'synthetic-peer:' . $n;
-    $entry['marker'] = \SymconECharts\EChartsJSLiveJournal::Marker($entry['identity'], $entryID);
+    $entry['marker'] = \eCharts\EChartsJSLiveJournal::Marker($entry['identity'], $entryID);
     $entry['snapshot'] = ['configuration' => ['SyntheticPrivatePayload' => str_repeat('synthetic ', 1800)]];
     $entry['pending'] = null;
     $peerJournal['entries'][$entryID] = $entry;
@@ -616,7 +714,7 @@ $gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($
 nativeAssert($GLOBALS['nativeJournalPageCalls'] === [[16001, 0], [16001, 50]], 'Peer reservation scan skipped a journal page.');
 $lastPeerKey = array_key_last($peerJournal['entries']);
 $peerJournal['entries'][$lastPeerKey]['identity'] = $lastNativeRow['identity'];
-$peerJournal['entries'][$lastPeerKey]['marker'] = \SymconECharts\EChartsJSLiveJournal::Marker($lastNativeRow['identity'], $lastPeerKey);
+$peerJournal['entries'][$lastPeerKey]['marker'] = \eCharts\EChartsJSLiveJournal::Marker($lastNativeRow['identity'], $lastPeerKey);
 $peer->RestoreTestJournal($peerJournal);
 nativeThrows(fn () => $gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($lastNativeConfirmation)), 'TARGET_CHANGED:');
 nativeAssert(count($kernel['mutations']) === $mutations && count($kernel['created']) === 40, 'Peer conflict caused a native mutation.');
@@ -709,5 +807,5 @@ echo "JSLive confirmed public API and native kernel adapter: 40 new targets plus
 
 function EChartsJSLivePackageArray(mixed $value): mixed
 {
-    return \SymconECharts\EChartsJSLivePackage::ArrayValue($value);
+    return \eCharts\EChartsJSLivePackage::ArrayValue($value);
 }

@@ -12,7 +12,7 @@
     var currentState = bootstrap.state || null;
     var currentTheme = null;
     var selection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
-    var navigation = window.SymconEChartsCategoryNavigation.create();
+    var navigation = window.eChartsCategoryNavigation.create();
     var selectedItems = [];
     var pageItems = [];
     var pageWindow = { first: 0, last: 0, visibleCount: 0 };

@@ -231,7 +231,7 @@
         });
     }
 
-    window.SymconEChartsZoom = {
+    window.eChartsZoom = {
         options: options,
         sliderThickness: sliderThickness,
         timeAxisOptions: timeAxisOptions,

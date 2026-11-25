@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Adds a view-local period picker after the normal renderer has registered its message handler. */
 final class EChartsPeriodControl

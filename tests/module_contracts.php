@@ -44,14 +44,14 @@ requireContract(
     'The library GUID changed.',
     $errors
 );
-requireContract(($library['name'] ?? null) === 'SymconECharts', 'The library name changed.', $errors);
+requireContract(($library['name'] ?? null) === 'eCharts', 'The library name changed.', $errors);
 requireContract(
     ($library['author'] ?? null) === 'Burkhard Kneiseler',
     'The library author changed.',
     $errors
 );
 requireContract(
-    ($library['url'] ?? null) === 'https://github.com/Burki24/SymconECharts',
+    ($library['url'] ?? null) === 'https://github.com/Burki24/eCharts',
     'The library URL changed.',
     $errors
 );
@@ -330,7 +330,7 @@ foreach ($expectedModules as $moduleName => $expected) {
         $errors
     );
     requireContract(
-        ($module['url'] ?? null) === 'https://github.com/Burki24/SymconECharts',
+        ($module['url'] ?? null) === 'https://github.com/Burki24/eCharts',
         $moduleName . ' changed its repository URL.',
         $errors
     );
@@ -407,8 +407,8 @@ foreach (glob($root . '/ECharts*/module.php') ?: [] as $modulePath) {
 }
 
 if ($errors !== []) {
-    fwrite(STDERR, "SymconECharts module contract validation failed:\n - " . implode("\n - ", $errors) . "\n");
+    fwrite(STDERR, "eCharts module contract validation failed:\n - " . implode("\n - ", $errors) . "\n");
     exit(1);
 }
 
-echo "SymconECharts module contracts verified.\n";
+echo "eCharts module contracts verified.\n";

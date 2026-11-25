@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsAsset;
-use SymconECharts\EChartsDataProtocol;
+use eCharts\EChartsAsset;
+use eCharts\EChartsDataProtocol;
 
 const IPS_KERNELSTARTED = 10001;
 const VM_UPDATE = 10603;
@@ -516,6 +516,11 @@ abstract class IPSModuleStrict
         }
     }
 
+    public function Migrate(string $JSONData): string
+    {
+        return '';
+    }
+
     public function Create(): void
     {
         $GLOBALS['symconTestModuleObjects'][$this->InstanceID] = $this;
@@ -888,6 +893,16 @@ abstract class IPSModuleStrict
         return true;
     }
 
+    protected function UnregisterHook(string $hook): bool
+    {
+        if (($GLOBALS['symconTestHookOwners'][$hook] ?? 0) !== $this->InstanceID) {
+            return false;
+        }
+        unset($GLOBALS['symconTestHookOwners'][$hook]);
+        $this->hooks = array_values(array_diff($this->hooks, [$hook]));
+        return true;
+    }
+
     protected function SendDebug(string $message, string $data, int $format): bool
     {
         if ($this->FailDebug) {
@@ -924,6 +939,12 @@ require_once dirname(__DIR__) . '/EChartsSankey/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
+    public function RestoreTestHook(string $hook): void
+    {
+        $this->RegisterHook($hook);
+        $this->SetBuffer('TransportPeers', '[]');
+    }
+
     public function ProcessTestHook(): string
     {
         ob_start();
@@ -1148,12 +1169,12 @@ $assetGateway = new TestableEChartsGateway();
 $assetGateway->Create();
 $assetServer = $_SERVER;
 $_SERVER['REQUEST_METHOD'] = 'GET';
-$_SERVER['SCRIPT_NAME'] = '/hook/SymconECharts/assets/interaction.js';
+$_SERVER['SCRIPT_NAME'] = '/hook/eCharts/assets/interaction.js';
 assertGatewayGauge(
     $assetGateway->ProcessTestHook() === file_get_contents(dirname(__DIR__) . '/libs/helper/visualization/interaction.min.js') && http_response_code() === 200,
     'The public interaction endpoint must serve exactly the bundled shared library.'
 );
-foreach ([['POST', '/hook/SymconECharts/assets/interaction.js'], ['GET', '/hook/SymconECharts/assets/interaction.js/extra'], ['GET', '/hook/SymconECharts/assets/../interaction.js']] as [$assetMethod, $assetPath]) {
+foreach ([['POST', '/hook/eCharts/assets/interaction.js'], ['GET', '/hook/eCharts/assets/interaction.js/extra'], ['GET', '/hook/eCharts/assets/../interaction.js']] as [$assetMethod, $assetPath]) {
     $_SERVER['REQUEST_METHOD'] = $assetMethod;
     $_SERVER['SCRIPT_NAME'] = $assetPath;
     assertGatewayGauge($assetGateway->ProcessTestHook() === '' && http_response_code() === 404, 'The interaction endpoint must reject other methods and paths.');
@@ -1176,8 +1197,8 @@ $gateway = new EChartsGateway();
 $gateway->Create();
 $gateway->ApplyChanges();
 assertGatewayGauge(
-    $gateway->GetTestHooks() === ['SymconECharts'],
-    'The Gateway must own the shared SymconECharts WebHook.'
+    $gateway->GetTestHooks() === [EChartsAsset::HOOK_NAME],
+    'The Gateway must own the shared eCharts WebHook.'
 );
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
 
@@ -2574,7 +2595,7 @@ $heatmapNavigation->ApplyChanges();
 $navigationCurrent = json_decode($heatmapNavigation->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
 $heatmapTile = $heatmapNavigation->GetVisualizationTile();
 assertGatewayGauge(
-    preg_match('#/hook/SymconECharts/state/5000/([a-f0-9]{32})#', $heatmapTile, $heatmapChannel) === 1,
+    preg_match('#/hook/eCharts/state/5000/([a-f0-9]{32})#', $heatmapTile, $heatmapChannel) === 1,
     'The Heatmap tile must expose a scoped read-only navigation channel.'
 );
 $heatmapRequest = ['DataID' => '{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
@@ -2604,7 +2625,7 @@ $heatmapHookGateway->Create();
 $heatmapHookGateway->ApplyChanges();
 IPSModuleStrict::$ChildResponders = [static fn (string $json): string => $heatmapNavigation->ReceiveData($json)];
 $_SERVER['REQUEST_METHOD'] = 'GET';
-$_SERVER['SCRIPT_NAME'] = '/hook/SymconECharts/state/5000/' . $heatmapChannel[1];
+$_SERVER['SCRIPT_NAME'] = '/hook/eCharts/state/5000/' . $heatmapChannel[1];
 $_GET['offset'] = '1';
 $_GET['output'] = 'tile';
 $navigatedHookState = json_decode($heatmapHookGateway->ProcessTestHook(), true, 512, JSON_THROW_ON_ERROR);
@@ -2744,10 +2765,10 @@ foreach ([1, 2, 3] as $index) {
 }
 foreach ($heatmapPresetSelect['options'] as $option) {
     $id = $option['value'];
-    $colors = \SymconECharts\HeatmapColorScales::Colors($id);
-    $scaleRange = \SymconECharts\HeatmapColorScales::Range($id);
+    $colors = \eCharts\HeatmapColorScales::Colors($id);
+    $scaleRange = \eCharts\HeatmapColorScales::Range($id);
     assertGatewayGauge(
-        \SymconECharts\HeatmapColorScales::IsSupported($id)
+        \eCharts\HeatmapColorScales::IsSupported($id)
             && ($id === 'custom' || count($colors) >= 2)
             && count(array_filter($colors, static fn (string $color): bool => preg_match('/^#[0-9A-F]{6}$/', $color) === 1)) === count($colors)
             && ($id === 'custom' ? $scaleRange === null : is_array($scaleRange) && $scaleRange['min'] < $scaleRange['max']),
@@ -2755,7 +2776,7 @@ foreach ($heatmapPresetSelect['options'] as $option) {
     );
 }
 assertGatewayGauge(
-    \SymconECharts\HeatmapColorScales::Range('noaa2023') === ['min' => -50, 'max' => 50],
+    \eCharts\HeatmapColorScales::Range('noaa2023') === ['min' => -50, 'max' => 50],
     'The NOAA sample must retain its documented -50 to +50 °C range.'
 );
 $heatmapTitleAction = (string) (findGaugeFormElement($heatmapForm['elements'], 'Title')['onChange'] ?? '');
@@ -3102,7 +3123,7 @@ foreach (['font-size:21px', 'font-size:57.5px', 'font-size:34.5px', 'font-size:1
 }
 
 foreach (['basic', 'simple', 'progress', 'speed'] as $preset) {
-    $presetSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    $presetSvg = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
         42.5,
         -20.0,
         80.0,
@@ -3117,7 +3138,7 @@ foreach (['basic', 'simple', 'progress', 'speed'] as $preset) {
         'Gauge Single preview must render the ' . $preset . ' preset.'
     );
 }
-$shortCustomPointerSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+$shortCustomPointerSvg = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
     50.0,
     0.0,
     100.0,
@@ -3134,7 +3155,7 @@ $shortCustomPointerSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
         'pointerLengthPercent' => 50
     ]
 );
-$longCustomPointerSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+$longCustomPointerSvg = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
     50.0,
     0.0,
     100.0,
@@ -3162,7 +3183,7 @@ foreach ([
     'progress' => ['centerY' => 190.0, 'radius' => 132.0],
     'speed'    => ['centerY' => 232.0, 'radius' => 142.0]
 ] as $preset => $geometry) {
-    $presetSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    $presetSvg = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
         42.5,
         -20.0,
         80.0,
@@ -3190,7 +3211,7 @@ foreach ([
         'Gauge preview must place split lines inside the progress ring for ' . $preset . '.'
     );
 }
-$basicPresetSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+$basicPresetSvg = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
     42.5,
     -20.0,
     80.0,
@@ -3204,7 +3225,7 @@ assertGatewayGauge(
     preg_match('/<path d="[^"]+" class="progress"/', $basicPresetSvg) !== 1,
     'Basic Gauge must not render a progress arc.'
 );
-$speedPresetSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+$speedPresetSvg = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
     42.5,
     -20.0,
     80.0,
@@ -3222,7 +3243,7 @@ assertGatewayGauge(
 assertGatewayGauge(str_contains($speedPresetSvg, 'class="value-unit"'), 'Speed Gauge preview must style the unit separately.');
 assertGatewayGauge(str_contains($speedPresetSvg, 'data-major-splits="10"'), 'A 0–100 scale must keep ten readable divisions.');
 
-$customDesignSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+$customDesignSvg = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
     42.5,
     -20.0,
     80.0,
@@ -3263,7 +3284,7 @@ foreach (['#112233', '#223344', '#334455', '#445566', '#556677', '#667788'] as $
     );
 }
 
-$officialSpeedRangeSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+$officialSpeedRangeSvg = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
     100.0,
     0.0,
     240.0,
@@ -3282,7 +3303,7 @@ assertGatewayGauge(
     'The official Speed Gauge preview must expose the characteristic 20-unit scale steps.'
 );
 
-$shineSpeedSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+$shineSpeedSvg = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
     1.0,
     0.0,
     1000.0,
@@ -3912,7 +3933,7 @@ foreach ([
     );
     if ($dedicatedClass === EChartsGaugeTacho::class) {
         $fivePreviewItems = array_fill(0, 5, $dedicatedData['items'][1]);
-        $fiveGaugePreview = \SymconECharts\EChartsGaugeTachoPreview::CreateSvg(
+        $fiveGaugePreview = \eCharts\EChartsGaugeTachoPreview::CreateSvg(
             $fivePreviewItems,
             '',
             'auto',
@@ -4057,12 +4078,12 @@ assertGatewayGauge(
 );
 assertGatewayGauge(
     preg_match(
-        '#/hook/SymconECharts/state/5000/([a-f0-9]{32})#',
+        '#/hook/eCharts/state/5000/([a-f0-9]{32})#',
         $inheritedMultiIPSView,
         $multiTransportMatch
     ) === 1
         && str_contains($inheritedMultiIPSView, 'new WebSocket')
-        && str_contains($inheritedMultiIPSView, '/hook/SymconECharts/WS/5000/'),
+        && str_contains($inheritedMultiIPSView, '/hook/eCharts/WS/5000/'),
     'Gauge Multi IPSView HTML must bootstrap the shared persistent transport.'
 );
 $multiStateRequest = ['DataID' => '{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
@@ -4083,7 +4104,7 @@ $hookGateway->Create();
 $hookGateway->ApplyChanges();
 IPSModuleStrict::$ChildResponders = [static fn (string $json): string => $multiGauge->ReceiveData($json)];
 $_SERVER['REQUEST_METHOD'] = 'GET';
-$_SERVER['SCRIPT_NAME'] = '/hook/SymconECharts/state/5000/' . $multiTransportMatch[1];
+$_SERVER['SCRIPT_NAME'] = '/hook/eCharts/state/5000/' . $multiTransportMatch[1];
 $hookState = json_decode($hookGateway->ProcessTestHook(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     ($hookState['status'] ?? null) === 'ready',
@@ -4350,7 +4371,7 @@ foreach (array_slice($multiGauge->GetTestFormUpdates(), -2) as $previewUpdate) {
     );
 }
 unset($GLOBALS['symconTestVariables'][4718]);
-$ringPreviewSvg = \SymconECharts\EChartsGaugeMultiPreview::CreateSvg(
+$ringPreviewSvg = \eCharts\EChartsGaugeMultiPreview::CreateSvg(
     [
         ['label' => 'A', 'minimum' => 0.0, 'maximum' => 100.0, 'unit' => '%', 'decimals' => 0, 'value' => 25.0],
         ['label' => 'B', 'minimum' => 0.0, 'maximum' => 100.0, 'unit' => '%', 'decimals' => 0, 'value' => 75.0]
@@ -4375,7 +4396,7 @@ foreach ([
     'multi-title'     => 4, 'ring-grid' => 4, 'ring-concentric' => 4,
     'weather-station' => 4, 'tacho' => 3, 'chronograph' => 6
 ] as $preset => $visibleCount) {
-    $limitedPresetSvg = \SymconECharts\EChartsGaugeMultiPreview::CreateSvg(
+    $limitedPresetSvg = \eCharts\EChartsGaugeMultiPreview::CreateSvg(
         $previewLimitItems,
         '',
         'dark',
@@ -4387,7 +4408,7 @@ foreach ([
         'Gauge Multi ' . $preset . ' preview must disclose its actual source limit.'
     );
 }
-$completePresetSvg = \SymconECharts\EChartsGaugeMultiPreview::CreateSvg(
+$completePresetSvg = \eCharts\EChartsGaugeMultiPreview::CreateSvg(
     array_slice($previewLimitItems, 0, 3),
     '',
     'dark',
@@ -4414,7 +4435,7 @@ $multiSocketUpdate = $GLOBALS['symconTestWebSocketMessages'][$multiSocketUpdateC
 assertGatewayGauge(
     is_array($multiSocketUpdate)
         && $multiSocketUpdate['InstanceID'] === 6100
-        && str_starts_with($multiSocketUpdate['Path'], '/hook/SymconECharts/WS/5000/')
+        && str_starts_with($multiSocketUpdate['Path'], '/hook/eCharts/WS/5000/')
         && str_contains($multiSocketUpdate['Message'], '"value":43.5'),
     'Gauge Multi must send source changes to the persistent IPSView chart through the Gateway.'
 );
@@ -4647,7 +4668,7 @@ assertGatewayGauge(
         && !str_contains(json_encode($customAnchorData, JSON_THROW_ON_ERROR), '<svg'),
     'Gauge Single must expose only the validated custom hub path and viewBox.'
 );
-$customAnchorPreviewSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+$customAnchorPreviewSvg = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
     50.0,
     0.0,
     100.0,
@@ -4665,7 +4686,7 @@ assertGatewayGauge(
         && str_contains($customAnchorPreviewSvg, 'M50 0L100 50L50 100L0 50Z'),
     'Gauge Single preview must render a validated custom SVG hub at the pointer pivot.'
 );
-$hiddenAnchorPreviewSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+$hiddenAnchorPreviewSvg = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
     50.0,
     0.0,
     100.0,
@@ -4681,7 +4702,7 @@ assertGatewayGauge(
     !str_contains($hiddenAnchorPreviewSvg, 'class="anchor"'),
     'Gauge Single preview must hide the hub when explicitly configured.'
 );
-$transparentPlatePreviewSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+$transparentPlatePreviewSvg = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
     50.0,
     0.0,
     100.0,
@@ -4704,7 +4725,7 @@ assertGatewayGauge(
         && str_contains($transparentPlatePreviewSvg, 'stroke-width:3'),
     'Gauge Single preview must support a transparent circular plate with a visible border.'
 );
-$linearPlatePreviewSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+$linearPlatePreviewSvg = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
     50.0,
     0.0,
     100.0,
@@ -4810,7 +4831,7 @@ assertGatewayGauge(
         && str_contains($plateBackgroundFormSvg, '<image href="data:image/svg+xml;base64,'),
     'The Gauge configuration form must preview the imported and clipped SVG plate background.'
 );
-$plateBackgroundPreview = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+$plateBackgroundPreview = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
     50.0,
     0.0,
     100.0,
@@ -4831,7 +4852,7 @@ assertGatewayGauge(
         && str_contains($plateBackgroundPreview, 'class="plate-outline"'),
     'Gauge Single preview must position and clip the SVG background inside the dial plate.'
 );
-$arcPlateBackgroundPreview = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+$arcPlateBackgroundPreview = \eCharts\EChartsGaugeSinglePreview::CreateSvg(
     50.0,
     0.0,
     100.0,
@@ -6553,7 +6574,7 @@ assertGatewayGauge(
         && $categoryPatternData['bar']['style']['barPatternAspectRatio'] === 2.0
         && str_starts_with($categoryPatternData['bar']['style']['barPatternImage'], 'data:image/svg+xml;base64,')
         && str_contains($categoryPatternIPSView, '"barPatternAspectRatio":1')
-        && str_contains($categoryPatternIPSView, 'SymconEChartsPattern'),
+        && str_contains($categoryPatternIPSView, 'eChartsPattern'),
     'Category Bar must use safe, independent SVG patterns for Tile and IPSView.'
 );
 $barCategory->SetTestProperty('BarSVG', base64_encode($largeBackgroundSvg));
@@ -6953,7 +6974,7 @@ assertGatewayGauge(
     'Historical Bar IPSView must use the persistent transport within the output limit.'
 );
 assertGatewayGauge(
-    preg_match('#/hook/SymconECharts/state/5000/([a-f0-9]{32})#', $barHistoryIPSView, $barTransportMatch) === 1,
+    preg_match('#/hook/eCharts/state/5000/([a-f0-9]{32})#', $barHistoryIPSView, $barTransportMatch) === 1,
     'Historical Bar IPSView must provide a targeted persistent state channel.'
 );
 $barStateRequest = ['DataID' => '{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
@@ -8508,8 +8529,8 @@ foreach ($requiredGermanFormTexts as $moduleName => $texts) {
     }
 }
 foreach ([
-    \SymconECharts\EChartsGaugeDesign::class,
-    \SymconECharts\EChartsTimeSeriesDesign::class
+    \eCharts\EChartsGaugeDesign::class,
+    \eCharts\EChartsTimeSeriesDesign::class
 ] as $designClass) {
     $individualColumn = null;
     foreach ($designClass::SourceDesignColumns() as $column) {
@@ -9355,7 +9376,7 @@ foreach ([EChartsBarCategory::class, EChartsBarPolar::class] as $presentedBarCla
     }
 }
 assertGatewayGauge(
-    \SymconECharts\EChartsBarPreview::FormatValue(1234.5, 2, '°C', 'de') === '1.234,50 °C',
+    \eCharts\EChartsBarPreview::FormatValue(1234.5, 2, '°C', 'de') === '1.234,50 °C',
     'Shared Bar preview values must use German decimal and grouping separators when configured.'
 );
 

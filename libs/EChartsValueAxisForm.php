@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Source-list defaults and editor for archive series sharing the value-axis model. */
 final class EChartsValueAxisForm

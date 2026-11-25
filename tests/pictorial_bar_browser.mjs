@@ -17,7 +17,7 @@ function state(){
 const variables = ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-border:#555860;--symc-surface:#25272b}';
 const translations = JSON.parse(read('EChartsPictorialBar/locale.json')).translations.de;
 const importedSvg=spawnSync('php',['-r',
-    'require "EChartsPictorialBar/PictorialBarSvg.php";echo json_encode(SymconECharts\\PictorialBarSvg::Import(file_get_contents($argv[1])));',
+    'require "EChartsPictorialBar/PictorialBarSvg.php";echo json_encode(eCharts\\PictorialBarSvg::Import(file_get_contents($argv[1])));',
     'tests/fixtures/pictorial-symbol-custom.svg'],{cwd:root,encoding:'utf8'});
 if(importedSvg.status !== 0)throw new Error('Local SVG fixture import failed.');
 const svgGeometry=JSON.parse(importedSvg.stdout);

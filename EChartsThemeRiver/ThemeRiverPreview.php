@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Bounded synthetic bands; no archive request is performed while editing. */
 trait ThemeRiverPreview

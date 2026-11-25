@@ -8,10 +8,10 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
-    var categoryNavigation = window.SymconEChartsCategoryNavigation.create();
+    var categoryNavigation = window.eChartsCategoryNavigation.create();
     var gradientLegendSelection = {};
     var echartsDesign = window.SYMC_ECHARTS_DESIGN;
-    var barPatterns = window.SymconEChartsPattern.create(function () {
+    var barPatterns = window.eChartsPattern.create(function () {
         if (typeof window.requestAnimationFrame === 'function') {
             window.requestAnimationFrame(function () { render(currentState); });
         } else if (typeof window.setTimeout === 'function') {

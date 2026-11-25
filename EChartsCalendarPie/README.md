@@ -5,7 +5,7 @@ Die Anteile können Tagesmittelwerte, Tagesverbrauch oder Zustandsdauern sein.
 Das Modul liest ausschließlich: Quellen, Archivaufzeichnung und Archivwerte
 werden weder verändert noch automatisch ergänzt.
 
-Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+Installation: Im **Symcon-Modulstore** nach **eCharts** suchen.
 [Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der

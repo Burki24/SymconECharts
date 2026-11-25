@@ -6,7 +6,7 @@
 
 ## Kontext
 
-Nach den Balken- und Gauge-Familien soll SymconECharts weitere Möglichkeiten
+Nach den Balken- und Gauge-Familien soll eCharts weitere Möglichkeiten
 von Apache ECharts erschließen. Kreis, Donut und Nightingale-Rose verwenden
 denselben Vertrag für aktuelle Anteile, nicht den Archivvertrag der
 TimeSeries- oder BarHistory-Module. Sie werden daher nicht als Modus eines

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsDataProtocol;
+use eCharts\EChartsDataProtocol;
 
 /** Exercise both chart families via the authenticated read-only transport with synthetic archives. */
 function verifyCartesianPeriodSelection(IPSModuleStrict $module, int $now, array &$requests): void
@@ -30,7 +30,7 @@ function verifyCartesianPeriodSelection(IPSModuleStrict $module, int $now, array
             'Designer previews must match each output and keep space for plotted values.'
         );
     }
-    assertGatewayGauge(preg_match('#/hook/SymconECharts/state/\d+/([a-f0-9]{32})#', $tile, $match) === 1, 'Tile period requests need the targeted channel.');
+    assertGatewayGauge(preg_match('#/hook/eCharts/state/\d+/([a-f0-9]{32})#', $tile, $match) === 1, 'Tile period requests need the targeted channel.');
     $state = static function (string $output, string $period) use ($module, $match): array
     {
         $operation = EChartsDataProtocol::OPERATION_IPSVIEW_STATE;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Shared property and form contract for ECharts entrance and update animations. */
 trait EChartsAnimationDesign

@@ -40,5 +40,5 @@
         return projected;
     }
 
-    window.SymconEChartsArchiveStack = { project: project };
+    window.eChartsArchiveStack = { project: project };
 }());

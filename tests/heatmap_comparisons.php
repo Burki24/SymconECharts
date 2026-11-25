@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsDataProtocol;
+use eCharts\EChartsDataProtocol;
 
 (static function (): void
 {
@@ -97,7 +97,7 @@ use SymconECharts\EChartsDataProtocol;
         assertGatewayGauge(count($requests) - $before === 2 && $data['panels'][1]['cells'][0]['value'] === 77.0
             && $chart->GetTestReferences() === [58001], 'Repeated IDs compare different periods and deduplicate exact requests/references.');
         $tile = $chart->GetVisualizationTile();
-        preg_match('#/hook/SymconECharts/state/5000/([a-f0-9]{32})#', $tile, $channel);
+        preg_match('#/hook/eCharts/state/5000/([a-f0-9]{32})#', $tile, $channel);
         foreach (['tile', 'ipsview'] as $output) {
             $baseKey = $output === 'tile' ? $data['heatmap']['viewKey'] : $bootstrap($chart->GetIPSViewHTML())['chart']['heatmap']['viewKey'];
             $request = ['DataID' => '{E4749B72-912B-E3E3-1C57-D19019FFDD84}'] + EChartsDataProtocol::CreateRequest('ipsview.state', [

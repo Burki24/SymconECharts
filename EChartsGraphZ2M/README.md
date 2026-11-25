@@ -6,7 +6,7 @@ verbundenes `EChartsGateway` und eine Instanz des Moduls
 `Zigbee2MQTT Network Map`, die bereits eine Netzwerkanalyse abgeschlossen und
 die Exportdateien erstellt hat.
 
-Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+Installation: Im **Symcon-Modulstore** nach **eCharts** suchen.
 [Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der

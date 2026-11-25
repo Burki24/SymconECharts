@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 use Closure;
 use RuntimeException;
 use Throwable;
 
+require_once __DIR__ . '/EChartsAsset.php';
 require_once __DIR__ . '/EChartsPeriodControl.php';
 require_once __DIR__ . '/EChartsViewDiagnostics.php';
 
@@ -19,7 +20,6 @@ trait EChartsIPSViewTransport
     use EChartsViewDiagnostics;
 
     private const ECHARTS_IPSVIEW_CHANNEL_ATTRIBUTE = 'IPSViewTransportChannel';
-    private const ECHARTS_IPSVIEW_HOOK = '/hook/SymconECharts';
 
     protected function RegisterEChartsIPSViewTransport(): void
     {
@@ -29,7 +29,7 @@ trait EChartsIPSViewTransport
     /** Keeps the common interaction code outside large chart HTML payloads. */
     protected function VisualizationInteractionScriptURL(): string
     {
-        return self::ECHARTS_IPSVIEW_HOOK . '/assets/interaction.js';
+        return EChartsAsset::HOOK_PATH . '/assets/interaction.js';
     }
 
     protected function EChartsPeriodSelectionEnabled(bool $ipsView): bool
@@ -61,8 +61,8 @@ trait EChartsIPSViewTransport
         $suffix = '/' . $this->InstanceID . '/' . $channel;
 
         return [
-            'statePath'  => self::ECHARTS_IPSVIEW_HOOK . '/state' . $suffix,
-            'socketPath' => self::ECHARTS_IPSVIEW_HOOK . '/WS' . $suffix
+            'statePath'  => EChartsAsset::HOOK_PATH . '/state' . $suffix,
+            'socketPath' => EChartsAsset::HOOK_PATH . '/WS' . $suffix
         ];
     }
 

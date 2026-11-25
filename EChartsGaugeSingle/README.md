@@ -1,12 +1,12 @@
 # EChartsGaugeSingle
 
-Gerätemodul der SymconECharts-Library für ein Gauge-Diagramm mit genau einer
+Gerätemodul der eCharts-Library für ein Gauge-Diagramm mit genau einer
 numerischen Quellvariable. Eine Gauge-Single-Instanz stellt die native
 Symcon-Kacheldarstellung und optional ein separat platzierbares WebContent-
 Widget für IPSView bereit. Datenquelle und fachliche Diagrammkonfiguration
 werden dabei nur einmal gepflegt.
 
-Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+Installation: Im **Symcon-Modulstore** nach **eCharts** suchen.
 [Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
@@ -187,10 +187,10 @@ IPSView-Ausgabeweg benötigt, nicht für native Kacheln.
 ## 3. Software-Installation
 
 Das Gauge-Modul wird gemeinsam mit EChartsGateway über die Library
-**SymconECharts** eingebunden. Es gibt kein separat zu installierendes
+**eCharts** eingebunden. Es gibt kein separat zu installierendes
 Gerätepaket.
 
-Im **Symcon-Modulstore** nach **SymconECharts** suchen und die Library
+Im **Symcon-Modulstore** nach **eCharts** suchen und die Library
 installieren. Sie enthält das Gateway und alle Diagrammmodule.
 
 ## 4. Einrichten der Instanzen in Symcon

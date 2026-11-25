@@ -5,7 +5,7 @@ Stufen werden manuell benannt und angeordnet. Die Breite richtet sich nach
 dem größten aktuellen Wert, nicht nach einer Gesamtsumme. Das Diagramm setzt
 weder einen Prozess noch fallende Werte voraus.
 
-Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+Installation: Im **Symcon-Modulstore** nach **eCharts** suchen.
 [Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der

@@ -6,7 +6,7 @@ gruppiert oder gestapelt möglich. Ohne Normalisierung müssen alle Quellen
 dieselbe wirksame Einheit besitzen. Historische Balken gehören zu
 [EChartsBarHistory](../EChartsBarHistory/README.md).
 
-Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+Installation: Im **Symcon-Modulstore** nach **eCharts** suchen.
 [Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der

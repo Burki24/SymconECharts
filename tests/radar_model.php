@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/EChartsRadar/RadarModel.php';
 
-use SymconECharts\RadarModel;
+use eCharts\RadarModel;
 
 $axes = [
     ['Key' => 'temperature', 'Label' => 'Temperature', 'Minimum' => -20, 'Maximum' => 40, 'Unit' => '°C'],

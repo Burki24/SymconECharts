@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 require_once __DIR__ . '/helper/DebugFlowHelper.php';
 require_once __DIR__ . '/helper/ConfigurationFormHelper.php';

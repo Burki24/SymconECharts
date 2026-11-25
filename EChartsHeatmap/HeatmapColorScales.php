@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /**
  * Color samples reconstructed from figures 1 and 5 of Jochen Schiewe,

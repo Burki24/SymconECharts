@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsGraphOutput;
+use eCharts\EChartsGraphOutput;
 
 require_once dirname(__DIR__) . '/libs/EChartsGraphOutput.php';
 

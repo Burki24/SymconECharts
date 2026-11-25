@@ -289,7 +289,7 @@ assertGatewayGauge(!str_starts_with($importer->UpdateSourceImportFromForm(json_e
 $oversized = array_slice($hundred, 0, 99);
 $oversized[0]['RetainedExtension'] = str_repeat('x', 65500);
 try {
-    SymconECharts\EChartsSourceImport::Append($oversized, [end($selected)], $hundred, 100);
+    eCharts\EChartsSourceImport::Append($oversized, [end($selected)], $hundred, 100);
     throw new RuntimeException('The 64 KiB guard did not reject an oversized draft.');
 } catch (InvalidArgumentException $exception) {
     assertGatewayGauge(str_contains($exception->getMessage(), '64 KiB'), 'The source byte budget must remain strict.');
@@ -303,7 +303,7 @@ for ($i = 101; $i < 501; ++$i) {
 $request['Action'] = 'search';
 $GLOBALS['symconTestTreeChildren'][9100] = array_slice($GLOBALS['symconTestTreeChildren'][9100], 0, 500);
 assertGatewayGauge(
-    count(SymconECharts\EChartsSourceImport::Search($request, [])) === 500,
+    count(eCharts\EChartsSourceImport::Search($request, [])) === 500,
     'A complete result at the 500-match boundary must remain usable.'
 );
 $GLOBALS['symconTestTreeChildren'][9100][] = 9700;
@@ -317,7 +317,7 @@ foreach (range(10000, 15000) as $id) {
 }
 $GLOBALS['symconTestTreeChildren'][9100] = range(10000, 14998);
 assertGatewayGauge(
-    SymconECharts\EChartsSourceImport::Search($request, []) === [],
+    eCharts\EChartsSourceImport::Search($request, []) === [],
     'A complete search of exactly 5000 objects including its root must succeed.'
 );
 $GLOBALS['symconTestTreeChildren'][9100] = range(10000, 14999);

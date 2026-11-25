@@ -4,7 +4,7 @@ Stellt Archivwerte von einer bis 32 numerischen Symcon-Variablen als Balken
 entlang einer Zeitachse dar. Für aktuelle Kategorienvergleiche verwenden Sie
 [EChartsBarCategory](../EChartsBarCategory/README.md).
 
-Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+Installation: Im **Symcon-Modulstore** nach **eCharts** suchen.
 [Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der

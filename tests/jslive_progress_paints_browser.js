@@ -10,7 +10,7 @@ assert.ok(['1','2','3'].includes(dpr));
 const engine=fs.readFileSync(path.join(reference,'SymconJSLive/js/loading-Bar/0.1.1-jslive.1/loading-bar.js'),'utf8');
 assert.equal(crypto.createHash('sha256').update(engine).digest('hex'),JSON.parse(read('tests/fixtures/jslive-progress-geometry.json')).sourceHashes.engine);
 const states=JSON.parse(cp.execFileSync(process.env.PHP_BINARY||'php',['tests/jslive_progress_paints.php','--emit'],{cwd:root,encoding:'utf8',maxBuffer:8388608}));
-const directory=fs.mkdtempSync(path.join(os.tmpdir(),'SymconECharts-progress-paints-')),html=path.join(directory,'paints.html');
+const directory=fs.mkdtempSync(path.join(os.tmpdir(),'eCharts-progress-paints-')),html=path.join(directory,'paints.html');
 const probe=`<script>
 // The source engine replaces Element.prototype.append; use appendChild for the probe.
 var results=[],temporal=[],updates=[],errors=[],progress=document.createElement('pre');progress.id='paint-progress';document.body.appendChild(progress);addEventListener('error',function(e){errors.push(String(e.message));progress.textContent=JSON.stringify({results:results,errors:errors});});

@@ -5,7 +5,7 @@
 
 ## Kontext
 
-SymconECharts und SymconiCloud brauchen dieselben Informationen zum nativen
+eCharts und SymconiCloud brauchen dieselben Informationen zum nativen
 Kachelkopf. Lokale Prüfungen von `ObjectIsHiddenTitle` und wiederholte
 Kopfbereichshöhen in JavaScript hatten bisher keinen gemeinsamen Vertrag.
 Diagrammtitel und Bedienelemente brauchen weiterhin ihre eigenen Abstände.

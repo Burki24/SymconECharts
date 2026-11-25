@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 use RuntimeException;
 
@@ -35,7 +35,9 @@ final class EChartsAsset
     public const CALENDAR_SHA256 = '9879dece9194b401d95d4e8061b43bf83bc3d6c08dacb320406f48de5b8d31a5';
     public const BOXPLOT_SHA256 = '485a64860d8f254bdfb18c230fc38ec996c96dea6af29ef0d7830d346fe0d9a6';
     public const TIME_SERIES_SHA256 = self::CARTESIAN_SHA256;
-    public const RENDERER_PATH = '/hook/SymconECharts/assets/echarts/';
+    public const HOOK_NAME = 'eCharts';
+    public const HOOK_PATH = '/hook/' . self::HOOK_NAME;
+    public const RENDERER_PATH = self::HOOK_PATH . '/assets/echarts/';
     public const THEME_AUTO = 'auto';
     public const THEME_SHA256 = [
         'dark'        => 'ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458',

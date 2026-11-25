@@ -11,7 +11,7 @@ from typing import Any
 
 VERSION_PATTERN = re.compile(r"^(\d+)\.(\d+)$")
 SHA_PATTERN = re.compile(r"^[0-9a-fA-F]{40}$")
-PREPARED_BETA_MARKER = "<!-- symconecharts:prepared-beta -->"
+PREPARED_BETA_MARKER = "<!-- echarts:prepared-beta -->"
 PREPARED_BETA_PATTERN = re.compile(
     r"^" + re.escape(PREPARED_BETA_MARKER)
     + r"\n(# \d{2}\.\d{2}\.\d{4} - Version )(\d+\.\d+)( \(Beta\))$",

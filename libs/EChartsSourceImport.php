@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 use Burki24\SymconModuleHelper\VariableSearchHelper;
 use InvalidArgumentException;

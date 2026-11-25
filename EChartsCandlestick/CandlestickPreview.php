@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Synthetic geometry only: editing a designer never reads archive data. */
 trait CandlestickPreview

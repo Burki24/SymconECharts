@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\HeatmapComparison;
+use eCharts\HeatmapComparison;
 
 require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';

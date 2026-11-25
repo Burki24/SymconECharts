@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 use InvalidArgumentException;
 use RuntimeException;
@@ -33,7 +33,7 @@ trait EChartsTreeJSONSource
     {
         return $this->DebugFlowCall(__FUNCTION__, __LINE__, function () use ($JSON): string
         {
-            $lock = 'SymconECharts.TreeJSON.' . $this->InstanceID;
+            $lock = 'eCharts.TreeJSON.' . $this->InstanceID;
             if (!IPS_SemaphoreEnter($lock, 1000)) {
                 return EChartsImportJson::Canonical(['status' => 'rejected'] + $this->TreeJSONRejected(new InvalidArgumentException('IMPORT_BUSY:')));
             }
@@ -66,7 +66,9 @@ trait EChartsTreeJSONSource
                     return EChartsImportJson::Canonical(['status' => 'rejected'] + $this->TreeJSONRejected($exception));
                 }
                 $hash = $model['documentHash'];
-                if (($same['documentHash'] ?? null) === $hash) {
+                $activeDocument = $expectedConfiguration['JsonDocument'];
+                if (($same['documentHash'] ?? null) === $hash && ($activeDocument === $model['document']
+                    || EChartsTreeJSON::MigrateStoredDocument($activeDocument) === null)) {
                     return EChartsImportJson::Canonical(['status' => 'unchanged', 'documentHash' => $hash]);
                 }
                 $configuration = $expectedConfiguration;
@@ -409,7 +411,7 @@ trait EChartsTreeJSONSource
 
     private function ReadTreeJSONHierarchy(): array
     {
-        $lock = 'SymconECharts.TreeJSON.Read.' . $this->InstanceID;
+        $lock = 'eCharts.TreeJSON.Read.' . $this->InstanceID;
         if (!IPS_SemaphoreEnter($lock, 1000)) {
             throw new RuntimeException('IMPORT_BUSY:');
         }

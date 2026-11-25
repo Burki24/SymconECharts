@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/EChartsJSLiveTime.php';
 
-use SymconECharts\EChartsJSLiveTime;
+use eCharts\EChartsJSLiveTime;
 
 $fixtures = json_decode(file_get_contents(__DIR__ . '/fixtures/jslive-calendar-rules.json'), true, 32, JSON_THROW_ON_ERROR);
 foreach ($fixtures as $fixture) {

@@ -11,18 +11,18 @@ use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
 use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
-use SymconECharts\EChartsAnimationDesign;
-use SymconECharts\EChartsAsset;
-use SymconECharts\EChartsBarPreview;
-use SymconECharts\EChartsBarPreviewForm;
-use SymconECharts\EChartsDesignerSections;
-use SymconECharts\EChartsIPSViewBackground;
-use SymconECharts\EChartsIPSViewDesignForm;
-use SymconECharts\EChartsIPSViewTransport;
-use SymconECharts\EChartsTransientRefresh;
-use SymconECharts\EChartsTreeJSONSource;
-use SymconECharts\EChartsTreePreview;
-use SymconECharts\TreeHierarchy;
+use eCharts\EChartsAnimationDesign;
+use eCharts\EChartsAsset;
+use eCharts\EChartsBarPreview;
+use eCharts\EChartsBarPreviewForm;
+use eCharts\EChartsDesignerSections;
+use eCharts\EChartsIPSViewBackground;
+use eCharts\EChartsIPSViewDesignForm;
+use eCharts\EChartsIPSViewTransport;
+use eCharts\EChartsTransientRefresh;
+use eCharts\EChartsTreeJSONSource;
+use eCharts\EChartsTreePreview;
+use eCharts\TreeHierarchy;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
@@ -44,11 +44,12 @@ require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsTreePreview.php';
 require_once __DIR__ . '/../libs/TreeHierarchy.php';
 require_once __DIR__ . '/../libs/EChartsTreeJSONSource.php';
+require_once __DIR__ . '/../libs/EChartsPersistenceMigration.php';
 
 class EChartsTree extends IPSModuleStrict
 {
     use \Burki24\SymconModuleHelper\DebugFlowHelper;
-    use \SymconECharts\EChartsDebugFlow;
+    use \eCharts\EChartsDebugFlow;
 
     use ConfigurationFormHelper;
     use DataFlowHelper;
@@ -89,6 +90,17 @@ class EChartsTree extends IPSModuleStrict
         'VariableColor'        => -1,
         'EdgeColor'            => -1
     ];
+
+    public function Migrate(string $JSONData): string
+    {
+        return \eCharts\EChartsPersistenceMigration::UpdateString(
+            $JSONData,
+            parent::Migrate($JSONData),
+            'configuration',
+            'JsonDocument',
+            \eCharts\EChartsTreeJSON::MigrateStoredDocument(...)
+        );
+    }
 
     public function Create(): void
     {
@@ -569,7 +581,7 @@ class EChartsTree extends IPSModuleStrict
             $this->DebugEChartsSetStatus(IS_ACTIVE);
         }
         $json = json_encode($this->TreeChartData($hierarchy, $ipsView), JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        if ($this->ReadPropertyString('SourceMode') !== 'objects' && strlen($json) > \SymconECharts\EChartsTreeJSON::MAXIMUM_BYTES - \SymconECharts\EChartsTreeJSON::TRANSPORT_RESERVE_BYTES) {
+        if ($this->ReadPropertyString('SourceMode') !== 'objects' && strlen($json) > \eCharts\EChartsTreeJSON::MAXIMUM_BYTES - \eCharts\EChartsTreeJSON::TRANSPORT_RESERVE_BYTES) {
             throw new RuntimeException('LIMIT_EXCEEDED:');
         }
         return $json;

@@ -22,7 +22,7 @@ Familie komplexer werden.
 
 ## Entscheidung
 
-SymconECharts verwendet getrennte Gerätemodule je Chartfamilie.
+eCharts verwendet getrennte Gerätemodule je Chartfamilie.
 
 - Das erste Gerätemodul heißt `EChartsGauge`; eine Instanz stellt genau einen
   unabhängig konfigurierbaren Gauge-Chart bereit.

@@ -1,8 +1,8 @@
 # Öffentliche Beta: Store-Unterlagen und Veröffentlichungsstand
 
-Stand: 05.11.2026. **SymconECharts ist als Beta im Symcon-Modulstore
+Stand: 05.11.2026. **eCharts ist als Beta im Symcon-Modulstore
 veröffentlicht.** Der Eigentümer hat die Veröffentlichung bestätigt; die
-[öffentliche Ankündigung vom 03.11.2026](https://community.symcon.de/t/beta-modul-symconecharts-nachfolger-von-jslive-charts/144844)
+[öffentliche Ankündigung vom 03.11.2026](https://community.symcon.de/t/144844)
 nennt die sofortige Verfügbarkeit. Die lesende Store-Abfrage bestätigt den
 Beta-Eintrag unter `de.burki24.symconecharts`. Eine Stable-Veröffentlichung
 wird damit nicht behauptet. Die frühere Terminplanung 31.10.2026 und die
@@ -30,16 +30,20 @@ zum Umfang des ersten Store-Stands erklärt.
 
 ## Store-Angaben
 
+Der neue Produktname auf `dev` lautet **eCharts**. Beim nächsten Store-Update
+werden Anzeigename und Git-Adresse im bestehenden Beta-Eintrag aktualisiert.
+Die Bundle-ID identifiziert weiterhin dieselbe Bibliothek.
+
 | Feld | Inhalt / Nachweis |
 | --- | --- |
 | Bundle-ID | `de.burki24.symconecharts` |
 | Kanal | Beta; im Store bestätigt. |
 | Versionsstand | `library.json` des tatsächlich im Store ausgewählten Commits; kann vom aktuellen `dev` abweichen. |
 | Erste öffentliche Ankündigung | `03.11.2026`; die frühere Planung `31.10.2026` ist überholt. |
-| Git-URL | `https://github.com/Burki24/SymconECharts` — Store-Quelle, keine Installationsanleitung über die Modulverwaltung. |
+| Git-URL | `https://github.com/Burki24/eCharts` — Store-Quelle, keine Installationsanleitung über die Modulverwaltung. |
 | Sprache | Deutsch (`de`), vom Eigentümer festgelegt. |
-| Name / Installation | Im Symcon-Modulstore nach **SymconECharts** suchen und die Beta installieren. |
-| Dokumentation | `https://github.com/Burki24/SymconECharts/blob/dev/README.md` |
+| Name / Installation | Im Symcon-Modulstore nach **eCharts** suchen und die Beta installieren. |
+| Dokumentation | `https://github.com/Burki24/eCharts/blob/dev/README.md` |
 | Kategorie | Visualisierung; die konkrete Konto-Kategorien-ID wurde hier nicht unabhängig geprüft. |
 | Mindestversion | Symcon 9.0 laut `library.json`; reale Abnahme auf Symcon 9.1/PHP 8.5. |
 | Lizenz | PolyForm Noncommercial 1.0.0; Fremdkomponenten gemäß `THIRD_PARTY_NOTICES.md`. |
@@ -52,7 +56,7 @@ Store-Eintrag; weitere Einreichungen nimmt ausschließlich der Eigentümer vor.
 ## Beschreibung
 
 ```text
-SymconECharts stellt aktuelle Variablenwerte, Archivdaten und ausgewählte
+eCharts stellt aktuelle Variablenwerte, Archivdaten und ausgewählte
 Objektbeziehungen als responsive Apache-ECharts-Diagramme dar. Die Library
 bietet 31 Diagrammfamilien, darunter Gauges, Zeitreihen, Balken, Kreisdiagramme,
 Heatmaps, Kalender, Graphen und Zustandszeitdiagramme. Native Symcon-Kacheln
@@ -68,7 +72,7 @@ noch nicht vollständig.
 ## Versionsinformation für die erste Beta
 
 ```text
-Erste öffentliche Beta von SymconECharts mit 31 Diagrammfamilien für aktuelle
+Erste öffentliche Beta von eCharts mit 31 Diagrammfamilien für aktuelle
 Werte, Archive und Objektbeziehungen. Die Ausgabe unterstützt native Kacheln
 und IPSView, getrennte Designer, Vorschauen und Live-Aktualisierungen.
 
@@ -146,10 +150,10 @@ Quellcommit `ee98624b7c9549c538d9aa57c9e7d6af1fd8ae42` vom 05.11.2026,
 
 | Nachweis | Ergebnis |
 | --- | --- |
-| [Check Style auf 9d371fc](https://github.com/Burki24/SymconECharts/actions/runs/41971699540) | Erfolgreich. |
-| [Tests auf 9d371fc](https://github.com/Burki24/SymconECharts/actions/runs/41971699449) | Erfolgreich. |
-| [Metadatenlauf des Quellcommits ee98624](https://github.com/Burki24/SymconECharts/actions/runs/41971395217) | Erfolgreich; erzeugte Version 1.405. |
-| [Metadatenlauf auf 9d371fc](https://github.com/Burki24/SymconECharts/actions/runs/41971699436) | Absichtlich übersprungen; Bot-Commit erzeugt keine neue Version. |
+| [Check Style auf 9d371fc](https://github.com/Burki24/eCharts/actions/runs/41971699540) | Erfolgreich. |
+| [Tests auf 9d371fc](https://github.com/Burki24/eCharts/actions/runs/41971699449) | Erfolgreich. |
+| [Metadatenlauf des Quellcommits ee98624](https://github.com/Burki24/eCharts/actions/runs/41971395217) | Erfolgreich; erzeugte Version 1.405. |
+| [Metadatenlauf auf 9d371fc](https://github.com/Burki24/eCharts/actions/runs/41971699436) | Absichtlich übersprungen; Bot-Commit erzeugt keine neue Version. |
 
 Dies ist kein Store-Veröffentlichungsnachweis für 1.405. Nach dem nächsten
 Eigentümer-Commit/Push sind dessen eigene abschließende CI- und Metadatenläufe
@@ -172,10 +176,10 @@ Es wird nicht auf das geplante Veröffentlichungsdatum umgeschrieben.
 
 | Nachweis | Ergebnis |
 | --- | --- |
-| [Check Style auf 8daade3](https://github.com/Burki24/SymconECharts/actions/runs/40909319039) | Erfolgreich, exakt auf dem Metadatencommit. |
-| [Tests auf 8daade3](https://github.com/Burki24/SymconECharts/actions/runs/40909319104) | Erfolgreich, exakt auf dem Metadatencommit. |
-| [Metadatenlauf des Quellcommits c3b429b](https://github.com/Burki24/SymconECharts/actions/runs/40908926284) | Erfolgreich; erzeugte 8daade3 und Version 1.356. Auch Style und Tests des Quellcommits sind erfolgreich. |
-| [Metadatenlauf auf 8daade3](https://github.com/Burki24/SymconECharts/actions/runs/40909319107) | Absichtlich übersprungen: Bot-Commit löst keine weitere Erhöhung aus. Kein fehlgeschlagener Check. |
+| [Check Style auf 8daade3](https://github.com/Burki24/eCharts/actions/runs/40909319039) | Erfolgreich, exakt auf dem Metadatencommit. |
+| [Tests auf 8daade3](https://github.com/Burki24/eCharts/actions/runs/40909319104) | Erfolgreich, exakt auf dem Metadatencommit. |
+| [Metadatenlauf des Quellcommits c3b429b](https://github.com/Burki24/eCharts/actions/runs/40908926284) | Erfolgreich; erzeugte 8daade3 und Version 1.356. Auch Style und Tests des Quellcommits sind erfolgreich. |
+| [Metadatenlauf auf 8daade3](https://github.com/Burki24/eCharts/actions/runs/40909319107) | Absichtlich übersprungen: Bot-Commit löst keine weitere Erhöhung aus. Kein fehlgeschlagener Check. |
 
 Der gepushte Stand enthält die StateTimeline-Dauerkorrektur und HelperBundle
 3.29.3. Sein Changelog ist automatisch auf dieselbe Version `1.356` fortgeführt.
@@ -188,7 +192,7 @@ ihre Commit-IDs und Ergebnisse werden hier nicht vorweggenommen.
 
 ## Automatische Fortschreibung während der Beta
 
-Die Markierung `<!-- symconecharts:prepared-beta -->` bleibt auf ausdrücklichen
+Die Markierung `<!-- echarts:prepared-beta -->` bleibt auf ausdrücklichen
 Eigentümerwunsch aktiv. Der vorhandene Metadatenworkflow übergibt
 `--prepared-beta-changelog CHANGELOG.md` an den Versionsplaner und schreibt
 `library.json` und die markierte Beta-Überschrift gemeinsam im Bot-Commit.

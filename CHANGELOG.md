@@ -2,6 +2,10 @@
 
 ## Geändert
 
+- Die Bibliothek und ihr GitHub-Repository heißen jetzt **eCharts**.
+  Bibliotheks- und Modul-IDs bleiben für Updates bestehender Installationen erhalten.
+  IPSView nutzt den neuen Gateway-Pfad `/hook/eCharts`. Bestehende
+  Tree-Dokumente und JSLive-Importjournale werden auf die neuen Kennungen überführt.
 - IPSView-Diagramme laden die Apache-ECharts-Laufzeit über den EChartsGateway.
   Das verkleinert den Symcon-Snapshot, auch bei aus JSLive übernommenen
   Diagrammen. Bestehende IPSView-Verknüpfungen bleiben erhalten.
@@ -82,12 +86,12 @@
   überschrittene Listenbudgets bleiben gesperrt. Bestehende Textwerte bleiben
   verwendbar; Quellen, Archivwerte und gespeicherte Designs werden nicht geändert.
 
-<!-- symconecharts:prepared-beta -->
+<!-- echarts:prepared-beta -->
 # 03.11.2026 - Version 1.420 (Beta)
 
 Fortgeschriebene Beta-Übersicht: Die erste öffentliche Beta ist seit
 03.11.2026 im Symcon-Modulstore verfügbar; siehe
-[Community-Ankündigung](https://community.symcon.de/t/beta-modul-symconecharts-nachfolger-von-jslive-charts/144844).
+[Community-Ankündigung](https://community.symcon.de/t/144844).
 Auf Wunsch des Eigentümers folgt die Versionsnummer dieser Überschrift
 weiterhin automatisch dem aktuellen `dev`-Stand. Das Datum bezeichnet den
 Beginn der öffentlichen Beta, nicht das Veröffentlichungsdatum jeder späteren
@@ -99,14 +103,14 @@ unter **Unveröffentlicht**, bis ihr jeweiliger Veröffentlichungsstand feststeh
 ## Neu
 
 - Die Migrationsanleitung zeigt 14 bereitgestellte JSLive-/ECharts-
-  Vergleichspaare und vier echte Formularausschnitte für Export, Paketprüfung,
+  Vergleichspaare und drei echte Formularausschnitte für Paketprüfung,
   Planvorbereitung und Bestätigung. Die Haupt-README enthält ausgewählte
   Gegenüberstellungen und verlinkt die vollständige Galerie.
 
 - Alle Installationsanleitungen nennen den Symcon-Modulstore und den
-  Eintragsnamen **SymconECharts** statt einer Installation über die Repository-URL.
+  Eintragsnamen **eCharts** statt einer Installation über die Repository-URL.
 
-- Die Haupt-README zeigt das bereitgestellte SymconECharts-Titelbild.
+- Die Haupt-README zeigt das bereitgestellte eCharts-Titelbild.
 
 - Die Benutzeranleitungen sind vereinheitlicht und um eine zentrale
   Konfigurationsreferenz mit Standardwerten, Quellenfeldern und vollständigen

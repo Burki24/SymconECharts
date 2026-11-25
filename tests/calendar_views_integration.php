@@ -80,7 +80,7 @@ declare(strict_types=1);
             foreach (['tile', 'ipsview'] as $output) {
                 $request = $calendarRequest;
                 $request['Payload']['Output'] = $output;
-                $response = SymconECharts\EChartsDataProtocol::DecodeResponse($calendar->ReceiveData(json_encode($request, JSON_THROW_ON_ERROR)), 'ipsview.state');
+                $response = eCharts\EChartsDataProtocol::DecodeResponse($calendar->ReceiveData(json_encode($request, JSON_THROW_ON_ERROR)), 'ipsview.state');
                 $navigated = $response['Payload']['State']['chart']['calendar'];
                 assertGatewayGauge(
                     $response['Success'] && $navigated['windowOffset'] === 1 && $navigated['period'] === $period
@@ -103,7 +103,7 @@ declare(strict_types=1);
         $periodRequest['Payload']['Output'] = 'tile';
         $periodRequest['Payload']['Period'] = 'month';
         $periodRequest['Payload']['WindowOffset'] = 1;
-        $state = SymconECharts\EChartsDataProtocol::DecodeResponse(
+        $state = eCharts\EChartsDataProtocol::DecodeResponse(
             $calendar->ReceiveData(json_encode($periodRequest, JSON_THROW_ON_ERROR)),
             'ipsview.state'
         )['Payload']['State'];

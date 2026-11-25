@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\ZigbeeGraphModel;
+use eCharts\ZigbeeGraphModel;
 
 require_once dirname(__DIR__) . '/libs/ZigbeeGraphModel.php';
 

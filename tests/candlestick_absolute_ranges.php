@@ -152,7 +152,7 @@ require_once __DIR__ . '/archive_period_view.php';
             $chart->SetTestProperty('AbsoluteEnd', '{}');
             $chart->ApplyChanges();
             $legacy = $model();
-            $expected = SymconECharts\CandlestickData::Window($range, 'hour', $chart->now, 'Europe/Berlin');
+            $expected = eCharts\CandlestickData::Window($range, 'hour', $chart->now, 'Europe/Berlin');
             assertGatewayGauge(
                 $legacy['range'] === ['key' => $range, 'startTimestamp' => $expected['StartTimestamp'],
                     'endTimestamp'          => $expected['EndTimestamp'], 'timezone' => 'Europe/Berlin']

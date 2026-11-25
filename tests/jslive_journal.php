@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/EChartsJSLiveJournal.php';
 
-use SymconECharts\EChartsImportJson;
-use SymconECharts\EChartsJSLiveImportKernel;
-use SymconECharts\EChartsJSLiveJournal;
+use eCharts\EChartsImportJson;
+use eCharts\EChartsJSLiveImportKernel;
+use eCharts\EChartsJSLiveJournal;
 
 set_error_handler(static function (int $severity, string $message): never
 { throw new RuntimeException($message); });
@@ -72,7 +72,7 @@ final class ImportJournalKernel implements EChartsJSLiveImportKernel
         $id = 20000 + ++$this->creates;
         $this->objects[$id] = ['moduleID' => $moduleID, 'name' => 'New', 'parentID' => 0, 'connectionID' => 0,
             'info'                        => '', 'children' => [], 'configuration' => ['Title' => '', 'SourceVariableID' => 0]];
-        $this->objects[$id]['creationGuard'] = \SymconECharts\EChartsJSLiveTargetSnapshot::CreationHash($this->objects[$id]);
+        $this->objects[$id]['creationGuard'] = \eCharts\EChartsJSLiveTargetSnapshot::CreationHash($this->objects[$id]);
         $this->Checkpoint();
         return $id;
     }
@@ -114,6 +114,10 @@ final class ImportJournalKernel implements EChartsJSLiveImportKernel
         $this->Checkpoint();
         return ['ipsview' => $id + 1];
     }
+    public function MigrateSeals(int $id, string $marker, array $snapshot, array $receipt): void
+    {
+        $this->objects[$id]['info'] = $marker;
+    }
     private function Checkpoint(): void
     {
         if (++$this->calls === $this->crashAfter) {
@@ -150,7 +154,19 @@ $result = $engine->Execute($plan, $confirm);
 journalAssert($result['charts']['instance:12000']['status'] === 'complete' && $kernel->creates === 1, 'Confirmed import must complete.');
 $journalID = $result['charts']['instance:12000']['journalID'];
 $id = $result['charts']['instance:12000']['targetID'];
+$legacyMarker = \eCharts\EChartsIdentity::LegacyProductName() . ':JSLive:1:' . hash('sha256', $chart['identity']) . ':' . $journalID;
+journalAssert(!\eCharts\EChartsJSLiveOwnership::IsValid(lcfirst($legacyMarker)), 'A differently cased historical origin is not an owned target.');
+journalAssert(str_starts_with($kernel->objects[$id]['info'], 'eCharts:JSLive:1:'), 'A new import must use the current library name.');
+// Simulate the installed V1 journal. The kernel returns canonical, verified ownership metadata.
+$kernel->journal['entries'][$journalID]['marker'] = $legacyMarker;
+$kernel->journal['entries'][$journalID]['snapshot']['info'] = $legacyMarker;
 $again = $engine->Execute($plan, $confirm);
+journalAssert(
+    $again['charts']['instance:12000']['status'] === 'complete'
+    && $kernel->journal['entries'][$journalID]['marker'] === $kernel->objects[$id]['info']
+    && !isset($kernel->journal['entries'][$journalID]['v1Seal']),
+    'The V1 journal must persist the migrated marker and finish the recorded seal migration.'
+);
 journalAssert($again['charts']['instance:12000']['targetID'] === $id && $kernel->creates === 1 && $kernel->applies === 1, 'Retry must reuse target without ApplyChanges.');
 $kernel->objects[$id]['configuration']['Title'] = 'User change';
 $edited = $kernel->objects;
@@ -261,7 +277,7 @@ foreach (['staged', 'stage-lost', 'activated', 'legacy-stage-lost', 'legacy-acti
         $reloaded->objects[$targetID]['info'] = 'Owner info';
     }
     $reloaded->objects[$targetID]['creationGuard'] = $mode === 'random-guard' ? str_repeat('f', 64)
-        : \SymconECharts\EChartsJSLiveTargetSnapshot::CreationHash($reloaded->objects[$targetID]);
+        : \eCharts\EChartsJSLiveTargetSnapshot::CreationHash($reloaded->objects[$targetID]);
     $beforeReload = $reloaded->objects;
     $applies = $reloaded->applies;
     $stages = $reloaded->stages;

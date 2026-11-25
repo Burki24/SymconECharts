@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsHierarchySources;
+use eCharts\EChartsHierarchySources;
 
 require_once __DIR__ . '/../libs/EChartsHierarchySources.php';
 

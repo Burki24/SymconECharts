@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsDataProtocol;
+use eCharts\EChartsDataProtocol;
 
 /** Exercise viewer-local ranges on an existing valid fixed-period family fixture. */
 function verifyArchivePeriodView(IPSModuleStrict $chart): void

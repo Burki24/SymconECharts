@@ -483,7 +483,7 @@ $pict->SetTestProperty('Sources', json_encode($manyPictorialSources, JSON_THROW_
 $pict->ApplyChanges();
 assertGatewayGauge($pict->GetTestStatus() === 201, 'A 101st PictorialBar source must fail visibly, not be silently omitted.');
 try {
-    SymconECharts\EChartsCurrentComparisonSources::Resolve(json_encode(array_slice($manyPictorialSources, 0, 17), JSON_THROW_ON_ERROR), 'Funnel');
+    eCharts\EChartsCurrentComparisonSources::Resolve(json_encode(array_slice($manyPictorialSources, 0, 17), JSON_THROW_ON_ERROR), 'Funnel');
     throw new RuntimeException('The PictorialBar extension must not silently raise Funnel limits.');
 } catch (InvalidArgumentException) {
 }

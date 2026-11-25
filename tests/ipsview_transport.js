@@ -31,8 +31,8 @@ const source = fs.readFileSync(
             mode: 'ipsview',
             options: {
                 ipsViewTransport: {
-                    statePath: '/hook/SymconECharts/state/5000/0123456789abcdef0123456789abcdef',
-                    socketPath: '/hook/SymconECharts/WS/5000/0123456789abcdef0123456789abcdef'
+                    statePath: '/hook/eCharts/state/5000/0123456789abcdef0123456789abcdef',
+                    socketPath: '/hook/eCharts/WS/5000/0123456789abcdef0123456789abcdef'
                 }
             }
         },
@@ -59,7 +59,7 @@ const source = fs.readFileSync(
     assert.equal(sockets.length, 1, 'IPSView must open one persistent WebSocket.');
     assert.equal(
         sockets[0].url,
-        'wss://symcon.example.test/hook/SymconECharts/WS/5000/0123456789abcdef0123456789abcdef'
+        'wss://symcon.example.test/hook/eCharts/WS/5000/0123456789abcdef0123456789abcdef'
     );
 
     sockets[0].onopen();
@@ -69,7 +69,7 @@ const source = fs.readFileSync(
     assert.equal(fetched.length, 1, 'Opening the socket must request one fresh full state.');
     assert.equal(
         fetched[0].url,
-        'https://symcon.example.test/hook/SymconECharts/state/5000/0123456789abcdef0123456789abcdef'
+        'https://symcon.example.test/hook/eCharts/state/5000/0123456789abcdef0123456789abcdef'
     );
     assert.deepEqual(messages[0], state);
 

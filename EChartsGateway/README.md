@@ -1,6 +1,6 @@
 # EChartsGateway
 
-Gemeinsame Zentrale der SymconECharts-Library. Das Splitter-Modul versorgt
+Gemeinsame Zentrale der eCharts-Library. Das Splitter-Modul versorgt
 Diagramminstanzen aller enthaltenen Chartfamilien mit gemeinsamen Diensten.
 Eine eigene I/O-Instanz ist nicht erforderlich.
 
@@ -43,10 +43,10 @@ zusätzliche Archivinstanz oder eigene Datenbank ist nicht vorgesehen.
 
 ## 3. Software-Installation
 
-Das Gateway ist Bestandteil der gemeinsamen Library **SymconECharts** und
+Das Gateway ist Bestandteil der gemeinsamen Library **eCharts** und
 wird nicht als getrennte Library installiert.
 
-Im **Symcon-Modulstore** nach **SymconECharts** suchen und die Library
+Im **Symcon-Modulstore** nach **eCharts** suchen und die Library
 installieren. Sie enthält das Gateway und alle Diagrammmodule.
 
 ## 4. Einrichten der Instanzen in Symcon
@@ -79,7 +79,7 @@ Siehe auch die [Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsgateway)
 Die vollständige [Migrationsanleitung](../docs/JSLIVE_MIGRATION.md) erklärt
 Export, Zuordnung, Vorschauen, Bestätigung und sicheren Wiederanlauf.
 Für einen neuen Export **JSLive Beta 0.113** oder einen neueren kompatiblen
-Stand mit **Export für SymconECharts** verwenden. Beide Libraries samt
+Stand mit dem Migrationsexport für eCharts verwenden. Beide Libraries samt
 regulären Helpern vor der Übernahme aktualisieren.
 
 **Konfigurationsseite:** Unter **JSLive-Export und Metadatenprüfung** die Datei

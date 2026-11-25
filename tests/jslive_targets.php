@@ -6,12 +6,13 @@ require_once __DIR__ . '/jslive_family_fixture.php';
 require_once __DIR__ . '/../EChartsRadarHistory/module.php';
 require_once __DIR__ . '/../EChartsProgress/module.php';
 
-use SymconECharts\EChartsImportJson;
-use SymconECharts\EChartsJSLiveImport;
-use SymconECharts\EChartsJSLiveModel;
-use SymconECharts\EChartsJSLivePlan;
-use SymconECharts\EChartsJSLiveRendering;
-use SymconECharts\EChartsJSLiveTargetSnapshot;
+use eCharts\EChartsIdentity;
+use eCharts\EChartsImportJson;
+use eCharts\EChartsJSLiveImport;
+use eCharts\EChartsJSLiveModel;
+use eCharts\EChartsJSLivePlan;
+use eCharts\EChartsJSLiveRendering;
+use eCharts\EChartsJSLiveTargetSnapshot;
 
 function jsliveTargetAssert(bool $ok, string $message): void
 {
@@ -131,7 +132,8 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
     $snapshot['creationGuard'] = $device->GetJSLiveCreationGuard();
     jsliveTargetAssert(EChartsJSLiveTargetSnapshot::IsUnchangedCreation($snapshot), 'Creation defaults were not sealed for ' . $name);
     $object = IPS_GetObject($id) + ['ObjectType' => 1, 'ObjectID' => $id];
-    $object['ObjectInfo'] = 'SymconECharts:JSLive:1:' . str_repeat('a', 64) . ':' . sprintf('%032x', $count);
+    $object['ObjectInfo'] = ($count % 2 === 0 ? 'eCharts:JSLive:1:' : \eCharts\EChartsIdentity::LegacyProductName() . ':JSLive:1:')
+        . str_repeat('a', 64) . ':' . sprintf('%032x', $count);
     $GLOBALS['symconTestTreeObjects'][$id] = $object;
     $sourceMapping = [];
     foreach ($model['sources'] as $key => &$source) {
@@ -196,10 +198,19 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
     $creationGuard = $device->GetJSLiveCreationGuard();
     $propertiesBeforeReload = $device->GetTestProperties();
     $outputGuardsBeforeReload = $device->GetJSLiveOutputGuards();
+    $outputID = IPS_GetChildrenIDs($id)[0];
+    $currentHTML = GetValue($outputID);
+    $oldPath = '/hook/' . EChartsIdentity::LegacyProductName() . '/';
+    $oldHTML = str_replace('/hook/eCharts/', $oldPath, $currentHTML);
+    jsliveTargetAssert($oldHTML !== $currentHTML, 'Missing canonical renderer URL in imported IPSView document.');
+    $GLOBALS['symconTestVariables'][$outputID]['Value'] = $oldHTML;
     $device->ReloadTestModule();
     jsliveTargetAssert($device->GetJSLiveCreationGuard() === $creationGuard
         && !isset($device->TestCreateAttributeWrites['JSLiveCreationGuard']), 'Module reload rewrote the persisted creation proof for ' . $name);
     $device->ApplyChanges();
+    $updatedHTML = GetValue($outputID);
+    jsliveTargetAssert(preg_match('#/hook/eCharts/state/[1-9][0-9]*/[a-f0-9]{32}#', $currentHTML, $stateRoute) === 1
+        && str_contains($updatedHTML, $stateRoute[0]) && !str_contains($updatedHTML, $oldPath), 'A running module update must regenerate the existing output with its original channel at the new address.');
     jsliveTargetAssert($device->GetTestProperties() === $propertiesBeforeReload
         && $device->GetJSLiveOutputGuards() === $outputGuardsBeforeReload, 'Module reload changed imported settings or output ownership.');
     $guards = json_decode($device->GetJSLiveOutputGuards(), true, 16, JSON_THROW_ON_ERROR);
@@ -209,6 +220,15 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
         'Output ownership was not sealed by the real module class.'
     );
     // Reload while the gateway is not ready. Only the registered timer may recover; no second ApplyChanges.
+    if ($count === 1) {
+        $canonical = \eCharts\EChartsJSLiveOwnership::Canonical($object['ObjectInfo']);
+        IPS_SetInfo($id, $canonical);
+        $device->RefreshJSLiveOutputSeals($canonical);
+        jsliveTargetAssert(
+            $device->GetJSLiveOutputGuards() === $outputGuardsBeforeReload,
+            'An already current output seal must be idempotent on a real target.'
+        );
+    }
     $referencesBeforeRetry = $device->GetTestReferences();
     $healthyResponder = IPSModuleStrict::$ParentResponder;
     $readsBeforeInitialization = 0;
@@ -253,6 +273,7 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
 
     if (!isset($families[$name])) {
         // Kernel startup remains deferred until IPS_KERNELSTARTED; invalid models never acquire a polling loop.
+        $GLOBALS['symconTestVariables'][$outputID]['Value'] = $oldHTML;
         $GLOBALS['symconTestKernelRunlevel'] = KR_READY - 1;
         $device->ReloadTestModule();
         $device->ApplyChanges();
@@ -260,6 +281,10 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
         unset($GLOBALS['symconTestKernelRunlevel']);
         $device->MessageSink(1793448000, 0, IPS_KERNELSTARTED, []);
         jsliveTargetAssert($device->GetTestStatus() === 102 && $device->GetTestTimerInterval('JSLiveImportRefresh') === $cadence, 'Kernel startup did not restore the import timer.');
+        $updatedHTML = GetValue($outputID);
+        jsliveTargetAssert(str_contains($updatedHTML, '/hook/eCharts/assets/echarts/')
+            && !str_contains($updatedHTML, $oldPath)
+            && $device->GetTestProperties() === $propertiesBeforeReload, 'Kernel startup must regenerate the existing WebContent under the new hook without changing configuration.');
         $device->SetTestProperty('JSLiveImportModel', 'invalid model');
         $device->ApplyChanges();
         $device->RefreshJSLiveImport();

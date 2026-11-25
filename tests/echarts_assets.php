@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsAsset;
+use eCharts\EChartsAsset;
 
 require_once dirname(__DIR__) . '/libs/EChartsAsset.php';
 
@@ -254,12 +254,12 @@ assertEChartsAsset(
 );
 assertEChartsAsset(
     EChartsAsset::ZoomJavaScript() === $zoomUtilities
-        && str_contains($zoomUtilities, 'SymconEChartsZoom'),
+        && str_contains($zoomUtilities, 'eChartsZoom'),
     'The shared ECharts zoom controls must be loaded from the local asset.'
 );
 assertEChartsAsset(
     EChartsAsset::PatternJavaScript() === $patternUtilities
-        && str_contains($patternUtilities, 'SymconEChartsPattern'),
+        && str_contains($patternUtilities, 'eChartsPattern'),
     'The shared ECharts SVG pattern renderer must be loaded from the local asset.'
 );
 assertEChartsAsset(
@@ -387,7 +387,7 @@ assertEChartsAsset(
 );
 
 assertEChartsAsset(
-    str_contains(EChartsAsset::CategoryNavigationJavaScript(), 'SymconEChartsCategoryNavigation'),
+    str_contains(EChartsAsset::CategoryNavigationJavaScript(), 'eChartsCategoryNavigation'),
     'The project-owned category navigation must be loadable for both consumers.'
 );
 assertEChartsAsset(

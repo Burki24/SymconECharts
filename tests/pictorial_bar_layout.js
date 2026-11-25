@@ -271,7 +271,7 @@ assert.equal(invalidIcon.errorElement.hidden,false);
 assert.equal(invalidIcon.errorElement.textContent,'The selected Symcon icon is unavailable or unsupported.');
 const {execFileSync}=require('node:child_process');
 const svgGeometry=JSON.parse(execFileSync('php',['-r',
-    'require "EChartsPictorialBar/PictorialBarSvg.php";echo json_encode(SymconECharts\\PictorialBarSvg::Import(file_get_contents($argv[1])));',
+    'require "EChartsPictorialBar/PictorialBarSvg.php";echo json_encode(eCharts\\PictorialBarSvg::Import(file_get_contents($argv[1])));',
     'tests/fixtures/pictorial-symbol-custom.svg'],{cwd:root,encoding:'utf8'}));
 const svgStyle={...iconStyle,symbol:'svg',symbolPath:svgGeometry.path,symbolWidth:svgGeometry.width,symbolHeight:svgGeometry.height,
     symbolMinimumX:svgGeometry.minimumX,symbolMinimumY:svgGeometry.minimumY};

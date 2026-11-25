@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
 
-use SymconECharts\EChartsLabelDesign;
+use eCharts\EChartsLabelDesign;
 
 function assertLabelDesign(bool $condition, string $message): void
 {
@@ -45,15 +45,15 @@ assertLabelDesign(
 
 require_once dirname(__DIR__) . '/libs/EChartsPreviewSymbol.php';
 assertLabelDesign(
-    \SymconECharts\EChartsPreviewSymbol::Symbol('circle', 10, 20, 3, '#123456') === '<circle cx="10" cy="20" r="3" fill="#123456"/>',
+    \eCharts\EChartsPreviewSymbol::Symbol('circle', 10, 20, 3, '#123456') === '<circle cx="10" cy="20" r="3" fill="#123456"/>',
     'Extracted TimeSeries point geometry must preserve the original circle output.'
 );
 assertLabelDesign(
-    \SymconECharts\EChartsPreviewSymbol::Symbol('none', 10, 20, 3, '#123456') === ''
-    && \SymconECharts\EChartsPreviewSymbol::Symbol('diamond', 10, 20, 0, '#123456') === '',
+    \eCharts\EChartsPreviewSymbol::Symbol('none', 10, 20, 3, '#123456') === ''
+    && \eCharts\EChartsPreviewSymbol::Symbol('diamond', 10, 20, 0, '#123456') === '',
     'Hidden and zero-size points must not create preview shapes.'
 );
-$styledSymbol = \SymconECharts\EChartsPreviewSymbol::Symbol(
+$styledSymbol = \eCharts\EChartsPreviewSymbol::Symbol(
     'emptyCircle',
     10,
     20,

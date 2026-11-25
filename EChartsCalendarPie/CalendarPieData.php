@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 require_once dirname(__DIR__) . '/EChartsCalendar/CalendarData.php';
 require_once dirname(__DIR__) . '/EChartsStateTimeline/StateTimelineData.php';

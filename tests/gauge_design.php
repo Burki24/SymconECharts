@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsGaugeDesign;
+use eCharts\EChartsGaugeDesign;
 
 require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
 

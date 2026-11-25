@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/EChartsBoxplot/BoxplotStatistics.php';
 
-use SymconECharts\BoxplotStatistics;
+use eCharts\BoxplotStatistics;
 
 $summary = BoxplotStatistics::Summarize([[10, 8], [20, -4], [30, 0], [40, 4]], 1, 40);
 if ($summary['statistics'] !== [-4.0, -1.0, 2.0, 5.0, 8.0] || $summary['count'] !== 4) {

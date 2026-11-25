@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\ScatterPairing;
+use eCharts\ScatterPairing;
 
 require_once __DIR__ . '/../EChartsScatter/ScatterPairing.php';
 

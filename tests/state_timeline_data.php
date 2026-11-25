@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/EChartsStateTimeline/StateTimelineData.php';
 
-use SymconECharts\StateTimelineData;
+use eCharts\StateTimelineData;
 
 function timelineAssert(bool $condition, string $message): void
 {

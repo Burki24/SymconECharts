@@ -73,7 +73,7 @@ function styleForMode(mode) {
 function page(mode, metric, period) {
     const initialState = state(0, metric, period, mode);
     const bootstrap = { mode, state: initialState, options: { tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {},
-        adaptToBackground: false, calendarStatePath: '/hook/SymconECharts/state/5000/' + 'a'.repeat(32) + '/metric/' + metric + '/period/' + period + '/mode/' + mode }, translations };
+        adaptToBackground: false, calendarStatePath: '/hook/eCharts/state/5000/' + 'a'.repeat(32) + '/metric/' + metric + '/period/' + period + '/mode/' + mode }, translations };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px', VIEWPORT_CONTENT: 'width=device-width, initial-scale=1',
         DOCUMENT_TITLE: 'Calendar browser fixture', VISUALIZATION_THEME: variables, MODULE_STYLE: read('EChartsCalendar/visualization/style.css'),
         IPSVIEW_STYLE: '', ECHARTS_SCRIPT: read('libs/echarts/6.1.0/echarts.calendar.min.js'), ECHARTS_THEME_SCRIPT: '',
@@ -90,7 +90,7 @@ http.createServer((req, res) => {
     const requestedPeriod = url.searchParams.get('period') || url.pathname.split('/period/')[1]?.split('/')[0];
     const period = ['year', 'quarter', 'month', 'absolute'].includes(requestedPeriod) ? requestedPeriod : 'year';
     const mode = (url.searchParams.get('mode') || url.pathname.split('/mode/')[1]) === 'ipsview' ? 'ipsview' : 'symcon';
-    if (url.pathname.startsWith('/hook/SymconECharts/state/')) {
+    if (url.pathname.startsWith('/hook/eCharts/state/')) {
         res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify(state(Math.max(0, Math.min(period === 'year' ? 53 : 120, Number(url.searchParams.get('offset')) || 0)), metric, period, mode)));
         return;

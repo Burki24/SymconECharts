@@ -99,7 +99,7 @@ verkürzten Aufrufe scheitern mit dieser Fixture reproduzierbar.
 Beide laufen im regulären Test-Runner; das 128-MiB-Limit bleibt erhalten.
 
 Die korrigierten fünf Callbackskripte aus dem Repository wurden zusätzlich per
-MCP gegen das unveränderte Gateway aus SymconECharts 1.367 ausgeführt
+MCP gegen das unveränderte Gateway aus eCharts 1.367 ausgeführt
 (Symcon 9.1, PHP 8.5.8, 64 MiB). Dateiauswahl, Diagramm-/Seitenauswahl,
 erneutes Prüfen und Download bestehen mit sechs Pflichtargumenten; der Download
 enthält den vollständigen Bericht und exakte Quellen-/Präsentationsmetadaten.

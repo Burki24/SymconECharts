@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 use Closure;
 use RuntimeException;
@@ -16,7 +16,7 @@ require_once __DIR__ . '/EChartsJSLiveJournalView.php';
 final class EChartsJSLiveCreationRuntime implements EChartsJSLiveImportKernel
 {
     private const GATEWAY = '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}';
-    private const LOCK = 'SymconECharts.JSLiveImport.1';
+    private const LOCK = 'eCharts.JSLiveImport.1';
     private bool $revalidated = false;
 
     public function __construct(
@@ -83,7 +83,7 @@ final class EChartsJSLiveCreationRuntime implements EChartsJSLiveImportKernel
         $found = [];
         foreach (EChartsJSLivePlan::Modules() as $module) {
             foreach ($this->Inventory($module['moduleId']) as $id) {
-                if (IPS_GetObject($id)['ObjectInfo'] === $marker) {
+                if (EChartsJSLiveOwnership::Canonical(IPS_GetObject($id)['ObjectInfo']) === $marker) {
                     $found[] = $id;
                 }
             }
@@ -122,15 +122,24 @@ final class EChartsJSLiveCreationRuntime implements EChartsJSLiveImportKernel
         $allowed = [];
         foreach ($entries as $entry) {
             if ($entry['identity'] === $identity) {
-                $allowed[$entry['marker']] = true;
+                $allowed[$entry['marker']] = $entry;
             }
         }
-        $prefix = 'SymconECharts:JSLive:1:' . hash('sha256', $identity) . ':';
+        $prefix = hash('sha256', $identity) . ':';
         foreach (EChartsJSLivePlan::Modules() as $module) {
             foreach ($this->Inventory($module['moduleId']) as $id) {
                 $info = IPS_GetObject($id)['ObjectInfo'];
-                if (str_starts_with($info, $prefix) && !isset($allowed[$info])) {
+                if (!str_starts_with(EChartsJSLiveOwnership::Body($info) ?? '', $prefix)) {
+                    continue;
+                }
+                $canonical = EChartsJSLiveOwnership::Canonical($info);
+                $entry = $allowed[$canonical] ?? null;
+                if ($entry === null || ($entry['targetID'] !== null && $entry['targetID'] !== $id)) {
                     throw new RuntimeException('RECOVERY_REQUIRED: an origin marker exists without this journal reservation.');
+                }
+                $phase = $entry['v1Seal'] ?? null;
+                if (($phase === null && $info !== $canonical) || ($phase === 0 && $info !== EChartsJSLiveOwnership::Historical($canonical))) {
+                    throw new RuntimeException('TARGET_CHANGED: the original ownership seal changed.');
                 }
             }
         }
@@ -145,21 +154,29 @@ final class EChartsJSLiveCreationRuntime implements EChartsJSLiveImportKernel
             throw new RuntimeException('FORMAT_UNSUPPORTED: target runtime is not updated.');
         }
         $snapshot['creationGuard'] = $function($id);
-        if (str_starts_with($snapshot['info'], 'SymconECharts:JSLive:1:') && $snapshot['children'] !== []) {
+        if (EChartsJSLiveOwnership::Body($snapshot['info']) !== null && $snapshot['children'] !== []) {
             $getGuards = $module['prefix'] . '_GetJSLiveOutputGuards';
             if (!function_exists($getGuards)) {
                 throw new RuntimeException('FORMAT_UNSUPPORTED: output ownership API unavailable.');
             }
             $guards = json_decode($getGuards($id), true, 16, JSON_THROW_ON_ERROR);
+            $marker = EChartsJSLiveOwnership::Canonical($snapshot['info']);
             foreach ($snapshot['children'] as $child) {
                 if (!isset($guards[$child])) {
                     throw new RuntimeException('RECOVERY_REQUIRED: an output has no durable ownership proof.');
                 }
-                if (!hash_equals($guards[$child], EChartsImportJson::Hash(EChartsJSLiveTargetSnapshot::Output($child)))) {
-                    throw new RuntimeException('TARGET_CHANGED: output metadata changed since its creation.');
+                $output = EChartsJSLiveTargetSnapshot::Output($child);
+                if (!hash_equals($guards[$child], EChartsImportJson::Hash($output))) {
+                    $entryID = substr($marker, -32);
+                    $entry = $this->Load()['entries'][$entryID] ?? [];
+                    if (($entry['v1Seal'] ?? null) !== 2 || ($entry['targetID'] ?? null) !== $id || ($entry['marker'] ?? null) !== $marker
+                        || !EChartsJSLiveOwnership::OutputGuardMatches($output, $guards[$child], $marker, true)) {
+                        throw new RuntimeException('TARGET_CHANGED: output metadata changed since its creation.');
+                    }
                 }
             }
         }
+        $snapshot['info'] = EChartsJSLiveOwnership::Canonical($snapshot['info']);
         return $snapshot;
     }
 
@@ -173,11 +190,49 @@ final class EChartsJSLiveCreationRuntime implements EChartsJSLiveImportKernel
     {
         $snapshot = $this->Inspect($id);
         if ($snapshot['info'] !== '' || !EChartsJSLiveTargetSnapshot::IsUnchangedCreation($snapshot) || $this->HasChanges($id)
-            || preg_match('/^SymconECharts:JSLive:1:[a-f0-9]{64}:[a-f0-9]{32}$/D', $marker) !== 1) {
+            || !EChartsJSLiveOwnership::IsValid($marker) || !str_starts_with($marker, EChartsJSLiveOwnership::PREFIX)) {
             throw new RuntimeException('TARGET_CHANGED: refusing to claim a changed or previously owned target.');
         }
         if (!IPS_SetInfo($id, $marker)) {
             throw new RuntimeException('IMPORT_FAILED: ownership marker could not be saved.');
+        }
+    }
+
+    public function MigrateSeals(int $id, string $marker, array $snapshot, array $receipt): void
+    {
+        $historical = EChartsJSLiveOwnership::Historical($marker);
+        $entry = $this->Load()['entries'][substr($marker, -32)] ?? [];
+        if (($entry['v1Seal'] ?? null) !== 2 || $entry['targetID'] !== $id || $entry['marker'] !== $marker) {
+            throw new RuntimeException('RECOVERY_REQUIRED: ownership migration was not recorded.');
+        }
+        $assignments = [$id => [$historical, $marker]];
+        foreach ($receipt['outputs'] as $output) {
+            $suffix = ':output:' . $output['ident'];
+            $assignments[$output['id']] = [$historical . $suffix, $marker . $suffix];
+        }
+        // Check every intended mutation before the first write. A retry can encounter either spelling.
+        foreach ($assignments as $objectID => $permitted) {
+            if (!in_array(IPS_GetObject($objectID)['ObjectInfo'], $permitted, true)) {
+                throw new RuntimeException('TARGET_CHANGED: unexpected ownership seal on the target or its output.');
+            }
+        }
+        $refresh = $this->Module($snapshot['moduleID'])['prefix'] . '_RefreshJSLiveOutputSeals';
+        if (!function_exists($refresh)) {
+            throw new RuntimeException('FORMAT_UNSUPPORTED: output seal migration API unavailable.');
+        }
+        foreach ($assignments as $objectID => [$old, $new]) {
+            if ($this->HasChanges($id) || EChartsImportJson::Hash($this->Inspect($id)) !== EChartsImportJson::Hash($snapshot)) {
+                throw new RuntimeException('TARGET_CHANGED: the target changed during ownership migration.');
+            }
+            $info = IPS_GetObject($objectID)['ObjectInfo'];
+            if ($info !== $new && ($info !== $old || !IPS_SetInfo($objectID, $new))) {
+                throw new RuntimeException('RECOVERY_REQUIRED: ownership migration must resume.');
+            }
+        }
+        $refresh($id, $marker);
+        if ($this->HasChanges($id) || EChartsImportJson::Hash($this->Inspect($id)) !== EChartsImportJson::Hash($snapshot)
+            || EChartsImportJson::Hash($this->Verify($id)) !== EChartsImportJson::Hash($receipt)) {
+            throw new RuntimeException('TARGET_CHANGED: migrated output identities differ.');
         }
     }
 
@@ -242,6 +297,7 @@ final class EChartsJSLiveCreationRuntime implements EChartsJSLiveImportKernel
                 || !is_string($html) || !str_starts_with($html, '<!doctype html>') || strlen($html) > 1048576) {
                 throw new RuntimeException('IMPORT_FAILED: target output is not a read-only native WebContent document.');
             }
+            $object['ObjectInfo'] = EChartsJSLiveOwnership::CanonicalOutput($object['ObjectInfo'], $snapshot['info'], $object['ObjectIdent']);
             $outputs[] = ['id' => $child, 'ident' => $object['ObjectIdent'], 'type' => $variable['VariableType'],
                 'action'       => $variable['VariableAction'], 'customAction' => $variable['VariableCustomAction'],
                 'native'       => $presentation, 'object' => array_intersect_key(

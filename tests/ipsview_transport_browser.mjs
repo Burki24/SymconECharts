@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const read = p => fs.readFileSync(path.join(root, p), 'utf8');
-const prefix = '/hook/SymconECharts/';
+const prefix = '/hook/eCharts/';
 const channel = '5000/0123456789abcdef0123456789abcdef';
 const start = 1780000000;
 function state(fresh) {

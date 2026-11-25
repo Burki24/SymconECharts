@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\SankeyModel;
+use eCharts\SankeyModel;
 
 require_once dirname(__DIR__) . '/EChartsSankey/SankeyModel.php';
 

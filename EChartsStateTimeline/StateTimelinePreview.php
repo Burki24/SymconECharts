@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Bounded, explicitly synthetic intervals; never reads archives while editing. */
 trait StateTimelinePreview

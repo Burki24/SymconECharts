@@ -45,7 +45,7 @@ declare(strict_types=1);
             $base = array_values(array_filter($items, static fn (array $item): bool => $item !== $guide));
             // Exercise the same final form adapter with its real module and shared German captions.
             $translate = static fn (string $text): string => $locale[$text] ?? $labels[$text] ?? $text;
-            $de = \SymconECharts\EChartsDesignerColorGuide::WithGuides(
+            $de = \eCharts\EChartsDesignerColorGuide::WithGuides(
                 ['elements' => [['caption' => $caption, 'items' => $base]]],
                 $dir,
                 $translate,

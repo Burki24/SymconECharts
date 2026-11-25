@@ -80,7 +80,7 @@ assertGatewayGauge(
     && str_contains($zoomIPS, '"zoomSliderSize":44') && $zoomTile['candlestick']['style']['zoomSliderSize'] === 0
     && $zoomTile['candlestick']['data'] === $candleData['candlestick']['data']
     && $GLOBALS['symconTestArchiveQueryCount'] === $zoomQueries
-    && str_contains($zoomIPS, 'SymconEChartsZoom') && !str_contains($zoomIPS, '{{ECHARTS_ZOOM_SCRIPT}}'),
+    && str_contains($zoomIPS, 'eChartsZoom') && !str_contains($zoomIPS, '{{ECHARTS_ZOOM_SCRIPT}}'),
     'Independent zoom must reuse the same data/cache and embed the shared controller.'
 );
 $candle->UpdateBarPreviewFromForm('{"EnableZoom":true,"IPSViewEnableZoom":true,"IPSViewOrientation":"horizontal","ZoomSliderSize":32,"IPSViewZoomSliderSize":40}');

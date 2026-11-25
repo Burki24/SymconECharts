@@ -5,7 +5,7 @@ eine eigene JSON-Hierarchie als interaktiven Apache-ECharts-Baum in einer native
 IPSView-HTML-Widget. Benötigt werden IP-Symcon 9.0/9.1 und ein verbundenes,
 aktives `EChartsGateway`. Ein Archiv ist nicht erforderlich.
 
-Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+Installation: Im **Symcon-Modulstore** nach **eCharts** suchen.
 [Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
@@ -109,7 +109,7 @@ direkt importieren. Es benötigt keine vorhandenen Symcon-Objekte:
 
 ```json
 {
-  "format": "de.burki24.symconecharts.tree",
+  "format": "de.burki24.echarts.tree",
   "formatVersion": "1.0",
   "rootId": "netzwerk",
   "nodes": [
@@ -126,7 +126,7 @@ Die Datei besteht aus vier Pflichtfeldern:
 
 | Feld | Einfach erklärt |
 | --- | --- |
-| `format` | Immer genau `"de.burki24.symconecharts.tree"` übernehmen. |
+| `format` | `"de.burki24.echarts.tree"` eintragen. Das Modul übernimmt ältere Dateien der Version 1.0 beim Einlesen automatisch. |
 | `formatVersion` | Immer den Text `"1.0"` einschließlich Anführungszeichen verwenden. |
 | `rootId` | Die `id` des obersten Knotens, hier `"netzwerk"`. |
 | `nodes` | Die Liste aller Knoten einschließlich der Wurzel. |

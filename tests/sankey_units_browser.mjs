@@ -10,7 +10,7 @@ const cases = ['manual', 'automatic', 'checked', 'mismatch', 'unitless', 'revers
     'balance', 'balance-inflow', 'balance-equal', 'balance-budget'];
 http.createServer((req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
-    if (url.pathname === '/hook/SymconECharts/assets/interaction.js') {
+    if (url.pathname === '/hook/eCharts/assets/interaction.js') {
         res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
         res.end(fs.readFileSync(path.join(root, 'libs/helper/visualization/interaction.min.js'))); return;
     }

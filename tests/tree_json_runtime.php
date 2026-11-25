@@ -105,6 +105,29 @@ assertGatewayGauge(!method_exists($module, 'VariableExists') && method_exists($m
 $module->CaptureDebug = true;
 $GLOBALS['symconTestCopyTarget'] = $module;
 $document = file_get_contents(__DIR__ . '/../docs/examples/tree-network-1.0.json');
+$oldTree = json_decode($document, true, 32, JSON_THROW_ON_ERROR);
+$oldTree['format'] = \eCharts\EChartsIdentity::STORE_BUNDLE_ID . '.tree';
+$oldTree['nodes'][0]['name'] = $oldTree['format'];
+$oldJSON = json_encode($oldTree, JSON_THROW_ON_ERROR);
+$saved = ['configuration' => ['JsonDocument' => $oldJSON, 'SourceMode' => 'variable', 'JsonVariableID' => 1001, 'Title' => 'Tree'],
+    'attributes'          => ['Setting' => $oldJSON]];
+$migrated = $module->Migrate(json_encode($saved, JSON_THROW_ON_ERROR));
+$newState = json_decode($migrated, true, 32, JSON_THROW_ON_ERROR);
+$newTree = $oldTree;
+$newTree['format'] = 'de.burki24.echarts.tree';
+assertGatewayGauge(
+    json_decode($newState['configuration']['JsonDocument'], true) == $newTree,
+    'The SDK migration must rename only the document envelope and preserve old-looking node labels.'
+);
+$saved['configuration']['JsonDocument'] = $newState['configuration']['JsonDocument'];
+assertGatewayGauge(
+    $saved == $newState && $module->Migrate($migrated) === '',
+    'SDK migration must preserve other properties and attributes, including the external source selection, and be idempotent.'
+);
+foreach (['{', '{}', str_replace('"1.0"', '"2.0"', $oldJSON)] as $untouched) {
+    $saved['configuration']['JsonDocument'] = $untouched;
+    assertGatewayGauge($module->Migrate(json_encode($saved, JSON_THROW_ON_ERROR)) === '', 'Unknown, incomplete and invalid input must be retained for diagnosis.');
+}
 $before = $module->GetTestProperties();
 assertGatewayGauge($before['SourceMode'] === 'objects' && $before['JsonDocument'] === '' && $before['JsonVariableID'] === 0
     && $before['UseJsonObjectBindings'] === false, 'The object mode must remain the compatible default.');
@@ -141,6 +164,17 @@ assertGatewayGauge($before === $after && !$module->Planned, 'Only JsonDocument m
 $applies = $module->Applies;
 $result = json_decode($module->SetTreeJSON($document), true, 32, JSON_THROW_ON_ERROR);
 assertGatewayGauge($result['status'] === 'unchanged' && $module->Applies === $applies, 'Canonical replay must not apply configuration again.');
+$module->SetTestProperty('JsonDocument', $oldJSON);
+$migratedSet = json_decode($module->SetTreeJSON($oldJSON), true, 32, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $migratedSet['status'] === 'applied' && json_decode(IPS_GetProperty($module->InstanceID, 'JsonDocument'), true) == $newTree,
+    'An explicitly submitted historical document must also upgrade an equivalent active text draft.'
+);
+$repeatedSet = json_decode($module->SetTreeJSON($oldJSON), true, 32, JSON_THROW_ON_ERROR);
+assertGatewayGauge($repeatedSet['status'] === 'unchanged' && $repeatedSet['documentHash'] === $migratedSet['documentHash']
+    && $module->Applies === $applies + 1, 'The same historical input must migrate once and keep its canonical hash on replay.');
+$module->SetTestProperty('JsonDocument', $document);
+$applies = $module->Applies;
 $module->PlanProperty('Title', 'Unapplied title');
 $result = json_decode($module->SetTreeJSON($document), true, 32, JSON_THROW_ON_ERROR);
 assertGatewayGauge($result['errors'][0]['code'] === 'CONFIGURATION_PENDING' && $module->Planned['Title'] === 'Unapplied title', 'The setter must not apply another planned property.');
@@ -149,10 +183,10 @@ $module->PlanProperty('SourceMode', 'variable');
 $result = json_decode($module->SetTreeJSON($document), true, 32, JSON_THROW_ON_ERROR);
 assertGatewayGauge($result['errors'][0]['code'] === 'CONFIGURATION_PENDING', 'An unapplied source selection is not the active source selection.');
 $module->Planned = [];
-$GLOBALS['treeJSONLocks']['SymconECharts.TreeJSON.' . $module->InstanceID] = true;
+$GLOBALS['treeJSONLocks']['eCharts.TreeJSON.' . $module->InstanceID] = true;
 $result = json_decode($module->SetTreeJSON($document), true, 32, JSON_THROW_ON_ERROR);
 assertGatewayGauge($result['status'] === 'rejected' && $result['errors'][0]['code'] === 'IMPORT_BUSY', 'Competing setters must be explicitly refused without writes.');
-$GLOBALS['treeJSONLocks']['SymconECharts.TreeJSON.' . $module->InstanceID] = false;
+$GLOBALS['treeJSONLocks']['eCharts.TreeJSON.' . $module->InstanceID] = false;
 $bad = json_decode($document, true, 32, JSON_THROW_ON_ERROR);
 $bad['nodes'][0]['name'] = 'NEW ROOT';
 $module->FailSave = true;
@@ -279,7 +313,7 @@ foreach (array_slice($module->GetTestFormUpdates(), -2) as $update) {
 }
 foreach ([[$module->GetVisualizationTile(), false], [$module->GetIPSViewHTML(), true]] as [$html, $ipsView]) {
     assertGatewayGauge(strlen($html) < SYMCON_OUTPUT_BUFFER_LIMIT
-        && str_contains($html, \SymconECharts\EChartsAsset::RendererScript('tree', $ipsView))
+        && str_contains($html, \eCharts\EChartsAsset::RendererScript('tree', $ipsView))
         && str_contains($html, 'SYMC_ECHARTS_TREE') && str_contains($html, 'json:document:network'), 'Both module outputs must select the pinned runtime and include the JSON tree within the byte limit.');
 }
 
@@ -351,7 +385,7 @@ try {
     unset($GLOBALS['treeJSONObjectHook']);
     $module->Planned = [];
 }
-$expanded = ['format' => 'de.burki24.symconecharts.tree', 'formatVersion' => '1.0', 'rootId' => 'root', 'nodes' => [
+$expanded = ['format' => 'de.burki24.echarts.tree', 'formatVersion' => '1.0', 'rootId' => 'root', 'nodes' => [
     ['id' => 'root', 'parentId' => null, 'name' => 'Root', 'kind' => 'category']
 ]];
 for ($index = 1; $index < 2600; $index++) {
@@ -386,7 +420,7 @@ try {
 }
 $module->SetTestProperty('JsonDocument', $document);
 
-$GLOBALS['symconTestVariables'][58100] = ['VariableType' => 3, 'VariableUpdated' => 100, 'Value' => $document, 'Name' => 'Same name'];
+$GLOBALS['symconTestVariables'][58100] = ['VariableType' => 3, 'VariableUpdated' => 100, 'Value' => $oldJSON, 'Name' => 'Same name'];
 $GLOBALS['symconTestTreeObjects'][58100] = ['ObjectType' => 2, 'ObjectName' => 'Same name'];
 $GLOBALS['symconTestVariables'][58101] = ['VariableType' => 3, 'VariableUpdated' => 100, 'Value' => $document, 'Name' => 'Same name'];
 $GLOBALS['symconTestTreeObjects'][58101] = ['ObjectType' => 2, 'ObjectName' => 'Same name'];
@@ -395,6 +429,10 @@ $module->SetTestProperty('JsonVariableID', 58100);
 $module->ApplyChanges();
 $tree = json_decode($module->GetTreeData(), true, 64, JSON_THROW_ON_ERROR)['tree'];
 assertGatewayGauge($tree['count'] === 6 && $tree['root']['id'] === 'json:variable-58100:network' && $tree['source']['quality'] === 'ready', 'String sources must retain their ID, not use names.');
+assertGatewayGauge(
+    $tree['root']['name'] === $oldTree['nodes'][0]['name'] && $GLOBALS['symconTestVariables'][58100]['Value'] === $oldJSON,
+    'The legacy source must render through the canonical reader while the external string remains byte-identical.'
+);
 assertGatewayGauge($module->GetTestTimerInterval('TreeRefresh') === 60000, 'The regular refresh interval stays unchanged.');
 $rapid = json_decode($document, true, 32, JSON_THROW_ON_ERROR);
 $rapid['nodes'][0]['name'] = 'Intermediate';

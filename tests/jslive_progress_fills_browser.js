@@ -10,7 +10,7 @@ const states=JSON.parse(cp.execFileSync(process.env.PHP_BINARY||'php',['tests/js
 const fixture=JSON.parse(read('tests/fixtures/jslive-progress-geometry.json'));
 const inputs=fixture.fills.filter(r=>choice==='--empty'?!r.bounds.width||!r.bounds.height:choice==='--borders'?r.bounds.width&&r.bounds.height:true)
     .map(record=>({record,chart:states[record.case-1].chart}));
-const directory=fs.mkdtempSync(path.join(os.tmpdir(),'SymconECharts-progress-fills-')),html=path.join(directory,'fills.html');
+const directory=fs.mkdtempSync(path.join(os.tmpdir(),'eCharts-progress-fills-')),html=path.join(directory,'fills.html');
 const probe=`<script>
 var results=[],errors=[];addEventListener('error',function(e){errors.push(String(e.message));});
 addEventListener('unhandledrejection',function(e){errors.push(String(e.reason));});

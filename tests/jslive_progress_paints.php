@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/jslive_family_fixture.php';
 
-use SymconECharts\EChartsImportJson;
-use SymconECharts\EChartsJSLiveImport;
-use SymconECharts\EChartsJSLiveModel;
-use SymconECharts\EChartsJSLivePage;
-use SymconECharts\EChartsJSLivePlan;
-use SymconECharts\EChartsJSLiveRendering;
-use SymconECharts\ProgressData;
+use eCharts\EChartsImportJson;
+use eCharts\EChartsJSLiveImport;
+use eCharts\EChartsJSLiveModel;
+use eCharts\EChartsJSLivePage;
+use eCharts\EChartsJSLivePlan;
+use eCharts\EChartsJSLiveRendering;
+use eCharts\ProgressData;
 
 function paintAssert(bool $ok, string $message): void
 {

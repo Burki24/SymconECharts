@@ -174,7 +174,7 @@ require_once __DIR__ . '/archive_period_view.php';
             $chart->SetTestProperty('AbsoluteEnd', '{}');
             $chart->ApplyChanges();
             $legacy = $model();
-            $expected = SymconECharts\ThemeRiverData::Window($range, 'hour', $chart->now, 'Europe/Berlin');
+            $expected = eCharts\ThemeRiverData::Window($range, 'hour', $chart->now, 'Europe/Berlin');
             assertGatewayGauge(array_keys($legacy['range']) === ['key', 'startTimestamp', 'endTimestamp', 'aggregationLevel', 'timezone', 'loadedAggregates', 'loadBudget']
                 && $legacy['range']['startTimestamp'] === $expected['StartTimestamp'] && $legacy['range']['endTimestamp'] === $expected['EndTimestamp']
                 && count($legacy['themeRiver']['rows']) === count($expected['Intervals']), 'Legacy window model and inactive dates remain backward compatible.');

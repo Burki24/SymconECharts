@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    window.SymconEChartsPattern = {
+    window.eChartsPattern = {
         create: function (onChange) {
             var cache = Object.create(null);
 

@@ -7,7 +7,7 @@ zusammengeführt. Tatsächlich nicht belegte Client-/Grenzbedienungen bleiben
 dort als Testlücken erhalten; frühere fehlende Familienmapper sind inzwischen umgesetzt.
 
 Stand: 31.10.2026, PHP 8.5.10 auf Windows. Drei getrennte Repositories:
-Symcon_ModuleHelper, JSLive und SymconECharts. Keine Bereitstellung, keine
+Symcon_ModuleHelper, JSLive und eCharts. Keine Bereitstellung, keine
 Installation geändert, keine Archivwerte oder Quellkonfigurationen geschrieben.
 
 ## Implementiert und geprüft
@@ -33,8 +33,8 @@ Installation geändert, keine Archivwerte oder Quellkonfigurationen geschrieben.
 
 | Befehl | Ergebnis |
 | --- | --- |
-| `php tests/quality.php --fix` in SymconECharts | Erfolgreich mit temporärem vollständigem Helper-Testbundle; Format, Syntax, Verträge, Integration, Layout und Integrität |
-| `php tests/presentation_snapshot.php` in SymconECharts | Erfolgreich am abschließenden Helper-/Adapterstand |
+| `php tests/quality.php --fix` in eCharts | Erfolgreich mit temporärem vollständigem Helper-Testbundle; Format, Syntax, Verträge, Integration, Layout und Integrität |
+| `php tests/presentation_snapshot.php` in eCharts | Erfolgreich am abschließenden Helper-/Adapterstand |
 | `php tests/run.php` in JSLive | Erfolgreich mit temporärem regulär erzeugtem Bundle, einschließlich der neuen Export-/Herkunftstests und bisherigen Exportfälle |
 | `php -d extension=gd tests/run.php` in Symcon_ModuleHelper | Erfolgreich; GD nur für den bereits vorhandenen Rasterimage-Test im gesamten Runner aktiviert |
 | `python .github/scripts/verify_manifest.py` in Symcon_ModuleHelper | Erfolgreich, 32 Helper |
@@ -52,7 +52,7 @@ Die ursprünglichen 20 Chart-Exportfälle und 108 ReceiveData-Fälle laufen weit
 ## Erste Nachprüfung mit regulären Helpern
 
 Am 31.10.2026 wurden die gepullten Consumer-Stände erneut geprüft:
-SymconECharts `bc5786ad7f8fe094440394ff54706c70a512af93` zuzüglich der
+eCharts `bc5786ad7f8fe094440394ff54706c70a512af93` zuzüglich der
 rein mechanischen Array-Ausrichtung in `tests/validate_structure.php` sowie
 JSLive `1b91ee9aa78c56086de8ec5bd5992f5a324048fe` ohne Änderungen.
 Beide enthalten `VariablePresentationNormalizationHelper` 1.0.0 aus dem
@@ -65,10 +65,10 @@ Es wurden keine Helper-Testkopien oder veränderten Vendor-Manifeste verwendet.
 | --- | --- |
 | php-cs-fixer für `tests/validate_structure.php` | Style-Fehler reproduziert; der vorgeschriebene Qualitätslauf korrigiert ausschließlich die Ausrichtung von neun Array-Zeilen. Der Diff ohne Whitespace ist leer. |
 | `php tests/presentation_snapshot.php` | Erfolgreich mit dem regulär verteilten Helper; Originalformatierung und lesender Zugriff erhalten. |
-| `python tests/helper_integrity.py` in SymconECharts | Erfolgreich, zehn Abonnements; Quellcommit und SHA-256 des Normalisierungshelpers zusätzlich geprüft. |
+| `python tests/helper_integrity.py` in eCharts | Erfolgreich, zehn Abonnements; Quellcommit und SHA-256 des Normalisierungshelpers zusätzlich geprüft. |
 | `php tests/run.php` in JSLive | Vollständig erfolgreich, einschließlich fünf neuer Export-Einstiege, Herkunftskennung, bisheriger 20 Export- und 108 Empfängerfälle sowie zwölf Helper-Abonnements mit 17 Dateien/Ressourcen. |
 | PHP-Syntax der JSLive-Migrationsänderungen | Erfolgreich, 19 PHP-Dateien. |
-| `php tests/quality.php --fix` in SymconECharts | Formatierung und Syntax aller 227 PHP-Dateien erfolgreich; Gesamtlauf mit Exit 255 im monolithischen Gateway-Test an dessen unverändertem 128-MiB-Limit abgebrochen. |
+| `php tests/quality.php --fix` in eCharts | Formatierung und Syntax aller 227 PHP-Dateien erfolgreich; Gesamtlauf mit Exit 255 im monolithischen Gateway-Test an dessen unverändertem 128-MiB-Limit abgebrochen. |
 | `php tests/gateway_gauges.php --current-normalization` | Erfolgreich im eigenen Prozess bei unverändertem 128-MiB-Limit, einschließlich der im Gesamtlauf betroffenen PictorialBar-Normalisierung. |
 | Sämtliche 74 nachgelagerten Befehle aus `tests/run.php` | Separat unverändert ausgeführt und vollständig erfolgreich: zusätzliche Integrationsfälle, Layouts, Frontend-Verträge, Helper-Integrität und Metadatenprüfung. Der Abbruch der vorangehenden monolithischen Fixture wird dadurch nicht aufgehoben. |
 

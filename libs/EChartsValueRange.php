@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Numeric range validation only; callers own projection, axis semantics and messages. */
 final class EChartsValueRange

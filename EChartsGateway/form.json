@@ -177,7 +177,7 @@
                 {
                     "type": "Button",
                     "caption": "Download complete report",
-                    "download": "symconecharts-import-preview.json",
+                    "download": "echarts-import-preview.json",
                     "onClick": "$sourceMapping = []; foreach ($JSLiveImportSources as $row) { if ($row['TargetID'] > 0) { $sourceMapping[$row['SourceKey']] = $row['TargetID']; } } $archiveMapping = []; foreach ($JSLiveImportArchives as $row) { if ($row['TargetID'] > 0) { $archiveMapping[$row['SourceKey']] = $row['TargetID']; } } $mapping = json_encode(['sourceMapping' => (object) $sourceMapping, 'archiveMapping' => (object) $archiveMapping]); echo ECGW_PreviewJSLiveImportFromForm($id, $JSLiveImportFile, $mapping, $JSLiveImportChart - 1, $JSLiveImportPage - 1, true);"
                 },
                 {
@@ -345,19 +345,19 @@
                     "type": "Button",
                     "caption": "Download complete takeover and difference report",
                     "onClick": "$sourceMapping = []; foreach ($JSLiveImportSources as $row) { if ($row['TargetID'] > 0) { $sourceMapping[$row['SourceKey']] = $row['TargetID']; } } $archiveMapping = []; foreach ($JSLiveImportArchives as $row) { if ($row['TargetID'] > 0) { $archiveMapping[$row['SourceKey']] = $row['TargetID']; } } $mapping = json_encode(['sourceMapping' => (object) $sourceMapping, 'archiveMapping' => (object) $archiveMapping]); echo ECGW_JSLiveImportFromForm($id, $JSLiveImportFile, $mapping, $JSLiveReadyParent, 'report', '{}', $JSLiveReadyChart - 1, false);",
-                    "download": "symconecharts-native-import-plan.json"
+                    "download": "echarts-native-import-plan.json"
                 },
                 {
                     "type": "Button",
                     "caption": "Download selected native tile preview",
                     "onClick": "$sourceMapping = []; foreach ($JSLiveImportSources as $row) { if ($row['TargetID'] > 0) { $sourceMapping[$row['SourceKey']] = $row['TargetID']; } } $archiveMapping = []; foreach ($JSLiveImportArchives as $row) { if ($row['TargetID'] > 0) { $archiveMapping[$row['SourceKey']] = $row['TargetID']; } } $mapping = json_encode(['sourceMapping' => (object) $sourceMapping, 'archiveMapping' => (object) $archiveMapping]); echo ECGW_JSLiveImportFromForm($id, $JSLiveImportFile, $mapping, $JSLiveReadyParent, 'preview', '{}', $JSLiveReadyChart - 1, false);",
-                    "download": "symconecharts-native-tile.html"
+                    "download": "echarts-native-tile.html"
                 },
                 {
                     "type": "Button",
                     "caption": "Download selected native IPSView preview",
                     "onClick": "$sourceMapping = []; foreach ($JSLiveImportSources as $row) { if ($row['TargetID'] > 0) { $sourceMapping[$row['SourceKey']] = $row['TargetID']; } } $archiveMapping = []; foreach ($JSLiveImportArchives as $row) { if ($row['TargetID'] > 0) { $archiveMapping[$row['SourceKey']] = $row['TargetID']; } } $mapping = json_encode(['sourceMapping' => (object) $sourceMapping, 'archiveMapping' => (object) $archiveMapping]); echo ECGW_JSLiveImportFromForm($id, $JSLiveImportFile, $mapping, $JSLiveReadyParent, 'preview', '{}', $JSLiveReadyChart - 1, true);",
-                    "download": "symconecharts-native-ipsview.html"
+                    "download": "echarts-native-ipsview.html"
                 },
                 {
                     "type": "List",

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsDataProtocol;
+use eCharts\EChartsDataProtocol;
 
 require_once dirname(__DIR__) . '/libs/EChartsDataProtocol.php';
 

@@ -12,7 +12,7 @@ function openView(output) {
     let nextTimer = 1;
     const select = {value: '', addEventListener(type, fn) { listeners[type] = fn; }};
     const status = {textContent: ''};
-    const control = {dataset: {output, path: '/hook/SymconECharts/state/1234/' + 'a'.repeat(32)},
+    const control = {dataset: {output, path: '/hook/eCharts/state/1234/' + 'a'.repeat(32)},
         querySelector(selector) { return selector === 'select' ? select : status; }};
     const document = {hidden: false, baseURI: 'http://symcon.test:3777/', documentElement: {lang: 'de'},
         getElementById() { return control; }, addEventListener(type, fn) { listeners[type] = fn; }};
@@ -48,7 +48,7 @@ function openView(output) {
     await ips.reply(0, '6h');
     assert.deepEqual(tile.received.map(s => s.viewPeriod), ['today']);
     assert.deepEqual(ips.received.map(s => s.viewPeriod), ['6h']);
-    const url = new URL(tile.window.SymconEChartsPeriodSelection.withPeriod('/state?offset=2'));
+    const url = new URL(tile.window.eChartsPeriodSelection.withPeriod('/state?offset=2'));
     assert.equal(url.origin, 'http://symcon.test:3777');
     assert.equal(url.searchParams.get('offset'), '2');
     assert.equal(url.searchParams.get('period'), 'today');

@@ -43,7 +43,7 @@ function harness(mode, initial, fetchImpl) {
     const charts = [];
     const window = {
         SYMC_VISUALIZATION: { mode, state: { status: 'ready', chart: initial }, translations: {},
-            options: { tileHeaderInset: mode === 'symcon' ? 58 : 0, heatmapStatePath: '/hook/SymconECharts/state/5000/0123456789abcdef0123456789abcdef' } },
+            options: { tileHeaderInset: mode === 'symcon' ? 58 : 0, heatmapStatePath: '/hook/eCharts/state/5000/0123456789abcdef0123456789abcdef' } },
         location: { protocol: 'https:', host: 'symcon.example.test' },
         getComputedStyle: () => ({ color: '' }), addEventListener: (name, listener) => { listeners[name] = listener; },
         echarts: { init(surface) {

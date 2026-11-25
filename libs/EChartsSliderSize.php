@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Shared thickness for visible ECharts zoom and navigation sliders, in CSS pixels. */
 final class EChartsSliderSize

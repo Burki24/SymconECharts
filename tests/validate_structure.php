@@ -654,8 +654,8 @@ if ($runner === false) {
 }
 
 if ($errors !== []) {
-    fwrite(STDERR, "SymconECharts structure validation failed:\n - " . implode("\n - ", $errors) . "\n");
+    fwrite(STDERR, "eCharts structure validation failed:\n - " . implode("\n - ", $errors) . "\n");
     exit(1);
 }
 
-echo 'SymconECharts repository structure is valid (' . count($discoveredModules) . " modules).\n";
+echo 'eCharts repository structure is valid (' . count($discoveredModules) . " modules).\n";

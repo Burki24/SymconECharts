@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsDataProtocol;
+use eCharts\EChartsDataProtocol;
 
 // Included by calendar_integration.php; all sources are synthetic.
 (static function () use ($calendar, $calendarID, $calendarRequest): void

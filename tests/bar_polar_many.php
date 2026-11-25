@@ -185,7 +185,7 @@ declare(strict_types=1);
                 && (float) $document->documentElement->getAttribute('data-polar-max') === 1000.0,
                 'Initial selection must precede sampling, even for only the hundredth source, without losing hidden scale extrema.'
             );
-            $palette = SymconECharts\EChartsAsset::ThemePreviewPalette('auto');
+            $palette = eCharts\EChartsAsset::ThemePreviewPalette('auto');
             assertGatewayGauge($paths->item(0)->getAttribute('fill') === $palette['seriesColors'][99 % count($palette['seriesColors'])], 'A late-only selected source must retain its original full-model palette position.');
         }
         $module->UpdateBarPreviewFromForm(json_encode(['Sources' => $rows, 'EnableSourceSelection' => false,

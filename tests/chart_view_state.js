@@ -23,7 +23,7 @@ assert.equal(selection.reconcile([rows[2], rows[1], rows[0]]).b, false);
 assert.equal(selection.reconcile([{id: 'b', initiallyVisible: true}]).b, true, 'A changed initial setting takes effect per ID.');
 selection.capture({getOption: () => ({legend: [{selected: {b: false}, scrollDataIndex: 0}]})});
 assert.equal(selection.reconcile([{id: 'b'}]).b, false, 'Existing native legend capture stays compatible.');
-const navigation = context.window.SymconEChartsCategoryNavigation.create();
+const navigation = context.window.eChartsCategoryNavigation.create();
 navigation.rememberWindow(['a', 'b', 'c', 'd'], 1);
 assert.equal(navigation.window(['x', 'b', 'd', 'a', 'c'], 2).first, 1);
 assert.equal(navigation.window(['x', 'd', 'a'], 2).first, 1, 'Removed anchors clamp the remembered offset.');

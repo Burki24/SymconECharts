@@ -38,7 +38,7 @@ function harness(data = model, mode = 'symcon', width = 900, height = 500, heade
     const engine = {setOption: value => {option = value;}, clear: () => {option = null;}, resize() {}, dispose() {}};
     const window = {SYMC_VISUALIZATION: {mode, language: 'de', state: {status: 'ready', chart: data}, translations: {},
         options: {tileHeaderVisible: mode === 'symcon' && (header), tileHeaderInset: mode === 'symcon' && (header) ? 58 : 0, adaptToBackground: mode === 'ipsview', echartsThemes: {auto: palette, dark: palette},
-            calendarPieStatePath: '/hook/SymconECharts/state/5000/' + 'a'.repeat(32)}},
+            calendarPieStatePath: '/hook/eCharts/state/5000/' + 'a'.repeat(32)}},
         echarts: {init: () => engine, format: echarts.format}, getComputedStyle: () => ({color: ''}), addEventListener: (name, fn) => {events[name] = fn;},
         location: {href: 'https://symcon.example/widget'}, ...locationOptions.window};
     const document = {getElementById: element, createElement: () => ({style: {}, remove() {}}), body: {appendChild() {}}, ...locationOptions.document};
@@ -339,7 +339,7 @@ async function flush() {for (let index = 0; index < 8; index++) {await Promise.r
     const navigation = harness();
     navigation.elements.previous.click();
     await flush();
-    assert.match(navigation.requests[0].url, /^https:\/\/symcon\.example\/hook\/SymconECharts\/state\/5000\//);
+    assert.match(navigation.requests[0].url, /^https:\/\/symcon\.example\/hook\/eCharts\/state\/5000\//);
     assert.match(navigation.requests[0].url, /offset=1&output=tile$/);
     assert.equal(navigation.requests[0].options.method, 'GET');
     navigation.window.handleMessage({status: 'ready', chart: model});

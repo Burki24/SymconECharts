@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsTimeSeriesDesign;
-use SymconECharts\EChartsTimeSeriesPreview;
+use eCharts\EChartsTimeSeriesDesign;
+use eCharts\EChartsTimeSeriesPreview;
 
 require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';

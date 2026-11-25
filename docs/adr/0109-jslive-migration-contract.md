@@ -19,7 +19,7 @@ Linien-/Balkenmodelle nicht mit den heutigen Zielfamilien gleichzusetzen.
 - Der gemeinsame [Export-/Importvertrag 1.0](../JSLIVE_MIGRATION_CONTRACT.md)
   ist die kanonische Spezifikation beider Libraries. JSLive ADR 0007 verweist
   auf dieselbe Datei, statt eine zweite Definition zu pflegen.
-- JSLive erfasst vollständig; SymconECharts prüft und plant die bestätigte
+- JSLive erfasst vollständig; eCharts prüft und plant die bestätigte
   Übernahme in neue Instanzen. Der alte JSLive-Export bleibt kompatibel.
 - Profile werden vollständig aufgelöst und in profilunabhängige native
   Darstellungen sowie Chart-Metadaten übersetzt. Präfix/Suffix, Schrittweite,

@@ -1,8 +1,8 @@
 {
     "id": "{66BE21BE-988A-10EB-1BBB-1E2F444E9F85}",
-    "name": "SymconECharts",
+    "name": "eCharts",
     "author": "Burkhard Kneiseler",
-    "url": "https://github.com/Burki24/SymconECharts",
+    "url": "https://github.com/Burki24/eCharts",
     "compatibility": {
         "version": "9.0"
     },

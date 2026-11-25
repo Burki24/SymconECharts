@@ -60,7 +60,7 @@ geprüft. Insbesondere wird das dort als noch nicht für Benutzer freigegeben
 gekennzeichnete `axisExpandWindow` nicht zu einem eigenen Modulvertrag gemacht.
 Keine neue Abhängigkeit, Runtime-Aktualisierung oder Änderung am Fremdcode.
 
-Die vorhandene `SymconEChartsCategoryNavigation` hält den variablen-ID-stabilen
+Die vorhandene `eChartsCategoryNavigation` hält den variablen-ID-stabilen
 Achsenanker. Nur Pixelgeometrie und Bruchteil innerhalb eines Achsenabstands
 bleiben familienlokal. Datenrefresh, Größen-/Schriftänderung und Quellenumordnung
 erhalten die Ansicht; eine zwischenzeitlich vollständig sichtbare Darstellung

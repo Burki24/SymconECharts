@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsDataProtocol;
+use eCharts\EChartsDataProtocol;
 
 // Reuse the established Kernel doubles and real Gateway through its narrow hook.
 if (!isset($gateway)) {

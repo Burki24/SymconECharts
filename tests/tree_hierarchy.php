@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\TreeHierarchy;
+use eCharts\TreeHierarchy;
 
 require_once dirname(__DIR__) . '/libs/TreeHierarchy.php';
 

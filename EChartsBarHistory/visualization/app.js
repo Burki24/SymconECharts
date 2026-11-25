@@ -11,9 +11,9 @@
     var currentTheme = null;
     var archiveRefreshFailures = 0;
     var archiveLoadError = 'The Historical Bar values could not be loaded.';
-    var zoomController = window.SymconEChartsZoom;
+    var zoomController = window.eChartsZoom;
     var seriesSelection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
-    var barPatterns = window.SymconEChartsPattern.create(function () {
+    var barPatterns = window.eChartsPattern.create(function () {
         if (typeof window.requestAnimationFrame === 'function') {
             window.requestAnimationFrame(function () { render(currentState); });
         } else if (typeof window.setTimeout === 'function') {
@@ -101,7 +101,7 @@
             return Object.assign({}, item, { id: item.id || 'series-' + index,
                 axisIndex: Number.isInteger(item.axisIndex) ? item.axisIndex : 0 });
         });
-        series = window.SymconEChartsArchiveStack.project(series);
+        series = window.eChartsArchiveStack.project(series);
         var selected = seriesSelection.reconcile(series);
         var axes = Array.isArray(model.axes) && model.axes.length > 0
             ? model.axes : [{ unit: String(bar.unit || ''), position: 'left', positionIndex: 0 }];

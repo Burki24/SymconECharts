@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsVariablePresentation;
+use eCharts\EChartsVariablePresentation;
 
 // Only Kernel boundaries are synthetic; module, presentation resolver and Gateway are real.
 (static function (): void

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/libs/EChartsArchiveQuery.php';
 
-use SymconECharts\EChartsArchiveQuery;
+use eCharts\EChartsArchiveQuery;
 
 function assertAbsoluteArchive(bool $condition, string $message): void
 {

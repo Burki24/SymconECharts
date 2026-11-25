@@ -9,8 +9,8 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
-    var zoomController = window.SymconEChartsZoom;
-    var areaPatterns = window.SymconEChartsPattern.create(schedulePatternRender);
+    var zoomController = window.eChartsZoom;
+    var areaPatterns = window.eChartsPattern.create(schedulePatternRender);
     var seriesSelection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
     var startupPending = Boolean(bootstrap.options && bootstrap.options.compressedStateGzipBase64);
     var pendingAppends = [];
@@ -157,7 +157,7 @@
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
         var axes = Array.isArray(model.axes) ? model.axes : [];
-        var series = window.SymconEChartsArchiveStack.project(model.series || [], model.range.stackGapTimestamps || {});
+        var series = window.eChartsArchiveStack.project(model.series || [], model.range.stackGapTimestamps || {});
         var selectedSeries = seriesSelection.reconcile(series);
         var visibleStackSizes = new Map();
         series.forEach(function (item) {

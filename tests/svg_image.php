@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsSvgImage;
+use eCharts\EChartsSvgImage;
 
 require_once __DIR__ . '/../libs/EChartsSvgImage.php';
 

@@ -30,7 +30,7 @@ wird. `RequireParent()` wird nicht mehr verwendet.
 
 Der Symcon-Datenfluss behält seine vorhandenen GUIDs. Die Transporthülle wird
 über `DataFlowHelper` aus `Symcon_ModuleHelper` validiert. Innerhalb der Hülle
-verwendet SymconECharts ein eigenes Protokoll mit folgenden Pflichtfeldern:
+verwendet eCharts ein eigenes Protokoll mit folgenden Pflichtfeldern:
 
 - `ProtocolVersion`: aktuell `1`;
 - `Operation`: stabiler Operationsname;

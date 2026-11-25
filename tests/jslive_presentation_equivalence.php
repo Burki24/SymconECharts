@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/jslive_family_fixture.php';
 
-use SymconECharts\EChartsImportJson;
-use SymconECharts\EChartsJSLiveModel;
-use SymconECharts\EChartsJSLivePlan;
-use SymconECharts\EChartsJSLivePresentation;
+use eCharts\EChartsImportJson;
+use eCharts\EChartsJSLiveModel;
+use eCharts\EChartsJSLivePlan;
+use eCharts\EChartsJSLivePresentation;
 
 function presentationEquivalenceAssert(bool $condition, string $message): void
 {

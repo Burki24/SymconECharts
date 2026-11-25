@@ -50,7 +50,7 @@ function page(mode, metric, range, panels) {
     const bootstrap = { mode, state: state(metric, 0, range, panels),
         translations: JSON.parse(read('EChartsHeatmap/locale.json')).translations.de,
         options: { tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {}, heatmapStatePath:
-            '/hook/SymconECharts/state/5000/' + 'a'.repeat(32) + '/metric/' + metric + '/range/' + range + (panels ? '/panels/4' : '') } };
+            '/hook/eCharts/state/5000/' + 'a'.repeat(32) + '/metric/' + metric + '/range/' + range + (panels ? '/panels/4' : '') } };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px',
         VIEWPORT_CONTENT: 'width=device-width, initial-scale=1', DOCUMENT_TITLE: 'Heatmap synthetic fixture',
         VISUALIZATION_THEME: variables, MODULE_STYLE: read('EChartsHeatmap/visualization/style.css'), IPSVIEW_STYLE: '',
@@ -71,7 +71,7 @@ http.createServer((request, response) => {
     const panels = url.searchParams.get('panels') === '4' || url.pathname.includes('/panels/4');
     const requestedRange = url.searchParams.get('range') || url.pathname.split('/range/')[1]?.split('/')[0];
     const range = ['custom', 'absolute'].includes(requestedRange) ? requestedRange : '1m';
-    if (url.pathname.startsWith('/hook/SymconECharts/state/')) {
+    if (url.pathname.startsWith('/hook/eCharts/state/')) {
         response.setHeader('Content-Type', 'application/json');
         response.end(JSON.stringify(state(metric, Math.max(0, Math.min(1, Number(url.searchParams.get('offset')) || 0)), range, panels)));
     } else if (url.pathname === '/chart') {

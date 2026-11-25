@@ -59,7 +59,7 @@ function controls(html, mode) {
 const port = Number(process.env.PORT || 8805);
 http.createServer((request, response) => {
     const url = new URL(request.url, 'http://localhost');
-    if (url.pathname === '/hook/SymconECharts/assets/interaction.js') {
+    if (url.pathname === '/hook/eCharts/assets/interaction.js') {
         response.writeHead(200, {'Content-Type': 'application/javascript; charset=utf-8'});
         response.end(read('libs/helper/visualization/interaction.min.js')); return;
     }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\PictorialBarSvg;
+use eCharts\PictorialBarSvg;
 
 require_once __DIR__ . '/../EChartsPictorialBar/PictorialBarSvg.php';
 

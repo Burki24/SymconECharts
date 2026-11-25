@@ -1,15 +1,15 @@
-# Migration von JSLive nach SymconECharts
+# Migration von JSLive nach eCharts
 
 Die Übernahme erspart den manuellen Neuaufbau unterstützter JSLive-Diagramme.
 Sie erhält Quellenbezüge, Zeit- und Berechnungsregeln sowie die übertragbaren
-Designangaben in einem eigenen nativen Modell. JSLive und SymconECharts bleiben
+Designangaben in einem eigenen nativen Modell. JSLive und eCharts bleiben
 getrennte Libraries. Das Original bleibt als Vergleich und Rückfall erhalten.
 
 ## Was erhalten bleibt
 
 | Bereich | Verhalten bei der Übernahme |
 | --- | --- |
-| Originalinstanz | Bleibt unverändert; SymconECharts erzeugt ausdrücklich bestätigte neue Ziele. |
+| Originalinstanz | Bleibt unverändert; eCharts erzeugt ausdrücklich bestätigte neue Ziele. |
 | Quellen und Werte | Vorhandene Variablen werden über ihre IDs verwendet. Keine Kopie oder Änderung ihrer Messwerte und Actions. |
 | Archive | Vorhandene Archivbezüge und die unterstützten Auswertungsregeln bleiben erhalten. Keine Löschung, Umschreibung oder automatische neue Archivierung. |
 | Profile und Darstellungen | Formatierungen werden profilunabhängig in native Darstellungsinformationen des Zielmodells übersetzt. Bestehende Quellprofile und Darstellungen werden nicht umgestellt. |
@@ -25,7 +25,7 @@ werden nicht aus aktuellen Werten rekonstruiert.
 
 ## Unterstützte Zielfamilien
 
-| JSLive-Diagramm | SymconECharts-Ziel |
+| JSLive-Diagramm | eCharts-Ziel |
 | --- | --- |
 | Linien, Flächen und Mischdiagramme | [EChartsTimeSeries](../EChartsTimeSeries/README.md) |
 | Historische Balken | [EChartsBarHistory](../EChartsBarHistory/README.md) |
@@ -46,21 +46,16 @@ jeweils das JSLive-Original links und das übernommene ECharts-Diagramm rechts.
 ## 1. In JSLive exportieren
 
 1. **JSLive Beta 0.113** oder einen neueren kompatiblen Stand einschließlich
-   seiner regulären Helper installieren; auch SymconECharts aktuell halten.
-   Benötigt wird **Export für SymconECharts** nach Vertrag
+   seiner regulären Helper installieren; auch eCharts aktuell halten.
+   Benötigt wird der Migrationsexport nach Vertrag
    `de.burki24.jslive-echarts` in Version 1.0. Bereits vorhandene Pakete mit
    geprüften Standardvorlagen aus 0.111 bleiben lesbar; deren technische
    Erkennung ersetzt nicht den aktuellen JSLive-Exportbereich.
-2. In der JSLive-Chartinstanz **Export für SymconECharts** öffnen und das Paket
+2. In der JSLive-Chartinstanz **Export für eCharts** öffnen und das Paket
    mit der Endung `.jslive-echarts.json` herunterladen.
 3. Bereits gemeldete fehlende Quellen, nicht übersetzbare Darstellungen oder
    Ressourcen vor der Übernahme klären. Das Paket lokal aufbewahren: Es enthält
    installationsbezogene Angaben und gehört nicht in öffentliche Foren.
-
-![JSLive-Formular: Export für SymconECharts mit optionalen inerten Vorlageninhalten](images/jslive-migration-export.jpg)
-
-Der eigene Exportbereich in der JSLive-Instanz. Der Schalter für
-Vorlageninhalte ist in dieser Aufnahme ausgeschaltet.
 
 Der ältere allgemeine JSLive-Konfigurationsexport ist **kein** Paket dieses
 Formats. Eine andere Dateiendung allein wandelt ihn nicht um.
@@ -69,7 +64,7 @@ das Paket macht sie nicht zu ausführbaren ECharts-Vorlagen.
 
 ## 2. Paket und Zuordnungen prüfen
 
-1. Im **Symcon-Modulstore** den Eintrag **SymconECharts** installieren
+1. Im **Symcon-Modulstore** den Eintrag **eCharts** installieren
    beziehungsweise aktualisieren und das gemeinsame
    [EChartsGateway](../EChartsGateway/README.md) öffnen.
 2. Unter **JSLive-Export und Metadatenprüfung** die Exportdatei auswählen.
@@ -127,6 +122,11 @@ solche Unterschiede statt sie im Ziel still zu aktivieren.
    ausführen und das Ergebnis samt Ziel-ID im Journal prüfen. Für weitere
    Diagramme die jeweilige Auswahl und Bestätigung wiederholen.
 
+**Wiederanlauf nach der Umbenennung:** Wenn Du vor dem Modulupdate bereits
+einen Plan bestätigt hast, bereite ihn im Gateway erneut vor. Prüfe die
+Abweichungen und bestätige den aktuellen Plan. Das Gateway ordnet einen
+passenden bestehenden Import wieder seiner bisherigen Ziel-ID zu.
+
 ![Gateway-Formular: ausdrückliche Bestätigung der Neuanlage und Journalbedienung](images/jslive-migration-confirm.jpg)
 
 Bestätigungsschalter und Anlageaktion sind von der Planvorbereitung getrennt.
@@ -142,6 +142,7 @@ keine überschreibbaren Importziele.
 
 Die neue Diagramminstanz in einer eigenen Kachel anzeigen. Für IPSView die
 HTML-Ausgabe aktivieren und die erzeugte WebContent-Variable verwenden.
+War die IPSView-Ansicht beim Modulupdate geöffnet, lade sie einmal neu.
 Die [Modulanleitung](../README.md#enthaltene-module) nennt ihren Ident und die
 verfügbaren Anpassungen. Das Kacheldesign wird standardmäßig geerbt; nach dem
 Ausschalten dieser Vererbung kann IPSView unabhängig gestaltet werden.

@@ -18,7 +18,7 @@ Auslieferung, die Trennung zwischen gemeinsamem Framework und
 familienbezogener Darstellung sowie der Aktualisierungsweg der nativen
 Symcon-Kachel verbindlich festgelegt werden.
 
-SymconECharts unterstützt Symcon 9.0 und 9.1. Deshalb darf der erste native
+eCharts unterstützt Symcon 9.0 und 9.1. Deshalb darf der erste native
 Ausgabeweg keine ausschließlich in 9.1 verfügbare Darstellungsart voraussetzen.
 Eine externe CDN-Abhängigkeit wäre außerdem weder reproduzierbar noch für eine
 lokale Symcon-Installation verlässlich verfügbar.

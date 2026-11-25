@@ -3,7 +3,7 @@
 
     var bootstrap = window.SYMC_VISUALIZATION || {};
     var design = window.SYMC_ECHARTS_DESIGN;
-    var zoom = window.SymconEChartsZoom;
+    var zoom = window.eChartsZoom;
     var chartElement = document.getElementById('echarts-scatter-chart');
     var emptyElement = document.getElementById('echarts-scatter-empty');
     var warningElement = document.getElementById('echarts-scatter-warning');

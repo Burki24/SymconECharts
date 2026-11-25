@@ -3,7 +3,7 @@
 
     var bootstrap = window.SYMC_VISUALIZATION || {};
     var design = window.SYMC_ECHARTS_DESIGN;
-    var zoom = window.SymconEChartsZoom;
+    var zoom = window.eChartsZoom;
     var rootElement = document.getElementById('echarts-state-timeline-root');
     var chartElement = document.getElementById('echarts-state-timeline-chart');
     var emptyElement = document.getElementById('echarts-state-timeline-empty');

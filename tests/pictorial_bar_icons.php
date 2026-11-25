@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../EChartsPictorialBar/PictorialBarIcon.php';
 
-use SymconECharts\PictorialBarIcon;
+use eCharts\PictorialBarIcon;
 
 // Synthetic icon data; no installed or licensed icon artwork is distributed.
 $fixture = json_decode(file_get_contents(__DIR__ . '/fixtures/pictorial-icons.json'), true, 512, JSON_THROW_ON_ERROR);

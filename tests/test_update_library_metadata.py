@@ -46,7 +46,7 @@ def main() -> None:
             json.dumps(
                 {
                     "id": "{00000000-0000-0000-0000-000000000000}",
-                    "name": "SymconECharts",
+                    "name": "eCharts",
                     "compatibility": {"version": "9.0"},
                     "version": "1.0",
                     "build": 0,
@@ -69,7 +69,7 @@ def main() -> None:
         if updated.get("id") != "{00000000-0000-0000-0000-000000000000}":
             raise SystemExit("Library identity metadata was not preserved.")
 
-        if updated.get("name") != "SymconECharts":
+        if updated.get("name") != "eCharts":
             raise SystemExit("Library name metadata was not preserved.")
 
         if updated.get("compatibility") != {"version": "9.0"}:
@@ -88,7 +88,7 @@ def main() -> None:
         changelog = Path(temporary_directory) / "CHANGELOG.md"
         original = (
             "# Unveröffentlicht\n\n- Future change.\n\n"
-            "<!-- symconecharts:prepared-beta -->\n"
+            "<!-- echarts:prepared-beta -->\n"
             "# 29.10.2026 - Version 1.350 (Beta)\n\n"
             "## Neu\n\n- Prepared change with ünicode.\n\n"
             "# 01.10.2026 - Version 1.200 (Beta)\n\n- Historical change.\n"
@@ -106,7 +106,7 @@ def main() -> None:
             raise SystemExit("Repeating the same metadata plan must preserve the prepared changelog.")
 
         # Removing the explicit marker freezes the now historical release.
-        released = expected.replace("<!-- symconecharts:prepared-beta -->\n", "")
+        released = expected.replace("<!-- echarts:prepared-beta -->\n", "")
         changelog.write_text(released, encoding="utf-8", newline="\n")
         run_update(library_file, base_version="1.353", increment=1, changelog=changelog)
         if changelog.read_text(encoding="utf-8") != released:
@@ -114,8 +114,8 @@ def main() -> None:
 
         # Invalid opt-in input must fail before either release file is modified.
         for invalid in (
-            "<!-- symconecharts:prepared-beta -->\n# malformed release\n",
-            original + "\n<!-- symconecharts:prepared-beta -->\n",
+            "<!-- echarts:prepared-beta -->\n# malformed release\n",
+            original + "\n<!-- echarts:prepared-beta -->\n",
         ):
             changelog.write_text(invalid, encoding="utf-8", newline="\n")
             before_library = library_file.read_bytes()

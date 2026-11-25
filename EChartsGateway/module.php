@@ -6,13 +6,16 @@ require_once __DIR__ . '/../libs/helper/DebugFlowHelper.php';
 require_once __DIR__ . '/../libs/EChartsDebugFlow.php';
 
 use Burki24\SymconModuleHelper\DataFlowHelper;
-use SymconECharts\EChartsAsset;
-use SymconECharts\EChartsDataProtocol;
+use eCharts\EChartsAsset;
+use eCharts\EChartsDataProtocol;
+use eCharts\EChartsIdentity;
 
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsIdentity.php';
+require_once __DIR__ . '/../libs/EChartsPersistenceMigration.php';
 require_once __DIR__ . '/../libs/EChartsJSLiveImportForm.php';
 require_once __DIR__ . '/../libs/EChartsJSLiveArchive.php';
 require_once __DIR__ . '/../libs/EChartsJSLiveCreationForm.php';
@@ -20,9 +23,9 @@ require_once __DIR__ . '/../libs/EChartsJSLiveCreationForm.php';
 class EChartsGateway extends IPSModuleStrict
 {
     use \Burki24\SymconModuleHelper\DebugFlowHelper;
-    use \SymconECharts\EChartsDebugFlow;
-    use \SymconECharts\EChartsJSLiveImportForm;
-    use \SymconECharts\EChartsJSLiveCreationForm;
+    use \eCharts\EChartsDebugFlow;
+    use \eCharts\EChartsJSLiveImportForm;
+    use \eCharts\EChartsJSLiveCreationForm;
 
     use DataFlowHelper;
     use \Burki24\SymconModuleHelper\VisualizationAssetHelper;
@@ -35,7 +38,6 @@ class EChartsGateway extends IPSModuleStrict
     private const DATA_ID_FROM_CHILD = '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}';
     private const DATA_ID_TO_CHILD = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
     private const WEBHOOK_CONTROL_MODULE_ID = '{015A6EB8-D6E5-4B93-B496-0D3F77AE9FE1}';
-    private const WEBHOOK_NAME = 'SymconECharts';
     private const GATEWAY_MODULE_ID = '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}';
 
     /** @var list<int> */
@@ -43,6 +45,17 @@ class EChartsGateway extends IPSModuleStrict
 
     /** @var list<string> */
     private const ARCHIVE_REDUCERS = ['auto', 'average', 'sum', 'minimum', 'maximum'];
+
+    public function Migrate(string $JSONData): string
+    {
+        return \eCharts\EChartsPersistenceMigration::UpdateString(
+            $JSONData,
+            parent::Migrate($JSONData),
+            'attributes',
+            'JSLiveImportJournal',
+            \eCharts\EChartsJSLiveJournal::MigrateStoredJournal(...)
+        );
+    }
 
     public function Create(): void
     {
@@ -113,7 +126,7 @@ class EChartsGateway extends IPSModuleStrict
                 EChartsDataProtocol::OPERATION_ARCHIVE_READ          => $this->ReadArchiveValues($request['Payload']),
                 EChartsDataProtocol::OPERATION_ARCHIVE_STATES_READ   => $this->ReadArchiveStates($request['Payload']),
                 EChartsDataProtocol::OPERATION_IPSVIEW_PUSH          => $this->PushIPSViewMessage($request['Payload']),
-                \SymconECharts\EChartsJSLiveArchive::OPERATION       => $this->ReadJSLiveSnapshot($request['Payload']),
+                \eCharts\EChartsJSLiveArchive::OPERATION             => $this->ReadJSLiveSnapshot($request['Payload']),
                 default                                              => EChartsDataProtocol::EncodeErrorResponse(
                     $operation,
                     'UNSUPPORTED_OPERATION',
@@ -200,7 +213,7 @@ class EChartsGateway extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             $path = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
-            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && $path === '/hook/SymconECharts/assets/interaction.js') {
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && $path === EChartsAsset::HOOK_PATH . '/assets/interaction.js') {
                 $this->SendHookResponse(200, $this->VisualizationInteractionScript(), 'application/javascript; charset=utf-8');
                 return;
             }
@@ -215,13 +228,14 @@ class EChartsGateway extends IPSModuleStrict
                 return;
             }
 
-            if (preg_match('#^/hook/SymconECharts/WS/[1-9][0-9]*/[a-f0-9]{32}$#D', $path) === 1) {
+            $hook = preg_quote(EChartsAsset::HOOK_PATH, '#');
+            if (preg_match('#^' . $hook . '/WS/[1-9][0-9]*/[a-f0-9]{32}$#D', $path) === 1) {
                 return;
             }
 
             if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET'
                 || preg_match(
-                    '#^/hook/SymconECharts/state/([1-9][0-9]*)/([a-f0-9]{32})$#D',
+                    '#^' . $hook . '/state/([1-9][0-9]*)/([a-f0-9]{32})$#D',
                     $path,
                     $matches
                 ) !== 1
@@ -258,9 +272,9 @@ class EChartsGateway extends IPSModuleStrict
     {
         return $this->DebugFlowCall(__FUNCTION__, __LINE__, function () use ($payload): string
         {
-            $operation = \SymconECharts\EChartsJSLiveArchive::OPERATION;
+            $operation = \eCharts\EChartsJSLiveArchive::OPERATION;
             try {
-                return EChartsDataProtocol::EncodeSuccessResponse($operation, \SymconECharts\EChartsJSLiveArchive::Read($payload));
+                return EChartsDataProtocol::EncodeSuccessResponse($operation, \eCharts\EChartsJSLiveArchive::Read($payload));
             } catch (\Throwable) {
                 return EChartsDataProtocol::EncodeErrorResponse($operation, 'SNAPSHOT_UNAVAILABLE', 'The bounded source/archive snapshot could not be read.');
             }
@@ -284,7 +298,16 @@ class EChartsGateway extends IPSModuleStrict
     {
         $ids = $this->TransportGatewayIDs($removedID);
         $peers = array_values(array_diff($ids, [$this->InstanceID]));
-        $oldPeers = json_decode($this->GetBuffer('TransportPeers') ?: '[]', true, 512, JSON_THROW_ON_ERROR);
+        $storedPeers = $this->GetBuffer('TransportPeers');
+        $oldPeers = json_decode($storedPeers ?: '[]', true, 512, JSON_THROW_ON_ERROR);
+        if ($this->GetBuffer('TransportHook') !== EChartsAsset::HOOK_NAME) {
+            // During a hot reload, only the previously elected gateway releases its old native registration.
+            // On a fresh installation or kernel restart the volatile registration no longer exists.
+            if ($storedPeers !== '' && min([$this->InstanceID, ...$oldPeers]) === $this->InstanceID) {
+                $this->UnregisterHook(EChartsIdentity::LegacyProductName());
+            }
+            $this->SetBuffer('TransportHook', EChartsAsset::HOOK_NAME);
+        }
         foreach (array_diff($oldPeers, $peers) as $id) {
             $this->UnregisterMessage($id, IM_DELETE);
         }
@@ -293,7 +316,7 @@ class EChartsGateway extends IPSModuleStrict
         }
         $this->SetBuffer('TransportPeers', json_encode($peers, JSON_THROW_ON_ERROR));
         if (($ids[0] ?? 0) === $this->InstanceID) {
-            $this->RegisterHook(self::WEBHOOK_NAME);
+            $this->RegisterHook(EChartsAsset::HOOK_NAME);
         }
     }
 
@@ -372,7 +395,7 @@ class EChartsGateway extends IPSModuleStrict
                 $this->DebugFlowEvent(__FUNCTION__, __LINE__, 'SENDEN', 'Aktualisierung an WebHook Control übergeben; Browserempfang ist noch nicht bestätigt.', ['Zielinstanz' => $instanceID, 'Bytes' => strlen($encodedMessage)]);
                 WC_PushMessage(
                     $webHookControlID,
-                    '/hook/SymconECharts/WS/' . $instanceID . '/' . $channel,
+                    EChartsAsset::HOOK_PATH . '/WS/' . $instanceID . '/' . $channel,
                     $encodedMessage
                 );
             } catch (Throwable $exception) {

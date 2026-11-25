@@ -6,7 +6,7 @@ require_once __DIR__ . '/../libs/EChartsJSLiveStandalone.php';
 
 class EChartsProgress extends IPSModuleStrict
 {
-    use \SymconECharts\EChartsJSLiveStandalone;
+    use \eCharts\EChartsJSLiveStandalone;
 
     private const IPSVIEW_OUTPUT_IDENT = 'IPSViewProgress';
 }

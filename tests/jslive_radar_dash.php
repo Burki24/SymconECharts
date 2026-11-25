@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/jslive_family_fixture.php';
 
-use SymconECharts\EChartsImportJson;
-use SymconECharts\EChartsJSLiveModel;
-use SymconECharts\EChartsJSLivePackage;
-use SymconECharts\EChartsJSLivePlan;
+use eCharts\EChartsImportJson;
+use eCharts\EChartsJSLiveModel;
+use eCharts\EChartsJSLivePackage;
+use eCharts\EChartsJSLivePlan;
 
 function radarDashAssert(bool $condition, string $message): void
 {

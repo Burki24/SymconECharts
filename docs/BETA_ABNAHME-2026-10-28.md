@@ -1,7 +1,7 @@
 # Gemeinsame Beta-Abnahme am 28.10.2026
 
 Nachtrag 05.11.2026: Die erste Beta ist durch den Eigentümer veröffentlicht
-und seit der [Community-Ankündigung vom 03.11.2026](https://community.symcon.de/t/beta-modul-symconecharts-nachfolger-von-jslive-charts/144844)
+und seit der [Community-Ankündigung vom 03.11.2026](https://community.symcon.de/t/144844)
 öffentlich verfügbar. Aussagen zu noch ausstehenden Einreichungsschritten
 beschreiben unten den damaligen Prüfstand, keine aktuellen Blocker. Den
 aktuellen Stand führt [BETA_STORE.md](BETA_STORE.md); die tatsächlichen

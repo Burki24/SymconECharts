@@ -1,7 +1,7 @@
 # Fremdkomponenten und Lizenzabgrenzung
 
 Die Projektlizenz [LICENSE](LICENSE) gilt für die eigenen Beiträge zu
-SymconECharts. Sie ersetzt oder beschränkt nicht die Originallizenzen separat
+eCharts. Sie ersetzt oder beschränkt nicht die Originallizenzen separat
 gekennzeichneter Fremdkomponenten.
 
 ## Apache ECharts
@@ -168,7 +168,7 @@ offiziellen Bundle enthaltenen Komponenten bleiben unter ihren in
 PictorialBar verwendet auf Wunsch ausgewählte Pfadformen aus der bereits
 installierten Symcon-Icon-Bibliothek. Diese enthält unter anderem Font Awesome
 Light/Brands und Symcon-spezifische Icons; es gelten deren jeweilige, mit
-Symcon ausgelieferte Lizenzbedingungen. SymconECharts liefert keine Kopie
+Symcon ausgelieferte Lizenzbedingungen. eCharts liefert keine Kopie
 dieser Bibliothek, Fonts oder kommerziellen Iconbestände aus. Der lokale
 Adapter liest nur die ausgewählte Form für die eigene Diagrammausgabe.
 Die Test-Fixtures enthalten ausschließlich selbst erstellte synthetische

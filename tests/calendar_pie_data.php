@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/EChartsCalendarPie/CalendarPieData.php';
 
-use SymconECharts\CalendarPieData;
-use SymconECharts\StateTimelineData;
+use eCharts\CalendarPieData;
+use eCharts\StateTimelineData;
 
 function calendarPieAssert(bool $condition, string $message): void
 {

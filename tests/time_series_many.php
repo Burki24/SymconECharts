@@ -276,7 +276,7 @@ declare(strict_types=1);
         foreach ([['2026-03-29', '2026-03-30', '2026-03-31', '2026-04-01'], ['2026-10-25', '2026-10-26', '2026-10-27', '2026-10-28']] as [$first, $second, $missing, $last]) {
             $dailyStack = [['stackGroup' => 1, 'points' => [[$localDay($first), 2], [$localDay($second), 0], [$localDay($last), 3]]]];
             assertGatewayGauge(
-                \SymconECharts\EChartsArchiveStack::GapTimestamps($dailyStack, 1, 'Europe/Berlin') === [1 => [$localDay($missing)]],
+                \eCharts\EChartsArchiveStack::GapTimestamps($dailyStack, 1, 'Europe/Berlin') === [1 => [$localDay($missing)]],
                 'Daily stack breaks must follow local calendar days across both DST boundaries.'
             );
         }

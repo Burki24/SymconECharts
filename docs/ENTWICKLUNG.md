@@ -1,4 +1,4 @@
-# Entwicklung von SymconECharts
+# Entwicklung von eCharts
 
 ## JSON-Datenquelle für EChartsTree
 
@@ -245,7 +245,7 @@ Echte Touchgeräte bleiben ungeprüft.
 ## Ziel und Abgrenzung
 
 Symcon-Variablen und Archivdaten sollen ohne eigene JavaScript-Programmierung
-als Messinstrumente und Diagramme dargestellt werden können. SymconECharts
+als Messinstrumente und Diagramme dargestellt werden können. eCharts
 entsteht unabhängig von JSLive; bestehende JSLive-Installationen werden nicht
 verändert und JSLive ist keine Voraussetzung.
 
@@ -520,7 +520,7 @@ ihre Ladelimits und bisherigen Range-Felder; neue effektive Budgetfelder sind
 additiv für größere Listen. Zu große Antworten werden vor dem Join abgewiesen.
 Alle Achsen und Zeilen bleiben in der nativen Parallel-Koordinate. Ein echter
 horizontaler DOM-Viewport statt Dimensionsauswahl verwendet die bestehende
-`SymconEChartsCategoryNavigation` für ID-stabile Anker. Titelupdates beim Scrollen
+`eChartsCategoryNavigation` für ID-stabile Anker. Titelupdates beim Scrollen
 ersetzen nur die Titelposition; native Achsenmarkierungen und Skalen bleiben
 erhalten. Reine SVG-Entwurfsvorschauen kennzeichnen ihren Sechs-Achsen-Ausschnitt.
 Die 16-Achsen-Ansicht wurde funktional per MCP auf Symcon 9.1 mit temporärer
@@ -923,7 +923,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 
 | Bestandteil | Name | Aufgabe |
 |---|---|---|
-| Library | SymconECharts | Gemeinsames installierbares Paket |
+| Library | eCharts | Gemeinsames installierbares Paket |
 | Splitter | EChartsGateway | Gemeinsame Dienste für mehrere Chart-Instanzen |
 | Gerät | EChartsGaugeSingle | Ein Gauge-Chart mit genau einer Quellvariable und zwei Ausgabewegen |
 | Gerät | EChartsGaugeMulti | Zwei bis 32 individuell skalierte Quellen mit optionaler Quellenauswahl und responsiven Instrumentenseiten |
@@ -967,7 +967,7 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 
 | Identität | GUID |
 |---|---|
-| Library SymconECharts | `{66BE21BE-988A-10EB-1BBB-1E2F444E9F85}` |
+| Library eCharts | `{66BE21BE-988A-10EB-1BBB-1E2F444E9F85}` |
 | Modul EChartsGateway | `{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}` |
 | Modul EChartsGaugeSingle | `{0CAA2780-342F-E5B9-2865-CB8DCED0BE7C}` |
 | Modul EChartsGaugeMulti | {E667D9C1-379D-44ED-A313-FF21FEFC355F} |
@@ -1280,7 +1280,7 @@ lokale Kopien. Synchronisierte Helper liegen ausschließlich unter
 
 Vor der Programmierung einer neuen Funktion oder Chartfamilie werden die
 fertigen Charts und vorhandenen Bibliotheken auf eine bereits bewährte Lösung
-geprüft. Eine kompatible, innerhalb von SymconECharts wiederverwendbare
+geprüft. Eine kompatible, innerhalb von eCharts wiederverwendbare
 Funktion wird als projektspezifischer Baustein direkt unter `libs`
 zentralisiert. ECharts-unabhängige Funktionen mit Nutzen für weitere
 Symcon-Module entstehen dagegen in `Symcon_ModuleHelper` und gelangen nur über
@@ -1344,7 +1344,7 @@ Quellcommit ab und setzt `date` auf dessen Commit-Zeit. Der getrennte
 Metadatencommit löst keine weitere Erhöhung aus. Tags, Releases und
 Veröffentlichungen bleiben manuelle, ausdrücklich freizugebende Schritte.
 
-Die ausdrücklich mit `<!-- symconecharts:prepared-beta -->` markierte
+Die ausdrücklich mit `<!-- echarts:prepared-beta -->` markierte
 Beta-Überschrift im Changelog folgt über `--prepared-beta-changelog` derselben
 berechneten Version. Der Bot committet beide Dateien gemeinsam; Datum und
 Inhalte bleiben erhalten. Auf ausdrücklichen Eigentümerwunsch bleibt die
@@ -1466,7 +1466,7 @@ Eigene Beiträge stehen unter der
 ihre Originallizenzen; die konkrete Einbindung wird in
 [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) dokumentiert.
 
-Required Notice: Copyright 2026 Burkhard Kneiseler. SymconECharts.
+Required Notice: Copyright 2026 Burkhard Kneiseler. eCharts.
 
 ## Zentrale Mausradbehandlung am 22.10.2026
 

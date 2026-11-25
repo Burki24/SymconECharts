@@ -1,15 +1,15 @@
-# Projektregeln für SymconECharts
+# Projektregeln für eCharts
 
 Vor Arbeiten in diesem Repository sind zuerst die zentralen Vorgaben aus
 `../SymconDevelopment/AGENTS.md` und
 `../SymconDevelopment/ARCHITECTURE.md` zu lesen. Die dort referenzierten
 Prinzipien und die für die konkrete Aufgabe relevanten Standards gelten auch
-für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
+für eCharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 `README.md`, `docs/ENTWICKLUNG.md` und den README-Dateien der Module.
 
 ## Produktumfang und Abgrenzung
 
-- SymconECharts ist die eigenständige Neuentwicklung für Diagramme auf Basis
+- eCharts ist die eigenständige Neuentwicklung für Diagramme auf Basis
   von Apache ECharts. JSLive bleibt ein getrenntes Wartungsprojekt und wird aus
   diesem Repository heraus nicht geändert.
 - Zielplattform sind IP-Symcon 9.0/9.1 und PHP 8.5. Eine gesonderte
@@ -436,7 +436,7 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   `../JSLive/docs/adr/0006-maintenance-scope.md`. JSLive dient ausschließlich
   als lesende Referenz, sofern kein eigener Auftrag für dieses Repository
   erteilt wurde.
-- JSLive liefert den Export bestehender Charts; SymconECharts erhält die
+- JSLive liefert den Export bestehender Charts; eCharts erhält die
   passende Übernahmefunktion. Vor der Implementierung ist ein gemeinsamer,
   versionierter Austauschvertrag zu spezifizieren.
 - Der gemeinsame Vertrag `de.burki24.jslive-echarts` 1.0 steht kanonisch in

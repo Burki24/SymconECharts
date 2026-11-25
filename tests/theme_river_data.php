@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/EChartsThemeRiver/ThemeRiverData.php';
 
-use SymconECharts\ThemeRiverData;
+use eCharts\ThemeRiverData;
 
 function assertRiver(bool $condition, string $message): void
 {

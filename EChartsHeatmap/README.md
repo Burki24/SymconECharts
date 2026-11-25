@@ -5,7 +5,7 @@ lokale Stunden von 0 bis 23 Uhr und je nach Zeitraum konkrete Tage oder
 zusammengefasste Wochentage. Eine
 gemeinsame `EChartsGateway`-Instanz genügt auch für diese Diagrammfamilie.
 
-Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+Installation: Im **Symcon-Modulstore** nach **eCharts** suchen.
 [Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der

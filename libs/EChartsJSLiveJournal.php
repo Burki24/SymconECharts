@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 use RuntimeException;
 use Throwable;
 
 require_once __DIR__ . '/EChartsImportJson.php';
+require_once __DIR__ . '/EChartsJSLiveOwnership.php';
 require_once __DIR__ . '/EChartsJSLiveTargetSnapshot.php';
 
 /** The only write boundary used by the confirmed import. Never addresses source objects. */
@@ -26,6 +27,7 @@ interface EChartsJSLiveImportKernel
     public function HasChanges(int $id): bool;
     public function Apply(int $id): void;
     public function Verify(int $id): array;
+    public function MigrateSeals(int $id, string $marker, array $snapshot, array $receipt): void;
     public function Revalidate(array $plan): void;
     public function AssertIdentity(string $identity, array $entries): void;
 }
@@ -71,8 +73,7 @@ final class EChartsJSLiveJournal
         try {
             // Recompile against current source metadata while holding the installation-wide lock.
             $this->kernel->Revalidate($plan);
-            $journal = $this->kernel->Load();
-            self::Validate($journal);
+            $journal = $this->LoadForUpdate();
             $result = [];
             foreach ($selected as $key => $choice) {
                 $chart = $plan['charts'][$key];
@@ -165,8 +166,7 @@ final class EChartsJSLiveJournal
             throw new RuntimeException('IMPORT_BUSY: another import is running.');
         }
         try {
-            $journal = $this->kernel->Load();
-            self::Validate($journal);
+            $journal = $this->LoadForUpdate();
             if (!isset($journal['entries'][$entryID])) {
                 throw new RuntimeException('RECOVERY_REQUIRED: unknown journal entry.');
             }
@@ -175,6 +175,7 @@ final class EChartsJSLiveJournal
                 || $entry['creationIntent'] === null || $entry['phase'] !== 'planned') {
                 throw new RuntimeException('RECOVERY_REQUIRED: this journal entry is not awaiting creation recovery.');
             }
+            $this->kernel->AssertIdentity($entry['identity'], $journal['entries']);
             $marked = $this->kernel->Find($entry['marker']);
             if ($marked !== [] && $marked !== [$targetID]) {
                 throw new RuntimeException('RECOVERY_REQUIRED: conflicting ownership markers.');
@@ -198,7 +199,9 @@ final class EChartsJSLiveJournal
                 $entry['pending'] = array_replace($snapshot, ['info' => $entry['marker']]);
                 $entry['phase'] = 'created';
                 $this->Persist($journal);
-                $this->kernel->Mark($targetID, $entry['marker']);
+                if ($snapshot['info'] === '') {
+                    $this->kernel->Mark($targetID, $entry['marker']);
+                }
                 $entry['snapshot'] = $this->kernel->Inspect($targetID);
                 $entry['pending'] = null;
             }
@@ -234,10 +237,13 @@ final class EChartsJSLiveJournal
                     || preg_match('/^[a-f0-9]{64}$/D', $entry['originalCreationGuard']) !== 1))
                 || ($entry['targetID'] !== null && !is_array($entry['snapshot']))
                 || ($entry['creationIntent'] !== null && (!is_array($entry['creationIntent']['before'] ?? null) || !array_is_list($entry['creationIntent']['before'])))
-                || ($entry['marker'] ?? '') !== self::Marker($entry['identity'], $id)) {
+                || !EChartsJSLiveOwnership::Matches($entry['marker'] ?? null, $entry['identity'], $id)) {
                 throw new RuntimeException('JOURNAL_INVALID: invalid import entry.');
             }
             $sequences[$entry['sequence']] = true;
+            if (array_key_exists('v1Seal', $entry) && !in_array($entry['v1Seal'], [0, 1, 2], true)) {
+                throw new RuntimeException('JOURNAL_INVALID: invalid ownership migration phase.');
+            }
         }
         foreach ($journal['entries'] as $entry) {
             if (isset($entry['separateFrom']) && (!is_string($entry['separateFrom'])
@@ -258,7 +264,75 @@ final class EChartsJSLiveJournal
 
     public static function Marker(string $identity, string $id): string
     {
-        return 'SymconECharts:JSLive:1:' . hash('sha256', $identity) . ':' . $id;
+        return EChartsJSLiveOwnership::PREFIX . hash('sha256', $identity) . ':' . $id;
+    }
+
+    /** Translate only proven ownership fields; user configuration and original plan hashes remain byte-for-byte intact. */
+    public static function CanonicalJournal(array $journal): array
+    {
+        self::Validate($journal);
+        foreach ($journal['entries'] as $id => $entry) {
+            $marker = self::Marker($entry['identity'], $id);
+            if ($entry['marker'] === $marker) {
+                continue;
+            }
+            if (($entry['snapshot']['info'] ?? null) === $entry['marker']) {
+                $entry['v1Seal'] = 0;
+            } elseif ($entry['creationIntent'] !== null) {
+                // Creation may have stopped just before or after marking the new object.
+                $entry['v1Seal'] = 1;
+            }
+            foreach (['snapshot', 'pending'] as $field) {
+                if (($entry[$field]['info'] ?? null) === $entry['marker']) {
+                    $entry[$field]['info'] = $marker;
+                }
+            }
+            foreach ($entry['receipt']['outputs'] ?? [] as $index => $output) {
+                if (is_string($output['object']['ObjectInfo'] ?? null) && is_string($output['ident'] ?? null)) {
+                    $entry['receipt']['outputs'][$index]['object']['ObjectInfo'] = EChartsJSLiveOwnership::CanonicalOutput(
+                        $output['object']['ObjectInfo'],
+                        $marker,
+                        $output['ident']
+                    );
+                }
+            }
+            $entry['marker'] = $marker;
+            $journal['entries'][$id] = $entry;
+        }
+        return $journal;
+    }
+
+    /** Kernel upgrade: migrate the saved journal, without looking up or editing any target object. */
+    public static function MigrateStoredJournal(string $json): ?string
+    {
+        if (strlen($json) > self::MAX_BYTES) {
+            return null;
+        }
+        try {
+            $stored = json_decode($json, true, 64, JSON_THROW_ON_ERROR);
+            if (!is_array($stored)) {
+                return null;
+            }
+            $journal = self::CanonicalJournal($stored);
+            if ($journal === $stored) {
+                return null;
+            }
+            self::Validate($journal);
+            return EChartsImportJson::Canonical($journal);
+        } catch (Throwable) {
+            // Keep unreadable journals available to the normal diagnostics and recovery workflow.
+            return null;
+        }
+    }
+
+    private function LoadForUpdate(): array
+    {
+        $saved = $this->kernel->Load();
+        $journal = self::CanonicalJournal($saved);
+        if ($journal !== $saved) {
+            $this->Persist($journal);
+        }
+        return $journal;
     }
 
     private function Persist(array $journal): void
@@ -416,6 +490,12 @@ final class EChartsJSLiveJournal
             }
             if (EChartsImportJson::Hash($this->kernel->Verify($id)) !== EChartsImportJson::Hash($entry['receipt'])) {
                 throw new RuntimeException('TARGET_CHANGED: output identities changed.');
+            }
+            if (isset($entry['v1Seal'])) {
+                $entry['v1Seal'] = 2;
+                $this->Persist($journal);
+                $this->kernel->MigrateSeals($id, $entry['marker'], $entry['snapshot'], $entry['receipt']);
+                unset($entry['v1Seal']);
             }
             $entry['phase'] = $entry['status'] = 'complete';
             $this->Persist($journal);

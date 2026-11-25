@@ -5,9 +5,9 @@ declare(strict_types=1);
 require_once __DIR__ . '/../libs/EChartsJSLiveImport.php';
 require_once __DIR__ . '/jslive_import_fixture.php';
 
-use SymconECharts\EChartsImportJson;
-use SymconECharts\EChartsJSLiveImport;
-use SymconECharts\EChartsJSLivePackage;
+use eCharts\EChartsImportJson;
+use eCharts\EChartsJSLiveImport;
+use eCharts\EChartsJSLivePackage;
 
 set_error_handler(static function (int $severity, string $message): bool
 {
@@ -54,6 +54,7 @@ function importIssues(array $report): array
 $base = jsliveImportPackage();
 $before = EChartsImportJson::Canonical($base);
 $report = importAnalysis($base);
+assertJSLiveImport($report['format'] === 'de.burki24.echarts.import-preview', 'Preview must identify the renamed library.');
 $chart = $report['charts'][0];
 assertJSLiveImport($report['creationEnabled'] === false && $chart['creationEnabled'] === false && $chart['target']['partial'] === true, 'A preview must never authorize creation or imply complete target mapping.');
 assertJSLiveImport($report['exportSnapshot']['sourceInstallation']->id === $base->sourceInstallation->id

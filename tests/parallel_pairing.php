@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\ParallelPairing;
+use eCharts\ParallelPairing;
 
 require_once __DIR__ . '/../EChartsParallel/ParallelPairing.php';
 

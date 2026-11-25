@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Layout of additional value axes in the TimeSeries and BarHistory designer previews. */
 final class EChartsValueAxisLayout

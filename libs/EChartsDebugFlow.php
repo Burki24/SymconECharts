@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Explains the project protocol without disclosing chart content or transport channels. */
 trait EChartsDebugFlow

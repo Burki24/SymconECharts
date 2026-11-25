@@ -32,7 +32,7 @@ function harness(data = model, mode = 'symcon', width = 1100, height = 500, head
     const chart = { setOption: value => { option = value; }, clear() { clears++; }, resize() {}, dispose() {} };
     const window = { SYMC_VISUALIZATION: { mode, state: { schemaVersion: 1, family: 'calendar', status: 'ready', chart: data },
         options: { tileHeaderVisible: mode === 'symcon' && (header), tileHeaderInset: mode === 'symcon' && (header) ? 58 : 0, adaptToBackground: mode === 'ipsview', echartsThemes: { dark: palette, auto: palette },
-            calendarStatePath: '/hook/SymconECharts/state/5000/' + 'a'.repeat(32) }, translations: { 'Daily mean': 'Tagesmittelwert' } },
+            calendarStatePath: '/hook/eCharts/state/5000/' + 'a'.repeat(32) }, translations: { 'Daily mean': 'Tagesmittelwert' } },
         echarts: { init: () => chart }, getComputedStyle: () => ({ color: '' }), addEventListener() {},
         location: { protocol: 'https:', host: 'symcon.example' } };
     const document = { getElementById: element, createElement: () => ({ style: {}, remove() {} }), body: { appendChild() {} } };
@@ -220,7 +220,7 @@ assert.equal(shortNarrow.option.series[0].label.show, true, 'Short views use act
 async function navigation() {
     const chosen = harness(model, 'ipsview');
     chosen.window.location = {href: 'data:text/html,chart'};
-    chosen.window.SymconEChartsPeriodSelection = {withPeriod(path) {
+    chosen.window.eChartsPeriodSelection = {withPeriod(path) {
         return new URL(path + '&period=year', 'https://opaque.example').href;
     }};
     chosen.window.handleMessage({status: 'ready', viewPeriod: 'year', chart: model});

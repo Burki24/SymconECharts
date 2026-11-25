@@ -5,7 +5,7 @@ als IPSView-WebContent dar. Diese Familie erhält die historischen Klassen- und
 Referenzregeln eines übernommenen JSLive-Radars. Für aktuelle Vergleiche mit
 eigenen Messachsen verwenden Sie [EChartsRadar](../EChartsRadar/README.md).
 
-Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+Installation: Im **Symcon-Modulstore** nach **eCharts** suchen.
 [Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der

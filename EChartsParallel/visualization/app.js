@@ -9,7 +9,7 @@
     var positionLabel = document.getElementById('echarts-parallel-position');
     var previousButton = document.getElementById('echarts-parallel-previous');
     var nextButton = document.getElementById('echarts-parallel-next');
-    var axisPosition = window.SymconEChartsCategoryNavigation.create();
+    var axisPosition = window.eChartsCategoryNavigation.create();
     var geometry = null;
     var anchorFraction = 0;
     var lastScrollLeft = 0;

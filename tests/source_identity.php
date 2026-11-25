@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsSourceIdentity;
+use eCharts\EChartsSourceIdentity;
 
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 

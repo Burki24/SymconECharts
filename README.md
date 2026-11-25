@@ -1,24 +1,24 @@
-# SymconECharts
+# eCharts
 
 [![Symcon](https://img.shields.io/badge/Symcon-PHPModul-brown.svg)](https://www.symcon.de)
 [![Symcon Version](https://img.shields.io/badge/Symcon%20Version-9.0%2B-blue.svg)](library.json)
 [![License](https://img.shields.io/badge/License-PolyForm--Noncommercial--1.0.0-brightgreen.svg)](LICENSE)
-[![Check Style](https://github.com/Burki24/SymconECharts/actions/workflows/style.yml/badge.svg?branch=dev)](https://github.com/Burki24/SymconECharts/actions/workflows/style.yml?query=branch%3Adev)
-[![Tests](https://github.com/Burki24/SymconECharts/actions/workflows/tests.yml/badge.svg?branch=dev)](https://github.com/Burki24/SymconECharts/actions/workflows/tests.yml?query=branch%3Adev)
+[![Check Style](https://github.com/Burki24/eCharts/actions/workflows/style.yml/badge.svg?branch=dev)](https://github.com/Burki24/eCharts/actions/workflows/style.yml?query=branch%3Adev)
+[![Tests](https://github.com/Burki24/eCharts/actions/workflows/tests.yml/badge.svg?branch=dev)](https://github.com/Burki24/eCharts/actions/workflows/tests.yml?query=branch%3Adev)
 
 [![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](#spenden)
 
-![SymconECharts – Deine Daten. Dein Überblick. Diagramme für Symcon und IPSView.](docs/images/symconecharts-readme-hero.png)
+![eCharts – Deine Daten. Dein Überblick. Diagramme für Symcon und IPSView.](docs/images/echarts-readme-hero.png)
 
-SymconECharts stellt aktuelle und archivierte Symcon-Werte sowie ausgewählte
+eCharts stellt aktuelle und archivierte Symcon-Werte sowie ausgewählte
 Objektbeziehungen als responsive Apache-ECharts-Diagramme dar. Die Library
 enthält **31 Diagrammmodule und ein gemeinsames Gateway**. Native Symcon-Kacheln
 und optionale IPSView-WebContent-Widgets verwenden dieselben Quellen; ihr
 Design kann gemeinsam oder unabhängig eingestellt werden.
 
-Die Library ist als **Beta im Symcon-Modulstore** unter **SymconECharts**
-verfügbar. Rückmeldungen und Fragen können im
-[Ankündigungsthema der Community](https://community.symcon.de/t/beta-modul-symconecharts-nachfolger-von-jslive-charts/144844)
+Die Library ist als **Beta im Symcon-Modulstore** verfügbar. Über die Suche
+nach **eCharts** findest Du auch die bisherige Veröffentlichung. Rückmeldungen und Fragen können im
+[Ankündigungsthema der Community](https://community.symcon.de/t/144844)
 gestellt werden. Diese Anleitung beschreibt den aktuellen `dev`-Stand;
 der installierte Store-Stand kann davon abweichen.
 
@@ -35,7 +35,7 @@ der installierte Store-Stand kann davon abweichen.
 
 ## Installation und erstes Diagramm
 
-1. Den **Symcon-Modulstore** öffnen, nach **SymconECharts** suchen und die
+1. Den **Symcon-Modulstore** öffnen, nach **eCharts** suchen und die
    Beta installieren. Sie enthält das Gateway und alle Diagrammmodule.
 2. Eine Instanz der gewünschten Diagrammfamilie anlegen. Beim ersten Diagramm
    ein `EChartsGateway` als Parent erstellen; weitere Diagramme mit diesem
@@ -198,7 +198,7 @@ Ein größeres Zeitfenster erhöht kein Ladebudget automatisch.
 ## Migration von JSLive nach ECharts
 
 Für den Export wird **JSLive Beta 0.113** oder ein neuerer kompatibler Stand
-mit **Export für SymconECharts** benötigt. Beide Libraries einschließlich
+mit dem Migrationsexport für eCharts benötigt. Beide Libraries einschließlich
 ihrer regulären Helper vor der Übernahme aktualisieren. Ein alter allgemeiner
 JSLive-Konfigurationsexport ist kein ECharts-Übernahmepaket.
 
@@ -240,11 +240,11 @@ Die eigenen Beiträge stehen unter der
 [PolyForm Noncommercial License 1.0.0](LICENSE).
 SPDX-Identifier: `PolyForm-Noncommercial-1.0.0`.
 
-Required Notice: Copyright 2026 Burkhard Kneiseler. SymconECharts.
+Required Notice: Copyright 2026 Burkhard Kneiseler. eCharts.
 
 Fremdkomponenten behalten ihre Originallizenzen. Version, Herkunft, Integrität
 und Lizenz stehen in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-SymconECharts ist kein offizielles Projekt der Apache Software Foundation.
+eCharts ist kein offizielles Projekt der Apache Software Foundation.
 
 ## Spenden
 

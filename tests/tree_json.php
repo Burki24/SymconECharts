@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/EChartsTreeJSON.php';
 
-use SymconECharts\EChartsTreeJSON;
+use eCharts\EChartsTreeJSON;
 
 function treeJSONAssert(bool $condition, string $message): void
 {
@@ -16,6 +16,15 @@ function treeJSONAssert(bool $condition, string $message): void
 $json = file_get_contents(__DIR__ . '/../docs/examples/tree-network-1.0.json');
 $read = static fn (string $text): array => EChartsTreeJSON::Read($text, false, static fn (int $id): array => [], static fn (int $id): string => '');
 $model = $read($json);
+$document = json_decode($json, true, 32, JSON_THROW_ON_ERROR);
+treeJSONAssert($document['format'] === 'de.burki24.echarts.tree', 'New examples must use the current format ID.');
+$document['format'] = \eCharts\EChartsIdentity::STORE_BUNDLE_ID . '.tree';
+$legacy = $read(json_encode($document, JSON_THROW_ON_ERROR));
+treeJSONAssert(
+    $legacy['document'] === $model['document'] && $legacy['documentHash'] === $model['documentHash']
+        && $legacy['root'] === $model['root'],
+    'Migrated Tree documents must have the same canonical content, hash and hierarchy as new documents.'
+);
 treeJSONAssert($model['totalNodes'] === 6 && $model['maximumDepth'] === 3, 'The real contract example must retain all six nodes.');
 $projected = EChartsTreeJSON::Project($model, 12, 3000, 'document');
 treeJSONAssert($projected['root']['id'] === 'json:document:network' && $projected['count'] === 6, 'JSON identities must have an isolated namespace.');

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 use InvalidArgumentException;
 use RuntimeException;
@@ -18,7 +18,7 @@ final class EChartsJSLiveJournalView
 
     public static function Full(array $journal): string
     {
-        EChartsJSLiveJournal::Validate($journal);
+        $journal = EChartsJSLiveJournal::CanonicalJournal($journal);
         $json = EChartsImportJson::Canonical($journal);
         if (strlen($json) > self::MAX_FULL_BYTES) {
             throw new RuntimeException('LIMIT_EXCEEDED: use GetJSLiveImportJournalPage for this journal.');
@@ -28,7 +28,7 @@ final class EChartsJSLiveJournalView
 
     public static function Page(array $journal, int $offset, int $limit, string $revision): array
     {
-        EChartsJSLiveJournal::Validate($journal);
+        $journal = EChartsJSLiveJournal::CanonicalJournal($journal);
         $total = count($journal['entries']);
         if ($offset < 0 || $offset > $total || $limit < 1 || $limit > self::MAX_PAGE_ENTRIES
             || ($revision !== '' && preg_match('/^[a-f0-9]{64}$/D', $revision) !== 1) || ($offset > 0 && $revision === '')) {
@@ -85,7 +85,7 @@ final class EChartsJSLiveJournalView
             $key = $entry['entryID'] ?? null;
             if (!is_array($entry) || !is_string($key) || preg_match('/^[a-f0-9]{32}$/D', $key) !== 1 || isset($seen[$key])
                 || ($entry['sequence'] ?? null) !== ++$offset || !is_string($entry['identity'] ?? null)
-                || ($entry['marker'] ?? null) !== EChartsJSLiveJournal::Marker($entry['identity'], $key)) {
+                || !EChartsJSLiveOwnership::Matches($entry['marker'] ?? null, $entry['identity'], $key)) {
                 throw new RuntimeException('JOURNAL_INVALID: invalid journal summary entry.');
             }
             $seen[$key] = true;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\TreemapModel;
+use eCharts\TreemapModel;
 
 require_once dirname(__DIR__) . '/libs/TreemapModel.php';
 

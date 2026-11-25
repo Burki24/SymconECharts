@@ -1,7 +1,7 @@
 (function (global) {
     'use strict';
     // Transient category position only: family geometry and balances stay local.
-    global.SymconEChartsCategoryNavigation = { create: function () {
+    global.eChartsCategoryNavigation = { create: function () {
         var anchor = null, start = 0;
         function reset() { anchor = null; start = 0; }
         function rememberWindow(keys, index) {

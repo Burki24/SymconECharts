@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../EChartsPie/PieData.php';
 
-use SymconECharts\PieData;
+use eCharts\PieData;
 
 function assertPieData(bool $condition, string $message): void
 {

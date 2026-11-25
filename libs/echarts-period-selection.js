@@ -19,7 +19,7 @@
         else { url.searchParams.delete('period'); }
         return url.toString();
     }
-    window.SymconEChartsPeriodSelection = {withPeriod: withPeriod};
+    window.eChartsPeriodSelection = {withPeriod: withPeriod};
 
     function schedule(delay) {
         if (!active || stopped || document.hidden || pending || timer !== null) { return; }

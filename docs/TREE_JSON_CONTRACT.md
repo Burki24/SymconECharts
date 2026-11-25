@@ -49,7 +49,7 @@ Die folgende kleine Hierarchie ist auf jeder Installation ohne Objektbindung gü
 
 ```json
 {
-  "format": "de.burki24.symconecharts.tree",
+  "format": "de.burki24.echarts.tree",
   "formatVersion": "1.0",
   "rootId": "network",
   "nodes": [
@@ -64,7 +64,7 @@ Die folgende kleine Hierarchie ist auf jeder Installation ohne Objektbindung gü
 
 | Feld | Pflicht | Bedeutung |
 | --- | --- | --- |
-| `format` | Ja | Exakt `de.burki24.symconecharts.tree`. |
+| `format` | Ja | `de.burki24.echarts.tree`. Der Import übersetzt die frühere Kennung der Version 1.0 vor der Hashberechnung. |
 | `formatVersion` | Ja | Exakt der String `1.0`; unbekannte Versionen werden abgewiesen. |
 | `rootId` | Ja | ID des einzigen Knotens mit `parentId: null`. |
 | `nodes` | Ja | Geordnete Liste mit 1–3000 Knoten einschließlich Wurzel. |
@@ -175,6 +175,9 @@ VM_UPDATE der ausgewählten Variable stößt eine erneute Prüfung an. Schnelle
 Folgeänderungen werden auf höchstens eine Verarbeitung pro Sekunde begrenzt;
 der zuletzt gelesene vollständige Wert muss nach Ruhe des Producers erscheinen.
 Identische kanonische Daten erzeugen keine unnötige Neuinitialisierung.
+Beim Modulupdate und beim Kernelstart migriert die Instanz die Formatkennung
+ihres gespeicherten JSON-Dokuments. Bei einer Stringvariable erfolgt die
+Übersetzung ausschließlich in der eingelesenen Kopie.
 Der bestehende 60-Sekunden-Timer bleibt als Nachprüfung erhalten. Optionale
 Wertbindungen verwenden dieselben deduplizierten aktuellen Referenzen und
 werden bei Datenänderungen wieder lesend aktualisiert. Andere Stringvariablen
@@ -260,7 +263,7 @@ Die ID ist ein synthetischer Platzhalter:
 ```php
 $instanceID = 12000;
 $document = json_encode([
-    'format' => 'de.burki24.symconecharts.tree',
+    'format' => 'de.burki24.echarts.tree',
     'formatVersion' => '1.0',
     'rootId' => 'network',
     'nodes' => [

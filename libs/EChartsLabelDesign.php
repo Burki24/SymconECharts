@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Shared value-label choices and form controls; each chart retains its own defaults. */
 final class EChartsLabelDesign

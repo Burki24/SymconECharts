@@ -42,7 +42,7 @@ declare(strict_types=1);
         IPSModuleStrict::$ParentResponder = static function (string $json) use ($responder, &$reads): string
         {
             $message = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-            if (($message['Operation'] ?? null) === \SymconECharts\EChartsDataProtocol::OPERATION_CURRENT_READ) {
+            if (($message['Operation'] ?? null) === \eCharts\EChartsDataProtocol::OPERATION_CURRENT_READ) {
                 ++$reads;
             }
             return $responder($json);

@@ -26,7 +26,7 @@ declare(strict_types=1);
  * THE SOFTWARE.
  */
 
-namespace SymconECharts;
+namespace eCharts;
 
 use InvalidArgumentException;
 

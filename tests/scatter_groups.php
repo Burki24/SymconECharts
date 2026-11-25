@@ -52,12 +52,12 @@ declare(strict_types=1);
         );
         $chart->SetTestProperty('EnablePeriodSelection', true);
         $tile = $chart->GetVisualizationTile();
-        assertGatewayGauge(preg_match('#/hook/SymconECharts/state/5000/([a-f0-9]{32})#', $tile, $channel) === 1
+        assertGatewayGauge(preg_match('#/hook/eCharts/state/5000/([a-f0-9]{32})#', $tile, $channel) === 1
             && str_contains($tile, 'id="echarts-period-picker"'), 'An enabled Scatter tile needs a scoped picker.');
-        $request = ['DataID' => '{E4749B72-912B-E3E3-1C57-D19019FFDD84}'] + SymconECharts\EChartsDataProtocol::CreateRequest('ipsview.state', [
+        $request = ['DataID' => '{E4749B72-912B-E3E3-1C57-D19019FFDD84}'] + eCharts\EChartsDataProtocol::CreateRequest('ipsview.state', [
             'InstanceID' => 5000, 'Channel' => $channel[1], 'Period' => '6h', 'Output' => 'tile'
         ]);
-        $alternate = SymconECharts\EChartsDataProtocol::DecodeResponse($chart->ReceiveData(json_encode($request, JSON_THROW_ON_ERROR)), 'ipsview.state')['Payload']['State'];
+        $alternate = eCharts\EChartsDataProtocol::DecodeResponse($chart->ReceiveData(json_encode($request, JSON_THROW_ON_ERROR)), 'ipsview.state')['Payload']['State'];
         assertGatewayGauge($alternate['viewPeriod'] === '6h' && $alternate['chart']['range']['key'] === '6h'
             && $alternate['chart']['range']['startTimestamp'] === $data['range']['startTimestamp'] - 5 * 3600
             && $alternate['chart']['groups'] === $data['groups'], 'The Scatter picker must load a new range and retain interval join rules for all groups.');

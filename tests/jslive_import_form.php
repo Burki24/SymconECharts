@@ -5,8 +5,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/jslive_import_fixture.php';
 
 use Burki24\SymconModuleHelper\VariablePresentationNormalizationHelper;
-use SymconECharts\EChartsImportJson;
-use SymconECharts\EChartsJSLiveRuntime;
+use eCharts\EChartsImportJson;
+use eCharts\EChartsJSLiveRuntime;
 
 set_error_handler(static function (int $severity, string $message): bool
 {

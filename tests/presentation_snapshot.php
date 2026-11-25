@@ -17,7 +17,7 @@ function IPS_SetVariableCustomPresentation(int $id, array $presentation): void
     throw new RuntimeException('Snapshot must never change source presentation.');
 }
 
-$snapshot = \SymconECharts\EChartsVariablePresentation::Snapshot(13000);
+$snapshot = \eCharts\EChartsVariablePresentation::Snapshot(13000);
 if ($snapshot['conversion']['status'] !== 'exact' || $snapshot['effective']['prefix'] !== 'ca. '
     || $snapshot['effective']['suffix'] !== ' °C' || isset($snapshot['native']['parameters']['PROFILE'])) {
     throw new RuntimeException('Shared ECharts migration presentation adapter lost formatting.');

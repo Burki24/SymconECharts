@@ -5,11 +5,11 @@ declare(strict_types=1);
 require_once __DIR__ . '/jslive_family_fixture.php';
 require_once __DIR__ . '/../libs/EChartsJSLiveArchive.php';
 
-use SymconECharts\EChartsImportJson;
-use SymconECharts\EChartsJSLiveArchive;
-use SymconECharts\EChartsJSLiveImport;
-use SymconECharts\EChartsJSLiveModel;
-use SymconECharts\EChartsJSLiveSourceReader;
+use eCharts\EChartsImportJson;
+use eCharts\EChartsJSLiveArchive;
+use eCharts\EChartsJSLiveImport;
+use eCharts\EChartsJSLiveModel;
+use eCharts\EChartsJSLiveSourceReader;
 
 set_error_handler(static function (int $severity, string $message): never
 { throw new RuntimeException($message); });
@@ -71,7 +71,7 @@ $invalid = $model;
 $invalid['bindings'][0]['variableID'] = 99999;
 safeReject(fn () => EChartsJSLiveModel::Read(EChartsImportJson::Canonical($invalid), $invalid['family']), 'SOURCE_UNRESOLVED:');
 foreach (['M0 0 L1', 'M0 0,,L1 1', 'M0 0 A2 2 0 2 0 4 4', 'M0 0 L1e99 1', 'M0 0 javascript:alert(1)'] as $path) {
-    safeReject(fn () => \SymconECharts\EChartsJSLivePath::Validate($path), str_contains($path, 'javascript') ? 'The SVG contains' : 'FORMAT_UNSUPPORTED:');
+    safeReject(fn () => \eCharts\EChartsJSLivePath::Validate($path), str_contains($path, 'javascript') ? 'The SVG contains' : 'FORMAT_UNSUPPORTED:');
 }
 
 // Test the actual Gateway transport boundary, including the sentinel and changed archive metadata.

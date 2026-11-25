@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\HeatmapAggregation;
+use eCharts\HeatmapAggregation;
 
 require_once __DIR__ . '/../EChartsHeatmap/HeatmapAggregation.php';
 

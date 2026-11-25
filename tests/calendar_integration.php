@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsDataProtocol;
+use eCharts\EChartsDataProtocol;
 
 // Included by gateway_gauges.php: exercise the real module/Gateway with its existing kernel doubles.
 require_once dirname(__DIR__) . '/EChartsCalendar/module.php';

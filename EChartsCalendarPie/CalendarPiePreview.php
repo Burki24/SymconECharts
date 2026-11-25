@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Schematic monthly design preview; never reads archives or current variable values. */
 trait CalendarPiePreview

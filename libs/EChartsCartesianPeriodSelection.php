@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Read-only archive window overrides for historical Cartesian series. */
 trait EChartsCartesianPeriodSelection

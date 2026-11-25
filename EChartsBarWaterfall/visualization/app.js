@@ -10,7 +10,7 @@
     var currentState = bootstrap.state || null;
     var currentTheme = null;
     var echartsDesign = window.SYMC_ECHARTS_DESIGN;
-    var categoryNavigation = window.SymconEChartsCategoryNavigation.create();
+    var categoryNavigation = window.eChartsCategoryNavigation.create();
 
     function translate(value) {
         return (bootstrap.translations || {})[value] || value;

@@ -9,7 +9,7 @@
 ## Kontext
 
 Die Gauge-Familie deckt numerische Momentanwerte ab. Als nächste fachliche
-Ausbaustufe soll SymconECharts historische Werte aus dem vorhandenen Symcon-
+Ausbaustufe soll eCharts historische Werte aus dem vorhandenen Symcon-
 Archiv darstellen. Damit entsteht erstmals ein realer Consumer für die in
 ADR 0002 bewusst zurückgestellte Archiv- und Cache-Funktion des Gateways.
 

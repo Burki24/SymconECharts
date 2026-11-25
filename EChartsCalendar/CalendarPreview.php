@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Synthetic calendar preview: draft changes never trigger archive queries. */
 trait CalendarPreview

@@ -397,7 +397,7 @@ require_once dirname(__DIR__) . '/EChartsRadar/module.php';
             'GroupVisibility'                                    => $visibility, 'GroupColors' => [], 'IPSViewUseTileDesign' => true], JSON_THROW_ON_ERROR));
         foreach ($previews($module) as $document) {
             $polygons = (new DOMXPath($document))->query('//*[local-name()="polygon" and @data-group]');
-            $palette = SymconECharts\EChartsBarPreview::Palette('auto');
+            $palette = eCharts\EChartsBarPreview::Palette('auto');
             assertGatewayGauge($document->documentElement->getAttribute('data-selected-count') === '1'
                 && $document->documentElement->getAttribute('data-rendered-count') === '1' && $polygons->length === 1
                 && $polygons->item(0)->getAttribute('data-group') === $names[15]

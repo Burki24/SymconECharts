@@ -30,7 +30,12 @@ Messwertänderungen über einen WebSocket.
 - Konfigurationsänderungen, Aktivierung, manuelle Regeneration und ein
   Kernelstart dürfen dieses Dokument neu erzeugen. Normale Messwert- und
   Archivaktualisierungen schreiben die Variable nicht mehr neu.
-- `EChartsGateway` registriert zentral `/hook/SymconECharts`. Der Gateway ist
+- `EChartsGateway` registriert zentral `/hook/eCharts`. Beim Modulupdate
+  bzw. Kernelstart erzeugen die Geräte ihre aktivierten IPSView-Ausgaben
+  mit dieser Adresse neu. Renderer, Zustandsabrufe und WebSocket erhalten
+  dieselbe Basis. Bereits geöffnete HTML-Dokumente benötigen ein Neuladen.
+  Bei späterer Aktivierung erhält auch eine aufbewahrte WebContent-Variable
+  die aktuelle Seite. Der Gateway ist
   für WebHook, WebSocket-Verteilung und die Weiterleitung einer aktuellen
   Zustandsabfrage zuständig; familienbezogene Zustände verbleiben in den
   jeweiligen Gerätemodulen.

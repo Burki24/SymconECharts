@@ -9,7 +9,7 @@ const source = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-zoom.
 const window = {};
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8'), { window });
 vm.runInNewContext(source, { window });
-const zoom = window.SymconEChartsZoom;
+const zoom = window.eChartsZoom;
 
 assert.ok(zoom, 'The shared ECharts zoom API must be available.');
 assert.equal(zoom.options(false, 'symcon', 12).length, 0);

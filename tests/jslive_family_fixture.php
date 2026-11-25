@@ -42,8 +42,8 @@ function jsliveFamilyFixture(string $file): array
             }
         }
     }
-    $json = \SymconECharts\EChartsImportJson::Canonical($fixture);
-    $package = \SymconECharts\EChartsJSLivePackage::Read($json);
+    $json = \eCharts\EChartsImportJson::Canonical($fixture);
+    $package = \eCharts\EChartsJSLivePackage::Read($json);
     $metadata = [];
     foreach ($package->charts as $chart) {
         foreach ($chart->sources as $source) {
@@ -51,7 +51,7 @@ function jsliveFamilyFixture(string $file): array
                 'variableAction'                             => $source->presentation->original->variable->VariableAction ?? null,
                 'variableCustomAction'                       => $source->presentation->original->variable->VariableCustomAction ?? null,
                 'archive'                                    => ['logging' => $source->archive->logging, 'aggregationType' => $source->archive->aggregationType,
-                    'counterSettings'                                      => \SymconECharts\EChartsJSLivePackage::ArrayValue($source->archive->counterSettings)]];
+                    'counterSettings'                                      => \eCharts\EChartsJSLivePackage::ArrayValue($source->archive->counterSettings)]];
         }
     }
     $reader = static function (array $query) use ($metadata): array

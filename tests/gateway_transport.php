@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsDataProtocol;
+use eCharts\EChartsAsset;
+use eCharts\EChartsDataProtocol;
+use eCharts\EChartsIdentity;
 
 // Exercise the actual gateway with the existing kernel, including exclusive native hook ownership.
 if (!isset($gateway)) {
@@ -24,9 +26,10 @@ try {
     $GLOBALS['symconTestModuleInstances'][$gatewayModuleID] = [];
     $GLOBALS['symconTestGatewayObjects'] = [];
     $GLOBALS['symconTestGatewayResponders'] = [];
-    $GLOBALS['symconTestHookOwners'] = [];
+    // An unrelated integration keeps its own registration throughout the migration.
+    $GLOBALS['symconTestHookOwners'] = ['third-party' => 4321];
     $GLOBALS['symconTestTransportRefreshCalls'] = [];
-    $createGateway = static function (int $id) use ($gatewayModuleID): TestableEChartsGateway
+    $createGateway = static function (int $id, bool $upgrade = false) use ($gatewayModuleID): TestableEChartsGateway
     {
         $instance = new TestableEChartsGateway();
         $instance->InstanceID = $id;
@@ -36,11 +39,31 @@ try {
         ];
         $GLOBALS['symconTestModuleInstances'][$gatewayModuleID][] = $id;
         $GLOBALS['symconTestGatewayObjects'][$id] = $instance;
+        if ($upgrade) {
+            $instance->RestoreTestHook(EChartsIdentity::LegacyProductName());
+        }
         $instance->Create();
         $instance->ApplyChanges();
         return $instance;
     };
-    $first = $createGateway(6001);
+    $first = $createGateway(6001, true);
+    $entryID = str_repeat('a', 32);
+    $origin = 'test-installation:12';
+    $seal = EChartsIdentity::LegacyProductName() . ':JSLive:1:' . hash('sha256', $origin) . ':' . $entryID;
+    $entry = ['sequence' => 1, 'identity' => $origin, 'revision' => str_repeat('b', 64), 'phase' => 'complete', 'status' => 'complete',
+        'moduleID'       => $gatewayModuleID, 'targetHash' => str_repeat('c', 64), 'targetID' => 12345, 'creationIntent' => null,
+        'pending'        => null, 'applyIntent' => true, 'receipt' => null, 'marker' => $seal, 'snapshot' => ['info' => $seal]];
+    $saved = ['attributes' => ['JSLiveImportJournal' => json_encode(['version' => 1, 'entries' => [$entryID => $entry]], JSON_THROW_ON_ERROR)],
+        'configuration'    => ['Keep' => $seal]];
+    $upgraded = $first->Migrate(json_encode($saved, JSON_THROW_ON_ERROR));
+    $persistence = json_decode($upgraded, true, 64, JSON_THROW_ON_ERROR);
+    $journal = json_decode($persistence['attributes']['JSLiveImportJournal'], true, 64, JSON_THROW_ON_ERROR);
+    assertGatewayGauge($journal['entries'][$entryID]['marker'] === \eCharts\EChartsJSLiveJournal::Marker($origin, $entryID)
+        && $journal['entries'][$entryID]['targetID'] === 12345 && $persistence['configuration'] === $saved['configuration']
+        && $first->Migrate($upgraded) === '', 'SDK migration must translate only saved journal evidence and be repeatable before any target is online.');
+    $saved['attributes']['JSLiveImportJournal'] = '{"version":2,"entries":[]}';
+    assertGatewayGauge($first->Migrate(json_encode($saved, JSON_THROW_ON_ERROR)) === '', 'Unknown journal formats must be retained for recovery.');
+    assertGatewayGauge($first->GetTestHooks() === ['eCharts'] && !isset($GLOBALS['symconTestHookOwners'][EChartsIdentity::LegacyProductName()]), 'A hot update must replace its own old registration with the new route.');
     // During a real library reload, another object's PHP interface may not exist yet.
     $GLOBALS['symconTestInstances'][9001] = [
         'ConnectionID' => 0, 'InstanceStatus' => 105,
@@ -52,7 +75,7 @@ try {
     unset($GLOBALS['symconTestInstances'][9001]);
     $GLOBALS['symconTestModuleInstances'][$gatewayModuleID] = [6001];
     $second = $createGateway(7001);
-    assertGatewayGauge($GLOBALS['symconTestHookOwners']['SymconECharts'] === 6001, 'Adding a gateway must not replace the deterministic shared hook owner.');
+    assertGatewayGauge($GLOBALS['symconTestHookOwners'][EChartsAsset::HOOK_NAME] === 6001, 'Adding a gateway must not replace the deterministic shared hook owner.');
 
     foreach ([6101 => 6001, 7101 => 7001] as $device => $parent) {
         $GLOBALS['symconTestInstances'][$device] = ['ConnectionID' => $parent];
@@ -68,7 +91,7 @@ try {
     $getState = static function (TestableEChartsGateway $handler, int $device, string $token, array $query = []): array
     {
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        $_SERVER['SCRIPT_NAME'] = '/hook/SymconECharts/state/' . $device . '/' . $token;
+        $_SERVER['SCRIPT_NAME'] = '/hook/eCharts/state/' . $device . '/' . $token;
         $_GET = $query;
         $body = $handler->ProcessTestHook();
         return ['status' => http_response_code(), 'state' => json_decode($body, true)];
@@ -84,6 +107,10 @@ try {
         }
     }
     assertGatewayGauge($getState($first, 7101, str_repeat('b', 32))['status'] === 404, 'Cross-gateway routing must preserve channel authorization.');
+    foreach (['/assets/interaction.js', '/state/7101/' . $channel] as $suffix) {
+        $_SERVER['SCRIPT_NAME'] = '/hook/' . EChartsIdentity::LegacyProductName() . $suffix;
+        assertGatewayGauge($first->ProcessTestHook() === '' && http_response_code() === 404, 'The retired hook must not serve cached clients as an alias.');
+    }
     foreach ([['24h'], str_repeat('a', 33), '24 hours'] as $invalidPeriod) {
         assertGatewayGauge($getState($first, 7101, $channel, ['period' => $invalidPeriod])['status'] === 400, 'Malformed period parameters must fail before data is loaded.');
     }
@@ -91,7 +118,7 @@ try {
     assertGatewayGauge($getState($first, 7101, $channel, ['output' => 'tile'])['state']['output'] === 'tile', 'Native tile navigation must retain its authenticated output contract.');
     assertGatewayGauge($first->GetTransportState(7101, $channel, 0, 'ipsview') === '', 'A gateway must not impersonate another gateway child.');
     $third = $createGateway(5501);
-    assertGatewayGauge($GLOBALS['symconTestHookOwners']['SymconECharts'] === 5501, 'An out-of-order lower ID must become the single deterministic owner.');
+    assertGatewayGauge($GLOBALS['symconTestHookOwners'][EChartsAsset::HOOK_NAME] === 5501, 'An out-of-order lower ID must become the single deterministic owner.');
     assertGatewayGauge($getState($third, 7101, $channel)['status'] === 200, 'Changing the owner must preserve existing state URLs.');
 
     $removeGateway = static function (int $id) use ($gatewayModuleID): void
@@ -110,15 +137,16 @@ try {
         }
     };
     $removeGateway(5501);
-    assertGatewayGauge($GLOBALS['symconTestHookOwners']['SymconECharts'] === 6001, 'Deleting the hook owner must automatically restore a surviving gateway.');
+    assertGatewayGauge($GLOBALS['symconTestHookOwners'][EChartsAsset::HOOK_NAME] === 6001, 'Deleting the hook owner must automatically restore a surviving gateway.');
     $removeGateway(6001);
-    assertGatewayGauge($GLOBALS['symconTestHookOwners']['SymconECharts'] === 7001, 'Repeated deletion must hand off the hook to the remaining gateway.');
+    assertGatewayGauge($GLOBALS['symconTestHookOwners'][EChartsAsset::HOOK_NAME] === 7001, 'Repeated deletion must hand off the hook to the remaining gateway.');
     assertGatewayGauge($getState($second, 7101, $channel)['status'] === 200, 'The remaining child must recover without ApplyChanges or configuration writes.');
     $second->MessageSink(2, 0, IPS_KERNELSTARTED, []);
     $second->ApplyChanges();
-    assertGatewayGauge($GLOBALS['symconTestHookOwners']['SymconECharts'] === 7001, 'Kernel startup and repeated updates must retain valid hook ownership.');
+    assertGatewayGauge($GLOBALS['symconTestHookOwners'][EChartsAsset::HOOK_NAME] === 7001, 'Kernel startup and repeated updates must retain valid hook ownership.');
     $removeGateway(7001);
-    assertGatewayGauge(!isset($GLOBALS['symconTestHookOwners']['SymconECharts']), 'Removing the last gateway must leave no stale hook.');
+    assertGatewayGauge(!isset($GLOBALS['symconTestHookOwners'][EChartsAsset::HOOK_NAME]), 'Removing the last gateway must leave no stale hook.');
+    assertGatewayGauge($GLOBALS['symconTestHookOwners'] === ['third-party' => 4321], 'Upgrade, peer handoff and removal must preserve unrelated hook registrations.');
 } finally {
     foreach ($transportGlobals as $key => $value) {
         if ($value === null) {

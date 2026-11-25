@@ -273,7 +273,7 @@ densityEngine.dispose();
 
 const navigationHost = {};
 vm.runInNewContext(navigationSource, {window: navigationHost});
-const navigation = navigationHost.SymconEChartsCategoryNavigation.create();
+const navigation = navigationHost.eChartsCategoryNavigation.create();
 navigation.remember({getOption: () => ({dataZoom: [{id: 'category-scroll', orient: 'vertical', startValue: 'last'}],
     yAxis: [{data: ['first', 'middle', 'last']} ]})});
 assert.equal(navigation.window(['last', 'middle', 'first'], 1).first, 0, 'Shared navigation follows category keys, not names or old indexes.');

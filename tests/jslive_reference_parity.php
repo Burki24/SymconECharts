@@ -7,8 +7,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/../libs/EChartsJSLiveTime.php';
 require_once __DIR__ . '/../EChartsRadarHistory/RadarHistoryData.php';
 
-use SymconECharts\EChartsJSLiveTime;
-use SymconECharts\RadarHistoryData;
+use eCharts\EChartsJSLiveTime;
+use eCharts\RadarHistoryData;
 
 $reference = $argv[1] ?? '';
 if (!is_file($reference . '/SymconJSLiveChart/module.php')) {

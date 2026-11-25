@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SymconECharts;
+namespace eCharts;
 
 /** Retries a failed value read without changing the chart's configuration or data contract. */
 trait EChartsTransientRefresh

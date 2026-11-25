@@ -277,7 +277,7 @@
     function address(target) { return target.location.href || target.location.protocol + '//' + target.location.host; }
     function stateURL(offset) {
         var path = options.calendarPieStatePath;
-        if (typeof path !== 'string' || !/^\/hook\/SymconECharts\/state\/[0-9]+\/[a-zA-Z0-9]+\/?$/.test(path)) { throw new Error('Missing state path.'); }
+        if (typeof path !== 'string' || !/^\/hook\/eCharts\/state\/[0-9]+\/[a-zA-Z0-9]+\/?$/.test(path)) { throw new Error('Missing state path.'); }
         var origin = readOrigin(function () { return address(window); }) || readOrigin(function () { return document.baseURI; })
             || readOrigin(function () { return address(window.parent); }) || readOrigin(function () { return document.referrer; });
         if (!origin) {

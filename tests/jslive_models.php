@@ -5,12 +5,12 @@ declare(strict_types=1);
 require_once __DIR__ . '/../libs/EChartsJSLiveModel.php';
 require_once __DIR__ . '/../libs/EChartsJSLiveRendering.php';
 
-use SymconECharts\EChartsImportJson;
-use SymconECharts\EChartsJSLiveImport;
-use SymconECharts\EChartsJSLiveModel;
-use SymconECharts\EChartsJSLivePackage;
-use SymconECharts\EChartsJSLivePage;
-use SymconECharts\EChartsJSLiveRendering;
+use eCharts\EChartsImportJson;
+use eCharts\EChartsJSLiveImport;
+use eCharts\EChartsJSLiveModel;
+use eCharts\EChartsJSLivePackage;
+use eCharts\EChartsJSLivePage;
+use eCharts\EChartsJSLiveRendering;
 
 $external = isset($argv[1]) && is_dir($argv[1]);
 $emit = ($argv[1] ?? '') === '--emit';

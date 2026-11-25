@@ -2,9 +2,9 @@
 
 ## Titelbild
 
-[symconecharts-readme-hero.png](symconecharts-readme-hero.png) ist das vom
-Eigentümer bereitgestellte Titelbild für die Haupt-README. Es wurde unverändert
-übernommen und ist eine gestaltete Produktillustration, kein reiner Screenshot.
+[echarts-readme-hero.png](echarts-readme-hero.png) ist die vom Eigentümer
+bereitgestellte Produktillustration für die Haupt-README. Der Schriftzug
+wurde an den Bibliotheksnamen **eCharts** angepasst.
 
 ## Vergleichspaare aus der lokalen Browseransicht
 
@@ -38,14 +38,13 @@ nicht retuschiert; eine beliebige pixelgleiche Migration wird nicht behauptet.
 
 ## Formularaufnahmen zur Migration
 
-Die vier JPEG-Ausschnitte wurden am 03.11.2026 in der lokalen Symcon-Webkonsole
+Die drei JPEG-Ausschnitte wurden am 03.11.2026 in der lokalen Symcon-Webkonsole
 der Testinstallation aufgenommen. Sie zeigen echte Formulare vor Dateiauswahl
 und Planvorbereitung. Es wurde keine Neuanlage bestätigt oder ausgeführt.
 Die Aufnahmen wurden nur zugeschnitten; Feldinhalte wurden nicht ersetzt.
 
 | Datei | Inhalt |
 | --- | --- |
-| [jslive-migration-export.jpg](jslive-migration-export.jpg) | Eigener Exportbereich der JSLive-Quellinstanz. |
 | [jslive-migration-package.jpg](jslive-migration-package.jpg) | Dateiauswahl und Übersicht möglicher Zielfamilien im Gateway. |
 | [jslive-migration-plan.jpg](jslive-migration-plan.jpg) | Kategorie, Diagrammnummer, Planvorbereitung, Bericht und native Vorschauen. |
 | [jslive-migration-confirm.jpg](jslive-migration-confirm.jpg) | Noch ausgeschaltete Bestätigung, Anlageaktion und Journalbedienung. |

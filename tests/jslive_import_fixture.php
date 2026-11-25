@@ -5,8 +5,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/../libs/EChartsJSLiveImport.php';
 
 use Burki24\SymconModuleHelper\VariablePresentationNormalizationHelper;
-use SymconECharts\EChartsImportJson;
-use SymconECharts\EChartsJSLivePackage;
+use eCharts\EChartsImportJson;
+use eCharts\EChartsJSLivePackage;
 
 /** Synthetic contract fixture; contains neither installation data nor third-party assets. */
 function jsliveImportPackage(string $module = 'SymconJSLiveGauge'): stdClass

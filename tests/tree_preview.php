@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SymconECharts\EChartsTreePreview;
+use eCharts\EChartsTreePreview;
 
 require_once dirname(__DIR__) . '/libs/EChartsTreePreview.php';
 

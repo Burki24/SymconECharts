@@ -64,7 +64,7 @@ function page(url) {
     const mode = url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon';
     const light = url.searchParams.get('theme') === 'light';
     const bootstrap = {mode, language: 'de', state: state(url), options: {tileHeaderVisible: mode === 'symcon' && (url.searchParams.get('header') !== 'hidden'), tileHeaderInset: mode === 'symcon' && (url.searchParams.get('header') !== 'hidden') ? 58 : 0,
-        adaptToBackground: false, echartsThemes: {auto: palette}, calendarPieStatePath: '/hook/SymconECharts/state/5000/' + 'a'.repeat(32)},
+        adaptToBackground: false, echartsThemes: {auto: palette}, calendarPieStatePath: '/hook/eCharts/state/5000/' + 'a'.repeat(32)},
         translations: {'Daily means': 'Tagesmittelwerte', 'Daily consumption': 'Tagesverbrauch', 'State duration': 'Zustandsdauer',
             'Normalized comparison (0–100)': 'Normalisierter Vergleich (0–100)', Normalized: 'Normalisiert', Range: 'Bereich', 'Circle share': 'Kreisanteil',
             'Shares refer only to available sources.': 'Anteile beziehen sich nur auf vorhandene Quellen.',
@@ -88,7 +88,7 @@ function page(url) {
 }
 http.createServer((req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
-    if (url.pathname.startsWith('/hook/SymconECharts/state/')) {
+    if (url.pathname.startsWith('/hook/eCharts/state/')) {
         // Keep the selected fixture data model across local navigation.
         const referer = new URL(req.headers.referer || 'http://127.0.0.1');
         for (const key of ['data', 'sources', 'normalize', 'incomplete']) {

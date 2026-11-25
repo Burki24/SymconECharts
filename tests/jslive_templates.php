@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/jslive_family_fixture.php';
 
-use SymconECharts\EChartsImportJson;
-use SymconECharts\EChartsJSLivePlan;
+use eCharts\EChartsImportJson;
+use eCharts\EChartsJSLivePlan;
 
 function templateAssert(bool $ok, string $message): void
 {

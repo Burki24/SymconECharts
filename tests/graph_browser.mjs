@@ -34,7 +34,7 @@ function state(layout, updated = false, zigbee = false, selection = 'strongest',
                 Weight: [updated ? 50 : 25, 75, 0][index % 4], WeightUnit: 'W', WeightDecimals: 0 }); }
         }); }
         model = JSON.parse(execFileSync('php', ['-r',
-            'require $argv[1]; $v=json_decode(stream_get_contents(STDIN),true,512,JSON_THROW_ON_ERROR); echo json_encode(\\SymconECharts\\GraphModel::Build($v["nodes"],$v["edges"],static fn(int $id):array=>["ObjectType"=>2,"ObjectName"=>"Same name"],static fn(int $id):string=>"25 %",$v["directed"],$v["weights"]),JSON_THROW_ON_ERROR);',
+            'require $argv[1]; $v=json_decode(stream_get_contents(STDIN),true,512,JSON_THROW_ON_ERROR); echo json_encode(\\eCharts\\GraphModel::Build($v["nodes"],$v["edges"],static fn(int $id):array=>["ObjectType"=>2,"ObjectName"=>"Same name"],static fn(int $id):string=>"25 %",$v["directed"],$v["weights"]),JSON_THROW_ON_ERROR);',
             path.join(root, 'libs/GraphModel.php')], { input: JSON.stringify({
                 nodes: nodes.map(node => ({ ObjectID: Number(node.id.slice(7)), Label: node.name })), edges: edgeRows, directed,
                 weights: { minimum: 0, maximum: 100, minimumWidth: 1, maximumWidth }
@@ -52,7 +52,7 @@ function state(layout, updated = false, zigbee = false, selection = 'strongest',
         if (selection === 'empty') { input.minimum = 1; input.maximum = 1;
             input.topology.links = input.topology.links.filter(link => link.lqi !== 1); }
         model = JSON.parse(execFileSync('php', ['-r',
-            'require $argv[1]; $v=json_decode(stream_get_contents(STDIN),true,512,JSON_THROW_ON_ERROR); echo json_encode(\\SymconECharts\\ZigbeeGraphModel::Build($v["topology"],$v["minimum"],300,$v["selection"],$v["maximum"]),JSON_THROW_ON_ERROR);',
+            'require $argv[1]; $v=json_decode(stream_get_contents(STDIN),true,512,JSON_THROW_ON_ERROR); echo json_encode(\\eCharts\\ZigbeeGraphModel::Build($v["topology"],$v["minimum"],300,$v["selection"],$v["maximum"]),JSON_THROW_ON_ERROR);',
             path.join(root, 'libs/ZigbeeGraphModel.php')], { input: JSON.stringify(input), encoding: 'utf8' }));
     }
     return { status: 'ready', chart: { family: zigbee ? 'zigbee-graph' : 'graph', theme: 'auto', graph: {

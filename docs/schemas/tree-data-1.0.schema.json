@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "SymconECharts Tree data 1.0",
+    "title": "eCharts Tree data 1.0",
     "description": "Tree JSON contract 1.0. Cross-node semantics, local object bindings, exact ID number types and byte budgets require additional runtime validation.",
     "type": "object",
     "additionalProperties": false,
@@ -12,7 +12,7 @@
     ],
     "properties": {
         "format": {
-            "const": "de.burki24.symconecharts.tree"
+            "const": "de.burki24.echarts.tree"
         },
         "formatVersion": {
             "const": "1.0"

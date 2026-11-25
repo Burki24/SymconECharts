@@ -23,7 +23,7 @@ Die neue Property `SourceMode` hat den kompatiblen Default `objects`.
 ID ausgewählte Stringvariable. Datei und Texteingabe sind zwei Eingabewege
 für dasselbe gespeicherte Dokument, keine unterschiedlichen Fachmodelle.
 
-Das versionierte Format `de.burki24.symconecharts.tree` 1.0 beschreibt einen
+Das versionierte Format `de.burki24.echarts.tree` 1.0 beschreibt einen
 einwurzeligen Baum aus stabilen String-IDs, Elternbezügen und Anzeigenamen.
 Optionale lokale Objektbindungen und statische Werttexte sind ausdrücklich
 geregelt. Es importiert keine ECharts-Optionen oder Designs und führt keine

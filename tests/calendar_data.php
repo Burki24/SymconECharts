@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../EChartsCalendar/CalendarData.php';
 
-use SymconECharts\CalendarData;
+use eCharts\CalendarData;
 
 function checkCalendar(bool $condition, string $message): void
 {
@@ -141,12 +141,12 @@ checkCalendar(
     && (new DateTimeImmutable('@' . $midnight['StartTimestamp']))->setTimezone(new DateTimeZone('America/Sao_Paulo'))->format('H:i') === '01:00',
     'Date-only selection uses the real local day boundary when DST removes midnight.'
 );
-$days = SymconECharts\EChartsArchiveQuery::CalendarDays('2018-11-04', '2018-11-06', $now, 'America/Sao_Paulo');
+$days = eCharts\EChartsArchiveQuery::CalendarDays('2018-11-04', '2018-11-06', $now, 'America/Sao_Paulo');
 checkCalendar(
     $days[1]['startTimestamp'] - $days[0]['startTimestamp'] === 23 * 3600,
     'A normalized midnight must not shift the following civil day.'
 );
-$skipped = SymconECharts\EChartsArchiveQuery::CalendarDays('2011-12-29', '2012-01-01', $now, 'Pacific/Apia');
+$skipped = eCharts\EChartsArchiveQuery::CalendarDays('2011-12-29', '2012-01-01', $now, 'Pacific/Apia');
 checkCalendar(array_column($skipped, 'date') === ['2011-12-29', '2011-12-31'], 'An entirely removed local date is not a synthetic archive day.');
 $removedNavigation = CalendarData::ResolveView(['Period' => 'absolute', 'AbsoluteStart' => $dateField(2011, 12, 31), 'AbsoluteEnd' => $dateField(2012, 1, 1)], 1, $now, 'Pacific/Apia');
 checkCalendar(

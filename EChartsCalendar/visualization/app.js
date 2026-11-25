@@ -252,9 +252,9 @@
     }
     function stateURL(offset) {
         var path = bootstrap.options.calendarStatePath;
-        if (!path || !/^\/hook\/SymconECharts\/state\//.test(path)) { throw new Error('Missing state path.'); }
+        if (!path || !/^\/hook\/eCharts\/state\//.test(path)) { throw new Error('Missing state path.'); }
         var request = path + '?offset=' + offset + (bootstrap.mode === 'symcon' ? '&output=tile' : '');
-        if (window.SymconEChartsPeriodSelection) { return window.SymconEChartsPeriodSelection.withPeriod(request); }
+        if (window.eChartsPeriodSelection) { return window.eChartsPeriodSelection.withPeriod(request); }
         var location = window.location || {};
         var protocol = location.protocol;
         var host = location.host;

@@ -239,7 +239,7 @@ final class TestableManyThemeRiver extends EChartsThemeRiver
         $late = $allHidden;
         $late[15]['InitiallyVisible'] = true;
         $module->UpdateBarPreviewFromForm(json_encode(['Sources' => $late], JSON_THROW_ON_ERROR));
-        $palette = SymconECharts\EChartsBarPreview::Palette($properties['EChartsTheme']);
+        $palette = eCharts\EChartsBarPreview::Palette($properties['EChartsTheme']);
         $originalColor = $palette['seriesColors'][15 % count($palette['seriesColors'])];
         foreach ($previewSVGs($module) as $svg) {
             assertGatewayGauge(

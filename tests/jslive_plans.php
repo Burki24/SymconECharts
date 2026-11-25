@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/jslive_family_fixture.php';
 
-use SymconECharts\EChartsImportJson;
-use SymconECharts\EChartsJSLivePlan;
+use eCharts\EChartsImportJson;
+use eCharts\EChartsJSLivePlan;
 
 set_error_handler(static function (int $severity, string $message): never
 { throw new RuntimeException($message); });
@@ -38,6 +38,9 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
     $source = static fn (int $id, ?int $archive): array => $metadata[$id];
     $context = ['gatewayID' => 16000, 'parentID' => 15000, 'fingerprint' => str_repeat('c', 64)];
     $plan = EChartsJSLivePlan::Prepare($json, [], $context, $source, $reader, $package->sourceInstallation->id, 1793448000);
+    if ($plan['format'] !== 'de.burki24.echarts.import-plan') {
+        throw new RuntimeException('Unexpected import plan identifier.');
+    }
     $chart = array_values($plan['charts'])[0];
     planAssert(!$chart['blocked'], basename($file) . ': plan is blocked: ' . EChartsImportJson::Canonical($chart['issues']));
     planAssert($chart['differences'] !== [] && count($chart['differences']) === count($chart['differenceDetails']), 'Each concrete difference requires a stable confirmation ID.');

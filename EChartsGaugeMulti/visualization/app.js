@@ -134,7 +134,7 @@
     function ensureViewControls() {
         if (sourceControls) { return; }
         sourceSelection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
-        pageNavigation = window.SymconEChartsCategoryNavigation.create();
+        pageNavigation = window.eChartsCategoryNavigation.create();
         sourceControls = window.SYMC_ECHARTS_SOURCE_CONTROLS.create({
             prefix: 'echarts-gauge', translate: translate,
             change: function (id, visible) { sourceSelection.select(id, visible); redrawView(); },
