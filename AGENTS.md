@@ -319,6 +319,11 @@ für eCharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 
 ## Modulpräfixe
 
+- `ECWI` gehört zu `EChartsGaugeWind`, GUID
+  `{D807A371-1639-4CDF-8DF7-97001C5AA420}` gemäß [ADR 0118](docs/adr/0118-wind-gauge.md).
+  Die Richtung in Grad und die optionale Geschwindigkeit sind unabhängige aktuelle
+  Messwerte. Beide Ausgaben teilen Windmodell und Renderer.
+
 - `ECRH` ist `EChartsRadarHistory` zugeordnet (Radar History), GUID
   `{A1ABAD81-1878-4F35-A6EE-29B1DE1BCF2D}` gemäß ADR 0111. Historische
   Klassenhäufigkeiten und Referenzzuordnung sind vom aktuellen Radar getrennt.

@@ -99,6 +99,7 @@ abweichen. Anleitung: [Migration von JSLive](JSLIVE_MIGRATION.md).
 - [EChartsFunnel](#echartsfunnel)
 - [EChartsGateway](#echartsgateway)
 - [EChartsGaugeChronograph](#echartsgaugechronograph)
+- [EChartsGaugeWind](#echartsgaugewind)
 - [EChartsGaugeMulti](#echartsgaugemulti)
 - [EChartsGaugeSingle](#echartsgaugesingle)
 - [EChartsGaugeTacho](#echartsgaugetacho)
@@ -745,6 +746,26 @@ Die [gemeinsamen IPSView-Regeln](#gemeinsame-ipsview-einstellungen) und gegebene
 Das Gateway registriert keine konfigurierbaren Properties. Datei, Zuordnungen,
 Zielkategorie und Bestätigungen sind flüchtige Formularangaben; das Importjournal
 wird getrennt gespeichert. Es gibt keine Diagramm-Designer oder Ausgabevariablen.
+
+## EChartsGaugeWind
+
+[Zur Modulanleitung](../EChartsGaugeWind/README.md).
+
+| Formularfeld | Technischer Name | Standard | Bedeutung |
+| --- | --- | --- | --- |
+| Windrichtung (Grad) | `DirectionVariableID` | keine Quelle | Numerische Richtung, aus der der Wind kommt, im Uhrzeigersinn ab Nord |
+| Windgeschwindigkeit (optional) | `SpeedVariableID` | keine Quelle | Separate numerische Variable mit Werten ab null |
+| Einheit und Nachkommastellen der Windgeschwindigkeit | `SpeedUnit`, `SpeedDecimals` | km/h, 2 | Einheit des Originalwerts und Anzeige mit 0 bis 6 Nachkommastellen |
+| Titel | `Title` | leer | Freie Überschrift für die Windrose |
+| Windrotor anzeigen | `ShowRotor` | aus | Blatt zusätzlich zum Richtungszeiger einblenden |
+| Windrichtung in Grad anzeigen | `ShowDegreeValue` | aus | Himmelsrichtung und Winkel zusätzlich als Text anzeigen |
+| Animation | `AnimationEnabled`, `AnimationDuration`, `AnimationDurationUpdate` | an, 350 ms, 500 ms | Bewegung zulassen und Dauer für Start und Aktualisierung wählen |
+| ECharts-Theme | `EChartsTheme` | auto | Automatisches Symcon-Design oder eine der angebotenen Vorlagen |
+| Farben | `DialColor`, `RingColor`, `TickColor`, `CardinalColor`, `PointerColor`, `HubColor`, `RotorColor`, `TitleColor`, `ValueColor` | automatisch | Farben für Zifferblatt, Ring, Striche, Himmelsrichtungen, Zeiger, Nabe, Blatt und Texte |
+
+IPSView übernimmt standardmäßig das Kacheldesign (`IPSViewUseTileDesign`).
+Für eine abweichende Darstellung stehen die Designfelder mit Präfix
+`IPSView` im eigenen Designer zur Verfügung.
 
 ## EChartsGaugeChronograph
 

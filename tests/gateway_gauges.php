@@ -1158,7 +1158,7 @@ function findGaugeFormElement(array $items, string $name): ?array
 }
 
 $interactionTemplates = glob(dirname(__DIR__) . '/ECharts*/visualization/index.html');
-assertGatewayGauge(count($interactionTemplates) === 29, 'Every chart module must participate in shared interaction delivery.');
+assertGatewayGauge(count($interactionTemplates) === 30, 'Every chart module must participate in shared interaction delivery.');
 foreach ($interactionTemplates as $interactionTemplate) {
     $interactionHTML = file_get_contents($interactionTemplate);
     $interactionOffset = strpos($interactionHTML, '{{INTERACTION_SCRIPT}}');
@@ -1261,6 +1261,12 @@ if (array_slice($argv, 1) === ['--tree-depth']) {
 
 if (array_slice($argv, 1) === ['--tree-json']) {
     require __DIR__ . '/tree_json_runtime.php';
+    exit(0);
+}
+
+if (array_slice($argv, 1) === ['--gauge-wind']) {
+    require_once dirname(__DIR__) . '/EChartsGaugeWind/module.php';
+    require __DIR__ . '/gauge_wind_integration.php';
     exit(0);
 }
 

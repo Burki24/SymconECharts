@@ -42,6 +42,7 @@ foreach ([
     'EChartsGaugeMulti'       => $gaugeMulti,
     'EChartsGaugeTacho'       => $gaugeTacho,
     'EChartsGaugeChronograph' => $gaugeChronograph,
+    'EChartsGaugeWind'        => (string) file_get_contents($root . '/EChartsGaugeWind/module.php'),
     'EChartsTimeSeries'       => $timeSeries,
     'EChartsBarCategory'      => $barCategory,
     'EChartsBarHistory'       => $barHistory,

@@ -1,0 +1,281 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "SelectVariable",
+            "name": "DirectionVariableID",
+            "caption": "Wind direction (degrees)",
+            "validVariableTypes": [
+                1,
+                2
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Select the direction the wind comes from. North is 0° or 360°, east is 90°."
+        },
+        {
+            "type": "SelectVariable",
+            "name": "SpeedVariableID",
+            "caption": "Wind speed (optional)",
+            "validVariableTypes": [
+                1,
+                2
+            ]
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "ValidationTextBox",
+                    "name": "SpeedUnit",
+                    "caption": "Wind speed unit"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "SpeedDecimals",
+                    "caption": "Wind speed decimal places",
+                    "minimum": 0,
+                    "maximum": 6
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Enter the unit of the speed variable, for example km/h or m/s. The reading uses the original value."
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate wind gauge"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowRotor",
+                            "caption": "Show wind rotor"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowDegreeValue",
+                            "caption": "Show direction in degrees"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "DialColor",
+                            "caption": "Dial color",
+                            "width": "225px",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "RingColor",
+                            "caption": "Compass ring color",
+                            "width": "225px",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "TickColor",
+                            "caption": "Tick mark color",
+                            "width": "225px",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "CardinalColor",
+                            "caption": "Compass label color",
+                            "width": "225px",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "PointerColor",
+                            "caption": "Direction pointer color",
+                            "width": "225px",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "HubColor",
+                            "caption": "Hub color",
+                            "width": "225px",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "RotorColor",
+                            "caption": "Rotor color",
+                            "width": "225px",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "TitleColor",
+                            "caption": "Title color",
+                            "width": "225px",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "ValueColor",
+                            "caption": "Reading color",
+                            "width": "225px",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "Button",
+            "caption": "Read current wind data",
+            "onClick": "echo ECWI_GetWindData($id);"
+        }
+    ],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Wind gauge is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Check the wind variables."
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Check the wind gauge settings."
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "Connect an active EChartsGateway."
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "The wind values could not be loaded."
+        },
+        {
+            "code": 205,
+            "icon": "error",
+            "caption": "Wind speed must be non-negative."
+        }
+    ]
+}

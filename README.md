@@ -12,7 +12,7 @@
 
 eCharts stellt aktuelle und archivierte Symcon-Werte sowie ausgewählte
 Objektbeziehungen als responsive Apache-ECharts-Diagramme dar. Die Library
-enthält **31 Diagrammmodule und ein gemeinsames Gateway**. Native Symcon-Kacheln
+enthält **32 Diagrammmodule und ein gemeinsames Gateway**. Native Symcon-Kacheln
 und optionale IPSView-WebContent-Widgets verwenden dieselben Quellen; ihr
 Design kann gemeinsam oder unabhängig eingestellt werden.
 
@@ -73,6 +73,7 @@ Archiv- und Ausgabegrenzen der verlinkten Modulanleitung.
 | [EChartsGaugeMulti](EChartsGaugeMulti/README.md) | 2–32 aktuelle Werte mit eigenen Skalen, Quellenauswahl und Seiten. |
 | [EChartsGaugeTacho](EChartsGaugeTacho/README.md) | 2–5 aktuelle Werte als Tacho-Cockpit mit Haupt- und Nebeninstrumenten. |
 | [EChartsGaugeChronograph](EChartsGaugeChronograph/README.md) | 2–5 aktuelle Werte als Chronograph mit Hilfszifferblättern. |
+| [EChartsGaugeWind](EChartsGaugeWind/README.md) | Windrose mit Richtungszeiger, optionaler Windgeschwindigkeit und drehendem Blatt. |
 | [EChartsTimeSeries](EChartsTimeSeries/README.md) | 1–32 historische oder live fortgeschriebene Linien-/Flächenreihen mit gemeinsamen oder eigenen Wertachsen, optional gestapelte Flächen für gemeinsame Archivintervalle, bis zu 32000 Gesamtpunkte. |
 | [EChartsBarCategory](EChartsBarCategory/README.md) | 1–100 aktuelle Quellen als einfache, gruppierte oder gestapelte Balken mit Kategoriennavigation. |
 | [EChartsBarHistory](EChartsBarHistory/README.md) | 1–32 Archivquellen als einzelne oder gestapelte Zeitbalken mit Reihenauswahl und optional eigenen Wertachsen und bis zu 32000 Gesamtpunkten. |

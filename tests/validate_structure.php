@@ -507,7 +507,7 @@ if ($helperSync !== null) {
 
 $expectedModules = [
     'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsBoxplot', 'EChartsCalendar', 'EChartsCalendarPie', 'EChartsCandlestick', 'EChartsFunnel', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
-    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPictorialBar', 'EChartsPie', 'EChartsProgress', 'EChartsRadar', 'EChartsRadarHistory', 'EChartsSankey', 'EChartsScatter', 'EChartsStateTimeline', 'EChartsSunburst', 'EChartsThemeRiver', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGaugeWind', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPictorialBar', 'EChartsPie', 'EChartsProgress', 'EChartsRadar', 'EChartsRadarHistory', 'EChartsSankey', 'EChartsScatter', 'EChartsStateTimeline', 'EChartsSunburst', 'EChartsThemeRiver', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {

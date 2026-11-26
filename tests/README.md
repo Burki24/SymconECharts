@@ -1,5 +1,15 @@
 # Tests
 
+## Windrose
+
+`php tests/gateway_gauges.php --gauge-wind` prüft die Geräteinstanz mit
+Gateway, Quellenwechsel, Winkelübergang bei Nord, optionaler Geschwindigkeit,
+Kachel, IPSView und beiden Formularvorschauen. `node tests/gauge_wind_layout.js`
+prüft in der ausgelieferten ECharts-Laufzeit Zeiger, Himmelsrichtungen und die
+tatsächliche Drehung des Blatts über mehrere Animationszeitpunkte. Windstille,
+fehlende Geschwindigkeit und die Einstellung für reduzierte Bewegung haben
+eigene Prüffälle.
+
 ## Tree-JSON-Datenquelle
 
 `php tests/tree_json.php` prüft den strikten gemeinsamen Parser und die gesamte

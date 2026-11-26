@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="164" height="68" viewBox="0 0 200 85">
+<rect x="1" y="1" width="198" height="83" rx="3" fill="var(--BackgroundColor,var(--ChartBackgroundColor,#f7f9fa))" stroke="#a3aeb6"/>
+<g font-family="sans-serif" text-anchor="middle">
+<text x="116" y="11" font-size="11" font-weight="bold" fill="var(--TitleColor,#43535e)">Wind</text>
+<circle cx="83" cy="47" r="32" stroke="var(--RingColor,#1678bd)" stroke-width="7" fill="var(--DialColor,#616871)"/>
+<circle cx="83" cy="47" r="31" fill="none" stroke="var(--TickColor,#eef4fa)" stroke-width="4" stroke-dasharray="1 5.09"/>
+<g font-size="8" fill="var(--CardinalColor,#ffffff)">
+<text x="83" y="28">N</text><text x="106" y="50">E</text><text x="83" y="72">S</text><text x="60" y="50">W</text>
+</g>
+<path d="M69 62L79 44L98 33L87 51Z" fill="var(--PointerColor,#42b7ff)"/>
+<circle cx="83" cy="47" r="4" fill="var(--HubColor,#f1f5f8)"/>
+<g transform="translate(143 40)" fill="var(--RotorColor,#70cbaf)">
+<path d="M0 0Q-10-7-4-17Q3-12 0 0Z M0 0Q11-6 17 3Q10 7 0 0Z M0 0Q0 13-12 14Q-12 6 0 0Z"/>
+<circle r="2"/>
+</g>
+<text x="142" y="67" font-size="11" fill="var(--ValueColor,#43535e)">12 km/h</text>
+</g>
+</svg>

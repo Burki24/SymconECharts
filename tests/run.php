@@ -77,6 +77,7 @@ $tests = [
 
 $commands = [
     ['Test Tree JSON sources, public API and native form callbacks', 'php tests/gateway_gauges.php --tree-json'],
+    ['Test wind gauge sources and outputs', 'php tests/gateway_gauges.php --gauge-wind'],
     ['Test native JSLive formatting', 'node tests/jslive_format.js'],
     ['Test all native JSLive renderers', 'node tests/jslive_renderers.js'],
     ['Test imported JSLive path and compass geometry', 'node tests/jslive_geometry.js'],
@@ -157,6 +158,7 @@ $commands = [
     ['Test Funnel layout', 'node tests/funnel_layout.js'],
     ['Test PictorialBar layout', 'node tests/pictorial_bar_layout.js'],
     ['Test Radar layout', 'node tests/radar_layout.js'],
+    ['Test wind compass layout and leaf animation', 'node tests/gauge_wind_layout.js'],
     ['Test Sankey layout', 'node tests/sankey_layout.js'],
     ['Test Calendar layout and navigation', 'node tests/calendar_layout.js'],
     ['Verify vendored helper integrity', 'python3 tests/helper_integrity.py'],

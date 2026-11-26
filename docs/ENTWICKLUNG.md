@@ -929,6 +929,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsGaugeMulti | Zwei bis 32 individuell skalierte Quellen mit optionaler Quellenauswahl und responsiven Instrumentenseiten |
 | Gerät | EChartsGaugeTacho | Tacho-Cockpit mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsGaugeChronograph | Chronograph mit 2 bis 5 individuell gestaltbaren Instrumenten |
+| Gerät | EChartsGaugeWind | Windrose für die aktuelle Richtung und optionale Windgeschwindigkeit gemäß [ADR 0118](adr/0118-wind-gauge.md) |
 | Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 32 Quellen, Reihenauswahl, bis zu acht gemeinsame oder eigene Wertachsen links/rechts sowie getrenntes Kachel- und IPSView-Design |
 | Gerät | EChartsBarCategory | Aktuelle einfache, gruppierte oder gestapelte Kategorienvergleiche für 1 bis 100 Quellen mit gemeinsamer Einheit, Kategoriennavigation, optionalem Min-/Max-Farbverlauf und getrenntem Kachel- und IPSView-Design |
 | Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken von 1 bis 32 Archivquellen, bis zu 16 gemeinsame oder eigene Wertachsen und Reihenauswahl in nativer Kachel und optionalem IPSView-HTML |
@@ -973,6 +974,7 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 | Modul EChartsGaugeMulti | {E667D9C1-379D-44ED-A313-FF21FEFC355F} |
 | Modul EChartsGaugeTacho | `{9D072BFE-45B4-4442-B1D2-4FC458C3BABD}` |
 | Modul EChartsGaugeChronograph | `{B99C3ADA-9A90-486F-97E3-96C39554D9A6}` |
+| Modul EChartsGaugeWind | `{D807A371-1639-4CDF-8DF7-97001C5AA420}` |
 | Modul EChartsTimeSeries | `{EF172F3B-50F5-41D1-B18E-6BCDEAECCABA}` |
 | Modul EChartsBarCategory | `{F9A88437-FE9E-4038-ADAF-775623D2DDC1}` |
 | Modul EChartsBarHistory | `{BCC80B03-2FC9-45CA-B004-2C81D0689F50}` |

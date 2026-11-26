@@ -142,6 +142,14 @@ $expectedModules = [
         'childRequirements'  => [],
         'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
     ],
+    'EChartsGaugeWind' => [
+        'id'                 => '{D807A371-1639-4CDF-8DF7-97001C5AA420}',
+        'type'               => 3,
+        'prefix'             => 'ECWI',
+        'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
+        'childRequirements'  => [],
+        'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
+    ],
     'EChartsTimeSeries' => [
         'id'                 => '{EF172F3B-50F5-41D1-B18E-6BCDEAECCABA}',
         'type'               => 3,
@@ -370,7 +378,7 @@ foreach ($expectedModules as $moduleName => $expected) {
 
 $gateway = $moduleContracts['EChartsGateway'];
 foreach ([
-    'EChartsGaugeSingle', 'EChartsGaugeMulti', 'EChartsGaugeTacho', 'EChartsGaugeChronograph',
+    'EChartsGaugeSingle', 'EChartsGaugeMulti', 'EChartsGaugeTacho', 'EChartsGaugeChronograph', 'EChartsGaugeWind',
     'EChartsThemeRiver', 'EChartsStateTimeline', 'EChartsCalendarPie',
     'EChartsTimeSeries', 'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarWaterfall', 'EChartsBarPolar',
     'EChartsCandlestick', 'EChartsBoxplot', 'EChartsFunnel', 'EChartsPictorialBar', 'EChartsPie', 'EChartsScatter', 'EChartsHeatmap', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsTreemap', 'EChartsSunburst', 'EChartsParallel', 'EChartsRadar', 'EChartsSankey', 'EChartsCalendar'
