@@ -17,6 +17,7 @@ final class EChartsGaugeWindPreview
         $textColor = static fn (string $name, string $fallback): string => SVGPreviewHelper::escape($style[$name] ?: $fallback);
         $labels = $chart['labels'];
         $direction = $chart['direction'];
+        $dialOffset = $style['rotateCompass'] ? -$direction : 0;
         $german = str_starts_with($chart['language'], 'de');
         $readings = [];
         if ($chart['speed'] !== null) {
@@ -49,11 +50,11 @@ final class EChartsGaugeWindPreview
             . '<circle r="85.25" fill="none" stroke="' . $textColor('ringColor', '#1678BD') . '" stroke-width="9.5"/>';
         for ($i = 0; $i < 48; $i++) {
             $major = $i % 6 === 0;
-            $svg .= '<path transform="rotate(' . ($i * 7.5) . ')" d="M0 -90v' . ($major ? '10' : '5.4') . '"'
+            $svg .= '<path transform="rotate(' . ($i * 7.5 + $dialOffset) . ')" d="M0 -90v' . ($major ? '10' : '5.4') . '"'
                 . ' stroke="' . $textColor('tickColor', $major ? '#F47B60' : '#EEF4FA') . '" stroke-width="' . ($major ? '1.6' : '1') . '"/>';
         }
         foreach ($labels as $i => $label) {
-            $angle = deg2rad(45 * $i);
+            $angle = deg2rad(45 * $i + $dialOffset);
             $svg .= '<text x="' . round(69 * sin($angle), 2) . '" y="' . round(-69 * cos($angle), 2) . '"'
                 . ' text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-weight="bold"'
                 . ' font-size="12.6" fill="' . $textColor('cardinalColor', '#FFFFFF') . '">' . SVGPreviewHelper::escape($label) . '</text>';
@@ -62,7 +63,7 @@ final class EChartsGaugeWindPreview
             $svg .= '<path transform="translate(0 34)" d="M0 -13.5 Q11 0 -2 8 L-4 13 L-3 6 Q-10 0 0 -13.5Z"'
                 . ' fill="' . $textColor('rotorColor', '#70CBAF') . '"/>';
         }
-        return $svg . '<path transform="rotate(' . (float) $direction . ')" d="M0 -66 L6.5 -3.3 L0 0 L-6.5 -3.3Z"'
+        return $svg . '<path transform="rotate(' . ($style['rotateCompass'] ? 0 : $direction) . ')" d="M0 -66 L6.5 -3.3 L0 0 L-6.5 -3.3Z"'
             . ' fill="' . $textColor('pointerColor', '#42B7FF') . '"/>'
             . '<circle r="7" fill="' . $textColor('hubColor', '#F1F5F8') . '" stroke="#858E97" stroke-width="1"/>'
             . '</g></svg>';

@@ -11,7 +11,7 @@ Die Geschwindigkeit ist ein separater nichtnegativer Messwert. Die Einheit
 beschriftet ihren Originalwert. Eine fehlende Quelle bleibt von gemessener
 Windstille unterscheidbar.
 
-Die Windrose benötigt feste Himmelsrichtungen, einen geschlossenen
+Die Windrose benötigt acht Himmelsrichtungen, einen geschlossenen
 360°-Maßstab und eine unabhängige Animation der Windgeschwindigkeit. Sie
 erhält deshalb einen eigenen Renderer und nutzt dieselbe lokal ausgelieferte
 Gauge-Laufzeit wie die bestehenden Instrumente. Das Rotorblatt verwendet die
@@ -20,5 +20,10 @@ als qualitative Anzeige. Sie erzeugt keine Messwerte oder Symcon-Timer.
 
 Kachel und IPSView nutzen dasselbe Datenmodell und denselben Renderer.
 Beide Designer verwenden die vorhandenen Theme-, Farb- und Vorschaukonventionen.
+Die Designoption `RotateCompass` belässt standardmäßig Norden oben. Aktiviert
+dreht sie Skala und Beschriftungen entsprechend der gemeldeten Richtung unter
+den oben fixierten Zeiger. Die Geschwindigkeit kann dabei null sein oder fehlen.
+Für IPSView gilt die übliche Designvererbung mit eigenem `IPSViewRotateCompass`.
 Die Formularvorschauen zeigen die Windrose als Standbild. Bei
-deaktivierter Animation oder reduzierter Bewegung bleibt das Blatt in Ruhe.
+deaktivierter Animation oder reduzierter Bewegung folgt die Windrose der
+gemeldeten Richtung unmittelbar und der Geschwindigkeitsrotor ruht.

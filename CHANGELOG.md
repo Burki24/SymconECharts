@@ -19,8 +19,9 @@
 ## Neu
 
 - `EChartsGaugeWind` zeigt die aktuelle Windrichtung auf einer Windrose.
-  Eine zweite Variable ergänzt die Geschwindigkeit. In Kachel und IPSView
-  lässt sich ein Blatt einblenden, das sich mit zunehmendem Wind schneller dreht.
+  In Kachel und IPSView kannst Du den Zeiger oben fixieren und die Windrose
+  darunter drehen. Eine zweite Variable ergänzt die Geschwindigkeit und kann
+  einen separaten Rotor antreiben.
 - Eine optionale kompakte Zeitraumauswahl in Kachel und IPSView lädt für
   Archivdiagramme die Daten des gewählten Fensters. Die Auswahl gilt je
   geöffneter Ansicht. Der konfigurierte Startzeitraum bleibt erhalten.

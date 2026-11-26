@@ -24,6 +24,7 @@ $wind->SetTestProperty('SpeedDecimals', 3);
 $wind->SetTestProperty('EnableIPSView', true);
 $wind->SetTestProperty('IPSViewUseTileDesign', false);
 $wind->SetTestProperty('IPSViewShowRotor', true);
+$wind->SetTestProperty('IPSViewRotateCompass', true);
 $wind->SetTestProperty('IPSViewPointerColor', 0xABCDEF);
 $wind->ApplyChanges();
 
@@ -54,12 +55,19 @@ foreach ([[$tile, false], [$ipsView, true]] as [$html, $independent]) {
     $shown = $bootstrap['state']['chart'];
     assertGatewayGauge(
         $shown['direction'] === 314.5 && $shown['style']['showRotor'] === $independent
+        && $shown['style']['rotateCompass'] === $independent
         && strtoupper($shown['style']['pointerColor']) === ($independent ? '#ABCDEF' : '')
         && ($independent ? str_contains($html, EChartsAsset::RendererScript('gauge', true)) : str_contains($html, EChartsAsset::JavaScript())),
         'Tile and IPSView must use the dedicated wind chart and their effective design with the shipped Gauge runtime.'
     );
 }
 $form = json_decode($wind->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+foreach (['RotateCompass', 'IPSViewRotateCompass'] as $name) {
+    assertGatewayGauge(
+        findGaugeFormElement($form['elements'], $name)['type'] === 'CheckBox',
+        'Both compass designers must offer the rotating wind rose.'
+    );
+}
 foreach (['BarPreview', 'IPSViewBarPreview'] as $name) {
     assertGatewayGauge(
         str_starts_with(findGaugeFormElement($form['elements'], $name)['image'] ?? '', 'data:image/svg+xml'),
@@ -72,6 +80,25 @@ $previewSVG = base64_decode(substr($previewURI, strpos($previewURI, ',') + 1), t
 assertGatewayGauge(array_column($wind->GetTestFormUpdates(), 'Field') === ['BarPreview', 'IPSViewBarPreview']
     && is_string($previewSVG) && preg_match('/12[,.]750000 m\/s/', $previewSVG) === 1
     && $wind->GetTestProperties()['Title'] === '', 'Wind preview edits affect both draft images only and respect precision bounds.');
+$GLOBALS['symconTestVariables'][$directionID]['Value'] = 135;
+$wind->UpdateBarPreviewFromForm(json_encode(['RotateCompass' => true, 'IPSViewUseTileDesign' => false,
+    'IPSViewRotateCompass'                                   => false], JSON_THROW_ON_ERROR));
+foreach (array_slice($wind->GetTestFormUpdates(), -2) as $update) {
+    $rotate = $update['Field'] === 'BarPreview';
+    $image = $update['Value'];
+    $svg = new DOMDocument();
+    $svg->loadXML(base64_decode(substr($image, strpos($image, ',') + 1), true));
+    $xpath = new DOMXPath($svg);
+    $xpath->registerNamespace('s', 'http://www.w3.org/2000/svg');
+    $pointer = $xpath->query('//s:path[starts-with(@d, "M0 -66")]')->item(0);
+    $southEast = $xpath->query('//s:text[text()="SE"]')->item(0);
+    assertGatewayGauge(
+        $pointer->getAttribute('transform') === ($rotate ? 'rotate(0)' : 'rotate(135)')
+        && ($rotate ? ((float) $southEast->getAttribute('x') === 0.0 && (float) $southEast->getAttribute('y') < 0)
+            : ((float) $southEast->getAttribute('x') > 0 && (float) $southEast->getAttribute('y') > 0)),
+        'At 135 degrees the rotating preview must place SE under the fixed pointer while the standard preview shows SE at bottom right.'
+    );
+}
 assertTransientRetry($wind, 'Wind Gauge');
 
 foreach ([[360, 0], [725, 5], [-360, 0], [-1e-16, 0]] as [$input, $expected]) {

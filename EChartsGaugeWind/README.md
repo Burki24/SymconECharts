@@ -1,9 +1,8 @@
 # EChartsGaugeWind
 
-Die Windrose zeigt, **aus welcher Richtung der Wind kommt**. Der Zeiger weist
-bei 0° nach Norden, bei 90° nach Osten, bei 180° nach Süden und bei 270° nach
-Westen. Mit einer zweiten Variable kannst Du die Geschwindigkeit anzeigen und
-ein kleines Blatt rotieren lassen.
+Die Windrose zeigt, **aus welcher Richtung der Wind kommt**. Standardmäßig liegt
+Norden oben und der Zeiger bewegt sich. Du kannst auch den Zeiger oben fixieren
+und die Windrose darunter drehen. Eine zweite Variable ergänzt die Windgeschwindigkeit.
 
 ## Einrichtung
 
@@ -15,19 +14,20 @@ ein kleines Blatt rotieren lassen.
    numerische Variable. Trage deren Einheit ein, beispielsweise `km/h` oder
    `m/s`. Die Zahl wird in der gewählten Genauigkeit angezeigt. Eine Quelle mit
    dem Wert 5 und der Einheit `m/s` erscheint als 5 m/s.
-4. Aktiviere **Windrotor anzeigen**, wenn Du die Geschwindigkeit zusätzlich
-   als Bewegung sehen möchtest. Bei gleichem Gerät dreht sich das Blatt mit
-   steigendem Messwert schneller. Bei Windstille steht es. Die Nadel zeigt
-   weiterhin die von der Wetterstation gemeldete Richtung.
+4. Öffne **Kacheldesigner → Kompass** und aktiviere **Windrose drehen (Zeiger oben fixieren)**.
+   Bei Wind aus Südost (135°) steht jetzt **SO** oben unter dem Zeiger. Die
+   Ausrichtung folgt allein der Richtungsvariable, auch bei 0 km/h.
+5. Mit **Windrotor anzeigen** kannst Du zusätzlich die Geschwindigkeit als
+   Bewegung darstellen. Dieser kleine Rotor dreht sich bei stärkerem Wind
+   schneller und steht bei Windstille.
 
 ## Kachel und IPSView
 
-Für die Kachel kannst Du Gradangabe, Rotor, Animation und Farben im
-Kacheldesigner wählen. Für IPSView kannst Du das Kacheldesign übernehmen oder
-das Widget separat gestalten. Die Vorschau zeigt ein Standbild der gewählten
-Quellen. Das Blatt dreht sich in der laufenden Anzeige bei positiver
-Windgeschwindigkeit und eingeschalteter Animation. Die Einstellung für
-reduzierte Bewegung auf dem Anzeigegerät wird berücksichtigt.
+IPSView übernimmt standardmäßig die Ausrichtung der Kachel. Für eine eigene
+Ausrichtung schalte im IPSView-Designer **Kacheldesign verwenden** aus und
+wähle dort unter **Kompass** die gewünschte Einstellung. Beide Vorschauen
+zeigen ein Standbild der gewählten Quellen. Bei reduzierter Bewegung zeigt
+die Windrose jede neue Richtung sofort an und der zusätzliche Rotor ruht.
 
 Bei aktivierter IPSView-Ausgabe bindest Du die WebContent-Stringvariable
 `IPSViewWind` als HTML-Widget ein.

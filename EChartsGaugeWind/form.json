@@ -85,6 +85,11 @@
                     ]
                 },
                 {
+                    "type": "CheckBox",
+                    "name": "RotateCompass",
+                    "caption": "Rotate compass rose (keep pointer at the top)"
+                },
+                {
                     "type": "RowLayout",
                     "items": [
                         {

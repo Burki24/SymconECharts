@@ -10,6 +10,9 @@
     var currentState;
     var rotorSignature = null;
     var previousDirection = null;
+    var dial = {bearing: 0};
+    var dialTarget = null;
+    var dialAnimator = null;
     var motion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
     var readError = 'The wind values could not be loaded.';
     var retain = design.createTransientFailureRetainer(
@@ -81,6 +84,40 @@
         graphic.push(leaf);
     }
 
+    function stopDial() {
+        if (dialAnimator) { dialAnimator.stop(); }
+        dialAnimator = null;
+        dialTarget = null;
+    }
+
+    // ECharts measures gauge angles counterclockwise from east. Move the scale and its
+    // data angle together so that the needle stays at twelve o'clock throughout the turn.
+    function dialPosition(bearing) {
+        var angle = (bearing % 360 + 360) % 360;
+        return {startAngle: 90 + angle, endAngle: -270 + angle, data: [{value: angle}]};
+    }
+
+    function rotateDial(direction, animation) {
+        if (dialTarget === direction && (animation.animationDurationUpdate || !dialAnimator)) { return; }
+        var first = dialTarget === null;
+        stopDial();
+        dialTarget = direction;
+        if (first || !animation.animationDurationUpdate) {
+            dial.bearing = direction;
+            return;
+        }
+        var distance = ((direction - dial.bearing) % 360 + 540) % 360 - 180;
+        if (!distance) { return; }
+        dialAnimator = chart.getZr().animation.animate(dial)
+            .when(animation.animationDurationUpdate, {bearing: dial.bearing + distance})
+            .delay(animation.animationDelayUpdate)
+            .during(function () {
+                chart.setOption({series: [Object.assign({id: 'wind-bearing'}, dialPosition(dial.bearing))]});
+            })
+            .done(function () { dialAnimator = null; dial.bearing = direction; })
+            .start(animation.animationEasingUpdate);
+    }
+
     function buildOption(model) {
         var style = model.style;
         var palette = (bootstrap.options.echartsThemes || {})[model.theme] || {};
@@ -114,7 +151,12 @@
         var animation = design.animationOptions(style, {enabled: true, initialDuration: 500, updateDuration: 500});
         // Gauge interpolation follows its linear 0–360 scale. Across north, snap to the
         // reported bearing so a 359° to 1° change does not sweep across south.
-        if (previousDirection !== null && Math.abs(model.direction - previousDirection) > 180) {
+        if (style.rotateCompass) {
+            rotateDial(model.direction, animation);
+        } else {
+            stopDial();
+        }
+        if (!style.rotateCompass && previousDirection !== null && Math.abs(model.direction - previousDirection) > 180) {
             animation.animationDurationUpdate = 0;
             animation.animationDelayUpdate = 0;
         }
@@ -124,7 +166,7 @@
             backgroundColor: design.chartBackground(bootstrap, model, background),
             graphic: graphic,
             tooltip: {trigger: 'item', renderMode: 'richText', formatter: function () { return value.accessible; }},
-            series: [{id: 'wind-bearing', type: 'gauge', z: 3, center: [cx, cy], radius: r,
+            series: [Object.assign({id: 'wind-bearing', type: 'gauge', z: 3, center: [cx, cy], radius: r,
                 startAngle: 90, endAngle: -270, clockwise: true, min: 0, max: 360, splitNumber: 8,
                 axisLine: {lineStyle: {width: r * 0.105, color: [[1, style.ringColor || '#1678BD']]}},
                 axisTick: {distance: -r * 0.10, splitNumber: 6, length: r * 0.06,
@@ -138,7 +180,9 @@
                     icon: 'path://M 0 -100 L 11 -5 L 0 0 L -11 -5 Z'},
                 anchor: {show: true, showAbove: true, size: r * 0.155, itemStyle: {
                     color: style.hubColor || '#F1F5F8', borderColor: '#858E97', borderWidth: Math.max(1, r * 0.012)}},
-                title: {show: false}, detail: {show: false}, data: [{value: model.direction}]}]
+                title: {show: false}, detail: {show: false}, data: [{value: model.direction}],
+                animation: animation.animation && !style.rotateCompass
+            }, style.rotateCompass ? dialPosition(dial.bearing) : {})]
         });
     }
 
@@ -146,6 +190,7 @@
         if (retain(state, currentState, chart)) { return; }
         currentState = state;
         if (!state || state.status !== 'ready' || !window.echarts) {
+            stopDial();
             if (chart) { chart.clear(); }
             rotorSignature = null;
             previousDirection = null;
@@ -158,6 +203,7 @@
         chartElement.hidden = false;
         errorElement.hidden = true;
         if (!chart || theme !== state.chart.theme) {
+            stopDial();
             if (chart) { chart.dispose(); }
             theme = state.chart.theme;
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, {renderer: 'canvas'});
@@ -179,6 +225,6 @@
     if (window.ResizeObserver) { new window.ResizeObserver(resize).observe(chartElement); }
     else { window.addEventListener('resize', resize); }
     if (motion && motion.addEventListener) { motion.addEventListener('change', function () { render(currentState); }); }
-    window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
+    window.addEventListener('beforeunload', function () { stopDial(); if (chart) { chart.dispose(); } });
     render(bootstrap.state);
 }());

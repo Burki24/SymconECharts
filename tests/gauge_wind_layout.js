@@ -107,6 +107,60 @@ for (const mode of ['symcon', 'ipsview']) {
         }
         update({direction: 350});
         assert.ok(series().getData().getItemGraphicEl(0).animators.length > 0, 'Ordinary changes retain pointer transitions.');
+
+        let turn;
+        const timeline = native.getZr().animation;
+        const animate = timeline.animate.bind(timeline);
+        timeline.animate = function (target) {
+            turn = animate(target);
+            return turn;
+        };
+        function assertNeedleUp() {
+            const pointer = series().getData().getItemGraphicEl(0);
+            assert.ok(Math.abs(Math.cos(pointer.rotation) - 1) < 1e-6, 'The needle must stay at twelve o’clock.');
+            assert.equal(pointer.animators.length, 0);
+        }
+        function labelPosition(label) {
+            const labelEl = elements().find(el => el.type === 'tspan' && el.style.text === label).parent;
+            assert.equal(labelEl.rotation, 0, 'Labels must remain upright.');
+            return [labelEl.style.x, labelEl.style.y];
+        }
+        function assertTopLabel(label) {
+            const [x, y] = labelPosition(label);
+            const [cx, cy] = series().get('center');
+            assert.ok(Math.abs(x - cx) < 0.001 && y < cy, label + ' must be centered above the hub.');
+            assertNeedleUp();
+        }
+        update({direction: 135, speed: 0, style: {...model.style, rotateCompass: true, animationEasingUpdate: 'linear'}});
+        assertTopLabel('SO');
+        assert.equal(turn, undefined, 'Initial orientation must be immediate.');
+        update({direction: 90, speed: null});
+        const firstTurn = turn;
+        const moving = turn.getClip();
+        moving.step(0, 0);
+        moving.step(300, 300);
+        assert.equal(series().get('startAngle'), 90 + 112.5);
+        assertNeedleUp();
+        update({speed: 12, style: {...model.style, showRotor: true}});
+        assert.ok(rotation(), 'The speed rotor can run independently of the compass.');
+        assert.equal(turn, firstTurn, 'A speed-only update must not restart the dial.');
+        moving.step(600, 300);
+        assertTopLabel('O');
+        update({direction: 359, style: {...model.style, animationEnabled: false}});
+        update({direction: 1, style: {...model.style, animationEnabled: true}});
+        const crossing = turn.getClip();
+        crossing.step(1000, 0);
+        crossing.step(1300, 300);
+        assertTopLabel('N');
+        motion.matches = true;
+        motion.changed();
+        assert.equal(turn.getClip(), null, 'Reduced motion stops an active dial transition.');
+        assert.equal(series().get('startAngle'), 91);
+        update({direction: 270, speed: null});
+        assertTopLabel('W');
+        update({style: {...model.style, rotateCompass: false}});
+        assert.equal(series().get('startAngle'), 90);
+        assert.ok(Math.abs(Math.sin(series().getData().getItemGraphicEl(0).rotation) - 1) < 1e-6);
     } finally {
         native.dispose();
     }

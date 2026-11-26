@@ -757,7 +757,8 @@ wird getrennt gespeichert. Es gibt keine Diagramm-Designer oder Ausgabevariablen
 | Windgeschwindigkeit (optional) | `SpeedVariableID` | keine Quelle | Separate numerische Variable mit Werten ab null |
 | Einheit und Nachkommastellen der Windgeschwindigkeit | `SpeedUnit`, `SpeedDecimals` | km/h, 2 | Einheit des Originalwerts und Anzeige mit 0 bis 6 Nachkommastellen |
 | Titel | `Title` | leer | Freie Überschrift für die Windrose |
-| Windrotor anzeigen | `ShowRotor` | aus | Blatt zusätzlich zum Richtungszeiger einblenden |
+| Windrose drehen (Zeiger oben fixieren) | `RotateCompass` | aus | Richtungsanzeige so ausrichten, dass die gemeldete Windrichtung oben am festen Zeiger steht |
+| Windrotor anzeigen | `ShowRotor` | aus | Zusätzliches Rotorblatt für die Windgeschwindigkeit einblenden |
 | Windrichtung in Grad anzeigen | `ShowDegreeValue` | aus | Himmelsrichtung und Winkel zusätzlich als Text anzeigen |
 | Animation | `AnimationEnabled`, `AnimationDuration`, `AnimationDurationUpdate` | an, 350 ms, 500 ms | Bewegung zulassen und Dauer für Start und Aktualisierung wählen |
 | ECharts-Theme | `EChartsTheme` | auto | Automatisches Symcon-Design oder eine der angebotenen Vorlagen |

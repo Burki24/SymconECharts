@@ -75,7 +75,7 @@ class EChartsGaugeWind extends IPSModuleStrict
     private const MAX_SPEED_DECIMALS = 6;
     private const COLORS = ['DialColor', 'RingColor', 'TickColor', 'CardinalColor', 'PointerColor',
         'HubColor', 'RotorColor', 'TitleColor', 'ValueColor'];
-    private const SWITCHES = ['ShowRotor', 'ShowDegreeValue'];
+    private const SWITCHES = ['RotateCompass', 'ShowRotor', 'ShowDegreeValue'];
     private const ANIMATION_FIELDS = ['AnimationEnabled', 'AnimationDuration', 'AnimationDurationUpdate',
         'AnimationEasing', 'AnimationEasingUpdate', 'AnimationDelay', 'AnimationDelayUpdate'];
     private const DESIGN_FIELDS = ['EChartsTheme', ...self::SWITCHES, ...self::COLORS, ...self::ANIMATION_FIELDS];
@@ -151,7 +151,7 @@ class EChartsGaugeWind extends IPSModuleStrict
             $form = $this->WithIPSViewDesignFormState($form, 'ECWI');
             $form = EChartsDesignerSections::Group($form, [
                 ['caption' => 'Animation', 'start' => 'AnimationEnabled'],
-                ['caption' => 'Compass', 'start' => 'ShowRotor'],
+                ['caption' => 'Compass', 'start' => 'RotateCompass'],
                 ['caption' => 'Colors', 'start' => 'DialColor']
             ]);
             $fields = ['DirectionVariableID', 'SpeedVariableID', 'Title', 'SpeedUnit', 'SpeedDecimals',
@@ -168,9 +168,9 @@ class EChartsGaugeWind extends IPSModuleStrict
         {
             foreach ([...self::DESIGN_FIELDS, 'ChartBackgroundColor'] as $name) {
                 $value = match ($name) {
-                    'EChartsTheme', 'AnimationEasing', 'AnimationEasingUpdate' => $this->ReadPropertyString($name),
-                    'ShowRotor', 'ShowDegreeValue', 'AnimationEnabled'         => $this->ReadPropertyBoolean($name),
-                    default                                                    => $this->ReadPropertyInteger($name)
+                    'EChartsTheme', 'AnimationEasing', 'AnimationEasingUpdate'          => $this->ReadPropertyString($name),
+                    'RotateCompass', 'ShowRotor', 'ShowDegreeValue', 'AnimationEnabled' => $this->ReadPropertyBoolean($name),
+                    default                                                             => $this->ReadPropertyInteger($name)
                 };
                 IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
             }
