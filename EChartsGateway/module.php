@@ -15,7 +15,6 @@ require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsIdentity.php';
-require_once __DIR__ . '/../libs/EChartsPersistenceMigration.php';
 require_once __DIR__ . '/../libs/EChartsJSLiveImportForm.php';
 require_once __DIR__ . '/../libs/EChartsJSLiveArchive.php';
 require_once __DIR__ . '/../libs/EChartsJSLiveCreationForm.php';
@@ -46,17 +45,6 @@ class EChartsGateway extends IPSModuleStrict
     /** @var list<string> */
     private const ARCHIVE_REDUCERS = ['auto', 'average', 'sum', 'minimum', 'maximum'];
 
-    public function Migrate(string $JSONData): string
-    {
-        return \eCharts\EChartsPersistenceMigration::UpdateString(
-            $JSONData,
-            parent::Migrate($JSONData),
-            'attributes',
-            'JSLiveImportJournal',
-            \eCharts\EChartsJSLiveJournal::MigrateStoredJournal(...)
-        );
-    }
-
     public function Create(): void
     {
         $debugFlowResult = null;
@@ -86,6 +74,7 @@ class EChartsGateway extends IPSModuleStrict
         try {
             parent::ApplyChanges();
 
+            $this->MigrateLoadedJSLiveJournal();
             $this->SetBuffer(self::ARCHIVE_CACHE_BUFFER, '');
             $this->RefreshGatewayTransports();
             $this->DebugEChartsSetStatus(IS_ACTIVE);

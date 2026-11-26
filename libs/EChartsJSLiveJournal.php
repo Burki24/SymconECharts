@@ -302,7 +302,7 @@ final class EChartsJSLiveJournal
         return $journal;
     }
 
-    /** Kernel upgrade: migrate the saved journal, without looking up or editing any target object. */
+    /** Upgrade the restored journal without looking up or editing any target object. */
     public static function MigrateStoredJournal(string $json): ?string
     {
         if (strlen($json) > self::MAX_BYTES) {

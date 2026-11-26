@@ -1202,6 +1202,10 @@ assertGatewayGauge(
 );
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
 
+if (array_slice($argv, 1) === ['--gateway-journal-start']) {
+    require __DIR__ . '/gateway_journal_start.php';
+    exit(0);
+}
 require __DIR__ . '/gateway_transport.php';
 if (array_slice($argv, 1) === ['--jslive-targets']) {
     require __DIR__ . '/jslive_targets.php';

@@ -1,5 +1,11 @@
 # Unveröffentlicht
 
+## Behoben
+
+- Das Gateway startet nach einem Modulupdate auch mit einem JSLive-Importjournal
+  über 1 MiB. Bestehende Einträge und der Fortschritt unterbrochener Importe
+  bleiben beim Umstellen der alten Eigentumskennungen erhalten.
+
 ## Geändert
 
 - Die Bibliothek und ihr GitHub-Repository heißen jetzt **eCharts**.

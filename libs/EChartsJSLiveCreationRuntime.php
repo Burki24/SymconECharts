@@ -15,8 +15,8 @@ require_once __DIR__ . '/EChartsJSLiveJournalView.php';
 /** Explicit write boundary for newly created, marked target instances. No source/archive write API is used. */
 final class EChartsJSLiveCreationRuntime implements EChartsJSLiveImportKernel
 {
+    public const IMPORT_LOCK = 'eCharts.JSLiveImport.1';
     private const GATEWAY = '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}';
-    private const LOCK = 'eCharts.JSLiveImport.1';
     private bool $revalidated = false;
 
     public function __construct(
@@ -33,12 +33,12 @@ final class EChartsJSLiveCreationRuntime implements EChartsJSLiveImportKernel
         if (!function_exists('IPS_SemaphoreEnter') || !function_exists('IPS_SemaphoreLeave')) {
             throw new RuntimeException('IMPORT_BUSY: the required kernel semaphore is unavailable.');
         }
-        return IPS_SemaphoreEnter(self::LOCK, 1000);
+        return IPS_SemaphoreEnter(self::IMPORT_LOCK, 1000);
     }
 
     public function Unlock(): void
     {
-        IPS_SemaphoreLeave(self::LOCK);
+        IPS_SemaphoreLeave(self::IMPORT_LOCK);
     }
     public function Load(): array
     {

@@ -76,6 +76,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test two gateway starts with a large legacy import journal', 'php tests/gateway_gauges.php --gateway-journal-start'],
     ['Test Tree JSON sources, public API and native form callbacks', 'php tests/gateway_gauges.php --tree-json'],
     ['Test wind gauge sources and outputs', 'php tests/gateway_gauges.php --gauge-wind'],
     ['Test native JSLive formatting', 'node tests/jslive_format.js'],

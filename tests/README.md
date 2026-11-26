@@ -321,6 +321,11 @@ Dateien und die bestehende Schleifenvermeidung. Die Prüfung läuft bereits übe
 
 ## Gateway-Hook und gemeinsame Beta-Abnahme
 
+`php tests/gateway_gauges.php --gateway-journal-start` prüft zwei Starts mit
+demselben JSLive-Journal aus 107 synthetischen Einträgen über 1 MiB. Der erste
+Start migriert die gespeicherten Kennungen nach der Attributwiederherstellung.
+Der zweite übernimmt das Ergebnis bytegleich ohne Schreibzugriff.
+
 `php tests/gateway_gauges.php --gateway-transport` prüft den tatsächlichen
 Gateway-Handler mit exklusiver Hookregistrierung im Kernel-Doppel: mehrere
 Gateway-IDs in unterschiedlicher Reihenfolge, Dispatch zum wirklichen Parent,

@@ -47,22 +47,6 @@ try {
         return $instance;
     };
     $first = $createGateway(6001, true);
-    $entryID = str_repeat('a', 32);
-    $origin = 'test-installation:12';
-    $seal = EChartsIdentity::LegacyProductName() . ':JSLive:1:' . hash('sha256', $origin) . ':' . $entryID;
-    $entry = ['sequence' => 1, 'identity' => $origin, 'revision' => str_repeat('b', 64), 'phase' => 'complete', 'status' => 'complete',
-        'moduleID'       => $gatewayModuleID, 'targetHash' => str_repeat('c', 64), 'targetID' => 12345, 'creationIntent' => null,
-        'pending'        => null, 'applyIntent' => true, 'receipt' => null, 'marker' => $seal, 'snapshot' => ['info' => $seal]];
-    $saved = ['attributes' => ['JSLiveImportJournal' => json_encode(['version' => 1, 'entries' => [$entryID => $entry]], JSON_THROW_ON_ERROR)],
-        'configuration'    => ['Keep' => $seal]];
-    $upgraded = $first->Migrate(json_encode($saved, JSON_THROW_ON_ERROR));
-    $persistence = json_decode($upgraded, true, 64, JSON_THROW_ON_ERROR);
-    $journal = json_decode($persistence['attributes']['JSLiveImportJournal'], true, 64, JSON_THROW_ON_ERROR);
-    assertGatewayGauge($journal['entries'][$entryID]['marker'] === \eCharts\EChartsJSLiveJournal::Marker($origin, $entryID)
-        && $journal['entries'][$entryID]['targetID'] === 12345 && $persistence['configuration'] === $saved['configuration']
-        && $first->Migrate($upgraded) === '', 'SDK migration must translate only saved journal evidence and be repeatable before any target is online.');
-    $saved['attributes']['JSLiveImportJournal'] = '{"version":2,"entries":[]}';
-    assertGatewayGauge($first->Migrate(json_encode($saved, JSON_THROW_ON_ERROR)) === '', 'Unknown journal formats must be retained for recovery.');
     assertGatewayGauge($first->GetTestHooks() === ['eCharts'] && !isset($GLOBALS['symconTestHookOwners'][EChartsIdentity::LegacyProductName()]), 'A hot update must replace its own old registration with the new route.');
     // During a real library reload, another object's PHP interface may not exist yet.
     $GLOBALS['symconTestInstances'][9001] = [

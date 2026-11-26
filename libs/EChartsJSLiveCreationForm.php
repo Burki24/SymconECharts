@@ -212,6 +212,24 @@ trait EChartsJSLiveCreationForm
         $this->RegisterAttributeString('JSLiveImportJournal', '{"version":1,"entries":[]}');
     }
 
+    private function MigrateLoadedJSLiveJournal(): void
+    {
+        // The native Migrate return is capped at 1 MiB. The journal attribute can hold up to 4 MiB.
+        $stored = $this->ReadAttributeString('JSLiveImportJournal');
+        $updated = EChartsJSLiveJournal::MigrateStoredJournal($stored);
+        if ($updated === null || !IPS_SemaphoreEnter(EChartsJSLiveCreationRuntime::IMPORT_LOCK, 1000)) {
+            // A running import already migrates on its write path. A later ApplyChanges can also retry.
+            return;
+        }
+        try {
+            if ($this->ReadAttributeString('JSLiveImportJournal') === $stored) {
+                $this->WriteAttributeString('JSLiveImportJournal', $updated);
+            }
+        } finally {
+            IPS_SemaphoreLeave(EChartsJSLiveCreationRuntime::IMPORT_LOCK);
+        }
+    }
+
     private function ReadJSLiveJournal(): array
     {
         return json_decode($this->ReadAttributeString('JSLiveImportJournal'), true, 64, JSON_THROW_ON_ERROR);
