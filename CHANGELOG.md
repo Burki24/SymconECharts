@@ -27,8 +27,9 @@
 
 ## Neu
 
-- GaugeWind bietet in beiden Designern 32 mitgelieferte Windrosen zur direkten
-  Auswahl mit Vorschau. Eigene SVGs bleiben über die automatische Auswahl nutzbar.
+- GaugeWind bietet in beiden Designern 37 mitgelieferte Windrosen zur direkten
+  Auswahl mit Vorschau. Bei fünf einfarbigen Motiven scheint der frei wählbare
+  Diagrammhintergrund durch. Eigene SVGs sind über die automatische Auswahl nutzbar.
 - In `EChartsGaugeWind` kannst Du für Kachel und IPSView eigene SVG-Windrosen
   mit Vorschau laden. Bei festem Zeiger dreht sich das Motiv mit der Windrichtung.
 - `EChartsGaugeWind` zeigt die aktuelle Windrichtung auf einer Windrose.

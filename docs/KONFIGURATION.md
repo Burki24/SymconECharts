@@ -762,7 +762,7 @@ wird getrennt gespeichert. Es gibt keine Diagramm-Designer oder Ausgabevariablen
 | Einheit und Nachkommastellen der Windgeschwindigkeit | `SpeedUnit`, `SpeedDecimals` | km/h, 2 | Einheit des Originalwerts und Anzeige mit 0 bis 6 Nachkommastellen |
 | Titel | `Title` | leer | Freie Überschrift für die Windrose |
 | Windrose drehen (Zeiger oben fixieren) | `RotateCompass` | aus | Richtungsanzeige so ausrichten, dass die gemeldete Windrichtung oben am festen Zeiger steht |
-| Windrose | `CompassPreset`, `IPSViewCompassPreset` | `auto` | Automatisch die eigene SVG oder das Standardzifferblatt verwenden, die Standardwindrose ausdrücklich wählen oder eines von 32 mitgelieferten Motiven anzeigen |
+| Windrose | `CompassPreset`, `IPSViewCompassPreset` | `auto` | Automatisch die eigene SVG oder das Standardzifferblatt verwenden, die Standardwindrose ausdrücklich wählen oder eines von 37 Motiven anzeigen. Bei den fünf einfarbigen Motiven scheint der gewählte Diagrammhintergrund durch. |
 | Eigene Windrose (SVG) | `CompassSvg`, `IPSViewCompassSvg` | leer | Eigenes Kompassbild mit Skala und Himmelsrichtungen, bis 256 KiB. Die Vorschau folgt der Dateiauswahl und dem Drehmodus. |
 | Windrotor anzeigen | `ShowRotor` | aus | Zusätzliches Rotorblatt für die Windgeschwindigkeit einblenden |
 | Windrichtung in Grad anzeigen | `ShowDegreeValue` | aus | Himmelsrichtung und Winkel zusätzlich als Text anzeigen |

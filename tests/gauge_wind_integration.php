@@ -230,7 +230,7 @@ $presets = [];
 foreach (glob($presetDirectory . '*.svg') as $file) {
     $presets[pathinfo($file, PATHINFO_FILENAME)] = EChartsSvgImage::ImportCompass(file_get_contents($file))['dataUri'];
 }
-assertGatewayGauge(count(array_unique($presets)) === 32, 'The module must ship 32 distinct, valid compass rose images.');
+assertGatewayGauge(count(array_unique($presets)) === 37, 'The module must ship 37 distinct, valid compass rose images.');
 $presetIDs = array_keys($presets);
 $expectedOptions = ['auto', 'standard', ...$presetIDs];
 sort($expectedOptions);

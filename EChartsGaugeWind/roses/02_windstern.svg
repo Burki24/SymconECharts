@@ -1,0 +1,219 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="700" viewBox="-350 -350 700 700" role="img" aria-labelledby="title desc" fill="#f5efe2">
+  <title id="title">Windrose – Windstern</title>
+  <desc id="desc">Heller, einfarbiger Windstern in einem abgeschrägten Kartenrahmen mit transparenten Zwischenräumen.</desc>
+  <g transform="rotate(0)">
+    <g fill="none" stroke="#f5efe2" stroke-width="3.4" stroke-linejoin="round">
+      <path d="M-38 -221H-193L-221 -193V-38"/>
+    </g>
+    <g fill="none" stroke="#f5efe2" stroke-width="2">
+      <path d="M-169 -212H-189L-212 -189V-169"/>
+    </g>
+    <path d="M-203 -203L-195 -200 -200 -195Z"/>
+  </g>
+  <g transform="rotate(90)">
+    <g fill="none" stroke="#f5efe2" stroke-width="3.4" stroke-linejoin="round">
+      <path d="M-38 -221H-193L-221 -193V-38"/>
+    </g>
+    <g fill="none" stroke="#f5efe2" stroke-width="2">
+      <path d="M-169 -212H-189L-212 -189V-169"/>
+    </g>
+    <path d="M-203 -203L-195 -200 -200 -195Z"/>
+  </g>
+  <g transform="rotate(180)">
+    <g fill="none" stroke="#f5efe2" stroke-width="3.4" stroke-linejoin="round">
+      <path d="M-38 -221H-193L-221 -193V-38"/>
+    </g>
+    <g fill="none" stroke="#f5efe2" stroke-width="2">
+      <path d="M-169 -212H-189L-212 -189V-169"/>
+    </g>
+    <path d="M-203 -203L-195 -200 -200 -195Z"/>
+  </g>
+  <g transform="rotate(270)">
+    <g fill="none" stroke="#f5efe2" stroke-width="3.4" stroke-linejoin="round">
+      <path d="M-38 -221H-193L-221 -193V-38"/>
+    </g>
+    <g fill="none" stroke="#f5efe2" stroke-width="2">
+      <path d="M-169 -212H-189L-212 -189V-169"/>
+    </g>
+    <path d="M-203 -203L-195 -200 -200 -195Z"/>
+  </g>
+  <g transform="rotate(22.5)">
+    <path d="M-16 -77C-19 -102 4 -119 11 -132C21 -150 5 -169 16 -197C16 -167 37 -151 27 -131C19 -116 0 -101 3 -81Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.3" stroke-linecap="round">
+      <path d="M-22 -99C-18 -118 -2 -126 2 -141C5 -150 3 -158 1 -167"/>
+    </g>
+  </g>
+  <g transform="rotate(67.5)">
+    <path d="M-16 -77C-19 -102 4 -119 11 -132C21 -150 5 -169 16 -197C16 -167 37 -151 27 -131C19 -116 0 -101 3 -81Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.3" stroke-linecap="round">
+      <path d="M-22 -99C-18 -118 -2 -126 2 -141C5 -150 3 -158 1 -167"/>
+    </g>
+  </g>
+  <g transform="rotate(112.5)">
+    <path d="M-16 -77C-19 -102 4 -119 11 -132C21 -150 5 -169 16 -197C16 -167 37 -151 27 -131C19 -116 0 -101 3 -81Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.3" stroke-linecap="round">
+      <path d="M-22 -99C-18 -118 -2 -126 2 -141C5 -150 3 -158 1 -167"/>
+    </g>
+  </g>
+  <g transform="rotate(157.5)">
+    <path d="M-16 -77C-19 -102 4 -119 11 -132C21 -150 5 -169 16 -197C16 -167 37 -151 27 -131C19 -116 0 -101 3 -81Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.3" stroke-linecap="round">
+      <path d="M-22 -99C-18 -118 -2 -126 2 -141C5 -150 3 -158 1 -167"/>
+    </g>
+  </g>
+  <g transform="rotate(202.5)">
+    <path d="M-16 -77C-19 -102 4 -119 11 -132C21 -150 5 -169 16 -197C16 -167 37 -151 27 -131C19 -116 0 -101 3 -81Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.3" stroke-linecap="round">
+      <path d="M-22 -99C-18 -118 -2 -126 2 -141C5 -150 3 -158 1 -167"/>
+    </g>
+  </g>
+  <g transform="rotate(247.5)">
+    <path d="M-16 -77C-19 -102 4 -119 11 -132C21 -150 5 -169 16 -197C16 -167 37 -151 27 -131C19 -116 0 -101 3 -81Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.3" stroke-linecap="round">
+      <path d="M-22 -99C-18 -118 -2 -126 2 -141C5 -150 3 -158 1 -167"/>
+    </g>
+  </g>
+  <g transform="rotate(292.5)">
+    <path d="M-16 -77C-19 -102 4 -119 11 -132C21 -150 5 -169 16 -197C16 -167 37 -151 27 -131C19 -116 0 -101 3 -81Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.3" stroke-linecap="round">
+      <path d="M-22 -99C-18 -118 -2 -126 2 -141C5 -150 3 -158 1 -167"/>
+    </g>
+  </g>
+  <g transform="rotate(337.5)">
+    <path d="M-16 -77C-19 -102 4 -119 11 -132C21 -150 5 -169 16 -197C16 -167 37 -151 27 -131C19 -116 0 -101 3 -81Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.3" stroke-linecap="round">
+      <path d="M-22 -99C-18 -118 -2 -126 2 -141C5 -150 3 -158 1 -167"/>
+    </g>
+  </g>
+  <g transform="rotate(0)">
+    <path d="M0 -270L34 -72H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="3.1" stroke-linejoin="round">
+      <path d="M0 -270L-34 -72H34Z"/>
+    </g>
+  </g>
+  <g transform="rotate(45)">
+    <path d="M0 -231L26 -72H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="3.1" stroke-linejoin="round">
+      <path d="M0 -231L-26 -72H26Z"/>
+    </g>
+  </g>
+  <g transform="rotate(90)">
+    <path d="M0 -270L34 -72H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="3.1" stroke-linejoin="round">
+      <path d="M0 -270L-34 -72H34Z"/>
+    </g>
+  </g>
+  <g transform="rotate(135)">
+    <path d="M0 -231L26 -72H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="3.1" stroke-linejoin="round">
+      <path d="M0 -231L-26 -72H26Z"/>
+    </g>
+  </g>
+  <g transform="rotate(180)">
+    <path d="M0 -270L34 -72H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="3.1" stroke-linejoin="round">
+      <path d="M0 -270L-34 -72H34Z"/>
+    </g>
+  </g>
+  <g transform="rotate(225)">
+    <path d="M0 -231L26 -72H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="3.1" stroke-linejoin="round">
+      <path d="M0 -231L-26 -72H26Z"/>
+    </g>
+  </g>
+  <g transform="rotate(270)">
+    <path d="M0 -270L34 -72H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="3.1" stroke-linejoin="round">
+      <path d="M0 -270L-34 -72H34Z"/>
+    </g>
+  </g>
+  <g transform="rotate(315)">
+    <path d="M0 -231L26 -72H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="3.1" stroke-linejoin="round">
+      <path d="M0 -231L-26 -72H26Z"/>
+    </g>
+  </g>
+  <g fill="none" stroke="#f5efe2" stroke-width="3.4">
+    <circle cx="0" cy="0" r="67" stroke-width="3.4"/>
+    <circle cx="0" cy="0" r="57" stroke-width="1.8"/>
+    <circle cx="0" cy="0" r="25" stroke-width="3.4"/>
+  </g>
+  <g transform="rotate(0)">
+    <path d="M0 -51L9 -32H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.2">
+      <path d="M0 -51L-9 -32H0"/>
+    </g>
+  </g>
+  <g transform="rotate(45)">
+    <path d="M0 -51L7 -32H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.2">
+      <path d="M0 -51L-7 -32H0"/>
+    </g>
+  </g>
+  <g transform="rotate(90)">
+    <path d="M0 -51L9 -32H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.2">
+      <path d="M0 -51L-9 -32H0"/>
+    </g>
+  </g>
+  <g transform="rotate(135)">
+    <path d="M0 -51L7 -32H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.2">
+      <path d="M0 -51L-7 -32H0"/>
+    </g>
+  </g>
+  <g transform="rotate(180)">
+    <path d="M0 -51L9 -32H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.2">
+      <path d="M0 -51L-9 -32H0"/>
+    </g>
+  </g>
+  <g transform="rotate(225)">
+    <path d="M0 -51L7 -32H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.2">
+      <path d="M0 -51L-7 -32H0"/>
+    </g>
+  </g>
+  <g transform="rotate(270)">
+    <path d="M0 -51L9 -32H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.2">
+      <path d="M0 -51L-9 -32H0"/>
+    </g>
+  </g>
+  <g transform="rotate(315)">
+    <path d="M0 -51L7 -32H0Z"/>
+    <g fill="none" stroke="#f5efe2" stroke-width="2.2">
+      <path d="M0 -51L-7 -32H0"/>
+    </g>
+  </g>
+  <g fill="none" stroke="#f5efe2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(0 -308) scale(1.09)">
+      <path d="M2 30V2L23 30V2" transform="translate(-12.5 -16)"/>
+    </g>
+    <g transform="translate(182.43 -182.43) scale(0.75)">
+      <path d="M2 30V2L23 30V2" transform="translate(-27.2 -16)"/>
+      <path d="M13 2C5 2 2 8 2 16S5 30 13 30 24 24 24 16 21 2 13 2Z" transform="translate(1.2 -16)"/>
+    </g>
+    <g transform="translate(308 0) scale(1.09)">
+      <path d="M13 2C5 2 2 8 2 16S5 30 13 30 24 24 24 16 21 2 13 2Z" transform="translate(-13 -16)"/>
+    </g>
+    <g transform="translate(182.43 182.43) scale(0.75)">
+      <path d="M22 6C19 3 16 2 12 2 6 2 3 5 3 9 3 19 23 12 23 23 23 27 19 30 12 30 8 30 4 28 2 25" transform="translate(-27.2 -16)"/>
+      <path d="M13 2C5 2 2 8 2 16S5 30 13 30 24 24 24 16 21 2 13 2Z" transform="translate(1.2 -16)"/>
+    </g>
+    <g transform="translate(0 308) scale(1.09)">
+      <path d="M22 6C19 3 16 2 12 2 6 2 3 5 3 9 3 19 23 12 23 23 23 27 19 30 12 30 8 30 4 28 2 25" transform="translate(-12.5 -16)"/>
+    </g>
+    <g transform="translate(-182.43 182.43) scale(0.75)">
+      <path d="M22 6C19 3 16 2 12 2 6 2 3 5 3 9 3 19 23 12 23 23 23 27 19 30 12 30 8 30 4 28 2 25" transform="translate(-31.2 -16)"/>
+      <path d="M2 2L9 30 17 8 25 30 32 2" transform="translate(-2.8 -16)"/>
+    </g>
+    <g transform="translate(-308 0) scale(1.09)">
+      <path d="M2 2L9 30 17 8 25 30 32 2" transform="translate(-17 -16)"/>
+    </g>
+    <g transform="translate(-182.43 -182.43) scale(0.75)">
+      <path d="M2 30V2L23 30V2" transform="translate(-31.2 -16)"/>
+      <path d="M2 2L9 30 17 8 25 30 32 2" transform="translate(-2.8 -16)"/>
+    </g>
+  </g>
+</svg>

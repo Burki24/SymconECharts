@@ -41,7 +41,12 @@ final class WindCompassCatalog
         '09_bronzerelief'     => 'Classic – Bronze relief',
         '10_eiche'            => 'Classic – Carved oak',
         '11_nussbaum'         => 'Classic – Carved walnut',
-        '12_kirschbaum'       => 'Classic – Carved cherry wood'
+        '12_kirschbaum'       => 'Classic – Carved cherry wood',
+        '01_lilienrose'       => 'Transparent – Fleur-de-lis rose (dark)',
+        '02_windstern'        => 'Transparent – Wind star (light)',
+        '03_nautischer_ring'  => 'Transparent – Nautical ring (dark)',
+        '04_kompasssiegel'    => 'Transparent – Compass seal (light)',
+        '05_graduierte_rose'  => 'Transparent – Graduated rose (dark)'
     ];
 
     /** @return list<array{caption: string, value: string}> */

@@ -23,14 +23,22 @@ und die Windrose darunter drehen. Eine zweite Variable ergänzt die Windgeschwin
 
 ## Windrose auswählen
 
-Unter **Kacheldesigner → Kompass → Windrose** kannst Du eines von 32 mitgelieferten
+Unter **Kacheldesigner → Kompass → Windrose** kannst Du eines von 37 mitgelieferten
 Motiven auswählen. Die Liste enthält 12 Farbvarianten, 8 historische Windrosen
 und 12 klassische Motive, darunter Kupferstich, Admiralskompass und geschnitzte
-Eiche. Die Vorschau zeigt Deine Auswahl sofort. **Übernehmen** speichert sie.
+Eiche. Hinzu kommen 5 einfarbige Windrosen mit transparentem Grund. Die Vorschau
+zeigt Deine Auswahl sofort. **Übernehmen** speichert sie.
 Bei festem Zeiger dreht sich auch das gewählte Motiv mit der Windrichtung.
 
 Im **IPSView-Designer** findest Du dieselbe Auswahl, sobald Du
 **Kacheldesign verwenden** ausschaltest.
+
+Die Einträge unter **Transparent** lassen die Farbe durch die freien Flächen
+der Windrose scheinen. Stelle **Diagrammhintergrund** im Abschnitt **Kompass**
+neben dem **ECharts-Theme** ein.
+Die dunkle Lilienrose, der Nautische Ring und die Graduierte Rose passen zu
+hellen Hintergründen. Der helle Windstern und das helle Kompasssiegel sind für
+dunkle Hintergründe gedacht.
 
 ## Eigene SVG-Windrose
 
