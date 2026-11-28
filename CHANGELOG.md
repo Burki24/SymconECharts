@@ -111,7 +111,7 @@
   verwendbar; Quellen, Archivwerte und gespeicherte Designs werden nicht geändert.
 
 <!-- echarts:prepared-beta -->
-# 03.11.2026 - Version 1.429 (Beta)
+# 03.11.2026 - Version 1.430 (Beta)
 
 Fortgeschriebene Beta-Übersicht: Die erste öffentliche Beta ist seit
 03.11.2026 im Symcon-Modulstore verfügbar; siehe
