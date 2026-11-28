@@ -454,8 +454,7 @@
                 },
                 {
                     "type": "Button",
-                    "caption": "Copy Tile design to IPSView and edit independently",
-                    "onClick": "ECPI_CopyTileDesignToIPSView($id); return \"MESSAGE:Tile design copied to IPSView.\";"
+                    "caption": "Copy Tile design to IPSView and edit independently"
                 },
                 {
                     "type": "ExpansionPanel",

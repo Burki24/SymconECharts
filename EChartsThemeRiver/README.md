@@ -219,7 +219,8 @@ bedeutet keine erfundenen Beispielbänder; die Legende bleibt verfügbar.
 Unter **IPSView-Design** lässt sich eine eigenständige WebContent-Variable
 aktivieren (`IPSViewThemeRiver`, String, nur lesend). Standardmäßig erbt sie
 das Kacheldesign. Für eine unabhängige Gestaltung **Kacheldesign verwenden**
-ausschalten; bei Bedarf das gespeicherte Kacheldesign einmalig kopieren.
+ausschalten. Der Kopierknopf übernimmt die aktuellen Kachelfelder für die IPSView-Vorschau.
+Mit **Übernehmen** speicherst Du das Design.
 Quellen und Zeitraum bleiben gemeinsam. Hintergrundfarbe, Deckkraft und
 Anpassung an den IPSView-Hintergrund sind separat einstellbar.
 
@@ -248,7 +249,7 @@ oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
 
 | Signatur | Rückgabe und Wirkung |
 | --- | --- |
-| `ECRV_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECRV_CopyTileDesignToIPSView(int $InstanzID): void` | Überträgt die gespeicherten Kachelwerte in den geöffneten IPSView-Formularentwurf. Erst **Übernehmen** speichert die Kopie. |
 | `ECRV_GetThemeRiverData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
 | `ECRV_GetThemeRiverDiagnostic(int $InstanzID): string` | JSON-Momentaufnahme der Konfigurationsprüfung und letzten Fehlermeldung; kein Nachweis einer erfolgreichen Datenabfrage. |
 | `ECRV_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |

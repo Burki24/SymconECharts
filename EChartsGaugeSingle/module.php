@@ -483,37 +483,6 @@ class EChartsGaugeSingle extends IPSModuleStrict
         }
     }
 
-    public function CopyTileDesignToIPSView(): void
-    {
-        $debugFlowResult = null;
-        $debugFlowFailed = false;
-        $this->DebugFlowStart(__FUNCTION__, __LINE__);
-        try {
-            foreach (self::GaugeDesignPropertyNames() as $propertyName) {
-                $sourceName = $propertyName;
-                $targetName = self::IPSVIEW_PROPERTY_PREFIX . $propertyName;
-                if (array_key_exists($propertyName, self::IPSVIEW_STRING_DESIGN_DEFAULTS)) {
-                    IPS_SetProperty($this->InstanceID, $targetName, $this->ReadPropertyString($sourceName));
-                } elseif (array_key_exists($propertyName, self::IPSVIEW_FLOAT_DESIGN_DEFAULTS)) {
-                    IPS_SetProperty($this->InstanceID, $targetName, $this->ReadPropertyFloat($sourceName));
-                } elseif (array_key_exists($propertyName, self::IPSVIEW_BOOLEAN_DESIGN_DEFAULTS)) {
-                    IPS_SetProperty($this->InstanceID, $targetName, $this->ReadPropertyBoolean($sourceName));
-                } else {
-                    IPS_SetProperty($this->InstanceID, $targetName, $this->ReadPropertyInteger($sourceName));
-                }
-            }
-            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
-            IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
-            IPS_ApplyChanges($this->InstanceID);
-        } catch (\Throwable $debugFlowException) {
-            $debugFlowFailed = true;
-            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
-            throw $debugFlowException;
-        } finally {
-            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
-        }
-    }
-
     public function UpdateIPSViewGaugePreviewFromForm(string $Configuration): void
     {
         $debugFlowResult = null;
@@ -1231,8 +1200,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 ],
                 [
                     'type'    => 'Button',
-                    'caption' => 'Copy Tile design to IPSView and edit independently',
-                    'onClick' => 'ECGS_CopyTileDesignToIPSView($id); return "MESSAGE:Tile design copied to IPSView.";'
+                    'caption' => 'Copy Tile design to IPSView and edit independently'
                 ],
                 [
                     'type'     => 'ExpansionPanel',

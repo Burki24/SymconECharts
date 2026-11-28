@@ -8,6 +8,10 @@
 
 ## Geändert
 
+- **Kacheldesign nach IPSView kopieren** übernimmt auch ungespeicherte Kachelwerte
+  in den IPSView-Designer und aktualisiert dessen Vorschau sofort. **Übernehmen**
+  speichert das Ergebnis. Auch die bisherigen Skriptfunktionen zur Designkopie
+  bearbeiten jetzt den Formularentwurf.
 - Die Bibliothek und ihr GitHub-Repository heißen jetzt **eCharts**.
   Bibliotheks- und Modul-IDs bleiben für Updates bestehender Installationen erhalten.
   IPSView nutzt den neuen Gateway-Pfad `/hook/eCharts`. Bestehende

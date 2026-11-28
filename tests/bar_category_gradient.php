@@ -70,9 +70,7 @@ declare(strict_types=1);
         count(array_filter($visibility, static fn (array $update): bool => $update['Value'] === true)) === 5,
         'Selecting gradient must immediately reveal its five settings.'
     );
-    $GLOBALS['symconTestCopyTarget'] = $bar;
-    $bar->CopyTileDesignToIPSView();
-    unset($GLOBALS['symconTestCopyTarget']);
+    copyDesignAndApplyForm($bar);
     assertGatewayGauge(str_contains($bar->GetIPSViewHTML(), '"colorMinimum":-0.25')
         && str_contains($bar->GetIPSViewHTML(), '"colorMaximum":100.5'), 'Copying designs must not round gradient bounds.');
     $bar->SetTestProperty('IPSViewUseTileDesign', true);

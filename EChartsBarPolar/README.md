@@ -141,7 +141,7 @@ Der Außenradius aus dem Designer ist eine Obergrenze: In kleineren Kacheln pass
 
 Die Kachel aktualisiert sich bei Änderungen einer Quellvariablen. Optional erzeugt das Modul eine eigenständige WebContent-Variable `IPSViewBarPolar` für ein IPSView-HTML-Widget. Deren HTML-Dokument bleibt bei Wertänderungen bestehen; nur der Diagrammzustand wird übertragen. Für IPSView sind Hintergrundfarbe und Deckkraft einstellbar.
 
-**Kacheldesign verwenden** ist in IPSView zunächst aktiv. Dann sind die eigenen Designfelder und **Kacheldesign nach IPSView kopieren und unabhängig bearbeiten** deaktiviert. Nach Abschalten des Schalters kann das zuletzt gespeicherte Kacheldesign einmalig kopiert und anschließend unabhängig geändert werden. Quellen und aktuelle Werte bleiben gemeinsam.
+**Kacheldesign verwenden** ist in IPSView zunächst aktiv. Dann sind die eigenen Designfelder und **Kacheldesign nach IPSView kopieren und unabhängig bearbeiten** deaktiviert. Nach Abschalten des Schalters kopiert der Knopf die aktuellen Kachelfelder in den IPSView-Designer. Die Vorschau zeigt auch ungespeicherte Änderungen sofort. Mit **Übernehmen** speicherst Du das Design. Quellen und aktuelle Werte bleiben gemeinsam.
 
 Die öffentliche Funktion `ECBP_GetPolarData($InstanzID)` liefert das aktuelle Chart-Modell als JSON. Sie liest Werte, verändert aber keine Quellvariablen.
 
@@ -170,7 +170,7 @@ oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
 
 | Signatur | Rückgabe und Wirkung |
 | --- | --- |
-| `ECBP_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECBP_CopyTileDesignToIPSView(int $InstanzID): void` | Überträgt die gespeicherten Kachelwerte in den geöffneten IPSView-Formularentwurf. Erst **Übernehmen** speichert die Kopie. |
 | `ECBP_GetPolarData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
 | `ECBP_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
 

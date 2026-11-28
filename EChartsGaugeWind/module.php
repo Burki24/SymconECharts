@@ -142,8 +142,7 @@ class EChartsGaugeWind extends IPSModuleStrict
                 $form['elements'],
                 $this->IPSViewHTMLPageFormItems('Creates a standalone WebContent variable for IPSView.'),
                 self::DESIGN_FIELDS,
-                '',
-                'ECWI_CopyTileDesignToIPSView($id); return "MESSAGE:Tile design copied to IPSView.";'
+                ''
             );
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -160,23 +159,6 @@ class EChartsGaugeWind extends IPSModuleStrict
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, self::DESIGN_FIELDS)];
             return $this->EncodeChartDesignerForm(__DIR__, $this->WithBarPreviewForm($form, 'ECWI', $fields, true));
         });
-    }
-
-    public function CopyTileDesignToIPSView(): void
-    {
-        $this->DebugFlowCall(__FUNCTION__, __LINE__, function (): void
-        {
-            foreach ([...self::DESIGN_FIELDS, 'ChartBackgroundColor'] as $name) {
-                $value = match ($name) {
-                    'EChartsTheme', 'AnimationEasing', 'AnimationEasingUpdate'          => $this->ReadPropertyString($name),
-                    'RotateCompass', 'ShowRotor', 'ShowDegreeValue', 'AnimationEnabled' => $this->ReadPropertyBoolean($name),
-                    default                                                             => $this->ReadPropertyInteger($name)
-                };
-                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
-            }
-            IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
-            IPS_ApplyChanges($this->InstanceID);
-        }, true);
     }
 
     public function RequestAction(string $Ident, mixed $Value): void

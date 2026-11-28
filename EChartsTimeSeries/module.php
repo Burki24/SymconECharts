@@ -628,33 +628,6 @@ class EChartsTimeSeries extends IPSModuleStrict
         }
     }
 
-    public function CopyTileDesignToIPSView(): void
-    {
-        $debugFlowResult = null;
-        $debugFlowFailed = false;
-        $this->DebugFlowStart(__FUNCTION__, __LINE__);
-        try {
-            IPS_SetProperty($this->InstanceID, 'IPSViewEChartsTheme', $this->ReadPropertyString('EChartsTheme'));
-            foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
-                $value = match ($type) {
-                    'string'  => $this->ReadPropertyString($name),
-                    'integer' => $this->ReadPropertyInteger($name),
-                    'boolean' => $this->ReadPropertyBoolean($name)
-                };
-                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
-            }
-            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
-            IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
-            IPS_ApplyChanges($this->InstanceID);
-        } catch (\Throwable $debugFlowException) {
-            $debugFlowFailed = true;
-            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
-            throw $debugFlowException;
-        } finally {
-            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
-        }
-    }
-
     public function GetTimeSeriesData(): string
     {
         $debugFlowResult = null;
@@ -2166,8 +2139,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 ],
                 [
                     'type'    => 'Button',
-                    'caption' => 'Copy Tile design to IPSView and edit independently',
-                    'onClick' => 'ECTS_CopyTileDesignToIPSView($id); return "MESSAGE:Tile design copied to IPSView.";'
+                    'caption' => 'Copy Tile design to IPSView and edit independently'
                 ],
                 [
                     'type'     => 'ExpansionPanel',

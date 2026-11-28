@@ -197,12 +197,7 @@ $pict->SetTestProperty('ColorMinimum', 0.5);
 $pict->SetTestProperty('ColorMaximum', 100.5);
 $pict->SetTestProperty('ColorMode', 'value');
 $pict->SetTestProperty('LabelColumnWidthPercent', 45);
-$GLOBALS['symconTestCopyTarget'] = $pict;
-try {
-    $pict->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($pict);
 assertGatewayGauge(str_contains($pict->GetIPSViewHTML(), '"symbol":"rect"'), 'Copy Tile design includes symbol settings.');
 assertGatewayGauge(str_contains($pict->GetIPSViewHTML(), '"labelColumnWidthPercent":45'), 'Design copying must include the label column.');
 $pict->SetTestProperty('LabelColumnWidthPercent', 0);
@@ -261,12 +256,7 @@ assertGatewayGauge(
     (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict) === $pictGradientBefore,
     'Gradient previews must preserve saved properties.'
 );
-$GLOBALS['symconTestCopyTarget'] = $pict;
-try {
-    $pict->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($pict);
 assertGatewayGauge(str_contains($pict->GetIPSViewHTML(), '"colorMode":"gradient"')
     && strlen($pict->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT, 'Copying must preserve the gradient and output budget.');
 $pictIconBefore = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict);
@@ -323,12 +313,7 @@ assertGatewayGauge($pict->GetTestStatus() === IS_ACTIVE && $iconData['symbolWidt
     && str_contains($iconData['symbolPath'], 'M22 4') && str_contains($pict->GetIPSViewHTML(), '"symbolIcon":"mark"')
     && strlen($pict->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT
     && strlen($pict->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT, 'Independent selected paths must reach both outputs within budget.');
-$GLOBALS['symconTestCopyTarget'] = $pict;
-try {
-    $pict->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($pict);
 assertGatewayGauge(str_contains($pict->GetIPSViewHTML(), '"symbolIcon":"cell"'), 'Design copy must include the selected icon.');
 $pict->SetTestProperty('SymbolIcon', '../unsafe');
 $pict->ApplyChanges();
@@ -395,12 +380,7 @@ assertGatewayGauge(
     && !str_contains($pict->GetVisualizationTile(), $pictSvgUpload),
     'Only derived SVG geometry may be transported, with independent viewBox origins.'
 );
-$GLOBALS['symconTestCopyTarget'] = $pict;
-try {
-    $pict->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($pict);
 $copiedSvg = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict);
 assertGatewayGauge($copiedSvg['IPSViewCustomSymbolSVG'] === $pictSvgUpload
     && str_contains($pict->GetIPSViewHTML(), '"symbolMinimumX":-12'), 'Design copy must retain the uploaded form.');

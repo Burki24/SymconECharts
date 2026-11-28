@@ -351,33 +351,6 @@ class EChartsBarPolar extends IPSModuleStrict
         }
     }
 
-    public function CopyTileDesignToIPSView(): void
-    {
-        $debugFlowResult = null;
-        $debugFlowFailed = false;
-        $this->DebugFlowStart(__FUNCTION__, __LINE__);
-        try {
-            foreach ($this->DesignPropertyNames() as $name => $type) {
-                $value = match ($type) {
-                    'string'  => $this->ReadPropertyString($name),
-                    'boolean' => $this->ReadPropertyBoolean($name),
-                    'float'   => $this->ReadPropertyFloat($name),
-                    default   => $this->ReadPropertyInteger($name)
-                };
-                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
-            }
-            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
-            IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
-            IPS_ApplyChanges($this->InstanceID);
-        } catch (\Throwable $debugFlowException) {
-            $debugFlowFailed = true;
-            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
-            throw $debugFlowException;
-        } finally {
-            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
-        }
-    }
-
     public function GetPolarData(): string
     {
         $debugFlowResult = null;
@@ -542,6 +515,13 @@ class EChartsBarPolar extends IPSModuleStrict
         } finally {
             $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
+    }
+
+    protected function UpdateIndependentDesignVisibilityAfterCopy(array $values): void
+    {
+        $this->UpdateBarFillForm(true, $values['BarFillMode']);
+        $this->UpdateBarHighlightForm(true, $values['BarHighlightMode']);
+        $this->UpdateIPSViewValueScaleForm($values['ValueAxisRangeMode']);
     }
 
     /** @param array<string,mixed> $values */

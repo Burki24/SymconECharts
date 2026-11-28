@@ -81,12 +81,7 @@ declare(strict_types=1);
             }
         }
 
-        $GLOBALS['symconTestCopyTarget'] = $module;
-        try {
-            $module->CopyTileDesignToIPSView();
-        } finally {
-            unset($GLOBALS['symconTestCopyTarget']);
-        }
+        copyDesignAndApplyForm($module);
         assertGatewayGauge(
             $module->GetTestProperties()['IPSViewChartBackgroundColor'] === 0,
             "$class must copy pure black into an independent IPSView design."

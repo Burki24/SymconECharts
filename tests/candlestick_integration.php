@@ -165,12 +165,7 @@ foreach ([['Interval', 'month', 'hour'], ['Range', '1h', '30d'], ['RiseColor', -
     $candle->SetTestProperty($field, $restore);
 }
 $candle->ApplyChanges();
-$GLOBALS['symconTestCopyTarget'] = $candle;
-try {
-    $candle->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($candle);
 assertGatewayGauge(str_contains($candle->GetIPSViewHTML(), '"riseColor":"#3FBE95"'), 'Copy design includes candle colors.');
 $candleLocale = json_decode(file_get_contents(__DIR__ . '/../EChartsCandlestick/locale.json'), true)['translations']['de'];
 $candleValuesBeforeDesign = array_column(json_decode($candle->GetCandlestickData(), true)['candlestick']['data'], 'statistics');
@@ -231,12 +226,7 @@ foreach (['', 'IPSView'] as $prefix) {
         assertGatewayGauge(json_decode($candle->GetCandlestickDiagnostic(), true)['valid'] === true, 'Recover corrected Candlestick field: ' . $prefix . $name);
     }
 }
-$GLOBALS['symconTestCopyTarget'] = $candle;
-try {
-    $candle->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($candle);
 assertGatewayGauge(str_contains($candle->GetIPSViewHTML(), '"riseBorderColor":"#123456"')
     && str_contains($candle->GetIPSViewHTML(), '"fontFamily":"Georgia, serif"'), 'Copy design includes all new fields.');
 $candleCopiedHTML = $candle->GetIPSViewHTML();

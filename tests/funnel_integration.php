@@ -135,12 +135,7 @@ assertGatewayGauge(
     && str_contains($funnel->GetIPSViewHTML(), '"fontFamily":"Arial, sans-serif"'),
     'Tile design changes must not leak into an independent IPSView design.'
 );
-$GLOBALS['symconTestCopyTarget'] = $funnel;
-try {
-    $funnel->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($funnel);
 $funnelCopiedProperties = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($funnel);
 foreach ($funnelDecorations as $name => $value) {
     assertGatewayGauge($funnelCopiedProperties['IPSView' . $name] === $value, 'Copy action must include: ' . $name);
@@ -177,12 +172,7 @@ foreach (['', 'IPSView'] as $funnelPrefix) {
 }
 $funnel->SetTestProperty('BorderWidth', 0);
 $funnel->SetTestProperty('OpacityPercent', 0);
-$GLOBALS['symconTestCopyTarget'] = $funnel;
-try {
-    $funnel->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($funnel);
 assertGatewayGauge(
     str_contains($funnel->GetIPSViewHTML(), '"borderWidth":0') && str_contains($funnel->GetIPSViewHTML(), '"opacityPercent":0'),
     'Design copy must include explicit zeros.'

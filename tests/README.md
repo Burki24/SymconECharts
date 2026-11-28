@@ -1,5 +1,12 @@
 # Tests
 
+## Kacheldesign nach IPSView kopieren
+
+`php tests/gateway_gauges.php --design-copy-form` führt den Kopierbutton der
+30 Diagrammformulare im Kernel-Testdoppel aus. Der Test prüft ungespeicherte
+Farben, ein ausgewähltes SVG und Listenzeilen. Beim Treemap-Formular prüft er
+die Vorschau direkt nach dem Kopieren, nach Verwerfen und nach Übernehmen.
+
 ## Windrose
 
 `php tests/gateway_gauges.php --gauge-wind` prüft die Geräteinstanz mit

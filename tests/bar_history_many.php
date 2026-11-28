@@ -185,12 +185,7 @@ declare(strict_types=1);
             && $decode($axisModule)['bar']['style']['zoomSliderSize'] === 28,
             'Independent designer values must reach their respective charts.'
         );
-        $GLOBALS['symconTestCopyTarget'] = $axisModule;
-        try {
-            $axisModule->CopyTileDesignToIPSView();
-        } finally {
-            unset($GLOBALS['symconTestCopyTarget']);
-        }
+        copyDesignAndApplyForm($axisModule);
         assertGatewayGauge($axisModule->GetTestProperties()['IPSViewValueAxisSpacing'] === 18, 'Copying the design includes its spacing.');
         assertGatewayGauge($axisModule->GetTestProperties()['IPSViewZoomSliderSize'] === 28, 'Copying the design includes its slider.');
         $ownStack = $axisRows;

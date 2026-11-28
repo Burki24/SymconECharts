@@ -86,11 +86,10 @@ Für ein eigenes IPSView-Grunddesign im Abschnitt **IPSView-Design** zuerst
 **Kacheldesign verwenden** ausschalten. Solange die Option aktiv ist, sind die
 eigenen Designfelder und der Knopf **Kacheldesign nach IPSView kopieren und
 unabhängig bearbeiten** direkt im Abschnitt **IPSView-Design** deaktiviert.
-Nach dem Ausschalten werden beide sofort aktiv. Der Knopf kopiert das
-gespeicherte Kacheldesign einmalig und überschreibt dabei bisherige
-unabhängige IPSView-Designwerte. Danach lassen sich Grunddesign
+Nach dem Ausschalten kopiert der Knopf die aktuellen Kachelfelder in den
+IPSView-Designer. Die Vorschau zeigt auch ungespeicherte Änderungen sofort. Danach lassen sich Grunddesign
 und individuelle Quellen-Designs für IPSView separat bearbeiten.
-Änderungen am Kacheldesigner vor dem Kopieren speichern.
+Mit **Übernehmen** speicherst Du das bearbeitete Design.
 
 ## Variablen
 
@@ -131,7 +130,7 @@ oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
 
 | Signatur | Rückgabe und Wirkung |
 | --- | --- |
-| `ECGC_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECGC_CopyTileDesignToIPSView(int $InstanzID): void` | Überträgt die gespeicherten Kachelwerte in den geöffneten IPSView-Formularentwurf. Erst **Übernehmen** speichert die Kopie. |
 | `ECGC_GetGaugeData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
 | `ECGC_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
 

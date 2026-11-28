@@ -129,22 +129,22 @@ $ipsViewDesigner = EChartsGaugeDesign::IPSViewDesignerForm(
     $formItems,
     [['type' => 'CheckBox', 'name' => 'EnableIPSView']],
     ['GaugePreset', 'PointerShape'],
-    $previewAction,
-    'ECGT_CopyTileDesignToIPSView($id);'
+    $previewAction
 );
 $independentItems = $ipsViewDesigner['items'][5]['items'];
 assertGaugeDesign(
     ($ipsViewDesigner['caption'] ?? null) === 'IPSView design'
         && ($ipsViewDesigner['items'][0]['name'] ?? null) === 'EnableIPSView'
         && ($ipsViewDesigner['items'][1]['items'][0]['onChange'] ?? null) === $previewAction
-        && ($ipsViewDesigner['items'][4]['onClick'] ?? null) === 'ECGT_CopyTileDesignToIPSView($id);'
+        && ($ipsViewDesigner['items'][4]['type'] ?? null) === 'Button'
+        && ($ipsViewDesigner['items'][4]['caption'] ?? null) === 'Copy Tile design to IPSView and edit independently'
         && array_column($independentItems, 'name') === [
             'IPSViewGaugePreset', 'IPSViewPointerShape', 'IPSViewGaugePreview'
         ],
     'Shared Gauge IPSView form must omit shared sources while preserving design fields and callbacks.'
 );
 try {
-    EChartsGaugeDesign::IPSViewDesignerForm([], [], [], '', '');
+    EChartsGaugeDesign::IPSViewDesignerForm([], [], [], '');
     throw new RuntimeException('A missing Tile designer section was accepted.');
 } catch (RuntimeException $exception) {
     assertGaugeDesign(

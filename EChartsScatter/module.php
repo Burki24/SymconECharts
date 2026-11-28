@@ -473,33 +473,6 @@ class EChartsScatter extends IPSModuleStrict
         }
     }
 
-    public function CopyTileDesignToIPSView(): void
-    {
-        $debugFlowResult = null;
-        $debugFlowFailed = false;
-        $this->DebugFlowStart(__FUNCTION__, __LINE__);
-        try {
-            foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
-                $value = match ($type) {
-                    'string'  => $this->ReadPropertyString($name),
-                    'boolean' => $this->ReadPropertyBoolean($name),
-                    'float'   => $this->ReadPropertyFloat($name),
-                    default   => $this->ReadPropertyInteger($name)
-                };
-                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
-            }
-            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
-            IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
-            IPS_ApplyChanges($this->InstanceID);
-        } catch (\Throwable $debugFlowException) {
-            $debugFlowFailed = true;
-            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
-            throw $debugFlowException;
-        } finally {
-            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
-        }
-    }
-
     public function GetScatterData(): string
     {
         $debugFlowResult = null;
@@ -640,6 +613,13 @@ class EChartsScatter extends IPSModuleStrict
         } finally {
             $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
+    }
+
+    protected function UpdateIndependentDesignVisibilityAfterCopy(array $values): void
+    {
+        $this->UpdateAxisRangeForm(true, $values['XAxisRangeMode'], $values['YAxisRangeMode']);
+        $this->UpdateBubbleRangeForm(true, $values['BubbleRangeMode']);
+        $this->UpdateColorMapRangeForm(true, $values['ColorMapRangeMode']);
     }
 
     protected function CurrentTimestamp(): int
@@ -1642,8 +1622,7 @@ class EChartsScatter extends IPSModuleStrict
             EChartsIPSViewBackground::FormRow(),
             ['type' => 'CheckBox', 'name' => 'IPSViewUseTileDesign', 'caption' => 'Use Tile design'],
             ['type' => 'Label', 'caption' => 'Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.'],
-            ['type'       => 'Button', 'caption' => 'Copy Tile design to IPSView and edit independently',
-                'onClick' => 'ECSC_CopyTileDesignToIPSView($id); return "MESSAGE:Tile design copied to IPSView.";'],
+            ['type'       => 'Button', 'caption' => 'Copy Tile design to IPSView and edit independently'],
             ['type'        => 'ExpansionPanel', 'caption' => 'Independent IPSView designer',
                 'expanded' => false, 'items' => $ipsViewRows]
         ]];

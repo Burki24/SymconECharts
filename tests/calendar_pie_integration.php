@@ -362,12 +362,7 @@ assertGatewayGauge(
 date_default_timezone_set('Europe/Berlin');
 assertGatewayGauge((new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($calendarPie) === $properties
     && $GLOBALS['symconTestArchiveQueryCount'] === $queries, 'Mode and designer drafts must not persist properties or query archives.');
-$GLOBALS['symconTestCopyTarget'] = $calendarPie;
-try {
-    $calendarPie->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($calendarPie);
 $copied = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($calendarPie);
 foreach ($defaults as $name => $default) {
     assertGatewayGauge($copied[$name] === $copied['IPSView' . $name], 'Copy must include CalendarPie design: ' . $name);

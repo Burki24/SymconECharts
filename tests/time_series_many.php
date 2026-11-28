@@ -196,12 +196,7 @@ declare(strict_types=1);
                 'Each unsaved spacing must move its preview axes and the plotted samples without persisting the draft.'
             );
         }
-        $GLOBALS['symconTestCopyTarget'] = $spacing;
-        try {
-            $spacing->CopyTileDesignToIPSView();
-        } finally {
-            unset($GLOBALS['symconTestCopyTarget']);
-        }
+        copyDesignAndApplyForm($spacing);
         assertGatewayGauge(
             $spacing->GetTestProperties()['IPSViewValueAxisSpacing'] === 24
             && $spacing->GetTestProperties()['IPSViewZoomSliderSize'] === 30,

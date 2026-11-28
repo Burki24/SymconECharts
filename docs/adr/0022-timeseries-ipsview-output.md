@@ -38,8 +38,9 @@ verbleiben im Gerätemodul.
   einem eigenen Farbwähler. Eine eigene Deckkraft von 0 bis 100 Prozent mischt
   diese Farbe genau einmal auf der äußeren Diagrammfläche ein; die ECharts-
   Canvas bleibt dabei transparent. Die native Kachel wird nicht verändert.
-- Eine Formularaktion kopiert das aktuelle Kacheldesign in die unabhängigen
-  IPSView-Properties. Beide Designer bleiben standardmäßig kollabiert und
+- Eine Formularaktion kopiert die aktuellen Kachelfelder in den unabhängigen
+  IPSView-Formularentwurf. Erst **Übernehmen** speichert die Properties.
+  Beide Designer bleiben standardmäßig kollabiert und
   besitzen eine sofort aktualisierte SVG-Vorschau.
 - Aktivierung, Beibehaltung beim Abschalten, bestätigte Löschung und manuelle
   Regeneration der WebContent-Variable verbleiben beim unveränderten

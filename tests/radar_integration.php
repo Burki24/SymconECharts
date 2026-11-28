@@ -155,13 +155,8 @@ foreach (['', 'IPSView'] as $radarPrefix) {
         assertGatewayGauge($radar->GetTestStatus() === IS_ACTIVE, 'Radar must recover after correcting extension: ' . $radarPrefix . $name);
     }
 }
-$GLOBALS['symconTestCopyTarget'] = $radar;
-try {
-    $radar->SetTestProperty('LineWidth', 6);
-    $radar->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+$radar->SetTestProperty('LineWidth', 6);
+copyDesignAndApplyForm($radar);
 assertGatewayGauge(str_contains($radar->GetIPSViewHTML(), '"lineWidth":6'), 'Radar copy action must initialize the independent IPSView design.');
 assertGatewayGauge(str_contains($radar->GetIPSViewHTML(), '"symbol":"diamond"')
     && str_contains($radar->GetIPSViewHTML(), '"showValues":true'), 'Copying Radar design must include the new options.');

@@ -16,6 +16,7 @@ declare(strict_types=1);
             $requests[] = $r['Payload'];
         }
         $gateway = new TestableEChartsGateway();
+        $gateway->InstanceID = 99759;
         $gateway->Create();
         $gateway->ApplyChanges();
         return $gateway->ForwardData($json);
@@ -154,12 +155,7 @@ declare(strict_types=1);
         $chart->SetTestProperty('BubbleRangeMode', 'manual');
         $chart->SetTestProperty('BubbleMinimum', -10.5);
         $chart->SetTestProperty('BubbleMaximum', 255.5);
-        $GLOBALS['symconTestCopyTarget'] = $chart;
-        try {
-            $chart->CopyTileDesignToIPSView();
-        } finally {
-            unset($GLOBALS['symconTestCopyTarget']);
-        }
+        copyDesignAndApplyForm($chart);
         assertGatewayGauge(
             $chart->GetTestProperties()['IPSViewBubbleRangeMode'] === 'manual'
             && $chart->GetTestProperties()['IPSViewBubbleMinimum'] === -10.5

@@ -332,7 +332,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 )
             );
 
-            $previewAction = $this->GaugePreviewFormAction();
+            $previewAction = $this->GaugePreviewFormAction(true);
             $form = $this->WithIPSViewDesignFormState($form, 'ECGM', $previewAction, $previewAction);
             $form = EChartsDesignerSections::Group($form, [
                 ['caption' => 'Chart title', 'start' => 'ChartTitleFontSizePercent'],
@@ -360,49 +360,6 @@ class EChartsGaugeMulti extends IPSModuleStrict
             }
 
             throw new InvalidArgumentException('Unknown action: ' . $Ident);
-        } catch (\Throwable $debugFlowException) {
-            $debugFlowFailed = true;
-            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
-            throw $debugFlowException;
-        } finally {
-            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
-        }
-    }
-
-    public function CopyTileDesignToIPSView(): void
-    {
-        $debugFlowResult = null;
-        $debugFlowFailed = false;
-        $this->DebugFlowStart(__FUNCTION__, __LINE__);
-        try {
-            IPS_SetProperty($this->InstanceID, 'IPSViewGaugePreset', $this->ReadPropertyString('GaugePreset'));
-            IPS_SetProperty($this->InstanceID, 'IPSViewEChartsTheme', $this->ReadPropertyString('EChartsTheme'));
-            IPS_SetProperty($this->InstanceID, 'IPSViewChartTitleFontSizePercent', $this->ReadPropertyInteger('ChartTitleFontSizePercent'));
-            IPS_SetProperty($this->InstanceID, 'IPSViewChartTitleColor', $this->ReadPropertyInteger('ChartTitleColor'));
-            foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
-                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
-            }
-            foreach (self::DESIGN_STRING_DEFAULTS as $name => $_default) {
-                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyString($name));
-            }
-            foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $_default) {
-                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
-            }
-            foreach (self::DESIGN_ASSET_STRING_DEFAULTS as $name => $_default) {
-                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyString($name));
-            }
-            foreach (self::DESIGN_ASSET_FLOAT_DEFAULTS as $name => $_default) {
-                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyFloat($name));
-            }
-            foreach (self::DESIGN_ASSET_BOOLEAN_DEFAULTS as $name => $_default) {
-                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyBoolean($name));
-            }
-            foreach (self::DESIGN_ASSET_INTEGER_DEFAULTS as $name => $_default) {
-                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
-            }
-            IPS_SetProperty($this->InstanceID, 'IPSViewChartBackgroundColor', $this->ReadPropertyInteger('ChartBackgroundColor'));
-            IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
-            IPS_ApplyChanges($this->InstanceID);
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -1612,8 +1569,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
             ),
             ['GaugePreset', 'EChartsTheme', ...$this->GaugeDesignFieldNames()],
-            $this->GaugePreviewFormAction(),
-            'ECGM_CopyTileDesignToIPSView($id); return "MESSAGE:Tile design copied to IPSView.";'
+            $this->GaugePreviewFormAction()
         );
     }
 }

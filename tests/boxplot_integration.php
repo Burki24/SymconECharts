@@ -97,7 +97,6 @@ if (class_exists(DOMDocument::class)) {
     $boxplotXML = new DOMDocument();
     assertGatewayGauge($boxplotXML->loadXML($boxplotSVG, LIBXML_NONET) && $boxplotXML->loadXML($boxplotDraftSVG, LIBXML_NONET), 'Boxplot previews must be valid XML.');
 }
-$GLOBALS['symconTestCopyTarget'] = $boxplot;
 // New controls must reach each output and the drafts, without changing source contracts.
 $boxplotSavedProperties = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($boxplot);
 $boxplotDecorations = ['MinBoxWidth' => 12, 'BorderType' => 'dashed', 'ShadowBlur' => 8, 'ShadowOffsetX' => 3, 'ShadowOffsetY' => -2,
@@ -136,11 +135,7 @@ assertGatewayGauge(
 );
 $boxplotDecoratedDocument = new DOMDocument();
 assertGatewayGauge($boxplotDecoratedDocument->loadXML($boxplotDecoratedSVG, LIBXML_NONET), 'Decorated Boxplot previews must remain valid XML.');
-try {
-    $boxplot->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($boxplot);
 assertGatewayGauge(str_contains($boxplot->GetIPSViewHTML(), '"orientation":"vertical"'), 'Explicit design copy must copy Boxplot settings.');
 assertGatewayGauge(str_contains($boxplot->GetIPSViewHTML(), '"borderType":"dashed"')
     && str_contains($boxplot->GetIPSViewHTML(), '"shadowBlur":8'), 'Explicit copy must include every new Boxplot design option.');

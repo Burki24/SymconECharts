@@ -120,12 +120,7 @@ foreach (['BandHeightPercent' => 19, 'BorderType' => 'invalid', 'ShadowBlur' => 
         $river->SetTestProperty($prefix . $name, $riverDesignChanges[$name]);
     }
 }
-$GLOBALS['symconTestCopyTarget'] = $river;
-try {
-    $river->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($river);
 $copied = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($river);
 foreach ($riverDesignChanges as $name => $value) {
     assertGatewayGauge($copied['IPSView' . $name] === $value, 'Design copy must include ' . $name);
@@ -175,12 +170,7 @@ foreach (['24h', '7d', '30d'] as $previewRange) {
     );
 }
 assertGatewayGauge((new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($river) === $riverSaved, 'Layout previews must never change saved configuration.');
-$GLOBALS['symconTestCopyTarget'] = $river;
-try {
-    $river->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($river);
 assertGatewayGauge(str_contains($river->GetIPSViewHTML(), '"bandOpacityPercent":85'), 'Design copy must include all ThemeRiver fields.');
 $river->SetTestProperty('IPSViewUseTileDesign', true);
 $riverInheritedForm = json_decode($river->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);

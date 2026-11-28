@@ -1105,6 +1105,27 @@ function designerGermanCaptions(): array
     return $translations;
 }
 
+/** Simulate clicking Copy and then the separate Apply button in the configuration form. */
+function copyDesignAndApplyForm(IPSModuleStrict $module): void
+{
+    $saved = $module->GetTestProperties();
+    $start = count($module->GetTestFormUpdates());
+    $module->CopyTileDesignToIPSView();
+    assertGatewayGauge($module->GetTestProperties() === $saved, 'Copy must leave the active configuration untouched.');
+    $draft = [];
+    foreach (array_slice($module->GetTestFormUpdates(), $start) as $update) {
+        $field = $update['Field'];
+        if (array_key_exists($field, $saved) && in_array($update['Parameter'], ['value', 'values'], true)) {
+            $draft[$field] = $update['Value'];
+        }
+    }
+    assertGatewayGauge(($draft['IPSViewUseTileDesign'] ?? null) === false, 'Copy must stage an independent IPSView design.');
+    foreach ($draft as $name => $value) {
+        $module->SetTestProperty($name, $value);
+    }
+    $module->ApplyChanges();
+}
+
 function assertGatewayGauge(bool $condition, string $message): void
 {
     if (!$condition) {
@@ -1204,6 +1225,10 @@ IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway
 
 if (array_slice($argv, 1) === ['--gateway-journal-start']) {
     require __DIR__ . '/gateway_journal_start.php';
+    exit(0);
+}
+if (array_slice($argv, 1) === ['--design-copy-form']) {
+    require __DIR__ . '/design_copy_form.php';
     exit(0);
 }
 require __DIR__ . '/gateway_transport.php';
@@ -5457,7 +5482,7 @@ assertGatewayGauge(
         && str_contains($timeSeriesForm, 'SeriesAreaSVG')
         && str_contains($timeSeriesForm, 'ECTS_UpdateTimeSeriesPreviewSourceFromForm')
         && str_contains($timeSeriesForm, 'ECTS_GetTimeSeriesDiagnostic')
-        && str_contains($timeSeriesForm, 'ECTS_CopyTileDesignToIPSView')
+        && str_contains($timeSeriesForm, 'CopyTileDesignToIPSViewButton')
         && str_contains($timeSeriesForm, 'IPSViewUseTileDesign')
         && str_contains($timeSeriesForm, 'IPSViewUseTileTimeSettings')
         && str_contains($timeSeriesForm, 'IPSViewRange')
@@ -7946,12 +7971,7 @@ assertGatewayGauge(
         && array_column($polarInheritedFontRow['items'], 'enabled') === [false, false, false],
     'Inherited Polar IPSView design must follow the Tile scale and tracks while disabling independent controls.'
 );
-$GLOBALS['symconTestCopyTarget'] = $polar;
-try {
-    $polar->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($polar);
 $polarCopiedHTML = $polar->GetIPSViewHTML();
 assertGatewayGauge(
     $polar->GetTestStatus() === IS_ACTIVE
@@ -8621,12 +8641,7 @@ foreach ([EChartsGaugeMulti::class, EChartsGaugeTacho::class, EChartsGaugeChrono
     $gauge->SetTestProperty('IPSViewChartTitleColor', 0x1000000);
     assertGatewayGauge($validate->invoke($gauge, 'IPSView') !== null, $moduleClass . ' must reject invalid IPSView title colors.');
     $gauge->SetTestProperty('ChartTitleFontSizePercent', 150);
-    $GLOBALS['symconTestCopyTarget'] = $gauge;
-    try {
-        $gauge->CopyTileDesignToIPSView();
-    } finally {
-        unset($GLOBALS['symconTestCopyTarget']);
-    }
+    copyDesignAndApplyForm($gauge);
     $copiedStyle = (new ReflectionMethod($gauge, 'ReadGaugeStyle'))->invoke($gauge, 'IPSView');
     assertGatewayGauge(
         $gauge->GetTestStatus() === IS_ACTIVE
@@ -10175,12 +10190,7 @@ $scatterOutput->SetTestProperty('ColorMapRangeMode', 'manual');
 $scatterOutput->SetTestProperty('ColorMapMinimum', 0.5);
 $scatterOutput->SetTestProperty('ColorMapMaximum', 99.5);
 $scatterOutput->SetTestProperty('EnableBrush', true);
-$GLOBALS['symconTestCopyTarget'] = $scatterOutput;
-try {
-    $scatterOutput->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($scatterOutput);
 assertGatewayGauge(
     str_contains($scatterOutput->GetIPSViewHTML(), '"xAxisRangeMode":"manual"')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"valueLabelContent":"both"')
@@ -10541,12 +10551,7 @@ assertGatewayGauge(
 );
 $parallelFormModule->SetTestProperty('AnimationEnabled', false);
 $parallelFormModule->SetTestProperty('AnimationDuration', 700);
-$GLOBALS['symconTestCopyTarget'] = $parallelFormModule;
-try {
-    $parallelFormModule->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($parallelFormModule);
 $parallelCopiedIPSView = $parallelFormModule->GetIPSViewHTML();
 assertGatewayGauge(
     $parallelFormModule->GetTestStatus() === IS_ACTIVE
@@ -10917,12 +10922,7 @@ assertGatewayGauge(
     && $sankey->GetTestStatus() === IS_ACTIVE && $sankey->GetTestReferences() === [4711, 4713],
     'Preview reads, invalid current values and unsaved graph edits must not modify saved configuration, status or subscriptions.'
 );
-$GLOBALS['symconTestCopyTarget'] = $sankey;
-try {
-    $sankey->CopyTileDesignToIPSView();
-} finally {
-    unset($GLOBALS['symconTestCopyTarget']);
-}
+copyDesignAndApplyForm($sankey);
 assertGatewayGauge(
     str_contains($sankey->GetIPSViewHTML(), '"orientation":"horizontal"')
         && str_contains($sankey->GetIPSViewHTML(), '"nodeColors":{"load":"#FF0000","other":"#00FF00"}')

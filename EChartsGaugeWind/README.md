@@ -25,7 +25,9 @@ und die Windrose darunter drehen. Eine zweite Variable ergänzt die Windgeschwin
 
 IPSView übernimmt standardmäßig die Ausrichtung der Kachel. Für eine eigene
 Ausrichtung schalte im IPSView-Designer **Kacheldesign verwenden** aus und
-wähle dort unter **Kompass** die gewünschte Einstellung. Beide Vorschauen
+wähle dort unter **Kompass** die gewünschte Einstellung. Mit dem Kopierknopf
+kannst Du die aktuellen Kachelfelder als Ausgangspunkt verwenden. Die
+IPSView-Vorschau reagiert sofort. **Übernehmen** speichert Deine Auswahl. Beide Vorschauen
 zeigen ein Standbild der gewählten Quellen. Bei reduzierter Bewegung zeigt
 die Windrose jede neue Richtung sofort an und der zusätzliche Rotor ruht.
 

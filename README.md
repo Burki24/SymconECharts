@@ -123,10 +123,10 @@ und dem Vergrößerungsbutton. IPSView zeigt keinen zusätzlichen Kachelkopf.
 Die Theme-Auswahl und die geometrische Vorlage sind getrennte Einstellungen.
 
 **Kacheldesign verwenden** ist für IPSView standardmäßig aktiv. Für ein eigenes
-IPSView-Design diesen Schalter ausschalten. In den regulären Designern übernimmt
-der Knopf **Kacheldesign nach IPSView kopieren und unabhängig bearbeiten** das zuletzt gespeicherte
-Kacheldesign einmalig und überschreibt dabei bisherige unabhängige Designwerte.
-Änderungen am Kacheldesign deshalb vor dem Kopieren speichern. Quellen bleiben
+IPSView-Design diesen Schalter ausschalten. **Kacheldesign nach IPSView kopieren und
+unabhängig bearbeiten** kopiert die aktuellen Kachelfelder einschließlich ungespeicherter
+Änderungen in den IPSView-Designer. Die Vorschau zeigt das Ergebnis sofort.
+Mit **Übernehmen** speicherst Du die Einstellungen. Quellen bleiben
 gemeinsam. Ein eigener IPSView-Zeitraum und die Anpassung an den Hintergrund
 des IPSView-Widgets lassen sich separat einstellen.
 

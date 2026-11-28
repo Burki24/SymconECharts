@@ -133,8 +133,8 @@ Archive hineinzoomen, um das Motiv erkennen zu können.
 
 IPSView übernimmt standardmäßig das Kacheldesign oder erhält ein unabhängiges
 Design. Vor der eigenen Bearbeitung **Kacheldesign verwenden** ausschalten.
-Der Kopierknopf übernimmt das gespeicherte Kacheldesign einmalig und ersetzt
-vorhandene unabhängige Werte. Quellen und Datenmodus bleiben gemeinsam;
+Der Kopierknopf übernimmt die aktuellen Kachelfelder in den IPSView-Designer.
+Die Vorschau zeigt auch ungespeicherte Änderungen sofort. Mit **Übernehmen** speicherst Du das Design. Quellen und Datenmodus bleiben gemeinsam;
 IPSView-Zeitraum und Zeitachsenbeschriftung liegen separat bei den Zeiteinstellungen.
 Archivaktualisierungen ersetzen nicht das gesamte WebContent-Dokument.
 
@@ -209,7 +209,7 @@ oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
 
 | Signatur | Rückgabe und Wirkung |
 | --- | --- |
-| `ECBH_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECBH_CopyTileDesignToIPSView(int $InstanzID): void` | Überträgt die gespeicherten Kachelwerte in den geöffneten IPSView-Formularentwurf. Erst **Übernehmen** speichert die Kopie. |
 | `ECBH_GetBarHistoryData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
 | `ECBH_GetBarHistoryDiagnostic(int $InstanzID): string` | JSON-Momentaufnahme der Konfigurationsprüfung und letzten Fehlermeldung; kein Nachweis einer erfolgreichen Datenabfrage. |
 | `ECBH_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |

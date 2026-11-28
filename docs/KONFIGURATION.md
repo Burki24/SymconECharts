@@ -52,6 +52,10 @@ Modulanleitung und gelten zusätzlich zu den Bedienbereichen des Formulars.
 | Hintergrundfarbe / `IPSViewBackgroundColor` | Integer | `-1` | Wenn angeboten: automatische Farbe; eigene Farbe als `0xRRGGBB`. |
 | Deckkraft / `IPSViewBackgroundOpacityPercent` | Integer | `35` | Wenn angeboten: Hintergrundtönung von 0 bis 100 %. |
 
+Für ein eigenes IPSView-Design **Kacheldesign verwenden** ausschalten.
+Der Kopierknopf übernimmt die aktuellen Kachelfelder einschließlich ungespeicherter
+Eingaben. Die IPSView-Vorschau zeigt den Entwurf sofort. **Übernehmen** speichert ihn.
+
 Die Tabellen unten führen das Kacheldesign auf. Für jede tatsächlich registrierte
 Designentsprechung gilt derselbe Name mit dem Präfix `IPSView`, etwa
 `IPSViewShowValues`. Werte und Bedienbereiche sind gleich, sofern keine Abweichung

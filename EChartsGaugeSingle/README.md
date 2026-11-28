@@ -357,13 +357,12 @@ Damit folgt das Widget jeder späteren Änderung am Kacheldesigner; die
 eigenen Designfelder und der Kopierknopf im Abschnitt **IPSView-Design** sind
 dann deaktiviert. Für eine andere Optik zuerst
 **Kacheldesign verwenden** ausschalten. Danach ist **Kacheldesign nach IPSView
-kopieren und unabhängig bearbeiten** sofort nutzbar: Die Aktion übernimmt das
-gespeicherte Kacheldesign einmalig und überschreibt bisherige unabhängige
-IPSView-Designwerte. Danach stehen
+kopieren und unabhängig bearbeiten** sofort nutzbar. Die IPSView-Vorschau zeigt
+auch die noch ungespeicherten Kachelwerte. Im Formular stehen
 Preset, Theme, Zeiger, Nabe, Platte, Skala, Farben, SVGs und Feinabstimmung
 unabhängig zur Verfügung. Datenquelle, Titeltext, Wertebereich, Einheit und
 Nachkommastellen bleiben bewusst gemeinsame fachliche Einstellungen.
-Änderungen am Kacheldesigner vor dem Kopieren speichern.
+Mit **Übernehmen** speicherst Du das bearbeitete Design.
 
 ### Gemeinsame Darstellung
 
@@ -435,7 +434,7 @@ oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
 
 | Signatur | Rückgabe und Wirkung |
 | --- | --- |
-| `ECGS_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECGS_CopyTileDesignToIPSView(int $InstanzID): void` | Überträgt die gespeicherten Kachelwerte in den geöffneten IPSView-Formularentwurf. Erst **Übernehmen** speichert die Kopie. |
 | `ECGS_GetGaugeData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
 | `ECGS_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
 | `ECGS_GetJSLiveImportHTML(int $InstanzID, bool $IPSView): string` | `$IPSView=false`: Kachelausgabe; `true`: IPSView-Ausgabe eines übernommenen JSLive-Modells als vollständiges HTML. |

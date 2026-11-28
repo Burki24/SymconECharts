@@ -267,12 +267,11 @@ assertGatewayGauge(
     'Preview visibility toggles and the font whitelist must work without unsafe SVG attributes.'
 );
 
-$GLOBALS['symconTestCopyTarget'] = $timeline;
 $timeline->SetTestProperty('RowHeightPercent', 47);
 foreach ($extendedDesign as $name => $value) {
     $timeline->SetTestProperty($name, $value);
 }
-$timeline->CopyTileDesignToIPSView();
+copyDesignAndApplyForm($timeline);
 assertGatewayGauge(str_contains($timeline->GetIPSViewHTML(), '"rowHeightPercent":47'), 'Copy action must preserve all effective design fields.');
 $copied = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($timeline);
 assertGatewayGauge(str_contains($timeline->GetIPSViewHTML(), '"fontFamily":"Georgia"')
@@ -282,7 +281,6 @@ foreach ($extendedDesign as $name => $value) {
     $timeline->SetTestProperty($name, $defaults[$name]);
     $timeline->SetTestProperty('IPSView' . $name, $defaults[$name]);
 }
-unset($GLOBALS['symconTestCopyTarget']);
 
 $parent = IPSModuleStrict::$ParentResponder;
 foreach ([

@@ -162,8 +162,8 @@ In **IPSView-Design** ist **Kacheldesign verwenden** zunächst aktiv. Die
 unabhängigen Designfelder und **Kacheldesign nach IPSView kopieren und
 unabhängig bearbeiten** sind dabei deaktiviert. Deaktivieren Sie den Schalter,
 um eigene IPSView-Farben und Darstellungsoptionen zu wählen. Der Kopierknopf
-übernimmt das aktuell gespeicherte Kacheldesign einmalig und ersetzt dabei
-bereits gespeicherte unabhängige IPSView-Einstellungen. Quellen und aktuelle
+übernimmt die aktuellen Kachelfelder in den IPSView-Designer. Die Vorschau zeigt
+auch ungespeicherte Änderungen sofort. Mit **Übernehmen** speichern Sie das Design. Quellen und aktuelle
 Werte bleiben in beiden Ausgaben gleich.
 
 Die öffentliche Funktion `ECBW_GetWaterfallData($InstanzID)` liefert das
@@ -195,7 +195,7 @@ oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
 
 | Signatur | Rückgabe und Wirkung |
 | --- | --- |
-| `ECBW_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECBW_CopyTileDesignToIPSView(int $InstanzID): void` | Überträgt die gespeicherten Kachelwerte in den geöffneten IPSView-Formularentwurf. Erst **Übernehmen** speichert die Kopie. |
 | `ECBW_GetWaterfallData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
 | `ECBW_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
 

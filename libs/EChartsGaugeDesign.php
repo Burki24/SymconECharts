@@ -354,8 +354,7 @@ final class EChartsGaugeDesign
         array $elements,
         array $htmlPageItems,
         array $designNames,
-        string $previewAction,
-        string $copyAction
+        string $previewAction
     ): array {
         $tileDesigner = null;
         foreach ($elements as $element) {
@@ -392,8 +391,7 @@ final class EChartsGaugeDesign
                 ],
                 [
                     'type'    => 'Button',
-                    'caption' => 'Copy Tile design to IPSView and edit independently',
-                    'onClick' => $copyAction
+                    'caption' => 'Copy Tile design to IPSView and edit independently'
                 ],
                 [
                     'type'     => 'ExpansionPanel',

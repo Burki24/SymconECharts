@@ -222,10 +222,8 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
    **Kacheldesign verwenden** ausschalten. Solange es aktiv ist, sind die
    eigenen Designfelder und der Knopf **Kacheldesign nach IPSView kopieren und
    unabhängig bearbeiten** direkt im Abschnitt **IPSView-Design** deaktiviert.
-   Nach dem Ausschalten werden beide sofort aktiv. Der Knopf kopiert das gespeicherte Kacheldesign
-   einmalig und überschreibt bisherige unabhängige IPSView-Designwerte; diese
-   können anschließend separat
-   bearbeitet werden. Änderungen am Kacheldesigner vor dem Kopieren speichern.
+   Nach dem Ausschalten kopiert der Knopf die aktuellen Kachelfelder in den IPSView-Designer.
+   Die Vorschau zeigt auch ungespeicherte Änderungen sofort. Mit **Übernehmen** speicherst Du das Design.
    **An IPSView-Hintergrund anpassen** lässt den tatsächlichen
    IPSView-Hintergrund durchscheinen. Die **Hintergrundfarbe**
    verwendet automatisch die Theme-Farbe oder eine frei gewählte Tönung; die
@@ -355,7 +353,7 @@ oder das Gateway. Alle aufgeführten Argumente beim Symcon-Aufruf übergeben.
 
 | Signatur | Rückgabe und Wirkung |
 | --- | --- |
-| `ECTS_CopyTileDesignToIPSView(int $InstanzID): void` | Kopiert das gespeicherte Kacheldesign, ersetzt die unabhängigen IPSView-Designwerte und wendet sie an; aktiviert unabhängiges Design. |
+| `ECTS_CopyTileDesignToIPSView(int $InstanzID): void` | Überträgt die gespeicherten Kachelwerte in den geöffneten IPSView-Formularentwurf. Erst **Übernehmen** speichert die Kopie. |
 | `ECTS_GetTimeSeriesData(int $InstanzID): string` | Liest das reguläre konfigurierte Diagrammmodell als JSON; keine Änderung von Quellen oder Archivwerten. |
 | `ECTS_GetTimeSeriesDiagnostic(int $InstanzID): string` | JSON-Momentaufnahme der Konfigurationsprüfung und letzten Fehlermeldung; kein Nachweis einer erfolgreichen Datenabfrage. |
 | `ECTS_GetIPSViewHTML(int $InstanzID): string` | Vollständiges HTML-Dokument für IPSView; der Rückgabewert bestätigt keine Anzeige in einem Client. |
