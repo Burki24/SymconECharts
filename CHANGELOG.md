@@ -2,6 +2,8 @@
 
 ## Behoben
 
+- Bei den fünf transparenten Windrosen in `EChartsGaugeWind` steht die
+  angezeigte Himmelsrichtung beim Drehen der Rose aufrecht unter dem festen Zeiger.
 - Mehrteilige SVG-Zeiger und -Naben behalten die Position jedes einzelnen
   Pfades. Auskommentierte Pfade werden übersprungen, unvollständige
   Zeichenbefehle beim Import gemeldet.

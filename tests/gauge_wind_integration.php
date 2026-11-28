@@ -231,6 +231,24 @@ foreach (glob($presetDirectory . '*.svg') as $file) {
     $presets[pathinfo($file, PATHINFO_FILENAME)] = EChartsSvgImage::ImportCompass(file_get_contents($file))['dataUri'];
 }
 assertGatewayGauge(count(array_unique($presets)) === 37, 'The module must ship 37 distinct, valid compass rose images.');
+foreach (['01_lilienrose', '02_windstern', '03_nautischer_ring', '04_kompasssiegel', '05_graduierte_rose'] as $id) {
+    $svg = new DOMDocument();
+    $svg->loadXML(base64_decode(explode(',', $presets[$id], 2)[1], true));
+    $xpath = new DOMXPath($svg);
+    $xpath->registerNamespace('s', 'http://www.w3.org/2000/svg');
+    $bearings = [];
+    foreach ($xpath->query('//s:g[starts-with(@transform, "translate(")]') as $label) {
+        assertGatewayGauge(
+            preg_match('/^translate\(([-\d.]+) ([-\d.]+)\) rotate\((\d+)\) scale\(/', $label->getAttribute('transform'), $parts) === 1,
+            "A direction label in $id must rotate around its own center."
+        );
+        $bearing = ((int) round(rad2deg(atan2((float) $parts[1], -(float) $parts[2]))) + 360) % 360;
+        assertGatewayGauge((int) $parts[3] === $bearing, "The label at {$bearing}° in $id must read upright under the fixed pointer.");
+        $bearings[] = $bearing;
+    }
+    sort($bearings);
+    assertGatewayGauge($bearings === range(0, 315, 45), "The wind rose $id must label all eight directions.");
+}
 $presetIDs = array_keys($presets);
 $expectedOptions = ['auto', 'standard', ...$presetIDs];
 sort($expectedOptions);

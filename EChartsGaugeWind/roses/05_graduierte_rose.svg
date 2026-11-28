@@ -237,31 +237,31 @@
     <circle cx="0" cy="0" r="35" stroke-width="3.8"/>
     <circle cx="0" cy="0" r="28" stroke-width="2.2"/>
   </g>
-  <g transform="translate(0 -303) scale(1.28)" fill-rule="evenodd">
+  <g transform="translate(0 -303) rotate(0) scale(1.28)" fill-rule="evenodd">
     <path d="M0 0H8L21 22V3L17 2V0H28V2L24 3V32H21L7 8V29L11 30V32H0V30L4 29V3L0 2Z" transform="translate(-14 -16)"/>
   </g>
-  <g transform="translate(187.38 -187.38) scale(0.81)" fill-rule="evenodd">
+  <g transform="translate(187.38 -187.38) rotate(45) scale(0.81)" fill-rule="evenodd">
     <path d="M0 0H8L21 22V3L17 2V0H28V2L24 3V32H21L7 8V29L11 30V32H0V30L4 29V3L0 2Z" transform="translate(-29.7 -16)"/>
     <path d="M14 0C22 0 28 7 28 16S22 32 14 32 0 25 0 16 6 0 14 0ZM14 2.8C8.4 2.8 5.5 8 5.5 16S8.4 29.2 14 29.2 22.5 24 22.5 16 19.6 2.8 14 2.8Z" transform="translate(1.7 -16)"/>
   </g>
-  <g transform="translate(303 0) scale(1.28)" fill-rule="evenodd">
+  <g transform="translate(303 0) rotate(90) scale(1.28)" fill-rule="evenodd">
     <path d="M14 0C22 0 28 7 28 16S22 32 14 32 0 25 0 16 6 0 14 0ZM14 2.8C8.4 2.8 5.5 8 5.5 16S8.4 29.2 14 29.2 22.5 24 22.5 16 19.6 2.8 14 2.8Z" transform="translate(-14 -16)"/>
   </g>
-  <g transform="translate(187.38 187.38) scale(0.81)" fill-rule="evenodd">
+  <g transform="translate(187.38 187.38) rotate(135) scale(0.81)" fill-rule="evenodd">
     <path d="M22 1L23 9H20C19 5 16 2.7 12 2.7 8.5 2.7 6 4.8 6 7.6 6 15.1 24 12 24 23 24 28.7 19 32 12 32 8 32 5 31 1 29L0 21H3C4.3 26.2 7.8 29.4 12.4 29.4 16.6 29.4 19 27.3 19 24.1 19 16.6 1.2 19.3 1.2 8.9 1.2 3.5 6 0 12.3 0 16 0 19 1 20.5 2Z" transform="translate(-27.7 -16)"/>
     <path d="M14 0C22 0 28 7 28 16S22 32 14 32 0 25 0 16 6 0 14 0ZM14 2.8C8.4 2.8 5.5 8 5.5 16S8.4 29.2 14 29.2 22.5 24 22.5 16 19.6 2.8 14 2.8Z" transform="translate(-0.3 -16)"/>
   </g>
-  <g transform="translate(0 303) scale(1.28)" fill-rule="evenodd">
+  <g transform="translate(0 303) rotate(180) scale(1.28)" fill-rule="evenodd">
     <path d="M22 1L23 9H20C19 5 16 2.7 12 2.7 8.5 2.7 6 4.8 6 7.6 6 15.1 24 12 24 23 24 28.7 19 32 12 32 8 32 5 31 1 29L0 21H3C4.3 26.2 7.8 29.4 12.4 29.4 16.6 29.4 19 27.3 19 24.1 19 16.6 1.2 19.3 1.2 8.9 1.2 3.5 6 0 12.3 0 16 0 19 1 20.5 2Z" transform="translate(-12 -16)"/>
   </g>
-  <g transform="translate(-187.38 187.38) scale(0.81)" fill-rule="evenodd">
+  <g transform="translate(-187.38 187.38) rotate(225) scale(0.81)" fill-rule="evenodd">
     <path d="M22 1L23 9H20C19 5 16 2.7 12 2.7 8.5 2.7 6 4.8 6 7.6 6 15.1 24 12 24 23 24 28.7 19 32 12 32 8 32 5 31 1 29L0 21H3C4.3 26.2 7.8 29.4 12.4 29.4 16.6 29.4 19 27.3 19 24.1 19 16.6 1.2 19.3 1.2 8.9 1.2 3.5 6 0 12.3 0 16 0 19 1 20.5 2Z" transform="translate(-35.7 -16)"/>
     <path d="M0 0H13V2L9.2 3.4 15 24 20.6 5.2 19.4 2H16V0H29V2L25.5 3.4 31 24 37 3.2 33 2V0H44V2L40.3 3.4 31.8 32H28.8L22 10.8 15.3 32H12.4L3.8 3.4 0 2Z" transform="translate(-8.3 -16)"/>
   </g>
-  <g transform="translate(-303 0) scale(1.28)" fill-rule="evenodd">
+  <g transform="translate(-303 0) rotate(270) scale(1.28)" fill-rule="evenodd">
     <path d="M0 0H13V2L9.2 3.4 15 24 20.6 5.2 19.4 2H16V0H29V2L25.5 3.4 31 24 37 3.2 33 2V0H44V2L40.3 3.4 31.8 32H28.8L22 10.8 15.3 32H12.4L3.8 3.4 0 2Z" transform="translate(-22 -16)"/>
   </g>
-  <g transform="translate(-187.38 -187.38) scale(0.81)" fill-rule="evenodd">
+  <g transform="translate(-187.38 -187.38) rotate(315) scale(0.81)" fill-rule="evenodd">
     <path d="M0 0H8L21 22V3L17 2V0H28V2L24 3V32H21L7 8V29L11 30V32H0V30L4 29V3L0 2Z" transform="translate(-37.7 -16)"/>
     <path d="M0 0H13V2L9.2 3.4 15 24 20.6 5.2 19.4 2H16V0H29V2L25.5 3.4 31 24 37 3.2 33 2V0H44V2L40.3 3.4 31.8 32H28.8L22 10.8 15.3 32H12.4L3.8 3.4 0 2Z" transform="translate(-6.3 -16)"/>
   </g>

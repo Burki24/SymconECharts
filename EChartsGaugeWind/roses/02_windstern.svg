@@ -187,31 +187,31 @@
     </g>
   </g>
   <g fill="none" stroke="#f5efe2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-    <g transform="translate(0 -308) scale(1.09)">
+    <g transform="translate(0 -308) rotate(0) scale(1.09)">
       <path d="M2 30V2L23 30V2" transform="translate(-12.5 -16)"/>
     </g>
-    <g transform="translate(182.43 -182.43) scale(0.75)">
+    <g transform="translate(182.43 -182.43) rotate(45) scale(0.75)">
       <path d="M2 30V2L23 30V2" transform="translate(-27.2 -16)"/>
       <path d="M13 2C5 2 2 8 2 16S5 30 13 30 24 24 24 16 21 2 13 2Z" transform="translate(1.2 -16)"/>
     </g>
-    <g transform="translate(308 0) scale(1.09)">
+    <g transform="translate(308 0) rotate(90) scale(1.09)">
       <path d="M13 2C5 2 2 8 2 16S5 30 13 30 24 24 24 16 21 2 13 2Z" transform="translate(-13 -16)"/>
     </g>
-    <g transform="translate(182.43 182.43) scale(0.75)">
+    <g transform="translate(182.43 182.43) rotate(135) scale(0.75)">
       <path d="M22 6C19 3 16 2 12 2 6 2 3 5 3 9 3 19 23 12 23 23 23 27 19 30 12 30 8 30 4 28 2 25" transform="translate(-27.2 -16)"/>
       <path d="M13 2C5 2 2 8 2 16S5 30 13 30 24 24 24 16 21 2 13 2Z" transform="translate(1.2 -16)"/>
     </g>
-    <g transform="translate(0 308) scale(1.09)">
+    <g transform="translate(0 308) rotate(180) scale(1.09)">
       <path d="M22 6C19 3 16 2 12 2 6 2 3 5 3 9 3 19 23 12 23 23 23 27 19 30 12 30 8 30 4 28 2 25" transform="translate(-12.5 -16)"/>
     </g>
-    <g transform="translate(-182.43 182.43) scale(0.75)">
+    <g transform="translate(-182.43 182.43) rotate(225) scale(0.75)">
       <path d="M22 6C19 3 16 2 12 2 6 2 3 5 3 9 3 19 23 12 23 23 23 27 19 30 12 30 8 30 4 28 2 25" transform="translate(-31.2 -16)"/>
       <path d="M2 2L9 30 17 8 25 30 32 2" transform="translate(-2.8 -16)"/>
     </g>
-    <g transform="translate(-308 0) scale(1.09)">
+    <g transform="translate(-308 0) rotate(270) scale(1.09)">
       <path d="M2 2L9 30 17 8 25 30 32 2" transform="translate(-17 -16)"/>
     </g>
-    <g transform="translate(-182.43 -182.43) scale(0.75)">
+    <g transform="translate(-182.43 -182.43) rotate(315) scale(0.75)">
       <path d="M2 30V2L23 30V2" transform="translate(-31.2 -16)"/>
       <path d="M2 2L9 30 17 8 25 30 32 2" transform="translate(-2.8 -16)"/>
     </g>

@@ -29,6 +29,8 @@ und 12 klassische Motive, darunter Kupferstich, Admiralskompass und geschnitzte
 Eiche. Hinzu kommen 5 einfarbige Windrosen mit transparentem Grund. Die Vorschau
 zeigt Deine Auswahl sofort. **Übernehmen** speichert sie.
 Bei festem Zeiger dreht sich auch das gewählte Motiv mit der Windrichtung.
+Bei den fünf transparenten Motiven steht die Himmelsrichtung unter dem Zeiger
+jeweils aufrecht.
 
 Im **IPSView-Designer** findest Du dieselbe Auswahl, sobald Du
 **Kacheldesign verwenden** ausschaltest.
