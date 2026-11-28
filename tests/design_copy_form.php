@@ -55,6 +55,7 @@ foreach (glob(dirname(__DIR__) . '/ECharts*/visualization/index.html') as $templ
         $inputs['CustomPointerSVG'] = base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 6"><path d="M3 0L6 6H0Z"/></svg>');
     }
     if ($family === 'EChartsGaugeWind') {
+        $inputs['CompassPreset'] = '01_portolan';
         $inputs['CompassSvg'] = base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M5 1L8 9H2Z" fill="#559933"/></svg>');
     }
     if ($family === 'EChartsTreemap') {
@@ -131,11 +132,13 @@ foreach (glob(dirname(__DIR__) . '/ECharts*/visualization/index.html') as $templ
         );
     }
     if ($family === 'EChartsGaugeWind') {
+        $rose = \eCharts\EChartsSvgImage::ImportCompass(file_get_contents($directory . '/roses/01_portolan.svg'));
         assertGatewayGauge(
             ($edits['IPSViewCompassSvg'] ?? null) === $inputs['CompassSvg']
-            && str_contains($images['IPSViewBarPreview'], 'data:image/svg+xml;base64,')
+            && ($edits['IPSViewCompassPreset'] ?? null) === '01_portolan'
+            && str_contains($images['IPSViewBarPreview'], $rose['dataUri'])
             && $images['IPSViewBarPreview'] === $images['BarPreview'],
-            'Copying a draft wind rose must stage the SVG and immediately refresh the independent preview.'
+            'Copying a draft wind rose must stage both the selection and stored file and immediately preview the selected motif.'
         );
     }
     if ($family === 'EChartsTreemap') {

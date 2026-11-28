@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500" role="img" aria-labelledby="title desc">
+  <title id="title">Windrose – Holz – Kirschbaum</title>
+  <desc id="desc">Sechzehnzackige Windrose mit acht deutschen Himmelsrichtungen, segmentiertem Kreisring und transparenter Umgebung.</desc>
+  <defs>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f0d3b9"/><stop offset="1" stop-color="#c38d69"/></linearGradient>
+    <radialGradient id="field"><stop stop-color="#cd9b77"/><stop offset="1" stop-color="#ab7052"/></radialGradient>
+  </defs>
+  <g id="gehaeuse">
+    <circle cx="250" cy="250" r="244" fill="url(#rim)" stroke="#713a2d" stroke-width="2.8"/>
+    <circle cx="250" cy="250" r="176" fill="url(#field)"/>
+    <circle cx="250" cy="250" r="139" fill="#cd9b77" opacity="0.36"/>
+    <circle cx="250" cy="250" r="104" fill="#ab7052" opacity="0.58"/>
+    <circle cx="250" cy="250" r="176" fill="none" stroke="#713a2d" stroke-width="1" opacity="0.5"/>
+  </g>
+  <g id="segmentring" fill="none" stroke-width="7">
+    <path d="M 250.000,77.000 A 173 173 0 0 1 316.204,90.169" stroke="#f4d7b5"/>
+    <path d="M 316.204,90.169 A 173 173 0 0 1 372.329,127.671" stroke="#713a2d"/>
+    <path d="M 372.329,127.671 A 173 173 0 0 1 409.831,183.796" stroke="#f4d7b5"/>
+    <path d="M 409.831,183.796 A 173 173 0 0 1 423.000,250.000" stroke="#713a2d"/>
+    <path d="M 423.000,250.000 A 173 173 0 0 1 409.831,316.204" stroke="#f4d7b5"/>
+    <path d="M 409.831,316.204 A 173 173 0 0 1 372.329,372.329" stroke="#713a2d"/>
+    <path d="M 372.329,372.329 A 173 173 0 0 1 316.204,409.831" stroke="#f4d7b5"/>
+    <path d="M 316.204,409.831 A 173 173 0 0 1 250.000,423.000" stroke="#713a2d"/>
+    <path d="M 250.000,423.000 A 173 173 0 0 1 183.796,409.831" stroke="#f4d7b5"/>
+    <path d="M 183.796,409.831 A 173 173 0 0 1 127.671,372.329" stroke="#713a2d"/>
+    <path d="M 127.671,372.329 A 173 173 0 0 1 90.169,316.204" stroke="#f4d7b5"/>
+    <path d="M 90.169,316.204 A 173 173 0 0 1 77.000,250.000" stroke="#713a2d"/>
+    <path d="M 77.000,250.000 A 173 173 0 0 1 90.169,183.796" stroke="#f4d7b5"/>
+    <path d="M 90.169,183.796 A 173 173 0 0 1 127.671,127.671" stroke="#713a2d"/>
+    <path d="M 127.671,127.671 A 173 173 0 0 1 183.796,90.169" stroke="#f4d7b5"/>
+    <path d="M 183.796,90.169 A 173 173 0 0 1 250.000,77.000" stroke="#713a2d"/>
+  </g>
+  <g id="windrose">
+    <polygon points="250.000,250.000 244.387,207.368 287.886,158.536" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 287.886,158.536 284.114,223.823" fill="#813c2e"/>
+    <polygon points="250.000,250.000 276.177,215.886 341.464,212.114" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 341.464,212.114 292.632,255.613" fill="#813c2e"/>
+    <polygon points="250.000,250.000 292.632,244.387 341.464,287.886" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 341.464,287.886 276.177,284.114" fill="#813c2e"/>
+    <polygon points="250.000,250.000 284.114,276.177 287.886,341.464" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 287.886,341.464 244.387,292.632" fill="#813c2e"/>
+    <polygon points="250.000,250.000 255.613,292.632 212.114,341.464" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 212.114,341.464 215.886,276.177" fill="#813c2e"/>
+    <polygon points="250.000,250.000 223.823,284.114 158.536,287.886" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 158.536,287.886 207.368,244.387" fill="#813c2e"/>
+    <polygon points="250.000,250.000 207.368,255.613 158.536,212.114" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 158.536,212.114 223.823,215.886" fill="#813c2e"/>
+    <polygon points="250.000,250.000 215.886,223.823 212.114,158.536" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 212.114,158.536 255.613,207.368" fill="#813c2e"/>
+    <polygon points="250.000,250.000 255.645,196.296 345.459,154.541" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 345.459,154.541 303.704,244.355" fill="#813c2e"/>
+    <polygon points="250.000,250.000 303.704,255.645 345.459,345.459" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 345.459,345.459 255.645,303.704" fill="#813c2e"/>
+    <polygon points="250.000,250.000 244.355,303.704 154.541,345.459" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 154.541,345.459 196.296,255.645" fill="#813c2e"/>
+    <polygon points="250.000,250.000 196.296,244.355 154.541,154.541" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 154.541,154.541 244.355,196.296" fill="#813c2e"/>
+    <polygon points="250.000,250.000 209.695,209.695 250.000,81.000" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 250.000,81.000 290.305,209.695" fill="#813c2e"/>
+    <polygon points="250.000,250.000 290.305,209.695 419.000,250.000" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 419.000,250.000 290.305,290.305" fill="#813c2e"/>
+    <polygon points="250.000,250.000 290.305,290.305 250.000,419.000" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 250.000,419.000 209.695,290.305" fill="#813c2e"/>
+    <polygon points="250.000,250.000 209.695,290.305 81.000,250.000" fill="#ffe5c7"/>
+    <polygon points="250.000,250.000 81.000,250.000 209.695,209.695" fill="#813c2e"/>
+  </g>
+  <g id="himmelsrichtungen" font-family="Arial, Liberation Sans, sans-serif" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#713a2d">
+    <text x="0" y="0" font-size="42" transform="translate(250.000 41.000) rotate(0)">N</text>
+    <text x="0" y="0" font-size="30" transform="translate(397.785 102.215) rotate(45)">NO</text>
+    <text x="0" y="0" font-size="42" transform="translate(459.000 250.000) rotate(90)">O</text>
+    <text x="0" y="0" font-size="30" transform="translate(397.785 397.785) rotate(135)">SO</text>
+    <text x="0" y="0" font-size="42" transform="translate(250.000 459.000) rotate(180)">S</text>
+    <text x="0" y="0" font-size="30" transform="translate(102.215 397.785) rotate(225)">SW</text>
+    <text x="0" y="0" font-size="42" transform="translate(41.000 250.000) rotate(270)">W</text>
+    <text x="0" y="0" font-size="30" transform="translate(102.215 102.215) rotate(315)">NW</text>
+  </g>
+</svg>

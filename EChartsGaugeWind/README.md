@@ -21,11 +21,23 @@ und die Windrose darunter drehen. Eine zweite Variable ergänzt die Windgeschwin
    Bewegung darstellen. Dieser kleine Rotor dreht sich bei stärkerem Wind
    schneller und steht bei Windstille.
 
+## Windrose auswählen
+
+Unter **Kacheldesigner → Kompass → Windrose** kannst Du eines von 32 mitgelieferten
+Motiven auswählen. Die Liste enthält 12 Farbvarianten, 8 historische Windrosen
+und 12 klassische Motive, darunter Kupferstich, Admiralskompass und geschnitzte
+Eiche. Die Vorschau zeigt Deine Auswahl sofort. **Übernehmen** speichert sie.
+Bei festem Zeiger dreht sich auch das gewählte Motiv mit der Windrichtung.
+
+Im **IPSView-Designer** findest Du dieselbe Auswahl, sobald Du
+**Kacheldesign verwenden** ausschaltest.
+
 ## Eigene SVG-Windrose
 
-Öffne **Kacheldesigner → Kompass → Eigene Windrose (SVG)** und wähle die Datei.
-Die Vorschau zeigt die Windrose sofort mit dem aktuellen Zeiger. **Übernehmen**
-speichert die Auswahl. Bei leerem Dateifeld erscheint die eingebaute Windrose.
+Wähle unter **Windrose** den Eintrag **Automatisch (eigene SVG oder Standard)**
+und lade im Feld **Eigene Windrose (SVG)** Deine Datei. Bei leerem Dateifeld
+erscheint die eingebaute Windrose. Mit **Standardwindrose** kannst Du jederzeit
+zum eingebauten Zifferblatt wechseln und die hochgeladene Datei für später behalten.
 
 Lege Norden in der Datei oben und den Drehpunkt in die Mitte der `viewBox`.
 Ein quadratisches Motiv nutzt den Platz am besten. Rechteckige Motive werden

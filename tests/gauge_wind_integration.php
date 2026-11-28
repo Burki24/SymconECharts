@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use eCharts\EChartsAsset;
+use eCharts\EChartsSvgImage;
 
 $wind = new EChartsGaugeWind();
 $wind->InstanceID = 64872;
@@ -222,6 +223,83 @@ $wind->ApplyChanges();
 assertGatewayGauge(
     $readPageImage($wind->GetVisualizationTile()) === '' && $readPageImage($wind->GetIPSViewHTML()) === '',
     'Clearing both uploads must recover the built-in compass without changing the sources.'
+);
+
+$presetDirectory = dirname(__DIR__) . '/EChartsGaugeWind/roses/';
+$presets = [];
+foreach (glob($presetDirectory . '*.svg') as $file) {
+    $presets[pathinfo($file, PATHINFO_FILENAME)] = EChartsSvgImage::ImportCompass(file_get_contents($file))['dataUri'];
+}
+assertGatewayGauge(count(array_unique($presets)) === 32, 'The module must ship 32 distinct, valid compass rose images.');
+$presetIDs = array_keys($presets);
+$expectedOptions = ['auto', 'standard', ...$presetIDs];
+sort($expectedOptions);
+foreach (['CompassPreset', 'IPSViewCompassPreset'] as $name) {
+    $selector = findGaugeFormElement($form['elements'], $name);
+    $options = array_column($selector['options'], 'value');
+    sort($options);
+    assertGatewayGauge(
+        $selector['type'] === 'Select' && $options === $expectedOptions && $wind->GetTestProperties()[$name] === 'auto'
+        && str_contains($selector['onChange'], 'ECWI_UpdateBarPreviewFromForm'),
+        'Both wind designers must offer every shipped rose and update previews when the selection changes.'
+    );
+}
+
+// The shifted second selection exercises each preset in each channel and detects accidental inheritance.
+$wind->SetTestProperty('CompassSvg', $badFile);
+$wind->SetTestProperty('IPSViewCompassSvg', $badFile);
+foreach ($presetIDs as $i => $tileID) {
+    $ipsID = $presetIDs[($i + 1) % count($presetIDs)];
+    $wind->SetTestProperty('CompassPreset', $tileID);
+    $wind->SetTestProperty('IPSViewCompassPreset', $ipsID);
+    assertGatewayGauge(
+        $readPageImage($wind->GetVisualizationTile()) === $presets[$tileID]
+        && $readPageImage($wind->GetIPSViewHTML()) === $presets[$ipsID],
+        "Selected wind roses must reach the independent tile ($tileID) and IPSView ($ipsID) pages."
+    );
+    $presetForm = $wind->GetConfigurationForm();
+    assertGatewayGauge(strlen($presetForm) < SYMCON_OUTPUT_BUFFER_LIMIT, 'Both preset previews must fit the configuration form.');
+    $elements = json_decode($presetForm, true, 512, JSON_THROW_ON_ERROR)['elements'];
+    foreach (['BarPreview' => $tileID, 'IPSViewBarPreview' => $ipsID] as $field => $presetID) {
+        $image = findGaugeFormElement($elements, $field)['image'];
+        assertGatewayGauge(
+            str_contains(base64_decode(explode(',', $image, 2)[1], true), $presets[$presetID]),
+            "$field must embed the selected wind rose $presetID."
+        );
+    }
+}
+
+$wind->SetTestProperty('IPSViewUseTileDesign', true);
+$wind->SetTestProperty('IPSViewCompassPreset', 'retired-rose');
+assertGatewayGauge($readPageImage($wind->GetIPSViewHTML()) === $presets[$tileID], 'Inheritance must ignore the unused preset ID.');
+$wind->UpdateBarPreviewFromForm(json_encode(['CompassPreset' => 'retired-rose'], JSON_THROW_ON_ERROR));
+foreach (array_slice($wind->GetTestFormUpdates(), -2) as $update) {
+    $preview = base64_decode(explode(',', $update['Value'], 2)[1], true);
+    assertGatewayGauge(
+        str_contains($preview, 'Select an available compass rose preset.') && !str_contains($preview, $presets[$tileID]),
+        'An invalid draft selection must show a preset error in both inherited previews.'
+    );
+}
+$wind->SetTestProperty('CompassPreset', 'standard');
+assertGatewayGauge(
+    $readPageImage($wind->GetVisualizationTile()) === '' && $readPageImage($wind->GetIPSViewHTML()) === ''
+    && $wind->GetTestProperties()['CompassSvg'] === $badFile,
+    'Explicitly using the standard dial must ignore a stored upload and retain the file.'
+);
+$wind->SetTestProperty('IPSViewUseTileDesign', false);
+$wind->ApplyChanges();
+assertGatewayGauge(
+    $wind->GetTestStatus() === 202 && $readState()['error'] === 'Select an available compass rose preset.',
+    'An unknown active preset ID must report a design error.'
+);
+$wind->SetTestProperty('IPSViewCompassPreset', 'auto');
+$wind->SetTestProperty('IPSViewCompassSvg', $ipsFile);
+$wind->SetTestProperty('CompassPreset', 'auto');
+$wind->SetTestProperty('CompassSvg', $tileFile);
+assertGatewayGauge(
+    $readPageImage($wind->GetVisualizationTile()) === $uris['BarPreview']
+    && $readPageImage($wind->GetIPSViewHTML()) === $uris['IPSViewBarPreview'],
+    'Returning to automatic mode must restore each previously selected upload.'
 );
 $wind->SetTestParentActive(false);
 $wind->ApplyChanges();

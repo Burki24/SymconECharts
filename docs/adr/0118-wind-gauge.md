@@ -37,3 +37,10 @@ lokale Ausschnitte und einfache Schlagschatten. Für dieses Profil gelten
 Die Kupferstichvariante benötigt 556 Elemente. Der Canvas-Renderer und
 beide SVG-Vorschauen zentrieren das Bild unter Zeiger und Nabe. Bei festem
 Zeiger nutzt das Bild denselben interpolierten Richtungswinkel wie die Skala.
+
+`CompassPreset` und `IPSViewCompassPreset` wählen je Designer zwischen
+`auto` (bestehender Dateiupload oder native Skala), `standard` (native Skala)
+und einer stabilen Motiv-ID aus dem mitgelieferten Katalog. Nur das gewählte
+Motiv durchläuft denselben Import- und Renderpfad wie ein eigener Upload.
+Ein Motivwechsel erhält den gespeicherten Upload. Neue Properties verwenden
+`auto`, sodass vorhandene Instanzen ihre bisherige Darstellung behalten.
