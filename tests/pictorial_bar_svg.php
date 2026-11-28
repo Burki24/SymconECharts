@@ -20,6 +20,12 @@ foreach ([$file, base64_encode($file), 'data:image/svg+xml;charset=utf-8;base64,
         throw new RuntimeException('SVG upload formats must produce the same path and nonzero viewBox.');
     }
 }
+$export = "\xEF\xBB\xBF<!-- Exported vector -->\n" . '<svg viewBox="0 0 24 12"><path d="M0 0H10"/></svg>';
+foreach ([$export, base64_encode($export), 'data:image/svg+xml;base64,' . base64_encode($export)] as $input) {
+    if (PictorialBarSvg::Import($input)['path'] !== 'M0 0 H10') {
+        throw new RuntimeException('PictorialBar must accept exporter preambles through each upload format.');
+    }
+}
 $multiple = PictorialBarSvg::Import('<svg viewBox="0 0 24 12"><path d="m0 0 20 0 0 12 -20 0z"/><path d="m22 4 2 0 0 4 -2 0z"/></svg>');
 if ($multiple['path'] !== 'M0 0 l20 0 l0 12 l-20 0 z M22 4 l2 0 l0 4 l-2 0 z') {
     throw new RuntimeException('Independent relative path origins must not drift when combined.');
@@ -28,7 +34,12 @@ $commands = PictorialBarSvg::Import('<svg viewBox="0 0 24 24"><path d="M0,0H2V3C
 if (!str_contains($commands['path'], 'A2 3 45 0 1 10 10 z')) {
     throw new RuntimeException('All SVG path commands and adjacent arc flags must normalize.');
 }
+$longPath = '<svg viewBox="0 0 24 12"><path d="M0 0' . str_repeat('H1', 5460) . '"/></svg>';
+if (strlen(PictorialBarSvg::Import($longPath)['path']) !== 16384) {
+    throw new RuntimeException('PictorialBar must accept its full 16 KiB normalized path budget.');
+}
 foreach ([
+    str_replace('H1"', 'H10"', $longPath),
     '', '../symbol.svg', 'https://example.invalid/symbol.svg', base64_encode('not svg'),
     '<svg viewBox="0 0 24 12"><path d="M0 0L1 1Z">',
     '<svg viewBox="0 0 24 12"><script>alert(1)</script><path d="M0 0Z"/></svg>',

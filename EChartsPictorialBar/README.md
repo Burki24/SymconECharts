@@ -167,6 +167,7 @@ eine andere Datei verwenden; „Kacheldesign übernehmen“ kopiert auch die SVG
 Unterstützt werden pfadbasierte SVG-Silhouetten mit einer gültigen `viewBox`
 und 1–32 `path`-Elementen, optional in `g`-Gruppen. Relative Pfadbefehle,
 mehrere Teilpfade und verschobene `viewBox`-Ursprünge sind erlaubt.
+Eine UTF-8-Markierung (BOM) und Exportkommentare dürfen in der SVG-Datei bleiben.
 Texte, Kreise, Rechtecke und andere Grundformen im Grafikprogramm zuerst
 in Pfade umwandeln; Transformationen vorher auf die Pfadkoordinaten anwenden.
 Für reine Konturlinien den Strich in eine gefüllte Kontur umwandeln.

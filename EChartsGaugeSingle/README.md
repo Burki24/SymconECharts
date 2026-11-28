@@ -95,6 +95,9 @@ eine `viewBox` und reine Pfadgeometrie aus bis zu 32 `path`-Elementen. Das
 SVG darf höchstens 128 KiB groß sein; Transformationen, Skripte, Ereignisse,
 externe Referenzen und andere Elemente werden nicht übernommen. An ECharts
 wird niemals das SVG-Dokument, sondern nur der validierte Pfad übergeben.
+Jedes `path`-Element hat seinen eigenen Ursprung. Du kannst daher auch
+mehrteilige Zeiger mit relativen Pfaden direkt aus dem Grafikprogramm übernehmen.
+Eine UTF-8-Markierung (BOM) und Exportkommentare dürfen in der Datei bleiben.
 Eine eng an der Pfadgeometrie liegende `viewBox` erhält bei `100 %`
 Zeigerstärke die ursprünglichen Proportionen; die Spitze zeigt im SVG nach
 oben. Optional legt
@@ -180,7 +183,7 @@ Erforderlich sind **Symcon 9.0 oder 9.1 und PHP 8.5**. Eine Kompatibilität zu
 Erforderlich sind eine Verbindung zu einer aktiven
 [EChartsGateway-Instanz](../EChartsGateway) und eine vorhandene Integer- oder
 Float-Variable als Datenquelle. Ein reines Momentanwert-Widget benötigt keine
-Historie. Für die Bereinigung eigener SVG-Hintergründe wird die PHP-DOM-
+Historie. Für den Import eigener SVG-Zeiger, -Naben und -Hintergründe wird die PHP-DOM-
 Erweiterung benötigt. IPSView wird nur für den zusätzlichen
 IPSView-Ausgabeweg benötigt, nicht für native Kacheln.
 

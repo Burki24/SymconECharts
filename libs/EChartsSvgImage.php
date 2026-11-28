@@ -9,6 +9,8 @@ use DOMElement;
 use DOMNode;
 use InvalidArgumentException;
 
+require_once __DIR__ . '/EChartsSvgInput.php';
+
 /**
  * Imports a bounded SVG document for use as an embedded visualization image.
  *
@@ -21,7 +23,6 @@ final class EChartsSvgImage
     private const MAX_INPUT_BYTES = 393216;
     private const MAX_ELEMENTS = 512;
     private const MAX_DEPTH = 32;
-    private const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
     private const ALLOWED_ELEMENTS = [
         'svg',
         'g',
@@ -144,43 +145,18 @@ final class EChartsSvgImage
 
     private static function ImportDocument(string $fileData, bool $paint): array
     {
-        $svg = self::DecodeFileData($fileData);
-        if (strlen($svg) > self::MAX_FILE_BYTES) {
-            throw new InvalidArgumentException('The SVG background exceeds the 256 KiB import limit.');
-        }
-        if (preg_match('/<\s*svg\b/i', $svg) !== 1) {
-            throw new InvalidArgumentException('The selected file is not an SVG document.');
-        }
-        if (preg_match('/<!DOCTYPE|<!ENTITY/i', $svg) === 1) {
-            throw new InvalidArgumentException('SVG document types and entities are not supported.');
-        }
-        if (!class_exists(DOMDocument::class)) {
-            throw new InvalidArgumentException('SVG background import requires the PHP DOM extension.');
-        }
-
-        $previousErrors = libxml_use_internal_errors(true);
-        try {
-            $document = new DOMDocument();
-            $document->resolveExternals = false;
-            $document->substituteEntities = false;
-            if (!$document->loadXML($svg, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_COMPACT)) {
-                throw new InvalidArgumentException('The selected file does not contain readable SVG data.');
-            }
-        } finally {
-            libxml_clear_errors();
-            libxml_use_internal_errors($previousErrors);
-        }
-
-        $root = $document->documentElement;
-        if (!$root instanceof DOMElement
-            || $root->localName !== 'svg'
-            || !in_array($root->namespaceURI, [null, '', self::SVG_NAMESPACE], true)) {
-            throw new InvalidArgumentException('The selected file is not an SVG document.');
-        }
+        $root = EChartsSvgInput::Load(
+            $fileData,
+            self::MAX_INPUT_BYTES,
+            self::MAX_FILE_BYTES,
+            'The selected SVG background is empty or too large.',
+            'The SVG background exceeds the 256 KiB import limit.'
+        );
+        $document = $root->ownerDocument;
         $viewBox = self::NormalizeViewBox($root->getAttribute('viewBox'));
         $viewBoxParts = array_map('floatval', explode(' ', $viewBox));
         $pixels = $paint ? self::PaintDimensions($root, $viewBoxParts) : null;
-        $root->setAttribute('xmlns', self::SVG_NAMESPACE);
+        $root->setAttribute('xmlns', EChartsSvgInput::SVG_NAMESPACE);
         $root->setAttribute('viewBox', $viewBox);
         $root->removeAttribute('width');
         $root->removeAttribute('height');
@@ -206,28 +182,6 @@ final class EChartsSvgImage
         return $pixels === null ? $result : $result + ['pixelWidth' => $pixels[0], 'pixelHeight' => $pixels[1]];
     }
 
-    private static function DecodeFileData(string $fileData): string
-    {
-        $fileData = trim($fileData);
-        if ($fileData === '' || strlen($fileData) > self::MAX_INPUT_BYTES) {
-            throw new InvalidArgumentException('The selected SVG background is empty or too large.');
-        }
-        if (preg_match('/^data:image\/svg\+xml(?:;[^,]*)?;base64,(.*)$/is', $fileData, $matches) === 1) {
-            $fileData = $matches[1];
-        }
-        if (preg_match('/^(?:<\?xml\b[^?]*\?>\s*)?<svg\b/is', ltrim($fileData)) === 1) {
-            return $fileData;
-        }
-
-        $compact = preg_replace('/\s+/', '', $fileData) ?? '';
-        $decoded = base64_decode($compact, true);
-        if ($decoded === false || preg_match('/^(?:<\?xml\b[^?]*\?>\s*)?<svg\b/is', ltrim($decoded)) !== 1) {
-            throw new InvalidArgumentException('The selected file does not contain readable SVG data.');
-        }
-
-        return $decoded;
-    }
-
     private static function ValidateElement(DOMElement $element, int $depth, int &$elementCount, bool $paint): void
     {
         ++$elementCount;
@@ -235,7 +189,7 @@ final class EChartsSvgImage
             throw new InvalidArgumentException('The SVG background is too complex.');
         }
         if ((!in_array($element->localName, self::ALLOWED_ELEMENTS, true) && !($paint && $element->localName === 'pattern'))
-            || !in_array($element->namespaceURI, [null, '', self::SVG_NAMESPACE], true)
+            || !in_array($element->namespaceURI, [null, '', EChartsSvgInput::SVG_NAMESPACE], true)
             || ($depth > 0 && $element->localName === 'svg')) {
             throw new InvalidArgumentException('The SVG background contains unsupported elements.');
         }
@@ -395,7 +349,7 @@ final class EChartsSvgImage
     private static function ValidateAttribute(string $name, string $value): void
     {
         if ($name === 'xmlns') {
-            if ($value !== self::SVG_NAMESPACE) {
+            if ($value !== EChartsSvgInput::SVG_NAMESPACE) {
                 throw new InvalidArgumentException('The SVG background contains an unsupported namespace.');
             }
 

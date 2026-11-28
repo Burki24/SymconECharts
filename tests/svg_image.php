@@ -59,6 +59,20 @@ assertSvgImage(
     'SVG image import must preserve safe vector styling while normalizing its viewport.'
 );
 
+$prolog = "\xEF\xBB\xBF" . '<?xml version="1.0" encoding="UTF-8"?>' . "\n<!-- Export note: removed <!DOCTYPE svg> -->\n<!-- Second note -->\n";
+$plain = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><circle cx="5" cy="5" r="3" fill="#ABCDEF"/></svg>';
+foreach (['Import', 'ImportPaint'] as $method) {
+    $expected = EChartsSvgImage::$method($plain);
+    foreach ([$prolog . $plain, base64_encode($prolog . $plain), 'data:image/svg+xml;base64,' . base64_encode($prolog . $plain)] as $input) {
+        assertSvgImage(EChartsSvgImage::$method($input) === $expected, $method . ' must preserve dimensions and sanitized vector content for every upload format.');
+    }
+}
+$atLimit = "\xEF\xBB\xBF<!--" . str_repeat('x', 262144 - strlen($plain) - 10) . '-->' . $plain;
+assertSvgImage(EChartsSvgImage::Import(base64_encode($atLimit)) === EChartsSvgImage::Import($plain), 'A 256 KiB image file must remain importable.');
+assertSvgImageRejected(str_replace('-->', 'x-->', $atLimit), 'The decoded 256 KiB image limit includes the BOM and exporter comment.');
+assertSvgImageRejected($prolog . '<!DOCTYPE svg>' . $plain, 'An exporter preamble must not enable document types.');
+assertSvgImageRejected($prolog . '<?drawing-editor mode="preview"?>' . $plain, 'An exporter preamble must not enable processing instructions.');
+
 assertSvgImageRejected(
     '<svg viewBox="0 0 10 10"><script>alert(1)</script><path d="M0 0L10 10"/></svg>',
     'SVG image import must reject scripts.'

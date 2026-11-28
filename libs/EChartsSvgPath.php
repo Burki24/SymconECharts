@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace eCharts;
 
+use DOMElement;
 use InvalidArgumentException;
+
+require_once __DIR__ . '/EChartsSvgInput.php';
 
 /**
  * Imports a path-only SVG as a bounded ECharts path symbol.
@@ -14,6 +17,7 @@ use InvalidArgumentException;
  */
 final class EChartsSvgPath
 {
+    public const INVALID_PATH_DATA = 'The SVG contains unsupported or invalid path data.';
     private const MAX_FILE_BYTES = 131072;
     private const MAX_INPUT_BYTES = 196608;
     private const MAX_PATH_BYTES = 65535;
@@ -23,67 +27,47 @@ final class EChartsSvgPath
     /** @return array{path: string, viewBox: string, pivotX?: float, pivotY?: float} */
     public static function Import(string $fileData): array
     {
-        $svg = self::DecodeFileData($fileData);
-        if (strlen($svg) > self::MAX_FILE_BYTES) {
-            throw new InvalidArgumentException('The SVG file exceeds the 128 KiB import limit.');
-        }
-        if (preg_match('/<\s*svg\b/i', $svg) !== 1) {
-            throw new InvalidArgumentException('The selected file is not an SVG document.');
-        }
-        if (preg_match('/<!DOCTYPE|<!ENTITY/i', $svg) === 1) {
-            throw new InvalidArgumentException('SVG document types and entities are not supported.');
-        }
-        if (preg_match('/\btransform\s*=/i', $svg) === 1) {
-            throw new InvalidArgumentException('SVG transformations are not supported; convert them to paths before importing.');
-        }
-        if (preg_match('/\bon[a-z]+\s*=|\b(?:href|xlink:href)\s*=/i', $svg) === 1) {
-            throw new InvalidArgumentException('SVG event handlers and external references are not supported.');
-        }
+        return self::Read($fileData, self::MAX_PATH_BYTES, null);
+    }
 
-        preg_match_all('/<\s*\/?\s*([A-Za-z][A-Za-z0-9:_-]*)\b/', $svg, $elementMatches);
-        foreach ($elementMatches[1] ?? [] as $element) {
-            if (!in_array(strtolower((string) $element), self::ALLOWED_ELEMENTS, true)) {
-                throw new InvalidArgumentException('The SVG may contain only svg, g and path elements.');
-            }
-        }
+    /** Produce explicit symbol commands within the caller's stricter geometry and size budgets. */
+    public static function ImportNormalizedSymbol(string $fileData, int $maxPathBytes, float $coordinateLimit): array
+    {
+        return self::Read($fileData, min($maxPathBytes, self::MAX_PATH_BYTES), $coordinateLimit);
+    }
 
-        if (preg_match('/<\s*svg\b([^>]*)>/is', $svg, $svgMatch) !== 1
-            || preg_match('/\bviewBox\s*=\s*(["\'])(.*?)\1/is', $svgMatch[1], $viewBoxMatch) !== 1) {
-            throw new InvalidArgumentException('The SVG requires a finite viewBox with positive width and height.');
-        }
-        $viewBox = self::NormalizeViewBox($viewBoxMatch[2]);
-        $pivot = self::ReadPivot($svgMatch[1], $viewBox);
-
-        preg_match_all('/<\s*path\b([^>]*)\/?>/is', $svg, $pathMatches);
-        if (count($pathMatches[1] ?? []) === 0 || count($pathMatches[1]) > self::MAX_PATHS) {
-            throw new InvalidArgumentException('The SVG must contain between one and 32 path elements.');
-        }
+    private static function Read(string $fileData, int $maxPathBytes, ?float $symbolCoordinateLimit): array
+    {
+        $root = EChartsSvgInput::Load(
+            $fileData,
+            self::MAX_INPUT_BYTES,
+            self::MAX_FILE_BYTES,
+            'The selected SVG file is empty or too large.',
+            'The SVG file exceeds the 128 KiB import limit.'
+        );
+        $viewBox = self::NormalizeViewBox($root->getAttribute('viewBox'));
+        $pivot = $root->hasAttribute('data-echarts-pivot') ? self::ReadPivot($root->getAttribute('data-echarts-pivot'), $viewBox) : null;
 
         $paths = [];
-        foreach ($pathMatches[1] as $attributes) {
-            if (preg_match('/\bd\s*=\s*(["\'])(.*?)\1/is', $attributes, $pathMatch) !== 1) {
-                throw new InvalidArgumentException('Every SVG path requires path data.');
-            }
-            $path = trim((string) (preg_replace('/\s+/', ' ', $pathMatch[2]) ?? ''));
-            if ($path === ''
-                || preg_match('/^[MmZzLlHhVvCcSsQqTtAa0-9eE+.,\-\s]+$/D', $path) !== 1
-                || preg_match('/^[Mm]/', $path) !== 1) {
-                throw new InvalidArgumentException('The SVG contains unsupported or invalid path data.');
-            }
-            preg_match_all('/[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?/', $path, $numberMatches);
-            foreach ($numberMatches[0] ?? [] as $number) {
-                if (!is_finite((float) $number)) {
-                    throw new InvalidArgumentException('The SVG path contains a non-finite coordinate.');
-                }
-            }
-            $paths[] = $path;
+        self::CollectPaths($root, $paths);
+        if ($paths === []) {
+            throw new InvalidArgumentException('The SVG must contain between one and 32 path elements.');
         }
-
-        $path = implode(' ', $paths);
-        if (strlen($path) > self::MAX_PATH_BYTES) {
+        if (strlen(implode(' ', $paths)) > $maxPathBytes) {
             throw new InvalidArgumentException('The combined SVG path exceeds the 64 KiB import limit.');
         }
-
+        foreach ($paths as $index => $path) {
+            $paths[$index] = self::ValidatePath($path, $index > 0, $symbolCoordinateLimit);
+        }
+        $path = implode(' ', $paths);
+        // A corrected implicit relative line can add one command per joined path.
+        // A command letter already separates two paths, even in a full-size compact Gauge.
+        if ($symbolCoordinateLimit === null && strlen($path) > $maxPathBytes) {
+            $path = implode('', $paths);
+        }
+        if (strlen($path) > $maxPathBytes) {
+            throw new InvalidArgumentException('The combined SVG path exceeds the 64 KiB import limit.');
+        }
         $result = ['path' => $path, 'viewBox' => $viewBox];
         if ($pivot !== null) {
             $result['pivotX'] = $pivot[0];
@@ -93,27 +77,111 @@ final class EChartsSvgPath
         return $result;
     }
 
-    private static function DecodeFileData(string $fileData): string
+    /** @param list<string> $paths */
+    private static function CollectPaths(DOMElement $element, array &$paths): void
     {
-        $fileData = trim($fileData);
-        if ($fileData === '' || strlen($fileData) > self::MAX_INPUT_BYTES) {
-            throw new InvalidArgumentException('The selected SVG file is empty or too large.');
+        if (!in_array($element->localName, self::ALLOWED_ELEMENTS, true)
+            || !in_array($element->namespaceURI, [null, '', EChartsSvgInput::SVG_NAMESPACE], true)) {
+            throw new InvalidArgumentException('The SVG may contain only svg, g and path elements.');
         }
+        foreach ($element->attributes as $attribute) {
+            $name = strtolower($attribute->localName);
+            if ($name === 'transform') {
+                throw new InvalidArgumentException('SVG transformations are not supported; convert them to paths before importing.');
+            }
+            if (str_contains($name, ':') || $name === 'href' || preg_match('/^on[a-z]+$/D', $name) === 1) {
+                throw new InvalidArgumentException('SVG event handlers and external references are not supported.');
+            }
+        }
+        if ($element->localName === 'path') {
+            if (count($paths) >= self::MAX_PATHS) {
+                throw new InvalidArgumentException('The SVG must contain between one and 32 path elements.');
+            }
+            if (!$element->hasAttribute('d')) {
+                throw new InvalidArgumentException('Every SVG path requires path data.');
+            }
+            $paths[] = trim((string) preg_replace('/\s+/', ' ', $element->getAttribute('d')));
+        }
+        foreach ($element->childNodes as $child) {
+            if ($child instanceof DOMElement) {
+                self::CollectPaths($child, $paths);
+            } elseif ($child->nodeType !== XML_COMMENT_NODE && !($child->nodeType === XML_TEXT_NODE && trim($child->nodeValue) === '')) {
+                throw new InvalidArgumentException('The SVG may contain only svg, g and path elements.');
+            }
+        }
+    }
 
-        if (preg_match('/^data:image\/svg\+xml(?:;[^,]*)?;base64,(.*)$/is', $fileData, $matches) === 1) {
-            $fileData = $matches[1];
+    /** Validate each command group, keeping compact Gauge paths and explicit PictorialBar symbols. */
+    private static function ValidatePath(string $path, bool $followsPath, ?float $symbolCoordinateLimit): string
+    {
+        $error = self::INVALID_PATH_DATA;
+        if ($path === '' || !in_array($path[0], ['M', 'm'], true)
+            || preg_match('/[A-Za-z,]\s*,|,\s*(?:[A-Za-z]|$)/', $path) === 1) {
+            throw new InvalidArgumentException($error);
         }
-        if (preg_match('/^(?:<\?xml\b[^?]*\?>\s*)?<svg\b/is', ltrim($fileData)) === 1) {
-            return $fileData;
+        $arities = ['M' => 2, 'L' => 2, 'H' => 1, 'V' => 1, 'C' => 6, 'S' => 4, 'Q' => 4, 'T' => 2, 'A' => 7, 'Z' => 0];
+        $offset = 0;
+        $length = strlen($path);
+        $command = null;
+        $normalized = '';
+        $first = true;
+        while ($offset < $length) {
+            $offset += strspn($path, ' ,', $offset);
+            if ($offset >= $length) {
+                break;
+            }
+            if (ctype_alpha($path[$offset])) {
+                $command = $path[$offset++];
+            }
+            $upper = strtoupper($command ?? '');
+            if (!isset($arities[$upper])) {
+                throw new InvalidArgumentException($error);
+            }
+            if ($upper === 'Z') {
+                $normalized .= $command;
+                $command = null;
+                continue;
+            }
+            $args = [];
+            for ($index = 0; $index < $arities[$upper]; ++$index) {
+                $offset += strspn($path, ' ,', $offset);
+                // SVG arc flags can be adjacent to one another and to the following coordinate.
+                $pattern = $upper === 'A' && in_array($index, [3, 4], true)
+                    ? '/\G[01]/' : '/\G[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/';
+                if (preg_match($pattern, $path, $match, 0, $offset) !== 1) {
+                    throw new InvalidArgumentException($error);
+                }
+                $value = (float) $match[0];
+                if (!is_finite($value)) {
+                    throw new InvalidArgumentException('The SVG path contains a non-finite coordinate.');
+                }
+                if (($upper === 'A' && $index < 2 && $value < 0)
+                    || ($symbolCoordinateLimit !== null && abs($value) > $symbolCoordinateLimit)) {
+                    throw new InvalidArgumentException($error);
+                }
+                if ($symbolCoordinateLimit !== null) {
+                    $args[] = json_encode($value, JSON_THROW_ON_ERROR);
+                }
+                $offset += strlen($match[0]);
+            }
+            if ($symbolCoordinateLimit !== null) {
+                $normalized .= ($first ? 'M' : $command) . implode(' ', $args) . ' ';
+            } elseif ($first && $followsPath && $command === 'm') {
+                // Every element starts at (0,0). Only its first pair becomes absolute;
+                // subsequent implicit pairs after a relative moveto remain relative lines.
+                $path[0] = 'M';
+                $next = $offset + strspn($path, ' ,', $offset);
+                if ($next < $length && !ctype_alpha($path[$next])) {
+                    $path = substr($path, 0, $offset) . 'l' . substr($path, $next);
+                    $length = strlen($path);
+                }
+            }
+            $first = false;
+            if ($upper === 'M') {
+                $command = $command === 'M' ? 'L' : 'l';
+            }
         }
-
-        $compact = preg_replace('/\s+/', '', $fileData) ?? '';
-        $decoded = base64_decode($compact, true);
-        if ($decoded === false || preg_match('/^(?:<\?xml\b[^?]*\?>\s*)?<svg\b/is', ltrim($decoded)) !== 1) {
-            throw new InvalidArgumentException('The selected file does not contain readable SVG data.');
-        }
-
-        return $decoded;
+        return $symbolCoordinateLimit === null ? $path : trim($normalized);
     }
 
     private static function NormalizeViewBox(string $viewBox): string
@@ -141,17 +209,10 @@ final class EChartsSvgPath
         return implode(' ', array_map(self::FormatNumber(...), $numbers));
     }
 
-    /** @return array{float, float}|null */
-    private static function ReadPivot(string $svgAttributes, string $viewBox): ?array
+    /** @return array{float, float} */
+    private static function ReadPivot(string $attribute, string $viewBox): array
     {
-        if (preg_match('/\bdata-echarts-pivot\s*=/i', $svgAttributes) !== 1) {
-            return null;
-        }
-        if (preg_match('/\bdata-echarts-pivot\s*=\s*(["\'])(.*?)\1/is', $svgAttributes, $pivotMatch) !== 1) {
-            throw new InvalidArgumentException('The optional ECharts pivot must contain two finite coordinates.');
-        }
-
-        $parts = preg_split('/[\s,]+/', trim($pivotMatch[2])) ?: [];
+        $parts = preg_split('/[\s,]+/', trim($attribute)) ?: [];
         if (count($parts) !== 2) {
             throw new InvalidArgumentException('The optional ECharts pivot must contain two finite coordinates.');
         }

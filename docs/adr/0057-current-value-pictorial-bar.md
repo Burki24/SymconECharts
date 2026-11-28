@@ -197,15 +197,14 @@ Das native `SelectFile` speichert den Dateiinhalt gemäß SDK als Base64.
 Entwürfe aktualisieren ausschließlich die Vorschauen. Vererbung und
 Designkopie folgen dem vorhandenen Vertrag; ungenutzte Dateien werden nicht validiert.
 
-Der familienbezogene Adapter `PictorialBarSvg` verwendet `EChartsSvgPath::Import`
-für Uploadformat, Dateigrenzen, erlaubte Elemente und Sicherheitsprüfung.
-Anschließend prüft DOM mit deaktiviertem Netzwerk die XML-Struktur. Es gibt
-weder Dateipfad-/URL-Lesen noch Skriptausführung oder Rückgabe des Original-Markups.
-Die zusätzliche Pfadgrammatikprüfung validiert Argumentgruppen aller
-SVG-Pfadbefehle einschließlich kompakter Arc-Flags. Jeder Teilpfad erhält
-einen absoluten initialen Move, damit unabhängige relative Ursprünge beim
-Zusammenfügen erhalten bleiben. Die gemeinsam verwendeten Validatoren und
-die ECharts-Runtime bleiben unverändert.
+Der familienbezogene Adapter `PictorialBarSvg` übergibt seine Größen- und
+Koordinatengrenzen an `EChartsSvgPath::ImportNormalizedSymbol`. Der gemeinsame
+Einstieg `EChartsSvgInput` dekodiert den Upload und liest das XML einmal mit
+deaktiviertem Netzwerkzugriff. XML-Deklaration, UTF-8-BOM und Exportkommentare
+sind zulässig. `EChartsSvgPath` liest die tatsächlichen Pfadelemente und prüft
+die Argumentgruppen einschließlich kompakter Arc-Flags auch für Gauge-Zeiger
+und -Naben. Jedes Pfadelement beginnt an seinem eigenen Ursprung. Relative
+Linien innerhalb des Elements behalten ihren Bezugspunkt.
 
 Es gelten 128 KiB dekodierte Datei, 192 KiB Uploadhülle, 32 Pfade und
 16 KiB normalisierte Pfaddaten. Absolute Koordinatenbeträge sind auf 10⁶,

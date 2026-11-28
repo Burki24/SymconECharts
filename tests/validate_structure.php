@@ -82,6 +82,7 @@ $requiredFiles = [
     'libs/EChartsVariablePresentation.php',
     'libs/echarts-design.js',
     'libs/echarts-pattern.js',
+    'libs/EChartsSvgInput.php',
     'libs/EChartsSvgImage.php',
     'libs/EChartsSvgPath.php',
     'libs/echarts/6.1.0/echarts.gauge.min.js',

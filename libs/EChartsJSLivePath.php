@@ -13,11 +13,26 @@ final class EChartsJSLivePath
 {
     public static function Validate(string $path): void
     {
-        EChartsSvgPath::Import('<svg viewBox="0 0 100 100"><path d="' . htmlspecialchars($path, ENT_QUOTES | ENT_XML1, 'UTF-8') . '"/></svg>');
+        try {
+            EChartsSvgPath::Import('<svg viewBox="0 0 100 100"><path d="' . htmlspecialchars($path, ENT_QUOTES | ENT_XML1, 'UTF-8') . '"/></svg>');
+        } catch (InvalidArgumentException $exception) {
+            if ($exception->getMessage() === EChartsSvgPath::INVALID_PATH_DATA) {
+                // Preserve the package report's specific diagnosis for a malformed drawing command.
+                self::ValidateCommands($path);
+            }
+            throw $exception;
+        }
+        self::ValidateCommands($path);
+    }
+
+    private static function ValidateCommands(string $path): void
+    {
         $pattern = '/[MmZzLlHhVvCcSsQqTtAa]|[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?/';
         preg_match_all($pattern, $path, $matches);
-        if (preg_match('/^[,\s]*$/D', preg_replace($pattern, '', $path)) !== 1
-            || preg_match('/,\s*,|[MmZzLlHhVvCcSsQqTtAa]\s*,|,\s*[MmZzLlHhVvCcSsQqTtAa]/', $path) === 1) {
+        if (preg_match('/^[,\s]*$/D', preg_replace($pattern, '', $path)) !== 1) {
+            throw new InvalidArgumentException(EChartsSvgPath::INVALID_PATH_DATA);
+        }
+        if (preg_match('/,\s*,|[MmZzLlHhVvCcSsQqTtAa]\s*,|,\s*[MmZzLlHhVvCcSsQqTtAa]/', $path) === 1) {
             throw new InvalidArgumentException('FORMAT_UNSUPPORTED: invalid SVG path separators.');
         }
         $arity = ['M' => 2, 'L' => 2, 'H' => 1, 'V' => 1, 'C' => 6, 'S' => 4, 'Q' => 4, 'T' => 2, 'A' => 7, 'Z' => 0];

@@ -230,7 +230,7 @@
             "The SVG background exceeds the 256 KiB import limit.": "Der SVG-Hintergrund überschreitet das Importlimit von 256 KiB.",
             "The selected file is not an SVG document.": "Die ausgewählte Datei ist kein SVG-Dokument.",
             "SVG document types and entities are not supported.": "SVG-Dokumenttypen und Entitäten werden nicht unterstützt.",
-            "SVG background import requires the PHP DOM extension.": "Der SVG-Hintergrundimport benötigt die PHP-DOM-Erweiterung.",
+            "SVG import requires the PHP DOM extension.": "Der SVG-Import benötigt die PHP-DOM-Erweiterung.",
             "The selected file does not contain readable SVG data.": "Die ausgewählte Datei enthält keine lesbaren SVG-Daten.",
             "The selected SVG background is empty or too large.": "Der ausgewählte SVG-Hintergrund ist leer oder zu groß.",
             "The SVG background is too complex.": "Der SVG-Hintergrund ist zu komplex.",

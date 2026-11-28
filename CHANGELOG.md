@@ -2,6 +2,11 @@
 
 ## Behoben
 
+- Mehrteilige SVG-Zeiger und -Naben behalten die Position jedes einzelnen
+  Pfades. Auskommentierte Pfade werden übersprungen, unvollständige
+  Zeichenbefehle beim Import gemeldet.
+- SVG-Formen, Zifferblätter und Füllmuster lassen sich auch aus UTF-8-Dateien
+  mit Byte Order Mark (BOM) oder Exportkommentaren vor dem SVG-Element laden.
 - Das Gateway startet nach einem Modulupdate auch mit einem JSLive-Importjournal
   über 1 MiB. Bestehende Einträge und der Fortschritt unterbrochener Importe
   bleiben beim Umstellen der alten Eigentumskennungen erhalten.
