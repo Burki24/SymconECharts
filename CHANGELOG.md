@@ -27,6 +27,8 @@
 
 ## Neu
 
+- In `EChartsGaugeWind` kannst Du für Kachel und IPSView eigene SVG-Windrosen
+  mit Vorschau laden. Bei festem Zeiger dreht sich das Motiv mit der Windrichtung.
 - `EChartsGaugeWind` zeigt die aktuelle Windrichtung auf einer Windrose.
   In Kachel und IPSView kannst Du den Zeiger oben fixieren und die Windrose
   darunter drehen. Eine zweite Variable ergänzt die Geschwindigkeit und kann

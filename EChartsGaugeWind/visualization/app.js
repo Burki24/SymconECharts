@@ -9,6 +9,7 @@
     var theme;
     var currentState;
     var rotorSignature = null;
+    var hasCompassImage = false;
     var previousDirection = null;
     var dial = {bearing: 0};
     var dialTarget = null;
@@ -112,7 +113,11 @@
             .when(animation.animationDurationUpdate, {bearing: dial.bearing + distance})
             .delay(animation.animationDelayUpdate)
             .during(function () {
-                chart.setOption({series: [Object.assign({id: 'wind-bearing'}, dialPosition(dial.bearing))]});
+                var frame = {series: [Object.assign({id: 'wind-bearing'}, dialPosition(dial.bearing))]};
+                if (currentState.chart.style.compassImage) {
+                    frame.graphic = [{id: 'wind-compass', rotation: dial.bearing * Math.PI / 180}];
+                }
+                chart.setOption(frame);
             })
             .done(function () { dialAnimator = null; dial.bearing = direction; })
             .start(animation.animationEasingUpdate);
@@ -142,9 +147,9 @@
         var cy = (top + height) / 2;
         var radius = Math.max(1, Math.min(width, height - top) * 0.48);
         graphic.push(
-            {id: 'wind-bezel', type: 'circle', z: 0, silent: true,
+            {id: 'wind-bezel', type: 'circle', z: 0, silent: true, invisible: !!style.compassImage,
                 shape: {cx: cx, cy: cy, r: radius}, style: {fill: bezel()}},
-            {id: 'wind-dial', type: 'circle', z: 1, silent: true,
+            {id: 'wind-dial', type: 'circle', z: 1, silent: true, invisible: !!style.compassImage,
                 shape: {cx: cx, cy: cy, r: radius * 0.91}, style: {fill: style.dialColor || '#616871'}}
         );
         var r = radius * 0.90;
@@ -156,6 +161,14 @@
         } else {
             stopDial();
         }
+        if (style.compassImage) {
+            graphic.push({id: 'wind-compass', type: 'image', silent: true, z: 1, x: cx, y: cy,
+                rotation: style.rotateCompass ? dial.bearing * Math.PI / 180 : 0,
+                style: {image: style.compassImage, x: -radius, y: -radius, width: 2 * radius, height: 2 * radius}});
+        } else if (hasCompassImage) {
+            graphic.push({id: 'wind-compass', $action: 'remove'});
+        }
+        hasCompassImage = !!style.compassImage;
         if (!style.rotateCompass && previousDirection !== null && Math.abs(model.direction - previousDirection) > 180) {
             animation.animationDurationUpdate = 0;
             animation.animationDelayUpdate = 0;
@@ -168,12 +181,12 @@
             tooltip: {trigger: 'item', renderMode: 'richText', formatter: function () { return value.accessible; }},
             series: [Object.assign({id: 'wind-bearing', type: 'gauge', z: 3, center: [cx, cy], radius: r,
                 startAngle: 90, endAngle: -270, clockwise: true, min: 0, max: 360, splitNumber: 8,
-                axisLine: {lineStyle: {width: r * 0.105, color: [[1, style.ringColor || '#1678BD']]}},
-                axisTick: {distance: -r * 0.10, splitNumber: 6, length: r * 0.06,
+                axisLine: {show: !style.compassImage, lineStyle: {width: r * 0.105, color: [[1, style.ringColor || '#1678BD']]}},
+                axisTick: {show: !style.compassImage, distance: -r * 0.10, splitNumber: 6, length: r * 0.06,
                     lineStyle: {color: style.tickColor || '#EEF4FA', width: Math.max(1, r * 0.009)}},
-                splitLine: {distance: -r * 0.10, length: r * 0.11,
+                splitLine: {show: !style.compassImage, distance: -r * 0.10, length: r * 0.11,
                     lineStyle: {color: style.tickColor || '#F47B60', width: Math.max(1, r * 0.018)}},
-                axisLabel: {distance: r * 0.16, color: style.cardinalColor || '#FFFFFF',
+                axisLabel: {show: !style.compassImage, distance: r * 0.16, color: style.cardinalColor || '#FFFFFF',
                     fontSize: clamp(r * 0.14, 7, 30), fontWeight: 'bold',
                     formatter: function (angle) { return angle === 360 ? '' : model.labels[Math.round(angle / 45)]; }},
                 pointer: {width: r * 0.145, length: '73%', itemStyle: {color: style.pointerColor || '#42B7FF'},
@@ -192,6 +205,7 @@
         if (!state || state.status !== 'ready' || !window.echarts) {
             stopDial();
             if (chart) { chart.clear(); }
+            hasCompassImage = false;
             rotorSignature = null;
             previousDirection = null;
             chartElement.hidden = true;
@@ -207,6 +221,7 @@
             if (chart) { chart.dispose(); }
             theme = state.chart.theme;
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, {renderer: 'canvas'});
+            hasCompassImage = false;
             rotorSignature = null;
             previousDirection = null;
         }

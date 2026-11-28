@@ -20,6 +20,7 @@ use eCharts\EChartsGaugeWindPreview;
 use eCharts\EChartsIPSViewBackground;
 use eCharts\EChartsIPSViewDesignForm;
 use eCharts\EChartsIPSViewTransport;
+use eCharts\EChartsSvgImage;
 use eCharts\EChartsTransientRefresh;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -66,6 +67,7 @@ class EChartsGaugeWind extends IPSModuleStrict
     private const DIRECTION_INVALID = 'Select a numeric wind direction variable.';
     private const SPEED_INVALID = 'Select a different numeric wind speed variable or leave it empty.';
     private const SETTINGS_INVALID = 'Check the wind gauge settings.';
+    private const COMPASS_INVALID = 'Select a supported SVG compass rose or clear the file.';
     private const BACKGROUND_INVALID = 'Select a valid chart background color.';
     private const NO_GATEWAY = 'Connect an active EChartsGateway.';
     private const NEGATIVE_SPEED = 'Wind speed must be non-negative.';
@@ -78,7 +80,10 @@ class EChartsGaugeWind extends IPSModuleStrict
     private const SWITCHES = ['RotateCompass', 'ShowRotor', 'ShowDegreeValue'];
     private const ANIMATION_FIELDS = ['AnimationEnabled', 'AnimationDuration', 'AnimationDurationUpdate',
         'AnimationEasing', 'AnimationEasingUpdate', 'AnimationDelay', 'AnimationDelayUpdate'];
-    private const DESIGN_FIELDS = ['EChartsTheme', ...self::SWITCHES, ...self::COLORS, ...self::ANIMATION_FIELDS];
+    private const DESIGN_FIELDS = ['EChartsTheme', 'CompassSvg', ...self::SWITCHES, ...self::COLORS, ...self::ANIMATION_FIELDS];
+
+    /** Last validated upload per designer, reused across outputs in the same module call. */
+    private array $compassImages = [];
 
     public function Create(): void
     {
@@ -95,6 +100,7 @@ class EChartsGaugeWind extends IPSModuleStrict
             $this->RegisterPropertyInteger('SpeedDecimals', 2);
             foreach (['', 'IPSView'] as $prefix) {
                 $this->RegisterPropertyString($prefix . 'EChartsTheme', 'auto');
+                $this->RegisterPropertyString($prefix . 'CompassSvg', '');
                 foreach (self::SWITCHES as $name) {
                     $this->RegisterPropertyBoolean($prefix . $name, false);
                 }
@@ -228,11 +234,18 @@ class EChartsGaugeWind extends IPSModuleStrict
         $speedID = $this->BarPreviewValue($values, 'SpeedVariableID', 'integer');
         $direction = self::IsNumericVariable($directionID) ? (float) GetValue($directionID) : 45.0;
         $speed = self::IsNumericVariable($speedID) ? (float) GetValue($speedID) : null;
+        try {
+            $file = $this->BarPreviewValue($values, 'CompassSvg', 'string', $ipsView);
+            $image = $this->CompassImage($file, $ipsView && !$values['IPSViewUseTileDesign']);
+        } catch (DomainException $exception) {
+            return EChartsGaugeDesign::CreateErrorSvg($this->Translate($exception->getMessage()));
+        }
         $chart = $this->WindChart(
             $ipsView,
             $values,
             is_finite($direction) ? $direction : 45.0,
-            $speed !== null && is_finite($speed) && $speed >= 0 ? $speed : null
+            $speed !== null && is_finite($speed) && $speed >= 0 ? $speed : null,
+            $image
         );
         $chart['style'] = EChartsIPSViewBackground::WithPreviewStyle(
             $chart['style'],
@@ -314,6 +327,17 @@ class EChartsGaugeWind extends IPSModuleStrict
         if ($error !== null) {
             throw new DomainException($error['Message'], $error['Status']);
         }
+        $tileFile = $this->ReadPropertyString('CompassSvg');
+        $image = $this->CompassImage($tileFile, false);
+        if (!$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
+            $ipsViewFile = $this->ReadPropertyString('IPSViewCompassSvg');
+            if ($ipsViewFile !== $tileFile) {
+                $ipsViewImage = $this->CompassImage($ipsViewFile, true);
+                if ($ipsView) {
+                    $image = $ipsViewImage;
+                }
+            }
+        }
         if (!$this->HasActiveParent()) {
             throw new DomainException(self::NO_GATEWAY, 203);
         }
@@ -324,7 +348,7 @@ class EChartsGaugeWind extends IPSModuleStrict
         if ($speed !== null && $speed['Value'] < 0) {
             throw new DomainException(self::NEGATIVE_SPEED, 205);
         }
-        $chart = $this->WindChart($ipsView, [], $direction['Value'], $speed['Value'] ?? null);
+        $chart = $this->WindChart($ipsView, [], $direction['Value'], $speed['Value'] ?? null, $image);
         $chart['directionVariableID'] = $directionID;
         $chart['directionTimestamp'] = $direction['Timestamp'];
         $chart['speedVariableID'] = $speedID;
@@ -332,10 +356,29 @@ class EChartsGaugeWind extends IPSModuleStrict
         return $this->WithChartBackground($chart, $ipsView);
     }
 
-    private function WindChart(bool $ipsView, array $values, float $direction, ?float $speed): array
+    private function CompassImage(string $file, bool $independent): string
+    {
+        if ($file === '') {
+            return '';
+        }
+        $cached = $this->compassImages[(int) $independent] ?? null;
+        if ($cached !== null && $cached['file'] === $file) {
+            return $cached['image'];
+        }
+        try {
+            $image = EChartsSvgImage::ImportCompass($file)['dataUri'];
+        } catch (InvalidArgumentException $exception) {
+            throw new DomainException(self::COMPASS_INVALID, 202, $exception);
+        }
+        $this->compassImages[(int) $independent] = ['file' => $file, 'image' => $image];
+        return $image;
+    }
+
+    private function WindChart(bool $ipsView, array $values, float $direction, ?float $speed, string $image): array
     {
         $prefix = $ipsView && !($values['IPSViewUseTileDesign'] ?? $this->ReadPropertyBoolean('IPSViewUseTileDesign')) ? 'IPSView' : '';
         $style = $this->AnimationStyleFromFormValues($values, $prefix);
+        $style['compassImage'] = $image;
         foreach (self::SWITCHES as $name) {
             $style[lcfirst($name)] = $this->BarPreviewValue($values, $name, 'boolean', $ipsView);
         }
@@ -413,7 +456,7 @@ class EChartsGaugeWind extends IPSModuleStrict
             ) : '',
             'state'        => $this->BuildVisualizationState($ipsView),
             'translations' => $this->IPSViewTranslationsFor([self::DIRECTION_INVALID, self::SPEED_INVALID,
-                self::SETTINGS_INVALID, self::BACKGROUND_INVALID, self::NO_GATEWAY, self::NEGATIVE_SPEED, self::LOAD_ERROR,
+                self::SETTINGS_INVALID, self::COMPASS_INVALID, self::BACKGROUND_INVALID, self::NO_GATEWAY, self::NEGATIVE_SPEED, self::LOAD_ERROR,
                 'Data could not be refreshed. Showing the last available values.']),
             'options' => [
                 'echartsVersion' => EChartsAsset::VERSION, 'echartsThemes' => EChartsAsset::ThemePalettes(),

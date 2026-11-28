@@ -54,6 +54,9 @@ foreach (glob(dirname(__DIR__) . '/ECharts*/visualization/index.html') as $templ
     if ($family === 'EChartsGaugeTacho') {
         $inputs['CustomPointerSVG'] = base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 6"><path d="M3 0L6 6H0Z"/></svg>');
     }
+    if ($family === 'EChartsGaugeWind') {
+        $inputs['CompassSvg'] = base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M5 1L8 9H2Z" fill="#559933"/></svg>');
+    }
     if ($family === 'EChartsTreemap') {
         $inputs['GroupColors'] = new ArrayIterator($groupColors);
         $inputs['Title'] = 'Unsaved tree title';
@@ -125,6 +128,14 @@ foreach (glob(dirname(__DIR__) . '/ECharts*/visualization/index.html') as $templ
         assertGatewayGauge(
             ($edits['IPSViewCustomPointerSVG'] ?? null) === $inputs['CustomPointerSVG'],
             'Copy the selected SVG contents into the independent file field.'
+        );
+    }
+    if ($family === 'EChartsGaugeWind') {
+        assertGatewayGauge(
+            ($edits['IPSViewCompassSvg'] ?? null) === $inputs['CompassSvg']
+            && str_contains($images['IPSViewBarPreview'], 'data:image/svg+xml;base64,')
+            && $images['IPSViewBarPreview'] === $images['BarPreview'],
+            'Copying a draft wind rose must stage the SVG and immediately refresh the independent preview.'
         );
     }
     if ($family === 'EChartsTreemap') {

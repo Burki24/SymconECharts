@@ -49,6 +49,20 @@ final class EChartsGaugeDesign
         'PlateBackgroundRotation'       => 0.0
     ];
 
+    public static function CreateErrorSvg(string $message): string
+    {
+        $message = SVGPreviewHelper::escape($message);
+
+        return <<<SVG
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="240" viewBox="0 0 720 240" role="img" aria-label="{$message}">
+  <rect fill="#151619" width="720" height="240" rx="12"/>
+  <circle cx="360" cy="88" r="28" fill="none" stroke="#ef6969" stroke-width="4"/>
+  <path d="M360 72v22M360 105v2" stroke="#ef6969" stroke-width="4" stroke-linecap="round"/>
+  <text x="360" y="160" fill="#f4f5f7" font-family="Segoe UI,Arial,sans-serif" font-size="18" text-anchor="middle">{$message}</text>
+</svg>
+SVG;
+    }
+
     /** @return list<string> */
     public static function ChartTitleFieldNames(): array
     {

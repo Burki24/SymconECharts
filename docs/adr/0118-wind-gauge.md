@@ -27,3 +27,13 @@ Für IPSView gilt die übliche Designvererbung mit eigenem `IPSViewRotateCompass
 Die Formularvorschauen zeigen die Windrose als Standbild. Bei
 deaktivierter Animation oder reduzierter Bewegung folgt die Windrose der
 gemeldeten Richtung unmittelbar und der Geschwindigkeitsrotor ruht.
+
+Die optionalen String-Properties `CompassSvg` und `IPSViewCompassSvg`
+verwenden dieselbe Formularvererbung und Entwurfskopie wie die Farben.
+Leere Werte ergeben die native Skala. Das gemeinsame SVG-Bildimportmodul
+validiert eigene Windrosen mit einem eigenen statischen Profil für Text,
+lokale Ausschnitte und einfache Schlagschatten. Für dieses Profil gelten
+256 KiB, maximal 576 Elemente und 32 Verschachtelungsebenen ab der Wurzel.
+Die Kupferstichvariante benötigt 556 Elemente. Der Canvas-Renderer und
+beide SVG-Vorschauen zentrieren das Bild unter Zeiger und Nabe. Bei festem
+Zeiger nutzt das Bild denselben interpolierten Richtungswinkel wie die Skala.

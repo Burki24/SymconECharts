@@ -762,6 +762,7 @@ wird getrennt gespeichert. Es gibt keine Diagramm-Designer oder Ausgabevariablen
 | Einheit und Nachkommastellen der Windgeschwindigkeit | `SpeedUnit`, `SpeedDecimals` | km/h, 2 | Einheit des Originalwerts und Anzeige mit 0 bis 6 Nachkommastellen |
 | Titel | `Title` | leer | Freie Überschrift für die Windrose |
 | Windrose drehen (Zeiger oben fixieren) | `RotateCompass` | aus | Richtungsanzeige so ausrichten, dass die gemeldete Windrichtung oben am festen Zeiger steht |
+| Eigene Windrose (SVG) | `CompassSvg`, `IPSViewCompassSvg` | leer | Eigenes Kompassbild mit Skala und Himmelsrichtungen, bis 256 KiB. Die Vorschau folgt der Dateiauswahl und dem Drehmodus. |
 | Windrotor anzeigen | `ShowRotor` | aus | Zusätzliches Rotorblatt für die Windgeschwindigkeit einblenden |
 | Windrichtung in Grad anzeigen | `ShowDegreeValue` | aus | Himmelsrichtung und Winkel zusätzlich als Text anzeigen |
 | Animation | `AnimationEnabled`, `AnimationDuration`, `AnimationDurationUpdate` | an, 350 ms, 500 ms | Bewegung zulassen und Dauer für Start und Aktualisierung wählen |

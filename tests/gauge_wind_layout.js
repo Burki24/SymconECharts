@@ -20,13 +20,14 @@ function surface(width, height) {
     canvas.getContext = () => context;
     return canvas;
 }
-shipped.echarts.setPlatformAPI({createCanvas: () => surface(300, 300)});
+shipped.echarts.setPlatformAPI({createCanvas: () => surface(300, 300),
+    loadImage: src => ({src, width: 100, height: 100})});
 
 for (const mode of ['symcon', 'ipsview']) {
     const width = 220, height = 230, inset = mode === 'symcon' ? 40 : 0;
     const chartElement = {clientWidth: width, clientHeight: height, setAttribute() {}};
     const motion = {matches: false, addEventListener(name, listener) { this.changed = listener; }};
-    let native;
+    let native, resize;
     const model = {theme: 'auto', title: 'Wetterstation', direction: 90, speed: 15.5, speedUnit: 'km/h',
         speedDecimals: 2, language: 'de', windLabel: 'Wind', labels: ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'],
         style: {showRotor: true, showDegreeValue: true, animationEnabled: true, animationDuration: 0, animationDurationUpdate: 0}};
@@ -36,7 +37,8 @@ for (const mode of ['symcon', 'ipsview']) {
             return native;
         }},
         SYMC_VISUALIZATION: {state: {status: 'ready', chart: model}, mode, options: {tileHeaderInset: inset}},
-        addEventListener() {}, matchMedia: () => motion, getComputedStyle: () => ({color: '#fff', getPropertyValue: () => '#303030'})
+        addEventListener(name, fn) { if (name === 'resize') { resize = fn; } },
+        matchMedia: () => motion, getComputedStyle: () => ({color: '#fff', getPropertyValue: () => '#303030'})
     };
     const document = {getElementById: id => id.endsWith('-chart') ? chartElement : {}};
     vm.runInNewContext(read('libs/echarts-design.js'), {window, document});
@@ -161,8 +163,57 @@ for (const mode of ['symcon', 'ipsview']) {
         update({style: {...model.style, rotateCompass: false}});
         assert.equal(series().get('startAngle'), 90);
         assert.ok(Math.abs(Math.sin(series().getData().getItemGraphicEl(0).rotation) - 1) < 1e-6);
+
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="90" y="50">O</text></svg>';
+        const compassImage = 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
+        const image = () => elements().find(el => el.type === 'image');
+        function assertImageOrientation(bearing) {
+            const rose = image();
+            assert.ok(rose && rose.style.image === compassImage);
+            const [cx, cy] = series().get('center');
+            const box = rose.getBoundingRect();
+            assert.ok(box.width > 0 && box.width === box.height);
+            const center = rose.transformCoordToGlobal(box.x + box.width / 2, box.y + box.height / 2);
+            const north = rose.transformCoordToGlobal(box.x + box.width / 2, box.y);
+            const rad = bearing * Math.PI / 180;
+            assert.ok(Math.hypot(center[0] - cx, center[1] - cy) < 1e-6, 'SVG pivots around the hub.');
+            assert.ok(Math.abs(north[0] - cx + box.width / 2 * Math.sin(rad)) < 1e-6
+                && Math.abs(north[1] - cy + box.height / 2 * Math.cos(rad)) < 1e-6, 'SVG north at bearing ' + bearing);
+            for (const name of ['axisLine', 'axisTick', 'splitLine', 'axisLabel']) {
+                assert.equal(series().get(name).show, false);
+            }
+        }
+        update({direction: 90, speed: 0, style: {...model.style, compassImage}});
+        assertImageOrientation(0);
+        assert.ok(Math.abs(Math.sin(series().getData().getItemGraphicEl(0).rotation) + 1) < 1e-6);
+        update({style: {...model.style, rotateCompass: true}});
+        assertImageOrientation(90);
+        assertNeedleUp();
+        update({direction: 359});
+        motion.matches = false;
+        motion.changed();
+        update({direction: 1});
+        const imageTurn = turn.getClip();
+        imageTurn.step(0, 0);
+        imageTurn.step(300, 300);
+        assertImageOrientation(0);
+        assertNeedleUp();
+        imageTurn.step(600, 300);
+        assertImageOrientation(1);
+        const originalWidth = image().style.width;
+        chartElement.clientWidth = 140;
+        chartElement.clientHeight = 160;
+        resize();
+        assertImageOrientation(1);
+        assertNeedleUp();
+        assert.ok(image().style.width < originalWidth && series().get('center')[0] === 70);
+        assert.equal(leaf().z > image().z, true, 'The optional speed rotor must stay above the imported artwork.');
+        assert.ok(elements().every(el => el.type !== 'tspan' || !model.labels.includes(el.style.text)));
+        update({style: {...model.style, compassImage: ''}});
+        assert.equal(image(), undefined, 'Returning to the standard rose removes the SVG.');
+        assert.equal(series().get('axisLabel').show, true);
     } finally {
         native.dispose();
     }
 }
-console.log('Wind Gauge draws the compass and advances or stops the independent native leaf animation.');
+console.log('Wind Gauge renders standard and SVG compasses, preserves their pivots, and animates bearing and rotor independently.');

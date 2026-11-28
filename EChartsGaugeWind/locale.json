@@ -71,6 +71,8 @@
             "Creates a standalone WebContent variable for IPSView.": "Erstellt eine eigenständige WebContent-Variable für IPSView.",
             "Tile design copied to IPSView.": "Kacheldesign nach IPSView kopiert.",
             "Compass": "Kompass",
+            "Custom compass rose (SVG)": "Eigene Windrose (SVG)",
+            "Select a supported SVG compass rose or clear the file.": "Eine unterstützte SVG-Windrose wählen oder die Datei entfernen.",
             "Colors": "Farben",
             "N": "N",
             "NE": "NO",

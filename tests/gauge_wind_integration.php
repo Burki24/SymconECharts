@@ -148,6 +148,81 @@ $wind->SetTestProperty('SpeedDecimals', 7);
 $wind->ApplyChanges();
 assertGatewayGauge($wind->GetTestStatus() === 202, 'Wind formatting bounds are enforced.');
 $wind->SetTestProperty('SpeedDecimals', 2);
+foreach (['CompassSvg', 'IPSViewCompassSvg'] as $name) {
+    $upload = findGaugeFormElement($form['elements'], $name);
+    assertGatewayGauge(
+        ($upload['type'] ?? '') === 'SelectFile' && $upload['extensions'] === '.svg'
+        && str_contains($upload['onChange'], 'ECWI_UpdateBarPreviewFromForm'),
+        'Both wind designers must wire SVG file selection into the live form preview.'
+    );
+}
+$tileFile = base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="#175395"/></svg>');
+$ipsFile = base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="#D15624"/></svg>');
+$readPageImage = static function (string $html): string
+{
+    assertGatewayGauge(
+        strlen($html) <= SYMCON_OUTPUT_BUFFER_LIMIT
+        && preg_match('/window\.SYMC_VISUALIZATION = (.+?);<\/script>/s', $html, $matches) === 1,
+        'A custom wind rose must fit the visualization bootstrap.'
+    );
+    $model = json_decode($matches[1], true, 512, JSON_THROW_ON_ERROR)['state'];
+    assertGatewayGauge($model['status'] === 'ready', 'Both pages must load a valid custom wind rose.');
+    return $model['chart']['style']['compassImage'];
+};
+$wind->UpdateBarPreviewFromForm(json_encode([
+    'CompassSvg' => $tileFile, 'IPSViewCompassSvg' => $ipsFile, 'IPSViewUseTileDesign' => false
+], JSON_THROW_ON_ERROR));
+$draftImages = array_column(array_slice($wind->GetTestFormUpdates(), -2), 'Value', 'Field');
+assertGatewayGauge(
+    $wind->GetTestProperties()['CompassSvg'] === '' && $wind->GetTestProperties()['IPSViewCompassSvg'] === '',
+    'Selecting wind roses must only stage draft previews before Apply.'
+);
+$wind->SetTestProperty('CompassSvg', $tileFile);
+$wind->SetTestProperty('IPSViewCompassSvg', $ipsFile);
+$wind->ApplyChanges();
+$uris = [
+    'BarPreview'        => $readPageImage($wind->GetVisualizationTile()),
+    'IPSViewBarPreview' => $readPageImage($wind->GetTestVariableValue('IPSViewWind'))
+];
+$savedForm = json_decode($wind->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+foreach ($uris as $field => $uri) {
+    $preview = base64_decode(explode(',', $draftImages[$field], 2)[1], true);
+    assertGatewayGauge(
+        str_starts_with($uri, 'data:image/svg+xml;base64,')
+        && str_contains(base64_decode(explode(',', $uri, 2)[1], true), $field === 'BarPreview' ? '#175395' : '#D15624')
+        && str_contains($preview, $uri) && findGaugeFormElement($savedForm['elements'], $field)['image'] === $draftImages[$field],
+        'Independent drafts, saved previews and both output pages must show the same selected image for each channel.'
+    );
+}
+$wind->SetTestProperty('IPSViewUseTileDesign', true);
+$badFile = base64_encode('<svg viewBox="0 0 10 10"><script>untrusted()</script></svg>');
+$wind->SetTestProperty('IPSViewCompassSvg', $badFile);
+$wind->ApplyChanges();
+assertGatewayGauge(
+    $readPageImage($wind->GetIPSViewHTML()) === $uris['BarPreview'],
+    'An inherited IPSView design must show the tile image even if an unused independent file is invalid.'
+);
+$wind->UpdateBarPreviewFromForm(json_encode(['CompassSvg' => $badFile], JSON_THROW_ON_ERROR));
+foreach (array_slice($wind->GetTestFormUpdates(), -2) as $update) {
+    $preview = base64_decode(explode(',', $update['Value'], 2)[1], true);
+    assertGatewayGauge(
+        !str_contains($preview, '<script') && str_contains($preview, 'Select a supported SVG compass rose or clear the file.'),
+        'An invalid draft must report the file error in both inherited previews.'
+    );
+}
+$wind->SetTestProperty('IPSViewUseTileDesign', false);
+$wind->ApplyChanges();
+assertGatewayGauge(
+    $wind->GetTestStatus() === 202 && $readState()['status'] === 'error',
+    'An invalid active compass file must report a design configuration error.'
+);
+$wind->SetTestProperty('CompassSvg', '');
+$wind->SetTestProperty('IPSViewCompassSvg', '');
+$wind->ApplyChanges();
+assertGatewayGauge(
+    $readPageImage($wind->GetVisualizationTile()) === '' && $readPageImage($wind->GetIPSViewHTML()) === '',
+    'Clearing both uploads must recover the built-in compass without changing the sources.'
+);
 $wind->SetTestParentActive(false);
 $wind->ApplyChanges();
 assertGatewayGauge($wind->GetTestStatus() === 203, 'Missing wind gateway is reported explicitly.');

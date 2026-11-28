@@ -61,7 +61,7 @@ assertSvgImage(
 
 $prolog = "\xEF\xBB\xBF" . '<?xml version="1.0" encoding="UTF-8"?>' . "\n<!-- Export note: removed <!DOCTYPE svg> -->\n<!-- Second note -->\n";
 $plain = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><circle cx="5" cy="5" r="3" fill="#ABCDEF"/></svg>';
-foreach (['Import', 'ImportPaint'] as $method) {
+foreach (['Import', 'ImportPaint', 'ImportCompass'] as $method) {
     $expected = EChartsSvgImage::$method($plain);
     foreach ([$prolog . $plain, base64_encode($prolog . $plain), 'data:image/svg+xml;base64,' . base64_encode($prolog . $plain)] as $input) {
         assertSvgImage(EChartsSvgImage::$method($input) === $expected, $method . ' must preserve dimensions and sanitized vector content for every upload format.');
@@ -107,6 +107,64 @@ foreach ([
             && str_starts_with($exampleImport['dataUri'], 'data:image/svg+xml;base64,'),
         'Chronograph example SVG is not importable: ' . $exampleFile
     );
+}
+
+$compass = <<<'SVG'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 -250 700 500" role="img" aria-labelledby="title desc">
+  <title id="title">Windrose – Holz</title><desc id="desc">Windrichtung</desc>
+  <defs>
+    <clipPath id="disc"><circle r="245"/></clipPath>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity=".16"/></filter>
+  </defs>
+  <g filter="url(#shadow)" clip-path="url(#disc)" font-family="Georgia, Liberation Serif, serif">
+    <text dy=".34em" font-size="43" text-anchor="middle" transform="rotate(45)" fill="#593a29">NO</text>
+  </g>
+</svg>
+SVG;
+$original = EChartsSvgImage::ImportCompass($compass);
+$compassXml = base64_decode(explode(',', $original['dataUri'], 2)[1], true);
+assertSvgImage(
+    is_string($compassXml) && str_contains($compassXml, 'width="700" height="700"')
+    && str_contains($compassXml, 'preserveAspectRatio="xMidYMid meet"') && $original['viewBox'] === '-350 -250 700 500'
+    && str_contains($compassXml, 'transform="rotate(45)"') && str_contains($compassXml, '>NO</text>')
+    && str_contains($compassXml, 'clip-path="url(#disc)"') && str_contains($compassXml, 'filter="url(#shadow)"'),
+    'Compass artwork must retain its labelled geometry and local effects on a centered square canvas.'
+);
+assertSvgImageRejected($compass, 'Standard image imports must not inherit the compass profile.');
+$emptyLabel = '<svg viewBox="0 0 10 10"><text></text></svg>';
+$labelLength = 262144 - strlen($emptyLabel);
+$fullLabel = str_replace('<text>', '<text>' . str_repeat('N', $labelLength), $emptyLabel);
+$serialized = base64_decode(explode(',', EChartsSvgImage::ImportCompass($fullLabel)['dataUri'], 2)[1], true);
+assertSvgImage(
+    is_string($serialized) && strlen($serialized) > 262144 && strlen($serialized) <= 262144 + 512,
+    'A full 256 KiB compass must still fit after adding the image namespace and intrinsic viewport.'
+);
+$elements = '<svg viewBox="0 0 10 10">' . str_repeat('<circle r="1"/>', 575) . '</svg>';
+assertSvgImage(EChartsSvgImage::ImportCompass($elements)['width'] === 10.0, 'The engraving profile must allow exactly 576 elements.');
+foreach ([
+    str_replace('<text>', '<text>' . str_repeat('>', 66000), $emptyLabel),
+    str_replace('</svg>', '<g/></svg>', $elements),
+    str_replace('-->', 'x-->', $atLimit),
+    str_replace('700 500', '0.00000000001 0.00000000001', $compass),
+    str_replace('url(#disc)', 'url(#missing)', $compass),
+    str_replace('url(#disc)', 'url(#shadow)', $compass),
+    str_replace('url(#shadow)', 'url(https://example.invalid/effect)', $compass),
+    str_replace('id="desc"', 'id="title"', $compass),
+    str_replace('<circle r="245"/>', '<g clip-path="url(#disc)"><circle r="245"/></g>', $compass),
+    str_replace('stdDeviation="2"', 'stdDeviation="1000"', $compass),
+    str_replace('width="140%"', 'width="500%"', $compass),
+    str_replace('</filter>', '<feDropShadow/></filter>', $compass),
+    str_replace('<text dy=', '<text onclick="run()" dy=', $compass),
+    str_replace('>NO</text>', '><a href="https://example.invalid">NO</a></text>', $compass),
+    str_replace('Liberation Serif', "url(\'remote-font\')", $compass),
+    str_replace('<defs>', '<script/> <defs>', $compass)
+] as $invalidCompass) {
+    try {
+        EChartsSvgImage::ImportCompass($invalidCompass);
+    } catch (InvalidArgumentException) {
+        continue;
+    }
+    throw new RuntimeException('A compass import exceeded its file/element budget or admitted unsupported content.');
 }
 
 echo "ECharts SVG image import verified.\n";

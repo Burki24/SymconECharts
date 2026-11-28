@@ -90,6 +90,12 @@
                     "caption": "Rotate compass rose (keep pointer at the top)"
                 },
                 {
+                    "type": "SelectFile",
+                    "name": "CompassSvg",
+                    "caption": "Custom compass rose (SVG)",
+                    "extensions": ".svg"
+                },
+                {
                     "type": "RowLayout",
                     "items": [
                         {

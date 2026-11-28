@@ -45,19 +45,24 @@ final class EChartsGaugeWindPreview
         }
         $center = (320 + $top) / 2;
         $scale = (320 - $top) * 0.0048;
-        $svg .= '<g transform="translate(160 ' . $center . ') scale(' . $scale . ')">'
-            . '<circle r="100" fill="url(#rim)"/><circle r="91" fill="' . $textColor('dialColor', '#616871') . '"/>'
-            . '<circle r="85.25" fill="none" stroke="' . $textColor('ringColor', '#1678BD') . '" stroke-width="9.5"/>';
-        for ($i = 0; $i < 48; $i++) {
-            $major = $i % 6 === 0;
-            $svg .= '<path transform="rotate(' . ($i * 7.5 + $dialOffset) . ')" d="M0 -90v' . ($major ? '10' : '5.4') . '"'
-                . ' stroke="' . $textColor('tickColor', $major ? '#F47B60' : '#EEF4FA') . '" stroke-width="' . ($major ? '1.6' : '1') . '"/>';
-        }
-        foreach ($labels as $i => $label) {
-            $angle = deg2rad(45 * $i + $dialOffset);
-            $svg .= '<text x="' . round(69 * sin($angle), 2) . '" y="' . round(-69 * cos($angle), 2) . '"'
-                . ' text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-weight="bold"'
-                . ' font-size="12.6" fill="' . $textColor('cardinalColor', '#FFFFFF') . '">' . SVGPreviewHelper::escape($label) . '</text>';
+        $svg .= '<g transform="translate(160 ' . $center . ') scale(' . $scale . ')">';
+        if (!empty($style['compassImage'])) {
+            $svg .= '<image x="-100" y="-100" width="200" height="200" transform="rotate(' . $dialOffset . ')"'
+                . ' href="' . SVGPreviewHelper::escape($style['compassImage']) . '"/>';
+        } else {
+            $svg .= '<circle r="100" fill="url(#rim)"/><circle r="91" fill="' . $textColor('dialColor', '#616871') . '"/>'
+                . '<circle r="85.25" fill="none" stroke="' . $textColor('ringColor', '#1678BD') . '" stroke-width="9.5"/>';
+            for ($i = 0; $i < 48; $i++) {
+                $major = $i % 6 === 0;
+                $svg .= '<path transform="rotate(' . ($i * 7.5 + $dialOffset) . ')" d="M0 -90v' . ($major ? '10' : '5.4') . '"'
+                    . ' stroke="' . $textColor('tickColor', $major ? '#F47B60' : '#EEF4FA') . '" stroke-width="' . ($major ? '1.6' : '1') . '"/>';
+            }
+            foreach ($labels as $i => $label) {
+                $angle = deg2rad(45 * $i + $dialOffset);
+                $svg .= '<text x="' . round(69 * sin($angle), 2) . '" y="' . round(-69 * cos($angle), 2) . '"'
+                    . ' text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-weight="bold"'
+                    . ' font-size="12.6" fill="' . $textColor('cardinalColor', '#FFFFFF') . '">' . SVGPreviewHelper::escape($label) . '</text>';
+            }
         }
         if ($style['showRotor']) {
             $svg .= '<path transform="translate(0 34)" d="M0 -13.5 Q11 0 -2 8 L-4 13 L-3 6 Q-10 0 0 -13.5Z"'

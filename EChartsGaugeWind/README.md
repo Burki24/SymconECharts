@@ -21,6 +21,31 @@ und die Windrose darunter drehen. Eine zweite Variable ergänzt die Windgeschwin
    Bewegung darstellen. Dieser kleine Rotor dreht sich bei stärkerem Wind
    schneller und steht bei Windstille.
 
+## Eigene SVG-Windrose
+
+Öffne **Kacheldesigner → Kompass → Eigene Windrose (SVG)** und wähle die Datei.
+Die Vorschau zeigt die Windrose sofort mit dem aktuellen Zeiger. **Übernehmen**
+speichert die Auswahl. Bei leerem Dateifeld erscheint die eingebaute Windrose.
+
+Lege Norden in der Datei oben und den Drehpunkt in die Mitte der `viewBox`.
+Ein quadratisches Motiv nutzt den Platz am besten. Rechteckige Motive werden
+zentriert und proportional eingepasst. Zeichne die gewünschten Himmelsrichtungen
+direkt ins SVG. Farben, Beschriftung und Teilstriche kommen dann aus der Datei.
+Zeiger, Nabe und optionaler Windrotor liegen darüber.
+
+Mit **Windrose drehen (Zeiger oben fixieren)** dreht sich das gesamte Motiv
+einschließlich seiner Beschriftung. Bei 90° wandert das **O** unter den oben
+stehenden Zeiger. Schaltest Du die Option aus, bleibt das Bild mit Norden oben.
+Für eine andere Datei in IPSView deaktiviere dort **Kacheldesign verwenden**
+und wähle im Abschnitt **Kompass** die zweite Datei.
+
+Verwende ein eigenständiges SVG mit `viewBox` und höchstens 256 KiB.
+Unterstützt werden unter anderem Pfade, einfache Formen, Text,
+Farbverläufe, lokale Ausschnittmasken (`clipPath`) und einfache Schlagschatten.
+Schriften werden auf dem Anzeigegerät aufgelöst. Für ein festes Schriftbild
+kannst Du die Beschriftung im Zeichenprogramm in Pfade umwandeln.
+Externe Ressourcen, Skripte und eingebettete Bilder werden beim Import abgewiesen.
+
 ## Kachel und IPSView
 
 IPSView übernimmt standardmäßig die Ausrichtung der Kachel. Für eine eigene

@@ -10,6 +10,7 @@ use DOMNode;
 use InvalidArgumentException;
 
 require_once __DIR__ . '/EChartsSvgInput.php';
+require_once __DIR__ . '/EChartsSvgCompassProfile.php';
 
 /**
  * Imports a bounded SVG document for use as an embedded visualization image.
@@ -21,6 +22,8 @@ final class EChartsSvgImage
 {
     private const MAX_FILE_BYTES = 262144;
     private const MAX_INPUT_BYTES = 393216;
+    // Two compass previews are embedded together; allow only modest viewport/namespace growth during serialization.
+    private const MAX_COMPASS_XML_BYTES = self::MAX_FILE_BYTES + 512;
     private const MAX_ELEMENTS = 512;
     private const MAX_DEPTH = 32;
     private const ALLOWED_ELEMENTS = [
@@ -134,16 +137,22 @@ final class EChartsSvgImage
     /** @return array{dataUri: string, viewBox: string, width: float, height: float} */
     public static function Import(string $fileData): array
     {
-        return self::ImportDocument($fileData, false);
+        return self::ImportDocument($fileData, 'image');
     }
 
     /** Inert image paints additionally permit bounded, non-nested local patterns. */
     public static function ImportPaint(string $fileData): array
     {
-        return self::ImportDocument($fileData, true);
+        return self::ImportDocument($fileData, 'paint');
     }
 
-    private static function ImportDocument(string $fileData, bool $paint): array
+    /** Inert compass artwork may retain printed labels, local clipping and a simple drop shadow. */
+    public static function ImportCompass(string $fileData): array
+    {
+        return self::ImportDocument($fileData, 'compass');
+    }
+
+    private static function ImportDocument(string $fileData, string $profile): array
     {
         $root = EChartsSvgInput::Load(
             $fileData,
@@ -155,15 +164,25 @@ final class EChartsSvgImage
         $document = $root->ownerDocument;
         $viewBox = self::NormalizeViewBox($root->getAttribute('viewBox'));
         $viewBoxParts = array_map('floatval', explode(' ', $viewBox));
-        $pixels = $paint ? self::PaintDimensions($root, $viewBoxParts) : null;
+        $pixels = $profile === 'paint' ? self::PaintDimensions($root, $viewBoxParts) : null;
         $root->setAttribute('xmlns', EChartsSvgInput::SVG_NAMESPACE);
         $root->setAttribute('viewBox', $viewBox);
         $root->removeAttribute('width');
         $root->removeAttribute('height');
 
         $elementCount = 0;
-        self::ValidateElement($root, 0, $elementCount, $paint);
-        if ($paint) {
+        self::ValidateElement($root, 0, $elementCount, $profile);
+        if ($profile === 'compass') {
+            EChartsSvgCompassProfile::ValidateEffects($document);
+            if (min($viewBoxParts[2], $viewBoxParts[3]) <= 0) {
+                throw new InvalidArgumentException('The SVG background requires a finite viewBox with positive width and height.');
+            }
+            // Center the original coordinate system in the square dial on Canvas and in previews.
+            $side = (string) max(1, min(1024, round(max($viewBoxParts[2], $viewBoxParts[3]))));
+            $root->setAttribute('width', $side);
+            $root->setAttribute('height', $side);
+            $root->setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        } elseif ($profile === 'paint') {
             self::ValidatePatterns($document, $viewBoxParts);
             $root->setAttribute('width', (string) $pixels[0]);
             $root->setAttribute('height', (string) $pixels[1]);
@@ -171,6 +190,9 @@ final class EChartsSvgImage
         $sanitized = $document->saveXML($root);
         if (!is_string($sanitized) || $sanitized === '') {
             throw new InvalidArgumentException('The selected file does not contain readable SVG data.');
+        }
+        if ($profile === 'compass' && strlen($sanitized) > self::MAX_COMPASS_XML_BYTES) {
+            throw new InvalidArgumentException('The normalized compass SVG is too large.');
         }
 
         $result = [
@@ -182,20 +204,27 @@ final class EChartsSvgImage
         return $pixels === null ? $result : $result + ['pixelWidth' => $pixels[0], 'pixelHeight' => $pixels[1]];
     }
 
-    private static function ValidateElement(DOMElement $element, int $depth, int &$elementCount, bool $paint): void
+    private static function ValidateElement(DOMElement $element, int $depth, int &$elementCount, string $profile): void
     {
         ++$elementCount;
-        if ($depth > self::MAX_DEPTH || $elementCount > self::MAX_ELEMENTS) {
+        $compass = $profile === 'compass';
+        if ($depth > self::MAX_DEPTH || $elementCount > ($compass ? EChartsSvgCompassProfile::MAX_ELEMENTS : self::MAX_ELEMENTS)) {
             throw new InvalidArgumentException('The SVG background is too complex.');
         }
-        if ((!in_array($element->localName, self::ALLOWED_ELEMENTS, true) && !($paint && $element->localName === 'pattern'))
+        if ((!in_array($element->localName, self::ALLOWED_ELEMENTS, true)
+                && !($profile === 'paint' && $element->localName === 'pattern')
+                && !($compass && in_array($element->localName, EChartsSvgCompassProfile::ELEMENTS, true)))
             || !in_array($element->namespaceURI, [null, '', EChartsSvgInput::SVG_NAMESPACE], true)
             || ($depth > 0 && $element->localName === 'svg')) {
             throw new InvalidArgumentException('The SVG background contains unsupported elements.');
         }
 
         foreach (iterator_to_array($element->attributes) as $attribute) {
-            if ($paint && $element->localName === 'pattern' && $attribute->namespaceURI === null
+            if ($compass && $attribute->namespaceURI === null
+                && EChartsSvgCompassProfile::AcceptAttribute($element, $attribute->localName, trim($attribute->value))) {
+                continue;
+            }
+            if ($profile === 'paint' && $element->localName === 'pattern' && $attribute->namespaceURI === null
                 && in_array($attribute->localName, ['patternUnits', 'patternContentUnits', 'patternTransform'], true)) {
                 if ($attribute->localName === 'patternTransform') {
                     self::ValidateTransform($attribute->value);
@@ -223,8 +252,9 @@ final class EChartsSvgImage
 
         foreach (iterator_to_array($element->childNodes) as $child) {
             if ($child instanceof DOMElement) {
-                self::ValidateElement($child, $depth + 1, $elementCount, $paint);
-            } elseif ($child->nodeType === XML_TEXT_NODE && trim($child->textContent) === '') {
+                self::ValidateElement($child, $depth + 1, $elementCount, $profile);
+            } elseif ($child->nodeType === XML_TEXT_NODE && (trim($child->textContent) === ''
+                || ($compass && in_array($element->localName, ['text', 'title', 'desc'], true)))) {
                 continue;
             } elseif (in_array($child->nodeType, [XML_COMMENT_NODE], true)) {
                 $element->removeChild($child);
